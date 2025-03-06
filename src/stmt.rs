@@ -1,5 +1,6 @@
 use crate::*;
 
+#[derive(Clone, Debug)]
 pub enum Stmt {
     Defun {
         name: String,
