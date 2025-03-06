@@ -15,14 +15,24 @@ use utils::*;
 use value::*;
 
 fn main() {
-    println!(
-        r#"(module (func (export "_start") (result i32) {}))"#,
-        Block::parse("1+2*3-10")
-            .map(|x| x.compile(&mut Compiler { declare: vec![] }))
-            .unwrap()
-    );
+    let mut compiler = Compiler::new();
+    println!("{}", compiler.build("fn inc(n) n+1; inc(1+2)").unwrap());
 }
 
 struct Compiler {
     declare: Vec<String>,
+}
+
+impl Compiler {
+    fn new() -> Self {
+        Compiler { declare: vec![] }
+    }
+
+    fn build(&mut self, source: &str) -> Option<String> {
+        Some(format!(
+            r#"(module {1} (func (export "_start") (result i32) {0})))"#,
+            Block::parse(source).map(|x| x.compile(self))?,
+            join!(self.declare)
+        ))
+    }
 }
