@@ -3,7 +3,9 @@ use crate::*;
 #[derive(Debug, Clone)]
 pub enum Expr {
     Value(Value),
+    Ref(String),
     Oper(Box<Oper>),
+    Call(String, Vec<Expr>),
 }
 
 impl Expr {
@@ -20,9 +22,20 @@ impl Expr {
             } else if token.starts_with("(") && token.ends_with(")") {
                 let token = token.get(1..token.len() - 1)?.trim();
                 Expr::parse(token)?
+            } else if token.contains("(") && token.ends_with(")") {
+                let token = token.get(..token.len() - 1)?.trim();
+                let (name, args) = token.split_once("(")?;
+                let args = {
+                    let mut result = vec![];
+                    for i in tokenize(args, &[","], false)? {
+                        result.push(Expr::parse(&i)?)
+                    }
+                    result
+                };
+                Expr::Call(name.to_string(), args)
             // Variable reference
             } else {
-                return None;
+                Expr::Ref(token)
             })
         }
     }
@@ -30,7 +43,12 @@ impl Expr {
     pub fn compile(&self) -> String {
         match self {
             Expr::Oper(oper) => oper.compile(),
+            Expr::Ref(to) => format!("(local.get ${to})"),
             Expr::Value(Value::Integer(n)) => format!("(i32.const {n})"),
+            Expr::Call(name, args) => format!(
+                "(call ${name} {}",
+                join!(args.iter().map(|x| x.compile()).collect::<Vec<_>>())
+            ),
         }
     }
 }
