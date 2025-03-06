@@ -5,7 +5,7 @@ pub enum Stmt {
     Defun {
         name: String,
         args: Vec<String>,
-        body: Block,
+        body: Expr,
     },
     If {
         cond: Expr,
@@ -23,7 +23,7 @@ impl Stmt {
             Some(Stmt::Defun {
                 name: name.trim().to_string(),
                 args: args.split(",").map(|x| x.trim().to_string()).collect(),
-                body: Block::parse(body)?,
+                body: Expr::parse(body)?,
             })
         } else if let Some(source) = source.strip_prefix("if ") {
             let code = tokenize(source, SPACE.as_ref(), false)?;
@@ -44,7 +44,7 @@ impl Stmt {
 
     pub fn compile(&self, ctx: &mut Compiler) -> String {
         match self {
-            Stmt::Expr(expr) => expr.compile(),
+            Stmt::Expr(expr) => expr.compile(ctx),
             Stmt::Defun { name, args, body } => {
                 let code = format!(
                     "(func ${name} {} (result i32) {})",
@@ -61,8 +61,8 @@ impl Stmt {
             Stmt::If { cond, then, r#else } => {
                 format!(
                     "(if (result i32) {} (then {}) (else {}))",
-                    cond.compile(),
-                    then.compile(),
+                    cond.compile(ctx),
+                    then.compile(ctx),
                     r#else.compile(ctx)
                 )
             }
