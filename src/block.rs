@@ -13,9 +13,6 @@ impl Block {
     }
 
     pub fn compile(&self, ctx: &mut Compiler) -> String {
-        format!(
-            "{}",
-            join!(self.0.iter().map(|x| x.compile(ctx)).collect::<Vec<_>>()),
-        )
+        join!(self.0.iter().map(|x| x.compile(ctx)).collect::<Vec<_>>())
     }
 }
