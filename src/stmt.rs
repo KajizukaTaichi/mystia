@@ -12,6 +12,10 @@ pub enum Stmt {
         then: Expr,
         r#else: Box<Stmt>,
     },
+    While {
+        cond: Expr,
+        body: Expr,
+    },
     Declare(String),
     Assign(String, Expr),
     Expr(Expr),
@@ -39,6 +43,15 @@ impl Stmt {
                 cond: Expr::parse(&cond_sec)?,
                 then: Expr::parse(&then_sec)?,
                 r#else: Box::new(Stmt::parse(&else_sec)?),
+            })
+        } else if let Some(source) = source.strip_prefix("while ") {
+            let code = tokenize(source, SPACE.as_ref(), false)?;
+            let loop_pos = code.iter().position(|i| i == "loop")?;
+            let cond_sec = join!(code.get(0..loop_pos)?);
+            let body_sec = join!(code.get(loop_pos + 1..)?);
+            Some(Stmt::While {
+                cond: Expr::parse(&cond_sec)?,
+                body: Expr::parse(&body_sec)?,
             })
         } else if let Some(source) = source.strip_prefix("declare ") {
             Some(Stmt::Declare(source.trim().to_string()))
@@ -72,6 +85,13 @@ impl Stmt {
                     cond.compile(ctx),
                     then.compile(ctx),
                     r#else.compile(ctx)
+                )
+            }
+            Stmt::While { cond, body } => {
+                format!(
+                    "(loop $while_start (br_if $loop {}) {})",
+                    cond.compile(ctx),
+                    body.compile(ctx),
                 )
             }
             Stmt::Declare(name) => format!("(local ${name} i32)"),
