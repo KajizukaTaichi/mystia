@@ -12,11 +12,14 @@ pub enum Stmt {
         then: Expr,
         r#else: Box<Stmt>,
     },
+    Declare(String),
+    Assign(String, Expr),
     Expr(Expr),
 }
 
 impl Stmt {
     pub fn parse(source: &str) -> Option<Self> {
+        let source = source.trim();
         if let Some(source) = source.strip_prefix("fn ") {
             let (name, source) = source.split_once("(")?;
             let (args, body) = source.split_once(")")?;
@@ -37,6 +40,11 @@ impl Stmt {
                 then: Expr::parse(&then_sec)?,
                 r#else: Box::new(Stmt::parse(&else_sec)?),
             })
+        } else if let Some(source) = source.strip_prefix("declare ") {
+            Some(Stmt::Declare(source.trim().to_string()))
+        } else if let Some(source) = source.strip_prefix("let ") {
+            let (name, source) = source.split_once("=")?;
+            Some(Stmt::Assign(name.trim().to_string(), Expr::parse(source)?))
         } else {
             Some(Stmt::Expr(Expr::parse(source)?))
         }
@@ -66,6 +74,8 @@ impl Stmt {
                     r#else.compile(ctx)
                 )
             }
+            Stmt::Declare(name) => format!("(local ${name} i32)"),
+            Stmt::Assign(name, expr) => format!("(local.set ${name} {})", expr.compile(ctx)),
         }
     }
 }
