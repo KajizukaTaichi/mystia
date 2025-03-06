@@ -6,6 +6,8 @@ pub enum Oper {
     Sub(Expr, Expr),
     Mul(Expr, Expr),
     Div(Expr, Expr),
+    Eql(Expr, Expr),
+    Mod(Expr, Expr),
 }
 
 impl Oper {
@@ -19,6 +21,8 @@ impl Oper {
             "-" => Oper::Sub(has_lhs(2)?, token),
             "*" => Oper::Mul(has_lhs(2)?, token),
             "/" => Oper::Div(has_lhs(2)?, token),
+            "%" => Oper::Mod(has_lhs(2)?, token),
+            "==" => Oper::Eql(has_lhs(2)?, token),
             _ => return None,
         })
     }
@@ -29,6 +33,8 @@ impl Oper {
             Oper::Sub(lhs, rhs) => format!("(i32.sub {} {})", lhs.compile(), rhs.compile()),
             Oper::Mul(lhs, rhs) => format!("(i32.mul {} {})", lhs.compile(), rhs.compile()),
             Oper::Div(lhs, rhs) => format!("(i32.div_s {} {})", lhs.compile(), rhs.compile()),
+            Oper::Eql(lhs, rhs) => format!("(i32.eq {} {})", lhs.compile(), rhs.compile()),
+            Oper::Mod(lhs, rhs) => format!("(i32.rem_s {} {})", lhs.compile(), rhs.compile()),
         }
     }
 }
