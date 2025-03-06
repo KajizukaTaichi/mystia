@@ -13,7 +13,7 @@ impl Block {
 
     pub fn compile(&self, ctx: &mut Compiler) -> String {
         format!(
-            "(block (result <type>) {})",
+            "(block (result i32) {}  (br 0))",
             join!(self.0.iter().map(|x| x.compile(ctx)).collect::<Vec<_>>())
         )
     }
