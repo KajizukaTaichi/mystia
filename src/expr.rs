@@ -46,7 +46,7 @@ impl Expr {
             Expr::Ref(to) => format!("(local.get ${to})"),
             Expr::Value(Value::Integer(n)) => format!("(i32.const {n})"),
             Expr::Call(name, args) => format!(
-                "(call ${name} {}",
+                "(call ${name} {})",
                 join!(args.iter().map(|x| x.compile()).collect::<Vec<_>>())
             ),
         }
