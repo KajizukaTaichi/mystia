@@ -15,8 +15,8 @@ impl Stmt {
             let (name, source) = source.split_once("(")?;
             let (args, body) = source.split_once(")")?;
             Some(Stmt::Defun {
-                name: name.trim(),
-                args: args.split(",").map(|x| x.trim()).collect(),
+                name: name.trim().to_string(),
+                args: args.split(",").map(|x| x.trim().to_string()).collect(),
                 body: Expr::parse(body)?,
             })
         } else {
