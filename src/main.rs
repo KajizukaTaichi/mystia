@@ -16,7 +16,10 @@ use value::*;
 
 fn main() {
     let mut compiler = Compiler::new();
-    println!("{}", compiler.build("fn inc(n) n + 1; inc(2 * 3)").unwrap());
+    println!(
+        "{}",
+        compiler.build("fn inc(n) n + 1; inc(inc(1))").unwrap()
+    );
 }
 
 struct Compiler {
@@ -30,7 +33,7 @@ impl Compiler {
 
     fn build(&mut self, source: &str) -> Option<String> {
         Some(format!(
-            r#"(module {1} (func (export "_start") (result i32) {0})))"#,
+            r#"(module {1} (func (export "_start") (result i32) {0}))"#,
             Block::parse(source).map(|x| x.compile(self))?,
             join!(self.declare)
         ))
