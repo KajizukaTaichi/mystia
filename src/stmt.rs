@@ -4,7 +4,7 @@ pub enum Stmt {
     Defun {
         name: String,
         args: Vec<String>,
-        body: Expr,
+        body: Block,
     },
     Expr(Expr),
 }
@@ -17,7 +17,7 @@ impl Stmt {
             Some(Stmt::Defun {
                 name: name.trim().to_string(),
                 args: args.split(",").map(|x| x.trim().to_string()).collect(),
-                body: Expr::parse(body)?,
+                body: Block::parse(body)?,
             })
         } else {
             Some(Stmt::Expr(Expr::parse(source)?))
@@ -28,15 +28,16 @@ impl Stmt {
         match self {
             Stmt::Expr(expr) => expr.compile(),
             Stmt::Defun { name, args, body } => {
-                ctx.declare.push(format!(
+                let code = format!(
                     "(func ${name} {} (result i32) {})",
                     join!(
                         args.iter()
                             .map(|x| format!("(param ${x} i32)"))
                             .collect::<Vec<_>>()
                     ),
-                    body.compile()
-                ));
+                    body.compile(ctx)
+                );
+                ctx.declare.push(code);
                 String::new()
             }
         }
