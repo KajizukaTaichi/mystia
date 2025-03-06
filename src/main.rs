@@ -13,6 +13,6 @@ use value::*;
 fn main() {
     println!(
         r#"(module (func (export "_start") (result i32) {}))"#,
-        Expr::parse("1+2*3").map(|x| x.compile()).unwrap()
+        Expr::parse("1+2*3-10").map(|x| x.compile()).unwrap()
     );
 }
