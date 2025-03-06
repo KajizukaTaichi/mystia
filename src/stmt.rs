@@ -27,15 +27,18 @@ impl Stmt {
     pub fn compile(&self, ctx: &mut Compiler) -> String {
         match self {
             Stmt::Expr(expr) => expr.compile(),
-            Stmt::Defun { name, args, body } => format!(
-                "(func ${name} {} (result i32) {})",
-                join!(
-                    args.iter()
-                        .map(|x| format!("(param ${x} i32)"))
-                        .collect::<Vec<_>>()
-                ),
-                body.compile()
-            ),
+            Stmt::Defun { name, args, body } => {
+                ctx.declare.push(format!(
+                    "(func ${name} {} (result i32) {})",
+                    join!(
+                        args.iter()
+                            .map(|x| format!("(param ${x} i32)"))
+                            .collect::<Vec<_>>()
+                    ),
+                    body.compile()
+                ));
+                String::new()
+            }
         }
     }
 }
