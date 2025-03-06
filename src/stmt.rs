@@ -89,7 +89,7 @@ impl Stmt {
             }
             Stmt::While { cond, body } => {
                 format!(
-                    "(loop $while_start (br_if $loop {}) {})",
+                    "(loop $while_start (br_if $while_start {}) {})",
                     cond.compile(ctx),
                     body.compile(ctx),
                 )
