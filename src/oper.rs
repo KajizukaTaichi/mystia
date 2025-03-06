@@ -27,14 +27,14 @@ impl Oper {
         })
     }
 
-    pub fn compile(&self) -> String {
+    pub fn compile(&self, ctx: &mut Compiler) -> String {
         match self {
-            Oper::Add(lhs, rhs) => format!("(i32.add {} {})", lhs.compile(), rhs.compile()),
-            Oper::Sub(lhs, rhs) => format!("(i32.sub {} {})", lhs.compile(), rhs.compile()),
-            Oper::Mul(lhs, rhs) => format!("(i32.mul {} {})", lhs.compile(), rhs.compile()),
-            Oper::Div(lhs, rhs) => format!("(i32.div_s {} {})", lhs.compile(), rhs.compile()),
-            Oper::Eql(lhs, rhs) => format!("(i32.eq {} {})", lhs.compile(), rhs.compile()),
-            Oper::Mod(lhs, rhs) => format!("(i32.rem_s {} {})", lhs.compile(), rhs.compile()),
+            Oper::Add(lhs, rhs) => format!("(i32.add {} {})", lhs.compile(ctx), rhs.compile(ctx)),
+            Oper::Sub(lhs, rhs) => format!("(i32.sub {} {})", lhs.compile(ctx), rhs.compile(ctx)),
+            Oper::Mul(lhs, rhs) => format!("(i32.mul {} {})", lhs.compile(ctx), rhs.compile(ctx)),
+            Oper::Div(lhs, rhs) => format!("(i32.div_s {} {})", lhs.compile(ctx), rhs.compile(ctx)),
+            Oper::Eql(lhs, rhs) => format!("(i32.eq {} {})", lhs.compile(ctx), rhs.compile(ctx)),
+            Oper::Mod(lhs, rhs) => format!("(i32.rem_s {} {})", lhs.compile(ctx), rhs.compile(ctx)),
         }
     }
 }
