@@ -1,2 +1,2 @@
 # Mystia
-Web frontend programming language outputs wasm 
+Web frontend programming language outputs wasm
