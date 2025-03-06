@@ -6,8 +6,13 @@ pub enum Oper {
     Sub(Expr, Expr),
     Mul(Expr, Expr),
     Div(Expr, Expr),
-    Eql(Expr, Expr),
     Mod(Expr, Expr),
+    Eql(Expr, Expr),
+    Neq(Expr, Expr),
+    Gt(Expr, Expr),
+    GtEq(Expr, Expr),
+    Lt(Expr, Expr),
+    LtEq(Expr, Expr),
 }
 
 impl Oper {
@@ -23,6 +28,11 @@ impl Oper {
             "/" => Oper::Div(has_lhs(2)?, token),
             "%" => Oper::Mod(has_lhs(2)?, token),
             "==" => Oper::Eql(has_lhs(2)?, token),
+            "!=" => Oper::Neq(has_lhs(2)?, token),
+            ">=" => Oper::GtEq(has_lhs(2)?, token),
+            ">" => Oper::Gt(has_lhs(2)?, token),
+            "<=" => Oper::LtEq(has_lhs(2)?, token),
+            "<" => Oper::Lt(has_lhs(2)?, token),
             _ => return None,
         })
     }
@@ -33,8 +43,13 @@ impl Oper {
             Oper::Sub(lhs, rhs) => format!("(i32.sub {} {})", lhs.compile(ctx), rhs.compile(ctx)),
             Oper::Mul(lhs, rhs) => format!("(i32.mul {} {})", lhs.compile(ctx), rhs.compile(ctx)),
             Oper::Div(lhs, rhs) => format!("(i32.div_s {} {})", lhs.compile(ctx), rhs.compile(ctx)),
-            Oper::Eql(lhs, rhs) => format!("(i32.eq {} {})", lhs.compile(ctx), rhs.compile(ctx)),
             Oper::Mod(lhs, rhs) => format!("(i32.rem_s {} {})", lhs.compile(ctx), rhs.compile(ctx)),
+            Oper::Eql(lhs, rhs) => format!("(i32.eq {} {})", lhs.compile(ctx), rhs.compile(ctx)),
+            Oper::Neq(lhs, rhs) => format!("(i32.ne {} {})", lhs.compile(ctx), rhs.compile(ctx)),
+            Oper::GtEq(lhs, rhs) => format!("(i32.ge_s {} {})", lhs.compile(ctx), rhs.compile(ctx)),
+            Oper::Gt(lhs, rhs) => format!("(i32.gt_s {} {})", lhs.compile(ctx), rhs.compile(ctx)),
+            Oper::LtEq(lhs, rhs) => format!("(i32.le_s {} {})", lhs.compile(ctx), rhs.compile(ctx)),
+            Oper::Lt(lhs, rhs) => format!("(i32.lt_s {} {})", lhs.compile(ctx), rhs.compile(ctx)),
         }
     }
 }
