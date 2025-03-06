@@ -1,1 +1,0 @@
-(module (func $inc (param $n i32) (result i32) (block (result i32)  (br 0 (i32.add (local.get $n) (i32.const 1))))) (func (export "_start") (result i32) (block (result i32)  (br 0 (call $inc (call $inc (i32.const 1)))))))
