@@ -18,7 +18,9 @@ fn main() {
     let mut compiler = Compiler::new();
     println!(
         "{}",
-        compiler.build("fn inc(n) n + 1; inc(inc(1))").unwrap()
+        compiler
+            .build("fn fact(n) if n == 0 then 1 else fact(n-1) * n; fact(5)")
+            .unwrap()
     );
 }
 
