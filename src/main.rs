@@ -16,7 +16,7 @@ use value::*;
 
 fn main() {
     let mut compiler = Compiler::new();
-    println!("{}", compiler.build("fn inc(n) n+1; inc(1+2)").unwrap());
+    println!("{}", compiler.build("fn inc(n) n + 1; inc(2 * 3)").unwrap());
 }
 
 struct Compiler {
