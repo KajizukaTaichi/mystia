@@ -13,17 +13,9 @@ impl Block {
     }
 
     pub fn compile(&self, ctx: &mut Compiler) -> String {
-        let block = self.0.clone();
-        let last = block.len() - 1;
         format!(
-            "(block (result i32) {} (br 0 {}))",
-            join!(
-                block[..last]
-                    .iter()
-                    .map(|x| x.compile(ctx))
-                    .collect::<Vec<_>>()
-            ),
-            block[last].compile(ctx)
+            "{}",
+            join!(self.0.iter().map(|x| x.compile(ctx)).collect::<Vec<_>>()),
         )
     }
 }
