@@ -1,5 +1,6 @@
 use crate::*;
 
+#[derive(Clone, Debug)]
 pub struct Block(Vec<Stmt>);
 
 impl Block {
@@ -12,15 +13,17 @@ impl Block {
     }
 
     pub fn compile(&self, ctx: &mut Compiler) -> String {
+        let block = self.0.clone();
+        let last = block.len() - 1;
         format!(
             "(block (result i32) {} (br 0 {}))",
             join!(
-                self.0[..self.0.len() - 1]
+                block[..last]
                     .iter()
                     .map(|x| x.compile(ctx))
                     .collect::<Vec<_>>()
             ),
-            self.0[self.0.len() - 1].compile(ctx)
+            block[last].compile(ctx)
         )
     }
 }
