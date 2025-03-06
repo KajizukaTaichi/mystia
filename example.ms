@@ -4,5 +4,5 @@ fn fact(n) {
 };
 
 declare x;
-let x = 1 + 2;
+let x = 2 * 3;
 fact(x)
