@@ -1,8 +1,10 @@
-fn fact(n) {
-    if n == 0 then 1
-    else n * fact(n-1)
-};
+declare total;
+declare count;
+let total = 0;
+let count = 0;
 
-declare x;
-let x = 2 * 3;
-fact(x)
+while count < 10 loop {
+    let count = count + 1;
+    let total = total + count;
+};
+total
