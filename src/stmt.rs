@@ -89,9 +89,9 @@ impl Stmt {
             }
             Stmt::While { cond, body } => {
                 format!(
-                    "(loop $while_start (br_if $while_start {}) {})",
-                    cond.compile(ctx),
+                    "(loop $while_start {} (br_if $while_start {}))",
                     body.compile(ctx),
+                    cond.compile(ctx),
                 )
             }
             Stmt::Declare(name) => format!("(local ${name} i32)"),
