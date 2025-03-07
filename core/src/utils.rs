@@ -1,6 +1,6 @@
 pub const SPACE: [&str; 5] = [" ", "　", "\n", "\t", "\r"];
-pub const OPERATOR: [&str; 15] = [
-    "+", "-", "*", "/", "%", "^", "==", "!=", "<", ">", "<=", ">=", "&&", "||", "!",
+pub const OPERATOR: [&str; 12] = [
+    "+", "-", "*", "/", "%", "^", "==", "!=", "<", ">", "<=", ">=",
 ];
 
 pub fn include_letter(query: &str, chars: &Vec<String>, idx: usize) -> bool {
