@@ -3,6 +3,4 @@ fn fact(n) {
     else n * fact(n-1)
 };
 
-declare x;
-let x = 2 * 3;
-fact(x)
+fact(6)
