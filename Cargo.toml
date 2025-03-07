@@ -1,7 +1,3 @@
-[package]
-name = "mystia"
-version = "0.1.0"
-edition = "2024"
-
-[dependencies]
-clap = { version = "4.5.31", features = ["derive"] }
+[workspace]
+members = ["cli","core"]
+resolver = "3"
