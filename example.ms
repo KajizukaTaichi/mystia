@@ -1,10 +1,11 @@
-declare total;
-declare count;
-let total = 0;
-let count = 0;
-
-while count < 10 loop {
-    let count = count + 1;
-    let total = total + count;
+fn total(start, end) {
+    declare total;
+    let total = 0;
+    while start < end loop {
+        let total = total + start;
+        let start = start + 1
+    };
+    total
 };
-total
+
+total(1, 10)
