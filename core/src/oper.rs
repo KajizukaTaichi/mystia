@@ -128,8 +128,8 @@ impl Node for Oper {
                     "({}.{} {})",
                     rhs.compile(ctx),
                     match rhs {
-                        Type::Float => "convert_s/i32",
-                        Type::Integer => "trunc_s/f64",
+                        Type::Float => "convert_i32_s",
+                        Type::Integer => "trunc_f64_s",
                         _ => todo!(),
                     },
                     lhs.compile(ctx),
