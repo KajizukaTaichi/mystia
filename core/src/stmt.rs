@@ -21,8 +21,8 @@ pub enum Stmt {
     Expr(Expr),
 }
 
-impl Stmt {
-    pub fn parse(source: &str) -> Option<Self> {
+impl Node for Stmt {
+    fn parse(source: &str) -> Option<Self> {
         let source = source.trim();
         if let Some(source) = source.strip_prefix("fn ") {
             let (name, source) = source.split_once("(")?;
@@ -63,7 +63,7 @@ impl Stmt {
         }
     }
 
-    pub fn compile(&self, ctx: &mut Compiler) -> String {
+    fn compile(&self, ctx: &mut Compiler) -> String {
         match self {
             Stmt::Expr(expr) => expr.compile(ctx),
             Stmt::Defun { name, args, body } => {
