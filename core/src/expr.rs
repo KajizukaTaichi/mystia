@@ -9,8 +9,8 @@ pub enum Expr {
     Block(Block),
 }
 
-impl Expr {
-    pub fn parse(source: &str) -> Option<Expr> {
+impl Node for Expr {
+    fn parse(source: &str) -> Option<Expr> {
         let source = source.trim();
         let token_list: Vec<String> = tokenize(source.trim(), SPACE.as_ref(), true)?;
         if token_list.len() >= 2 {
@@ -49,7 +49,7 @@ impl Expr {
         }
     }
 
-    pub fn compile(&self, ctx: &mut Compiler) -> String {
+    fn compile(&self, ctx: &mut Compiler) -> String {
         match self {
             Expr::Oper(oper) => oper.compile(ctx),
             Expr::Ref(to) => format!("(local.get ${to})"),
