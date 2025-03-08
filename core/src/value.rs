@@ -10,6 +10,7 @@ pub enum Value {
 pub enum Type {
     Integer,
     Float,
+    Void,
 }
 
 impl Node for Type {
@@ -25,6 +26,7 @@ impl Node for Type {
         match self {
             Self::Integer => "i32",
             Self::Float => "f64",
+            Self::Void => "void",
         }
         .to_string()
     }
