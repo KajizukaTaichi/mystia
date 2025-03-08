@@ -7,13 +7,13 @@ mod stmt;
 mod utils;
 mod value;
 
+use std::collections::HashMap;
 use {
     block::Block,
     expr::Expr,
     lexer::tokenize,
     node::Node,
     oper::Oper,
-    std::collections::HashMap,
     stmt::Stmt,
     utils::{OPERATOR, SPACE, include_letter},
     value::{Type, Value},
