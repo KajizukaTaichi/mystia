@@ -1,12 +1,13 @@
 mod block;
 mod expr;
 mod lexer;
+mod node;
 mod oper;
 mod stmt;
 mod utils;
 mod value;
 
-use {block::*, expr::*, lexer::*, oper::*, stmt::*, utils::*, value::*};
+use {block::*, expr::*, lexer::*, node::*, oper::*, stmt::*, utils::*, value::*};
 
 pub struct Compiler {
     declare: Vec<String>,
