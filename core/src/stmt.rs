@@ -134,12 +134,12 @@ impl Node for Stmt {
                 body,
                 ret,
             } => {
-                body.type_infer(ctx);
                 for (arg, anno) in args {
                     ctx.variable.insert(arg.to_string(), anno.clone());
                 }
+                body.type_infer(ctx);
                 ctx.function.insert(name.to_string(), ret.clone());
-                ret.clone()
+                Type::Void
             }
             Stmt::If { cond, then, r#else } => {
                 cond.type_infer(ctx);
@@ -153,7 +153,7 @@ impl Node for Stmt {
             }
             Stmt::Declare { name, annotation } => {
                 ctx.variable.insert(name.to_string(), annotation.clone());
-                annotation.clone()
+                Type::Void
             }
             Stmt::Assign(_, expr) => expr.type_infer(ctx),
         }
