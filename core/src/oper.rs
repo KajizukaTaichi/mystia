@@ -39,17 +39,72 @@ impl Node for Oper {
 
     fn compile(&self, ctx: &mut Compiler) -> String {
         match self {
-            Oper::Add(lhs, rhs) => format!("(i32.add {} {})", lhs.compile(ctx), rhs.compile(ctx)),
-            Oper::Sub(lhs, rhs) => format!("(i32.sub {} {})", lhs.compile(ctx), rhs.compile(ctx)),
-            Oper::Mul(lhs, rhs) => format!("(i32.mul {} {})", lhs.compile(ctx), rhs.compile(ctx)),
-            Oper::Div(lhs, rhs) => format!("(i32.div_s {} {})", lhs.compile(ctx), rhs.compile(ctx)),
-            Oper::Mod(lhs, rhs) => format!("(i32.rem_s {} {})", lhs.compile(ctx), rhs.compile(ctx)),
-            Oper::Eql(lhs, rhs) => format!("(i32.eq {} {})", lhs.compile(ctx), rhs.compile(ctx)),
-            Oper::Neq(lhs, rhs) => format!("(i32.ne {} {})", lhs.compile(ctx), rhs.compile(ctx)),
-            Oper::Lt(lhs, rhs) => format!("(i32.lt_s {} {})", lhs.compile(ctx), rhs.compile(ctx)),
-            Oper::Gt(lhs, rhs) => format!("(i32.gt_s {} {})", lhs.compile(ctx), rhs.compile(ctx)),
-            Oper::LtEq(lhs, rhs) => format!("(i32.le_s {} {})", lhs.compile(ctx), rhs.compile(ctx)),
-            Oper::GtEq(lhs, rhs) => format!("(i32.ge_s {} {})", lhs.compile(ctx), rhs.compile(ctx)),
+            Oper::Add(lhs, rhs) => format!(
+                "({}.add {} {})",
+                self.type_infer(ctx).compile(ctx),
+                lhs.compile(ctx),
+                rhs.compile(ctx)
+            ),
+            Oper::Sub(lhs, rhs) => format!(
+                "({}.sub {} {})",
+                self.type_infer(ctx).compile(ctx),
+                lhs.compile(ctx),
+                rhs.compile(ctx)
+            ),
+            Oper::Mul(lhs, rhs) => format!(
+                "({}.mul {} {})",
+                self.type_infer(ctx).compile(ctx),
+                lhs.compile(ctx),
+                rhs.compile(ctx)
+            ),
+            Oper::Div(lhs, rhs) => format!(
+                "({}.div_s {} {})",
+                self.type_infer(ctx).compile(ctx),
+                lhs.compile(ctx),
+                rhs.compile(ctx)
+            ),
+            Oper::Mod(lhs, rhs) => format!(
+                "({}.rem_s {} {})",
+                self.type_infer(ctx).compile(ctx),
+                lhs.compile(ctx),
+                rhs.compile(ctx)
+            ),
+            Oper::Eql(lhs, rhs) => format!(
+                "({}.eq {} {})",
+                self.type_infer(ctx).compile(ctx),
+                lhs.compile(ctx),
+                rhs.compile(ctx)
+            ),
+            Oper::Neq(lhs, rhs) => format!(
+                "({}.ne {} {})",
+                self.type_infer(ctx).compile(ctx),
+                lhs.compile(ctx),
+                rhs.compile(ctx)
+            ),
+            Oper::Lt(lhs, rhs) => format!(
+                "({}.lt_s {} {})",
+                self.type_infer(ctx).compile(ctx),
+                lhs.compile(ctx),
+                rhs.compile(ctx)
+            ),
+            Oper::Gt(lhs, rhs) => format!(
+                "({}.gt_s {} {})",
+                self.type_infer(ctx).compile(ctx),
+                lhs.compile(ctx),
+                rhs.compile(ctx)
+            ),
+            Oper::LtEq(lhs, rhs) => format!(
+                "({}.le_s {} {})",
+                self.type_infer(ctx).compile(ctx),
+                lhs.compile(ctx),
+                rhs.compile(ctx)
+            ),
+            Oper::GtEq(lhs, rhs) => format!(
+                "({}.ge_s {} {})",
+                self.type_infer(ctx).compile(ctx),
+                lhs.compile(ctx),
+                rhs.compile(ctx)
+            ),
         }
     }
 
