@@ -1,4 +1,4 @@
-fn total(start as int, end as int, step as float) as float = {
+fn total(start as float, end as float, step as float) as float = {
     declare result as float;
     let result = 0.0;
     while start < end loop {
@@ -8,4 +8,4 @@ fn total(start as int, end as int, step as float) as float = {
     result
 };
 
-total(1, 10, 0.5)
+total(1.0, 10.0, 2.0)
