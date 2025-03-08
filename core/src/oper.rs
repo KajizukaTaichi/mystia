@@ -15,8 +15,8 @@ pub enum Oper {
     GtEq(Expr, Expr),
 }
 
-impl Oper {
-    pub fn parse(source: &str) -> Option<Self> {
+impl Node for Oper {
+    fn parse(source: &str) -> Option<Self> {
         let token_list: Vec<String> = tokenize(source, SPACE.as_ref(), true)?;
         let token = Expr::parse(token_list.last()?)?;
         let operator = token_list.get(token_list.len().checked_sub(2)?)?;
@@ -37,7 +37,7 @@ impl Oper {
         })
     }
 
-    pub fn compile(&self, ctx: &mut Compiler) -> String {
+    fn compile(&self, ctx: &mut Compiler) -> String {
         match self {
             Oper::Add(lhs, rhs) => format!("(i32.add {} {})", lhs.compile(ctx), rhs.compile(ctx)),
             Oper::Sub(lhs, rhs) => format!("(i32.sub {} {})", lhs.compile(ctx), rhs.compile(ctx)),
