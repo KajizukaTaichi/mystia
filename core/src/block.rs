@@ -17,7 +17,10 @@ impl Node for Block {
     }
 
     fn type_infer(&self, ctx: &mut Compiler) -> Type {
-        let block = self.0.clone();
-        block[block.len() - 1].type_infer(ctx)
+        let mut result = Type::Void;
+        for line in &self.0 {
+            result = line.type_infer(ctx);
+        }
+        result
     }
 }
