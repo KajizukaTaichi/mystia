@@ -21,7 +21,10 @@ pub enum Stmt {
         name: String,
         annotation: Type,
     },
-    Assign(String, Expr),
+    Assign {
+        name: String,
+        value: Expr,
+    },
     Expr(Expr),
 }
 
@@ -74,7 +77,10 @@ impl Node for Stmt {
             })
         } else if let Some(source) = source.strip_prefix("let ") {
             let (name, source) = source.split_once("=")?;
-            Some(Stmt::Assign(name.trim().to_string(), Expr::parse(source)?))
+            Some(Stmt::Assign {
+                name: name.trim().to_string(),
+                value: Expr::parse(source)?,
+            })
         } else {
             Some(Stmt::Expr(Expr::parse(source)?))
         }
@@ -121,7 +127,7 @@ impl Node for Stmt {
             Stmt::Declare { name, annotation } => {
                 format!("(local ${name} {})", annotation.compile(ctx))
             }
-            Stmt::Assign(name, expr) => format!("(local.set ${name} {})", expr.compile(ctx)),
+            Stmt::Assign { name, value } => format!("(local.set ${name} {})", value.compile(ctx)),
         }
     }
 
@@ -155,7 +161,7 @@ impl Node for Stmt {
                 ctx.variable.insert(name.to_string(), annotation.clone());
                 Type::Void
             }
-            Stmt::Assign(_, expr) => expr.type_infer(ctx),
+            Stmt::Assign { name: _, value } => value.type_infer(ctx),
         }
     }
 }
