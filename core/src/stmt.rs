@@ -130,10 +130,13 @@ impl Node for Stmt {
             Stmt::Expr(expr) => expr.type_infer(ctx),
             Stmt::Defun {
                 name,
-                args: _,
+                args,
                 body: _,
                 ret,
             } => {
+                for (arg, anno) in args {
+                    ctx.variable.insert(arg.to_string(), anno.clone());
+                }
                 ctx.function.insert(name.to_string(), ret.clone());
                 ret.clone()
             }
@@ -143,10 +146,10 @@ impl Node for Stmt {
                 r#else: _,
             } => then.type_infer(ctx),
             Stmt::While { cond: _, body } => body.type_infer(ctx),
-            Stmt::Declare {
-                name: _,
-                annotation,
-            } => annotation.clone(),
+            Stmt::Declare { name, annotation } => {
+                ctx.variable.insert(name.to_string(), annotation.clone());
+                annotation.clone()
+            }
             Stmt::Assign(_, expr) => expr.type_infer(ctx),
         }
     }
