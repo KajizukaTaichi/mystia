@@ -15,7 +15,7 @@ use {
     node::Node,
     oper::Oper,
     stmt::Stmt,
-    utils::{OPERATOR, SPACE, include_letter},
+    utils::{OPERATOR, SPACE, expand_local, include_letter},
     value::{Type, Value},
 };
 
@@ -24,6 +24,7 @@ pub struct Compiler {
     declare: Vec<String>,
     variable: HashMap<String, Type>,
     function: HashMap<String, Type>,
+    argument: HashMap<String, Type>,
 }
 
 impl Compiler {
@@ -32,6 +33,7 @@ impl Compiler {
             declare: vec![],
             variable: HashMap::new(),
             function: HashMap::new(),
+            argument: HashMap::new(),
         }
     }
 
@@ -39,10 +41,11 @@ impl Compiler {
         let ast = Block::parse(source)?;
         let ret = ast.type_infer(self);
         Some(format!(
-            r#"(module {2} (func (export "_start") (result {1}) {0}))"#,
+            r#"(module {2} (func (export "_start") (result {1}) {3} {0}))"#,
             ast.compile(self),
             ret.compile(self),
-            join!(self.declare)
+            join!(self.declare),
+            expand_local(self)
         ))
     }
 }
