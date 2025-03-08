@@ -8,7 +8,7 @@ use std::{
 
 #[derive(Parser)]
 #[command(
-    name = "mystia",
+    name = "Mystia",
     about = "Web frontend programming language outputs wasm"
 )]
 struct Cli {
