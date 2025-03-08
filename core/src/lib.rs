@@ -36,9 +36,12 @@ impl Compiler {
     }
 
     pub fn build(&mut self, source: &str) -> Option<String> {
+        let ast = Block::parse(source)?;
+        let ret = ast.type_infer(self);
         Some(format!(
-            r#"(module {1} (func (export "_start") (result i32) {0}))"#,
-            Block::parse(source).map(|x| x.compile(self))?,
+            r#"(module {2} (func (export "_start") (result {1}) {0}))"#,
+            ast.compile(self),
+            ret.compile(self),
             join!(self.declare)
         ))
     }
