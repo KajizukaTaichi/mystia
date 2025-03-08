@@ -1,6 +1,4 @@
 fn total(number as int) as int = {
-    declare count as int;
-    declare result as int;
     let count = 1;
     let result = 0;
 
