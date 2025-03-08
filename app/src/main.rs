@@ -29,7 +29,7 @@ fn main() {
         return;
     };
     let Ok(mut output_file) = File::create(Path::new(&cli.path).with_extension("wat")) else {
-        eprintln!("Failed to create output file");
+        eprintln!("Failed to create output WAT file");
         return;
     };
     let Ok(_) = output_file.write_all(wat_code.as_bytes()) else {
