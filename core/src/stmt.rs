@@ -4,8 +4,9 @@ use crate::*;
 pub enum Stmt {
     Defun {
         name: String,
-        args: Vec<String>,
+        args: Vec<(String, Type)>,
         body: Expr,
+        ret: Type,
     },
     If {
         cond: Expr,
@@ -29,11 +30,20 @@ impl Node for Stmt {
         let source = source.trim();
         if let Some(source) = source.strip_prefix("fn ") {
             let (name, source) = source.split_once("(")?;
-            let (args, body) = source.split_once(")")?;
+            let (args, source) = source.split_once("):")?;
+            let (ret, body) = source.split_once("=")?;
             Some(Stmt::Defun {
                 name: name.trim().to_string(),
-                args: args.split(",").map(|x| x.trim().to_string()).collect(),
+                args: {
+                    let mut result = vec![];
+                    for arg in args.split(",") {
+                        let (arg, annotation) = arg.split_once(":")?;
+                        result.push((arg.trim().to_string(), Type::parse(annotation)?));
+                    }
+                    result
+                },
                 body: Expr::parse(body)?,
+                ret: Type::parse(ret)?,
             })
         } else if let Some(source) = source.strip_prefix("if ") {
             let code = tokenize(source, SPACE.as_ref(), false)?;
@@ -73,14 +83,20 @@ impl Node for Stmt {
     fn compile(&self, ctx: &mut Compiler) -> String {
         match self {
             Stmt::Expr(expr) => expr.compile(ctx),
-            Stmt::Defun { name, args, body } => {
+            Stmt::Defun {
+                name,
+                args,
+                body,
+                ret,
+            } => {
                 let code = format!(
-                    "(func ${name} {} (result i32) {})",
+                    "(func ${name} {} (result {}) {})",
                     join!(
                         args.iter()
-                            .map(|x| format!("(param ${x} i32)"))
+                            .map(|x| format!("(param ${} {})", x.0, x.1.compile(ctx)))
                             .collect::<Vec<_>>()
                     ),
+                    ret.compile(ctx),
                     body.compile(ctx)
                 );
                 ctx.declare.push(code);
@@ -115,8 +131,9 @@ impl Node for Stmt {
             Stmt::Defun {
                 name: _,
                 args: _,
-                body,
-            } => body.type_infer(ctx),
+                body: _,
+                ret,
+            } => ret.clone(),
             Stmt::If {
                 cond: _,
                 then,
