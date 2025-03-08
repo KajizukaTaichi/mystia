@@ -13,26 +13,28 @@ pub enum Oper {
     Gt(Expr, Expr),
     LtEq(Expr, Expr),
     GtEq(Expr, Expr),
+    Cast(Expr, Type),
 }
 
 impl Node for Oper {
     fn parse(source: &str) -> Option<Self> {
         let token_list: Vec<String> = tokenize(source, SPACE.as_ref(), true)?;
-        let token = Expr::parse(token_list.last()?)?;
+        let token = || Some(Expr::parse(token_list.last()?)?);
         let operator = token_list.get(token_list.len().checked_sub(2)?)?;
         let has_lhs = |len: usize| Expr::parse(&join!(token_list.get(..token_list.len() - len)?));
         Some(match operator.as_str() {
-            "+" => Oper::Add(has_lhs(2)?, token),
-            "-" => Oper::Sub(has_lhs(2)?, token),
-            "*" => Oper::Mul(has_lhs(2)?, token),
-            "/" => Oper::Div(has_lhs(2)?, token),
-            "%" => Oper::Mod(has_lhs(2)?, token),
-            "==" => Oper::Eql(has_lhs(2)?, token),
-            "!=" => Oper::Neq(has_lhs(2)?, token),
-            "<" => Oper::Lt(has_lhs(2)?, token),
-            ">" => Oper::Gt(has_lhs(2)?, token),
-            ">=" => Oper::GtEq(has_lhs(2)?, token),
-            "<=" => Oper::LtEq(has_lhs(2)?, token),
+            "+" => Oper::Add(has_lhs(2)?, token()?),
+            "-" => Oper::Sub(has_lhs(2)?, token()?),
+            "*" => Oper::Mul(has_lhs(2)?, token()?),
+            "/" => Oper::Div(has_lhs(2)?, token()?),
+            "%" => Oper::Mod(has_lhs(2)?, token()?),
+            "==" => Oper::Eql(has_lhs(2)?, token()?),
+            "!=" => Oper::Neq(has_lhs(2)?, token()?),
+            "<" => Oper::Lt(has_lhs(2)?, token()?),
+            ">" => Oper::Gt(has_lhs(2)?, token()?),
+            ">=" => Oper::GtEq(has_lhs(2)?, token()?),
+            "<=" => Oper::LtEq(has_lhs(2)?, token()?),
+            "as" => Oper::Cast(has_lhs(2)?, Type::parse(source)?),
             _ => return None,
         })
     }
@@ -121,6 +123,19 @@ impl Node for Oper {
                     rhs.compile(ctx)
                 )
             }
+            Oper::Cast(lhs, rhs) => {
+                format!(
+                    "({}.{} {} {})",
+                    self.type_infer(ctx).compile(ctx),
+                    match rhs {
+                        Type::Float => "convert_s/i32",
+                        Type::Integer => "trunc_s/f64",
+                        _ => todo!(),
+                    },
+                    lhs.compile(ctx),
+                    rhs.compile(ctx)
+                )
+            }
         }
     }
 
@@ -167,6 +182,10 @@ impl Node for Oper {
                 rhs.type_infer(ctx)
             }
             Oper::GtEq(lhs, rhs) => {
+                lhs.type_infer(ctx);
+                rhs.type_infer(ctx)
+            }
+            Oper::Cast(lhs, rhs) => {
                 lhs.type_infer(ctx);
                 rhs.type_infer(ctx)
             }
