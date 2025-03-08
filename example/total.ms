@@ -8,4 +8,4 @@ fn total(start as float, end as float, step as float) as float = {
     result
 };
 
-total(1.0, 10.0, 2.0)
+total(0.0, 1.0, 0.1)
