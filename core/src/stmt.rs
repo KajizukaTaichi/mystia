@@ -129,11 +129,14 @@ impl Node for Stmt {
         match self {
             Stmt::Expr(expr) => expr.type_infer(ctx),
             Stmt::Defun {
-                name: _,
+                name,
                 args: _,
                 body: _,
                 ret,
-            } => ret.clone(),
+            } => {
+                ctx.function.insert(name.to_string(), ret.clone());
+                ret.clone()
+            }
             Stmt::If {
                 cond: _,
                 then,
