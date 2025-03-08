@@ -1,1 +1,0 @@
-(module  (func (export "_start") (result f64) (i32.const 1) (f64.convert_s/i32)))
