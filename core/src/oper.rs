@@ -81,30 +81,46 @@ impl Node for Oper {
                 lhs.compile(ctx),
                 rhs.compile(ctx)
             ),
-            Oper::Lt(lhs, rhs) => format!(
-                "({}.lt_s {} {})",
-                self.type_infer(ctx).compile(ctx),
-                lhs.compile(ctx),
-                rhs.compile(ctx)
-            ),
-            Oper::Gt(lhs, rhs) => format!(
-                "({}.gt_s {} {})",
-                self.type_infer(ctx).compile(ctx),
-                lhs.compile(ctx),
-                rhs.compile(ctx)
-            ),
-            Oper::LtEq(lhs, rhs) => format!(
-                "({}.le_s {} {})",
-                self.type_infer(ctx).compile(ctx),
-                lhs.compile(ctx),
-                rhs.compile(ctx)
-            ),
-            Oper::GtEq(lhs, rhs) => format!(
-                "({}.ge_s {} {})",
-                self.type_infer(ctx).compile(ctx),
-                lhs.compile(ctx),
-                rhs.compile(ctx)
-            ),
+            Oper::Lt(lhs, rhs) => {
+                let ret = self.type_infer(ctx).compile(ctx);
+                format!(
+                    "({}.lt{} {} {})",
+                    ret,
+                    if ret == "i32" { "_s" } else { "" },
+                    lhs.compile(ctx),
+                    rhs.compile(ctx)
+                )
+            }
+            Oper::LtEq(lhs, rhs) => {
+                let ret = self.type_infer(ctx).compile(ctx);
+                format!(
+                    "({}.le{} {} {})",
+                    ret,
+                    if ret == "i32" { "_s" } else { "" },
+                    lhs.compile(ctx),
+                    rhs.compile(ctx)
+                )
+            }
+            Oper::Gt(lhs, rhs) => {
+                let ret = self.type_infer(ctx).compile(ctx);
+                format!(
+                    "({}.gt{} {} {})",
+                    ret,
+                    if ret == "i32" { "_s" } else { "" },
+                    lhs.compile(ctx),
+                    rhs.compile(ctx)
+                )
+            }
+            Oper::GtEq(lhs, rhs) => {
+                let ret = self.type_infer(ctx).compile(ctx);
+                format!(
+                    "({}.ge{} {} {})",
+                    ret,
+                    if ret == "i32" { "_s" } else { "" },
+                    lhs.compile(ctx),
+                    rhs.compile(ctx)
+                )
+            }
         }
     }
 
