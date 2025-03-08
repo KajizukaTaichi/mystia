@@ -104,18 +104,18 @@ impl Node for Stmt {
             }
             Stmt::If { cond, then, r#else } => {
                 format!(
-                    "(if (result {}) {} (then {}) (else {}))",
+                    "(if (result {}) (i32.eqz {}) (then {}) (else {}))",
                     self.type_infer(ctx).compile(ctx),
                     cond.compile(ctx),
-                    then.compile(ctx),
-                    r#else.compile(ctx)
+                    r#else.compile(ctx),
+                    then.compile(ctx)
                 )
             }
             Stmt::While { cond, body } => {
                 format!(
-                    "(loop $while_start {} (br_if $while_start {}))",
-                    body.compile(ctx),
+                    "(block $outer (loop $while_start (br_if $outer (i32.eqz {})) {} (br $while_start)))",
                     cond.compile(ctx),
+                    body.compile(ctx),
                 )
             }
             Stmt::Declare { name, annotation } => {
