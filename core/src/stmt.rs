@@ -16,7 +16,10 @@ pub enum Stmt {
         cond: Expr,
         body: Expr,
     },
-    Declare(String),
+    Declare {
+        name: String,
+        annotation: Type,
+    },
     Assign(String, Expr),
     Expr(Expr),
 }
@@ -54,7 +57,11 @@ impl Node for Stmt {
                 body: Expr::parse(&body_sec)?,
             })
         } else if let Some(source) = source.strip_prefix("declare ") {
-            Some(Stmt::Declare(source.trim().to_string()))
+            let (name, annotation) = source.split_once(":")?;
+            Some(Stmt::Declare {
+                name: name.trim().to_string(),
+                annotation: Type::parse(annotation)?,
+            })
         } else if let Some(source) = source.strip_prefix("let ") {
             let (name, source) = source.split_once("=")?;
             Some(Stmt::Assign(name.trim().to_string(), Expr::parse(source)?))
@@ -81,7 +88,8 @@ impl Node for Stmt {
             }
             Stmt::If { cond, then, r#else } => {
                 format!(
-                    "(if (result i32) {} (then {}) (else {}))",
+                    "(if (result {}) {} (then {}) (else {}))",
+                    self.type_infer(ctx).compile(ctx),
                     cond.compile(ctx),
                     then.compile(ctx),
                     r#else.compile(ctx)
@@ -94,8 +102,32 @@ impl Node for Stmt {
                     cond.compile(ctx),
                 )
             }
-            Stmt::Declare(name) => format!("(local ${name} i32)"),
+            Stmt::Declare { name, annotation } => {
+                format!("(local ${name} {})", annotation.compile(ctx))
+            }
             Stmt::Assign(name, expr) => format!("(local.set ${name} {})", expr.compile(ctx)),
+        }
+    }
+
+    fn type_infer(&self, ctx: &mut Compiler) -> Type {
+        match self {
+            Stmt::Expr(expr) => expr.type_infer(ctx),
+            Stmt::Defun {
+                name: _,
+                args: _,
+                body,
+            } => body.type_infer(ctx),
+            Stmt::If {
+                cond: _,
+                then,
+                r#else: _,
+            } => then.type_infer(ctx),
+            Stmt::While { cond: _, body } => body.type_infer(ctx),
+            Stmt::Declare {
+                name: _,
+                annotation,
+            } => annotation.clone(),
+            Stmt::Assign(_, expr) => expr.type_infer(ctx),
         }
     }
 }
