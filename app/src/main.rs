@@ -32,7 +32,6 @@ fn main() {
         eprintln!("Failed to create output file");
         return;
     };
-
     let Ok(_) = output_file.write_all(wat_code.as_bytes()) else {
         eprintln!("Failed to write output in the file");
         return;
