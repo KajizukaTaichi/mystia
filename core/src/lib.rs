@@ -4,18 +4,34 @@ mod lexer;
 mod node;
 mod oper;
 mod stmt;
+mod r#type;
 mod utils;
 mod value;
 
-use {block::*, expr::*, lexer::*, node::*, oper::*, stmt::*, utils::*, value::*};
+use {
+    block::Block,
+    expr::Expr,
+    lexer::tokenize,
+    node::Node,
+    oper::Oper,
+    std::collections::HashMap,
+    stmt::Stmt,
+    r#type::Type,
+    utils::{OPERATOR, SPACE, include_letter},
+    value::Value,
+};
 
 pub struct Compiler {
     declare: Vec<String>,
+    variable: HashMap<String, Type>,
 }
 
 impl Compiler {
     pub fn new() -> Self {
-        Compiler { declare: vec![] }
+        Compiler {
+            declare: vec![],
+            variable: HashMap::new(),
+        }
     }
 
     pub fn build(&mut self, source: &str) -> Option<String> {
