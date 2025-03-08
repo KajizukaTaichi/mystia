@@ -34,7 +34,7 @@ impl Node for Oper {
             ">" => Oper::Gt(has_lhs(2)?, token()?),
             ">=" => Oper::GtEq(has_lhs(2)?, token()?),
             "<=" => Oper::LtEq(has_lhs(2)?, token()?),
-            "as" => Oper::Cast(has_lhs(2)?, Type::parse(source)?),
+            "as" => Oper::Cast(has_lhs(2)?, Type::parse(token_list.last()?)?),
             _ => return None,
         })
     }
@@ -125,15 +125,14 @@ impl Node for Oper {
             }
             Oper::Cast(lhs, rhs) => {
                 format!(
-                    "({}.{} {} {})",
-                    self.type_infer(ctx).compile(ctx),
+                    "({}.{} {})",
+                    rhs.compile(ctx),
                     match rhs {
                         Type::Float => "convert_s/i32",
                         Type::Integer => "trunc_s/f64",
                         _ => todo!(),
                     },
                     lhs.compile(ctx),
-                    rhs.compile(ctx)
                 )
             }
         }
