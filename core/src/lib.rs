@@ -4,7 +4,6 @@ mod lexer;
 mod node;
 mod oper;
 mod stmt;
-mod r#type;
 mod utils;
 mod value;
 
@@ -16,14 +15,14 @@ use {
     oper::Oper,
     std::collections::HashMap,
     stmt::Stmt,
-    r#type::Type,
     utils::{OPERATOR, SPACE, include_letter},
-    value::Value,
+    value::{Type, Value},
 };
 
 pub struct Compiler {
     declare: Vec<String>,
     variable: HashMap<String, Type>,
+    function: HashMap<String, Type>,
 }
 
 impl Compiler {
@@ -31,6 +30,7 @@ impl Compiler {
         Compiler {
             declare: vec![],
             variable: HashMap::new(),
+            function: HashMap::new(),
         }
     }
 
