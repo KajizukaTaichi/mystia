@@ -67,13 +67,12 @@ impl Node for Expr {
     }
 
     fn type_infer(&self, ctx: &mut Compiler) -> Type {
-        dbg!(&self, &ctx);
         match self {
             Expr::Oper(oper) => oper.type_infer(ctx),
             Expr::Ref(to) => ctx.variable[to].clone(),
             Expr::Value(Value::Integer(_)) => Type::Integer,
             Expr::Value(Value::Float(_)) => Type::Float,
-            Expr::Call(name, _) => ctx.variable[name].clone(),
+            Expr::Call(name, _) => ctx.function[name].clone(),
             Expr::Block(block) => block.type_infer(ctx),
         }
     }
