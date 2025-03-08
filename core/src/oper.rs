@@ -110,17 +110,50 @@ impl Node for Oper {
 
     fn type_infer(&self, ctx: &mut Compiler) -> Type {
         match self {
-            Oper::Add(lhs, _) => lhs.type_infer(ctx),
-            Oper::Sub(lhs, _) => lhs.type_infer(ctx),
-            Oper::Mul(lhs, _) => lhs.type_infer(ctx),
-            Oper::Div(lhs, _) => lhs.type_infer(ctx),
-            Oper::Mod(lhs, _) => lhs.type_infer(ctx),
-            Oper::Eql(lhs, _) => lhs.type_infer(ctx),
-            Oper::Neq(lhs, _) => lhs.type_infer(ctx),
-            Oper::Lt(lhs, _) => lhs.type_infer(ctx),
-            Oper::Gt(lhs, _) => lhs.type_infer(ctx),
-            Oper::LtEq(lhs, _) => lhs.type_infer(ctx),
-            Oper::GtEq(lhs, _) => lhs.type_infer(ctx),
+            Oper::Add(lhs, rhs) => {
+                lhs.type_infer(ctx);
+                rhs.type_infer(ctx)
+            }
+            Oper::Sub(lhs, rhs) => {
+                lhs.type_infer(ctx);
+                rhs.type_infer(ctx)
+            }
+            Oper::Mul(lhs, rhs) => {
+                lhs.type_infer(ctx);
+                rhs.type_infer(ctx)
+            }
+            Oper::Div(lhs, rhs) => {
+                lhs.type_infer(ctx);
+                rhs.type_infer(ctx)
+            }
+            Oper::Mod(lhs, rhs) => {
+                lhs.type_infer(ctx);
+                rhs.type_infer(ctx)
+            }
+            Oper::Eql(lhs, rhs) => {
+                lhs.type_infer(ctx);
+                rhs.type_infer(ctx)
+            }
+            Oper::Neq(lhs, rhs) => {
+                lhs.type_infer(ctx);
+                rhs.type_infer(ctx)
+            }
+            Oper::Lt(lhs, rhs) => {
+                lhs.type_infer(ctx);
+                rhs.type_infer(ctx)
+            }
+            Oper::Gt(lhs, rhs) => {
+                lhs.type_infer(ctx);
+                rhs.type_infer(ctx)
+            }
+            Oper::LtEq(lhs, rhs) => {
+                lhs.type_infer(ctx);
+                rhs.type_infer(ctx)
+            }
+            Oper::GtEq(lhs, rhs) => {
+                lhs.type_infer(ctx);
+                rhs.type_infer(ctx)
+            }
         }
     }
 }
