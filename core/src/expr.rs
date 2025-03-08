@@ -67,6 +67,7 @@ impl Node for Expr {
     }
 
     fn type_infer(&self, ctx: &mut Compiler) -> Type {
+        dbg!(&self, &ctx);
         match self {
             Expr::Oper(oper) => oper.type_infer(ctx),
             Expr::Ref(to) => ctx.variable[to].clone(),
