@@ -5,6 +5,7 @@ fn total(
 ) as float = {
     declare result as float;
     let result = 0.0;
+
     while start < end loop {
         let result = result + start;
         let start = start + step
