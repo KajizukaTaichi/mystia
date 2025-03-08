@@ -69,7 +69,11 @@ impl Node for Expr {
     fn type_infer(&self, ctx: &mut Compiler) -> Type {
         match self {
             Expr::Oper(oper) => oper.type_infer(ctx),
-            Expr::Ref(to) => ctx.variable[to].clone(),
+            Expr::Ref(to) => {
+                let mut locals = ctx.variable.clone();
+                locals.extend(ctx.argument.clone());
+                locals[to].clone()
+            }
             Expr::Value(Value::Integer(_)) => Type::Integer,
             Expr::Value(Value::Float(_)) => Type::Float,
             Expr::Call(name, args) => {
