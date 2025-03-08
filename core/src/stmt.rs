@@ -17,11 +17,7 @@ pub enum Stmt {
         cond: Expr,
         body: Expr,
     },
-    Declare {
-        name: String,
-        annotation: Type,
-    },
-    Assign {
+    Let {
         name: String,
         value: Expr,
     },
@@ -69,15 +65,9 @@ impl Node for Stmt {
                 cond: Expr::parse(&cond_sec)?,
                 body: Expr::parse(&body_sec)?,
             })
-        } else if let Some(source) = source.strip_prefix("declare ") {
-            let (name, annotation) = source.split_once(" as ")?;
-            Some(Stmt::Declare {
-                name: name.trim().to_string(),
-                annotation: Type::parse(annotation)?,
-            })
         } else if let Some(source) = source.strip_prefix("let ") {
             let (name, source) = source.split_once("=")?;
-            Some(Stmt::Assign {
+            Some(Stmt::Let {
                 name: name.trim().to_string(),
                 value: Expr::parse(source)?,
             })
@@ -96,15 +86,17 @@ impl Node for Stmt {
                 ret,
             } => {
                 let code = format!(
-                    "(func ${name} {} (result {}) {})",
+                    "(func ${name} {0} (result {1}) {3} {2})",
                     join!(
                         args.iter()
                             .map(|x| format!("(param ${} {})", x.0, x.1.compile(ctx)))
                             .collect::<Vec<_>>()
                     ),
                     ret.compile(ctx),
-                    body.compile(ctx)
+                    body.compile(ctx),
+                    expand_local(ctx)
                 );
+                ctx.variable = HashMap::new();
                 ctx.declare.push(code);
                 String::new()
             }
@@ -124,10 +116,11 @@ impl Node for Stmt {
                     body.compile(ctx),
                 )
             }
-            Stmt::Declare { name, annotation } => {
-                format!("(local ${name} {})", annotation.compile(ctx))
+            Stmt::Let { name, value } => {
+                let value_type = value.type_infer(ctx);
+                ctx.variable.insert(name.to_string(), value_type);
+                format!("(local.set ${name} {})", value.compile(ctx))
             }
-            Stmt::Assign { name, value } => format!("(local.set ${name} {})", value.compile(ctx)),
         }
     }
 
@@ -141,7 +134,7 @@ impl Node for Stmt {
                 ret,
             } => {
                 for (arg, anno) in args {
-                    ctx.variable.insert(arg.to_string(), anno.clone());
+                    ctx.argument.insert(arg.to_string(), anno.clone());
                 }
                 ctx.function.insert(name.to_string(), ret.clone());
                 body.type_infer(ctx);
@@ -152,16 +145,15 @@ impl Node for Stmt {
                 then.type_infer(ctx);
                 r#else.type_infer(ctx)
             }
-
             Stmt::While { cond, body } => {
                 cond.type_infer(ctx);
                 body.type_infer(ctx)
             }
-            Stmt::Declare { name, annotation } => {
-                ctx.variable.insert(name.to_string(), annotation.clone());
+            Stmt::Let { name, value } => {
+                let value_type = value.type_infer(ctx);
+                ctx.variable.insert(name.to_string(), value_type);
                 Type::Void
             }
-            Stmt::Assign { name: _, value } => value.type_infer(ctx),
         }
     }
 }
