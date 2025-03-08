@@ -30,14 +30,14 @@ impl Node for Stmt {
         let source = source.trim();
         if let Some(source) = source.strip_prefix("fn ") {
             let (name, source) = source.split_once("(")?;
-            let (args, source) = source.split_once("):")?;
+            let (args, source) = source.split_once(") as ")?;
             let (ret, body) = source.split_once("=")?;
             Some(Stmt::Defun {
                 name: name.trim().to_string(),
                 args: {
                     let mut result = vec![];
                     for arg in args.split(",") {
-                        let (arg, annotation) = arg.split_once(":")?;
+                        let (arg, annotation) = arg.split_once(" as ")?;
                         result.push((arg.trim().to_string(), Type::parse(annotation)?));
                     }
                     result
@@ -67,7 +67,7 @@ impl Node for Stmt {
                 body: Expr::parse(&body_sec)?,
             })
         } else if let Some(source) = source.strip_prefix("declare ") {
-            let (name, annotation) = source.split_once(":")?;
+            let (name, annotation) = source.split_once(" as ")?;
             Some(Stmt::Declare {
                 name: name.trim().to_string(),
                 annotation: Type::parse(annotation)?,
@@ -137,8 +137,8 @@ impl Node for Stmt {
                 for (arg, anno) in args {
                     ctx.variable.insert(arg.to_string(), anno.clone());
                 }
-                body.type_infer(ctx);
                 ctx.function.insert(name.to_string(), ret.clone());
+                body.type_infer(ctx);
                 Type::Void
             }
             Stmt::If { cond, then, r#else } => {
