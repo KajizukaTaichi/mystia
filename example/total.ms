@@ -1,16 +1,14 @@
-fn total(
-    start as float,
-    end as float,
-    step as float
-) as float = {
-    declare result as float;
-    let result = 0.0;
+fn total(number as int) as int = {
+    declare count as int;
+    declare result as int;
+    let count = 1;
+    let result = 0;
 
-    while start < end loop {
-        let result = result + start;
-        let start = start + step
+    while count < number loop {
+        let result = result + count;
+        let count = count + 1
     };
     result
 };
 
-total(0.1, 1 as float, 0.1)
+total(10)
