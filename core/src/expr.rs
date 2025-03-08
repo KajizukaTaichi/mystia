@@ -21,6 +21,9 @@ impl Node for Expr {
                 // Integer literal
                 if let Ok(n) = token.parse::<i32>() {
                     Expr::Value(Value::Integer(n))
+                // Float number literal
+                } else if let Ok(n) = token.parse::<f64>() {
+                    Expr::Value(Value::Float(n))
                 // Code block
                 } else if token.starts_with("{") && token.ends_with("}") {
                     let token = token.get(1..token.len() - 1)?.trim();
@@ -54,6 +57,7 @@ impl Node for Expr {
             Expr::Oper(oper) => oper.compile(ctx),
             Expr::Ref(to) => format!("(local.get ${to})"),
             Expr::Value(Value::Integer(n)) => format!("(i32.const {n})"),
+            Expr::Value(Value::Float(n)) => format!("(f64.const {n})"),
             Expr::Call(name, args) => format!(
                 "(call ${name} {})",
                 join!(args.iter().map(|x| x.compile(ctx)).collect::<Vec<_>>())
