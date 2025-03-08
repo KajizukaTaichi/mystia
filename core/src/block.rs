@@ -15,4 +15,9 @@ impl Node for Block {
     fn compile(&self, ctx: &mut Compiler) -> String {
         join!(self.0.iter().map(|x| x.compile(ctx)).collect::<Vec<_>>())
     }
+
+    fn type_infer(&self, ctx: &mut Compiler) -> Type {
+        let block = self.0.clone();
+        block[block.len() - 1].type_infer(ctx)
+    }
 }
