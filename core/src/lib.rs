@@ -19,6 +19,7 @@ use {
     value::{Type, Value},
 };
 
+#[derive(Debug, Clone)]
 pub struct Compiler {
     declare: Vec<String>,
     variable: HashMap<String, Type>,
