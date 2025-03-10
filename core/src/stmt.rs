@@ -18,7 +18,7 @@ pub enum Stmt {
         body: Expr,
     },
     Let {
-        name: String,
+        name: Expr,
         value: Expr,
     },
     Expr(Expr),
@@ -66,10 +66,10 @@ impl Node for Stmt {
                 body: Expr::parse(&body_sec)?,
             })
         } else if let Some(source) = source.strip_prefix("let ") {
-            let (name, source) = source.split_once("=")?;
+            let (name, value) = source.split_once("=")?;
             Some(Stmt::Let {
-                name: name.trim().to_string(),
-                value: Expr::parse(source)?,
+                name: Expr::parse(name)?,
+                value: Expr::parse(value)?,
             })
         } else {
             Some(Stmt::Expr(Expr::parse(source)?))
@@ -116,24 +116,27 @@ impl Node for Stmt {
                     body.compile(ctx),
                 )
             }
-            Stmt::Let {
-                name,
-                value: Expr::Value(Value::Array(value)),
-            } => {
-                let value = Expr::Value(Value::Array(value.clone()));
-                ctx.variable.insert(name.to_string(), Type::Integer);
-                let result = format!(
-                    "{1} (local.set ${name} {0})",
-                    value.compile(ctx),
-                    join!(ctx.array),
-                );
-                ctx.array = Vec::new();
-                result
-            }
             Stmt::Let { name, value } => {
                 let value_type = value.type_infer(ctx);
-                ctx.variable.insert(name.to_string(), value_type);
-                format!("(local.set ${name} {})", value.compile(ctx))
+                match name {
+                    Expr::Ref(name) => {
+                        ctx.variable.insert(name.to_string(), value_type);
+                        format!(
+                            "{} (local.set ${name} {})",
+                            join!(ctx.array),
+                            value.compile(ctx)
+                        )
+                    }
+                    Expr::Access(array, index) => {
+                        format!(
+                            "(i32.store (i32.mul (i32.add {} {}) (i32.const 4)) (i32.const {}))",
+                            array.compile(ctx),
+                            index.compile(ctx),
+                            value.compile(ctx)
+                        )
+                    }
+                    _ => todo!(),
+                }
             }
         }
     }
@@ -163,11 +166,23 @@ impl Node for Stmt {
                 cond.type_infer(ctx);
                 body.type_infer(ctx)
             }
-            Stmt::Let { name, value } => {
+            Stmt::Let {
+                name: Expr::Ref(name),
+                value,
+            } => {
                 let value_type = value.type_infer(ctx);
                 ctx.variable.insert(name.to_string(), value_type);
                 Type::Void
             }
+            Stmt::Let {
+                name: Expr::Access(array, _),
+                value,
+            } => Stmt::Let {
+                name: *array.clone(),
+                value: value.clone(),
+            }
+            .type_infer(ctx),
+            _ => todo!(),
         }
     }
 }
