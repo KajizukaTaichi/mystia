@@ -58,26 +58,37 @@ impl Node for Expr {
             Expr::Ref(to) => format!("(local.get ${to})"),
             Expr::Value(Value::Integer(n)) => format!("(i32.const {n})"),
             Expr::Value(Value::Float(n)) => format!("(f64.const {n})"),
+            Expr::Value(Value::Array(x)) => format!(
+                "{1} (i32.const {0})",
+                ctx.index.clone(),
+                join!(
+                    x.iter()
+                        .map(|i| format!(
+                            "(i32.store (i32.mul {} (i32.const 4)) (i32.const {i}))",
+                            {
+                                let index = ctx.index;
+                                ctx.index += 1;
+                                index
+                            },
+                        ))
+                        .collect::<Vec<_>>()
+                ),
+            ),
             Expr::Call(name, args) => match name.as_str() {
-                "array.get" => {
-                    format!(
-                        "(i32.load (i32.mul {} (i32.const 4)))",
-                        args[0].compile(ctx)
-                    )
-                }
-                "array.set" => {
-                    format!(
-                        "(i32.store (i32.mul {} (i32.const 4)) {})",
-                        args[0].compile(ctx),
-                        args[1].compile(ctx),
-                    )
-                }
+                "array.get" => format!(
+                    "(i32.load (i32.mul {} (i32.const 4)))",
+                    args[0].compile(ctx)
+                ),
+                "array.set" => format!(
+                    "(i32.store (i32.mul {} (i32.const 4)) {})",
+                    args[0].compile(ctx),
+                    args[1].compile(ctx),
+                ),
                 _ => format!(
                     "(call ${name} {})",
                     join!(args.iter().map(|x| x.compile(ctx)).collect::<Vec<_>>())
                 ),
             },
-
             Expr::Block(block) => block.compile(ctx),
         }
     }
@@ -92,6 +103,7 @@ impl Node for Expr {
             }
             Expr::Value(Value::Integer(_)) => Type::Integer,
             Expr::Value(Value::Float(_)) => Type::Float,
+            Expr::Value(Value::Array(_)) => Type::Array,
             Expr::Call(name, args) => {
                 let _ = args.iter().map(|i| i.type_infer(ctx));
                 ctx.function[name].clone()
