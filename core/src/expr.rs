@@ -58,10 +58,26 @@ impl Node for Expr {
             Expr::Ref(to) => format!("(local.get ${to})"),
             Expr::Value(Value::Integer(n)) => format!("(i32.const {n})"),
             Expr::Value(Value::Float(n)) => format!("(f64.const {n})"),
-            Expr::Call(name, args) => format!(
-                "(call ${name} {})",
-                join!(args.iter().map(|x| x.compile(ctx)).collect::<Vec<_>>())
-            ),
+            Expr::Call(name, args) => match name.as_str() {
+                "array.get" => {
+                    format!(
+                        "(i32.load (i32.mul {} (i32.const 4)))",
+                        args[0].compile(ctx)
+                    )
+                }
+                "array.set" => {
+                    format!(
+                        "(i32.store (i32.mul {} (i32.const 4)) {})",
+                        args[0].compile(ctx),
+                        args[1].compile(ctx),
+                    )
+                }
+                _ => format!(
+                    "(call ${name} {})",
+                    join!(args.iter().map(|x| x.compile(ctx)).collect::<Vec<_>>())
+                ),
+            },
+
             Expr::Block(block) => block.compile(ctx),
         }
     }
