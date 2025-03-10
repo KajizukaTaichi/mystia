@@ -116,6 +116,18 @@ impl Node for Stmt {
                     body.compile(ctx),
                 )
             }
+            Stmt::Let {
+                name,
+                value: Expr::Value(Value::Array(value)),
+            } => {
+                let value = Expr::Value(Value::Array(value.clone()));
+                ctx.variable.insert(name.to_string(), Type::Integer);
+                format!(
+                    "{} (local.set ${name} {})",
+                    join!(ctx.array),
+                    value.compile(ctx)
+                )
+            }
             Stmt::Let { name, value } => {
                 let value_type = value.type_infer(ctx);
                 ctx.variable.insert(name.to_string(), value_type);
