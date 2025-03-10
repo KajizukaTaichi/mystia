@@ -1,2 +1,2 @@
 # Mystia
-Web frontend programming language outputs wasm
+The front-end programming language be compiled to WebAssembly 
