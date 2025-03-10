@@ -122,11 +122,13 @@ impl Node for Stmt {
             } => {
                 let value = Expr::Value(Value::Array(value.clone()));
                 ctx.variable.insert(name.to_string(), Type::Integer);
-                format!(
+                let result = format!(
                     "{1} (local.set ${name} {0})",
                     value.compile(ctx),
                     join!(ctx.array),
-                )
+                );
+                ctx.array = Vec::new();
+                result
             }
             Stmt::Let { name, value } => {
                 let value_type = value.type_infer(ctx);
