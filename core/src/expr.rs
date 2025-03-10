@@ -27,11 +27,11 @@ impl Node for Expr {
                     Expr::Value(Value::Float(n))
                 // Array
                 } else if token.starts_with("[") && token.ends_with("]") {
-                    let token = token.get(..token.len() - 1)?.trim();
+                    let token = token.get(1..token.len() - 1)?.trim();
                     Expr::Value(Value::Array(
                         tokenize(token, &[","], false)?
                             .iter()
-                            .map(|x| x.parse::<i32>().unwrap_or(0))
+                            .map(|x| x.trim().parse::<i32>().unwrap_or(0))
                             .collect(),
                     ))
                 // Code block
@@ -42,12 +42,12 @@ impl Node for Expr {
                 } else if token.starts_with("(") && token.ends_with(")") {
                     let token = token.get(1..token.len() - 1)?.trim();
                     Expr::parse(token)?
-                // Index access
-                } else if token.starts_with("[") && token.ends_with("]") {
+                // Index access `array[index]`
+                } else if token.contains("[") && token.ends_with("]") {
                     let token = token.get(..token.len() - 1)?.trim();
                     let (array, index) = token.split_once("[")?;
                     Expr::Access(Box::new(Expr::parse(array)?), Box::new(Expr::parse(index)?))
-                // Function call
+                // Function call `name(args, ...)`
                 } else if token.contains("(") && token.ends_with(")") {
                     let token = token.get(..token.len() - 1)?.trim();
                     let (name, args) = token.split_once("(")?;
@@ -73,22 +73,20 @@ impl Node for Expr {
             Expr::Ref(to) => format!("(local.get ${to})"),
             Expr::Value(Value::Integer(n)) => format!("(i32.const {n})"),
             Expr::Value(Value::Float(n)) => format!("(f64.const {n})"),
-            Expr::Value(Value::Array(x)) => format!(
-                "{1} (i32.const {0})",
-                ctx.index.clone(),
-                join!(
-                    x.iter()
-                        .map(|i| format!(
-                            "(i32.store (i32.mul {} (i32.const 4)) (i32.const {i}))",
-                            {
-                                let index = ctx.index;
-                                ctx.index += 1;
-                                index
-                            },
-                        ))
-                        .collect::<Vec<_>>()
-                ),
-            ),
+            Expr::Value(Value::Array(x)) => {
+                let result = format!("(i32.const {0})", ctx.index.clone());
+                for i in x {
+                    ctx.array.push(format!(
+                        "(i32.store (i32.mul {} (i32.const 4)) (i32.const {i}))",
+                        {
+                            let index = ctx.index;
+                            ctx.index += 1;
+                            index
+                        },
+                    ))
+                }
+                result
+            }
             Expr::Call(name, args) => format!(
                 "(call ${name} {})",
                 join!(args.iter().map(|x| x.compile(ctx)).collect::<Vec<_>>())
