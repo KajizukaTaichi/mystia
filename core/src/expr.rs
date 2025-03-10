@@ -6,6 +6,7 @@ pub enum Expr {
     Ref(String),
     Oper(Box<Oper>),
     Call(String, Vec<Expr>),
+    Access(Box<Expr>, Box<Expr>),
     Block(Block),
 }
 
@@ -24,6 +25,15 @@ impl Node for Expr {
                 // Float number literal
                 } else if let Ok(n) = token.parse::<f64>() {
                     Expr::Value(Value::Float(n))
+                // Array
+                } else if token.starts_with("[") && token.ends_with("]") {
+                    let token = token.get(..token.len() - 1)?.trim();
+                    Expr::Value(Value::Array(
+                        tokenize(token, &[","], false)?
+                            .iter()
+                            .map(|x| x.parse::<i32>().unwrap_or(0))
+                            .collect(),
+                    ))
                 // Code block
                 } else if token.starts_with("{") && token.ends_with("}") {
                     let token = token.get(1..token.len() - 1)?.trim();
@@ -32,6 +42,11 @@ impl Node for Expr {
                 } else if token.starts_with("(") && token.ends_with(")") {
                     let token = token.get(1..token.len() - 1)?.trim();
                     Expr::parse(token)?
+                // Index access
+                } else if token.starts_with("[") && token.ends_with("]") {
+                    let token = token.get(..token.len() - 1)?.trim();
+                    let (array, index) = token.split_once("[")?;
+                    Expr::Access(Box::new(Expr::parse(array)?), Box::new(Expr::parse(index)?))
                 // Function call
                 } else if token.contains("(") && token.ends_with(")") {
                     let token = token.get(..token.len() - 1)?.trim();
@@ -74,21 +89,17 @@ impl Node for Expr {
                         .collect::<Vec<_>>()
                 ),
             ),
-            Expr::Call(name, args) => match name.as_str() {
-                "array.get" => format!(
-                    "(i32.load (i32.mul {} (i32.const 4)))",
-                    args[0].compile(ctx)
-                ),
-                "array.set" => format!(
-                    "(i32.store (i32.mul {} (i32.const 4)) {})",
-                    args[0].compile(ctx),
-                    args[1].compile(ctx),
-                ),
-                _ => format!(
-                    "(call ${name} {})",
-                    join!(args.iter().map(|x| x.compile(ctx)).collect::<Vec<_>>())
-                ),
-            },
+            Expr::Call(name, args) => format!(
+                "(call ${name} {})",
+                join!(args.iter().map(|x| x.compile(ctx)).collect::<Vec<_>>())
+            ),
+            Expr::Access(array, index) => {
+                format!(
+                    "(i32.load (i32.mul (i32.add {} {}) (i32.const 4)))",
+                    array.compile(ctx),
+                    index.compile(ctx)
+                )
+            }
             Expr::Block(block) => block.compile(ctx),
         }
     }
@@ -109,6 +120,7 @@ impl Node for Expr {
                 ctx.function[name].clone()
             }
             Expr::Block(block) => block.type_infer(ctx),
+            Expr::Access(_, _) => Type::Integer,
         }
     }
 }
