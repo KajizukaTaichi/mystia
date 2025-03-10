@@ -123,9 +123,9 @@ impl Node for Stmt {
                 let value = Expr::Value(Value::Array(value.clone()));
                 ctx.variable.insert(name.to_string(), Type::Integer);
                 format!(
-                    "{} (local.set ${name} {})",
+                    "{1} (local.set ${name} {0})",
+                    value.compile(ctx),
                     join!(ctx.array),
-                    value.compile(ctx)
                 )
             }
             Stmt::Let { name, value } => {
