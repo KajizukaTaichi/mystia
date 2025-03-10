@@ -1,2 +1,2 @@
-array.set(0, 123);
-array.get(0)
+let hoge = [1, 2, 3];
+hoge[1]
