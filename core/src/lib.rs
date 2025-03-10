@@ -22,6 +22,7 @@ use {
 #[derive(Debug, Clone)]
 pub struct Compiler {
     index: usize,
+    array: Vec<String>,
     declare: Vec<String>,
     variable: HashMap<String, Type>,
     function: HashMap<String, Type>,
@@ -33,6 +34,7 @@ impl Compiler {
         Compiler {
             index: 0,
             declare: vec![],
+            array: vec![],
             variable: HashMap::new(),
             function: HashMap::from([
                 ("array.set".to_string(), Type::Void),
