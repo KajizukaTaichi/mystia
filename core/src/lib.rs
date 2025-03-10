@@ -32,7 +32,10 @@ impl Compiler {
         Compiler {
             declare: vec![],
             variable: HashMap::new(),
-            function: HashMap::new(),
+            function: HashMap::from([
+                ("array.set".to_string(), Type::Void),
+                ("array.get".to_string(), Type::Integer),
+            ]),
             argument: HashMap::new(),
         }
     }
@@ -41,7 +44,7 @@ impl Compiler {
         let ast = Block::parse(source)?;
         let ret = ast.type_infer(self);
         Some(format!(
-            r#"(module {2} (func (export "_start") (result {1}) {3} {0}))"#,
+            r#"(module (memory $mem 1) {2} (func (export "_start") (result {1}) {3} {0}))"#,
             ast.compile(self),
             ret.compile(self),
             join!(self.declare),
