@@ -21,6 +21,7 @@ use {
 
 #[derive(Debug, Clone)]
 pub struct Compiler {
+    index: usize,
     declare: Vec<String>,
     variable: HashMap<String, Type>,
     function: HashMap<String, Type>,
@@ -30,6 +31,7 @@ pub struct Compiler {
 impl Compiler {
     pub fn new() -> Self {
         Compiler {
+            index: 0,
             declare: vec![],
             variable: HashMap::new(),
             function: HashMap::from([
