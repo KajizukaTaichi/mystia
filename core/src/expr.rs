@@ -77,13 +77,13 @@ impl Node for Expr {
                 let result = format!("(i32.const {0})", ctx.index.clone());
                 for i in x {
                     ctx.array.push(format!(
-                        "(i32.store (i32.mul {} (i32.const 4)) (i32.const {i}))",
+                        "(i32.store (i32.mul (i32.const {}) (i32.const 4)) (i32.const {i}))",
                         {
                             let index = ctx.index;
                             ctx.index += 1;
                             index
                         },
-                    ))
+                    ));
                 }
                 result
             }
