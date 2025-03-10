@@ -1,8 +1,9 @@
 fn fact(n as int) as int = {
-    if n <= 0 then
+    if n <= 0 then {
         1
-    else
+    } else {
         n * fact(n-1)
+    }
 };
 
 fact(6)
