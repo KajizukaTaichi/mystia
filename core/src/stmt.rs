@@ -122,14 +122,14 @@ impl Node for Stmt {
                     Expr::Ref(name) => {
                         ctx.variable.insert(name.to_string(), value_type);
                         format!(
-                            "{} (local.set ${name} {})",
-                            join!(ctx.array),
-                            value.compile(ctx)
+                            "{1} (local.set ${name} {0})",
+                            value.compile(ctx),
+                            join!(ctx.array)
                         )
                     }
                     Expr::Access(array, index) => {
                         format!(
-                            "(i32.store (i32.mul (i32.add {} {}) (i32.const 4)) (i32.const {}))",
+                            "(i32.store (i32.mul (i32.add {} {}) (i32.const 4)) {})",
                             array.compile(ctx),
                             index.compile(ctx),
                             value.compile(ctx)
