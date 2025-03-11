@@ -17,7 +17,7 @@ pub enum Type {
 impl Node for Type {
     fn parse(source: &str) -> Option<Self> {
         match source.trim() {
-            "int" => Some(Self::Integer),
+            "int" | "ptr" => Some(Self::Integer),
             "float" => Some(Self::Float),
             "void" => Some(Self::Void),
             _ => None,
