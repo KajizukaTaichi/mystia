@@ -19,6 +19,7 @@ impl Node for Type {
         match source.trim() {
             "int" => Some(Self::Integer),
             "float" => Some(Self::Float),
+            "void" => Some(Self::Void),
             _ => None,
         }
     }
