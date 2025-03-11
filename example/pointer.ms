@@ -1,2 +1,3 @@
 let a = [100, 200, 300];
-&2
+let pointer = a + 2;
+&pointer
