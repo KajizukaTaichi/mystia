@@ -3,7 +3,8 @@ use crate::*;
 #[derive(Debug, Clone)]
 pub enum Expr {
     Value(Value),
-    Ref(String),
+    Refer(String),
+    Pointer(Box<Expr>),
     Oper(Box<Oper>),
     Call(String, Vec<Expr>),
     Access(Box<Expr>, Box<Expr>),
@@ -61,7 +62,7 @@ impl Node for Expr {
                     Expr::Call(name.to_string(), args)
                 // Variable reference
                 } else {
-                    Expr::Ref(token)
+                    Expr::Refer(token)
                 },
             )
         }
@@ -70,7 +71,7 @@ impl Node for Expr {
     fn compile(&self, ctx: &mut Compiler) -> String {
         match self {
             Expr::Oper(oper) => oper.compile(ctx),
-            Expr::Ref(to) => format!("(local.get ${to})"),
+            Expr::Refer(to) => format!("(local.get ${to})"),
             Expr::Value(Value::Integer(n)) => format!("(i32.const {n})"),
             Expr::Value(Value::Float(n)) => format!("(f64.const {n})"),
             Expr::Value(Value::Array(x)) => {
@@ -86,6 +87,9 @@ impl Node for Expr {
                     ));
                 }
                 result
+            }
+            Expr::Pointer(expr) => {
+                format!("(i32.load (i32.mul {} (i32.const 4)))", expr.compile(ctx),)
             }
             Expr::Call(name, args) => format!(
                 "(call ${name} {})",
@@ -105,14 +109,15 @@ impl Node for Expr {
     fn type_infer(&self, ctx: &mut Compiler) -> Type {
         match self {
             Expr::Oper(oper) => oper.type_infer(ctx),
-            Expr::Ref(to) => {
+            Expr::Refer(to) => {
                 let mut locals = ctx.variable.clone();
                 locals.extend(ctx.argument.clone());
                 locals[to].clone()
             }
             Expr::Value(Value::Integer(_)) => Type::Integer,
             Expr::Value(Value::Float(_)) => Type::Float,
-            Expr::Value(Value::Array(_)) => Type::Array,
+            Expr::Value(Value::Array(_)) => Type::Integer,
+            Expr::Pointer(_) => Type::Integer,
             Expr::Call(name, args) => {
                 let _ = args.iter().map(|i| i.type_infer(ctx));
                 ctx.function[name].clone()
