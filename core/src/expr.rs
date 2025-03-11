@@ -26,6 +26,10 @@ impl Node for Expr {
                 // Float number literal
                 } else if let Ok(n) = token.parse::<f64>() {
                     Expr::Value(Value::Float(n))
+                // Pointer access
+                } else if token.starts_with("&") {
+                    let token = token.get(1..)?.trim();
+                    Expr::Pointer(Box::new(Expr::parse(token)?))
                 // Array
                 } else if token.starts_with("[") && token.ends_with("]") {
                     let token = token.get(1..token.len() - 1)?.trim();
