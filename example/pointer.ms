@@ -5,7 +5,7 @@ fn swap(a as int, b as int) as void = {
 };
 
 let nums = [3, 7];
-let a = 0;
-let b = 1;
+let a = nums;
+let b = nums +1;
 swap(a, b);
 &a - &b
