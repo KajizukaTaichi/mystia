@@ -85,6 +85,7 @@ impl Node for Stmt {
                 body,
                 ret,
             } => {
+                ctx.variable.clear();
                 let code = format!(
                     "(func ${name} {0} {1} {3} {2})",
                     join!(
