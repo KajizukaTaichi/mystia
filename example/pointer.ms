@@ -1,4 +1,4 @@
-fn swap(a as int, b as int) as void = {
+fn swap(a as ptr, b as ptr) as void = {
     let temp = @a;
     let @a = @b;
     let @b = temp;
