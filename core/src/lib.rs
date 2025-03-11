@@ -21,7 +21,7 @@ use {
 
 #[derive(Debug, Clone)]
 pub struct Compiler {
-    index: usize,
+    index: i32,
     array: Vec<String>,
     declare: Vec<String>,
     variable: HashMap<String, Type>,
