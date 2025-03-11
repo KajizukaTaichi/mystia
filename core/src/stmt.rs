@@ -86,13 +86,17 @@ impl Node for Stmt {
                 ret,
             } => {
                 let code = format!(
-                    "(func ${name} {0} (result {1}) {3} {2})",
+                    "(func ${name} {0} {1} {3} {2})",
                     join!(
                         args.iter()
                             .map(|x| format!("(param ${} {})", x.0, x.1.compile(ctx)))
                             .collect::<Vec<_>>()
                     ),
-                    ret.compile(ctx),
+                    if let Type::Void = ret {
+                        String::new()
+                    } else {
+                        format!("(result {})", ret.compile(ctx))
+                    },
                     body.compile(ctx),
                     expand_local(ctx)
                 );
@@ -178,7 +182,7 @@ impl Node for Stmt {
             Stmt::Let {
                 name: Expr::Refer(name),
                 value,
-            } => {
+            } if !ctx.argument.contains_key(name) => {
                 let value_type = value.type_infer(ctx);
                 ctx.variable.insert(name.to_string(), value_type);
                 Type::Void
