@@ -1,4 +1,4 @@
-fn swap(a as int, b as int) as int = {
+fn swap(a as int, b as int) as void = {
     let temp = &a;
     let &a = &b;
     let &b = temp;
