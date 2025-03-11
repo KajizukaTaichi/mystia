@@ -11,7 +11,6 @@ pub enum Value {
 pub enum Type {
     Integer,
     Float,
-    Array,
     Void,
 }
 
@@ -28,7 +27,6 @@ impl Node for Type {
         match self {
             Self::Integer => "i32",
             Self::Float => "f64",
-            Self::Array => "i32",
             Self::Void => "void",
         }
         .to_string()
