@@ -119,12 +119,19 @@ impl Node for Stmt {
             Stmt::Let { name, value } => {
                 let value_type = value.type_infer(ctx);
                 match name {
-                    Expr::Ref(name) => {
+                    Expr::Refer(name) => {
                         ctx.variable.insert(name.to_string(), value_type);
                         format!(
                             "{1} (local.set ${name} {0})",
                             value.compile(ctx),
                             join!(ctx.array)
+                        )
+                    }
+                    Expr::Pointer(addr) => {
+                        format!(
+                            "(i32.store (i32.mul {} (i32.const 4)) {})",
+                            addr.compile(ctx),
+                            value.compile(ctx)
                         )
                     }
                     Expr::Access(array, index) => {
@@ -167,7 +174,7 @@ impl Node for Stmt {
                 body.type_infer(ctx)
             }
             Stmt::Let {
-                name: Expr::Ref(name),
+                name: Expr::Refer(name),
                 value,
             } => {
                 let value_type = value.type_infer(ctx);
