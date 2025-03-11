@@ -96,7 +96,7 @@ impl Node for Stmt {
                     body.compile(ctx),
                     expand_local(ctx)
                 );
-                ctx.variable = HashMap::new();
+                ctx.variable.clear();
                 ctx.declare.push(code);
                 String::new()
             }
@@ -121,11 +121,13 @@ impl Node for Stmt {
                 match name {
                     Expr::Refer(name) => {
                         ctx.variable.insert(name.to_string(), value_type);
-                        format!(
+                        let result = format!(
                             "{1} (local.set ${name} {0})",
                             value.compile(ctx),
                             join!(ctx.array)
-                        )
+                        );
+                        ctx.array.clear();
+                        result
                     }
                     Expr::Pointer(addr) => {
                         format!(
@@ -181,15 +183,7 @@ impl Node for Stmt {
                 ctx.variable.insert(name.to_string(), value_type);
                 Type::Void
             }
-            Stmt::Let {
-                name: Expr::Access(array, _),
-                value,
-            } => Stmt::Let {
-                name: *array.clone(),
-                value: value.clone(),
-            }
-            .type_infer(ctx),
-            _ => todo!(),
+            Stmt::Let { name: _, value: _ } => Type::Void,
         }
     }
 }
