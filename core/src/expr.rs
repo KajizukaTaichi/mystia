@@ -81,14 +81,13 @@ impl Node for Expr {
             Expr::Value(Value::Array(x)) => {
                 let result = format!("(i32.const {0})", ctx.index.clone());
                 for i in x {
-                    ctx.array.push(format!(
-                        "(i32.store (i32.mul (i32.const {}) (i32.const 4)) (i32.const {i}))",
-                        {
-                            let index = ctx.index;
-                            ctx.index += 1;
-                            index
-                        },
-                    ));
+                    let code = Stmt::Let {
+                        name: Expr::Pointer(Box::new(Expr::Value(Value::Integer(ctx.index)))),
+                        value: Expr::Value(Value::Integer(*i)),
+                    }
+                    .compile(ctx);
+                    ctx.array.push(code);
+                    ctx.index += 1;
                 }
                 result
             }
@@ -99,13 +98,11 @@ impl Node for Expr {
                 "(call ${name} {})",
                 join!(args.iter().map(|x| x.compile(ctx)).collect::<Vec<_>>())
             ),
-            Expr::Access(array, index) => {
-                format!(
-                    "(i32.load (i32.mul (i32.add {} {}) (i32.const 4)))",
-                    array.compile(ctx),
-                    index.compile(ctx)
-                )
-            }
+            Expr::Access(array, index) => Expr::Pointer(Box::new(Expr::Oper(Box::new(Oper::Add(
+                *array.clone(),
+                *index.clone(),
+            )))))
+            .compile(ctx),
             Expr::Block(block) => block.compile(ctx),
         }
     }
