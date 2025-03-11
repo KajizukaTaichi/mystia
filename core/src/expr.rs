@@ -27,7 +27,7 @@ impl Node for Expr {
                 } else if let Ok(n) = token.parse::<f64>() {
                     Expr::Value(Value::Float(n))
                 // Pointer access
-                } else if token.starts_with("&") {
+                } else if token.starts_with("@") {
                     let token = token.get(1..)?.trim();
                     Expr::Pointer(Box::new(Expr::parse(token)?))
                 // Array
