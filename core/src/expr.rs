@@ -120,6 +120,9 @@ impl Node for Expr {
             Expr::Value(Value::Array(_)) => Type::Integer,
             Expr::Pointer(_) => Type::Integer,
             Expr::Call(name, args) => {
+                if name == "fd_write" {
+                    ctx.stdout = true
+                }
                 let _ = args.iter().map(|i| i.type_infer(ctx));
                 ctx.function[name].clone()
             }
