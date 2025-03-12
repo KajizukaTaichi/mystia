@@ -28,7 +28,7 @@ impl Node for Type {
         match self {
             Self::Integer => "i32",
             Self::Float => "f64",
-            Self::Void => "void",
+            Self::Void => todo!(),
         }
         .to_string()
     }
