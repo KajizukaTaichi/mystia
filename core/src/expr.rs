@@ -33,7 +33,7 @@ impl Node for Expr {
                 // String literal
                 } else if token.starts_with("\"") && token.ends_with("\"") {
                     let token = token.get(1..token.len() - 1)?.trim();
-                    Expr::Value(Value::Array(token.chars().map(|x| x as i32).collect()))
+                    Expr::Value(Value::String(token.to_string()))
                 // Array
                 } else if token.starts_with("[") && token.ends_with("]") {
                     let token = token.get(1..token.len() - 1)?.trim();
@@ -83,7 +83,7 @@ impl Node for Expr {
             Expr::Value(Value::Integer(n)) => format!("(i32.const {n})"),
             Expr::Value(Value::Float(n)) => format!("(f64.const {n})"),
             Expr::Value(Value::Array(x)) => {
-                let result = format!("(i32.const {0})", ctx.index.clone());
+                let result = Expr::Value(Value::Integer(ctx.index.clone()));
                 for i in x {
                     let code = Stmt::Let {
                         name: Expr::Pointer(Box::new(Expr::Value(Value::Integer(ctx.index)))),
@@ -93,10 +93,25 @@ impl Node for Expr {
                     ctx.array.push(code);
                     ctx.index += 1;
                 }
+                result.compile(ctx)
+            }
+            Expr::Value(Value::String(x)) => {
+                let result = Expr::Value(Value::Integer(ctx.index.clone())).compile(ctx),;
+                ctx.data.push(format!(
+                    r#"(data {} "{x}")"#,
+                    result
+                ));
                 result
             }
             Expr::Pointer(expr) => {
-                format!("(i32.load (i32.mul {} (i32.const 4)))", expr.compile(ctx),)
+                format!(
+                    "(i32.load {})",
+                    Expr::Oper(Box::new(Oper::Mul(
+                        *expr.clone(),
+                        Expr::Value(Value::Integer(4))
+                    )))
+                    .compile(ctx)
+                )
             }
             Expr::Call(name, args) => format!(
                 "(call ${name} {})",
@@ -121,7 +136,7 @@ impl Node for Expr {
             }
             Expr::Value(Value::Integer(_)) => Type::Integer,
             Expr::Value(Value::Float(_)) => Type::Float,
-            Expr::Value(Value::Array(_)) => Type::Integer,
+            Expr::Value(Value::Array(_))| Expr::Value(Value::String(_)) => Type::parse("ptr").unwrap(),
             Expr::Pointer(_) => Type::Integer,
             Expr::Call(name, args) => {
                 if name == "fd_write" {
