@@ -96,11 +96,8 @@ impl Node for Expr {
                 result.compile(ctx)
             }
             Expr::Value(Value::String(x)) => {
-                let result = Expr::Value(Value::Integer(ctx.index.clone())).compile(ctx),;
-                ctx.data.push(format!(
-                    r#"(data {} "{x}")"#,
-                    result
-                ));
+                let result = Expr::Value(Value::Integer(ctx.index.clone())).compile(ctx);
+                ctx.data.push(format!(r#"(data {} "{x}")"#, result));
                 result
             }
             Expr::Pointer(expr) => {
@@ -136,7 +133,9 @@ impl Node for Expr {
             }
             Expr::Value(Value::Integer(_)) => Type::Integer,
             Expr::Value(Value::Float(_)) => Type::Float,
-            Expr::Value(Value::Array(_))| Expr::Value(Value::String(_)) => Type::parse("ptr").unwrap(),
+            Expr::Value(Value::Array(_)) | Expr::Value(Value::String(_)) => {
+                Type::parse("ptr").unwrap()
+            }
             Expr::Pointer(_) => Type::Integer,
             Expr::Call(name, args) => {
                 if name == "fd_write" {
