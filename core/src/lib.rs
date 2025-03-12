@@ -50,9 +50,9 @@ impl Compiler {
         let ast = Block::parse(source)?;
         let ret = ast.type_infer(self);
         Some(format!(
-            r#"(module {4} (memory $mem 1) {2} (func (export "_start") (result {1}) {3} {0}))"#,
+            r#"(module {4} (memory (export "mem") 1) {2} (func (export "_start") {1} {3} {0}))"#,
             ast.compile(self),
-            ret.compile(self),
+            config_return!(ret, self),
             join!(self.declare),
             expand_local(self),
             if self.stdout {
