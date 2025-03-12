@@ -133,10 +133,8 @@ impl Node for Expr {
             }
             Expr::Value(Value::Integer(_)) => Type::Integer,
             Expr::Value(Value::Float(_)) => Type::Float,
-            Expr::Value(Value::Array(_)) | Expr::Value(Value::String(_)) => {
-                Type::parse("ptr").unwrap()
-            }
-            Expr::Pointer(_) => Type::Integer,
+            Expr::Value(Value::Array(_)) | Expr::Value(Value::String(_)) => Type::Pointer,
+            Expr::Pointer(_) => Type::Pointer,
             Expr::Call(name, args) => {
                 if name == "fd_write" {
                     ctx.stdout = true;
