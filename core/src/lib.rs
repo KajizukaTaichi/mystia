@@ -22,6 +22,7 @@ use {
 #[derive(Debug, Clone)]
 pub struct Compiler {
     index: i32,
+    stdout: bool,
     array: Vec<String>,
     declare: Vec<String>,
     variable: HashMap<String, Type>,
@@ -33,6 +34,7 @@ impl Compiler {
     pub fn new() -> Self {
         Compiler {
             index: 0,
+            stdout: false,
             declare: vec![],
             array: vec![],
             variable: HashMap::new(),
@@ -48,11 +50,16 @@ impl Compiler {
         let ast = Block::parse(source)?;
         let ret = ast.type_infer(self);
         Some(format!(
-            r#"(module (memory $mem 1) {2} (func (export "_start") (result {1}) {3} {0}))"#,
+            r#"(module {4} (memory $mem 1) {2} (func (export "_start") (result {1}) {3} {0}))"#,
             ast.compile(self),
             ret.compile(self),
             join!(self.declare),
-            expand_local(self)
+            expand_local(self),
+            if self.stdout {
+                r#"(import "wasi_snapshot_preview1" "fd_write" (func $fd_write (param i32 i32 i32 i32) (result i32)))"#
+            } else {
+                ""
+            }
         ))
     }
 }
