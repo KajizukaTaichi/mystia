@@ -98,6 +98,7 @@ impl Node for Expr {
             Expr::Value(Value::String(x)) => {
                 let result = Expr::Value(Value::Integer(ctx.index.clone())).compile(ctx);
                 ctx.data.push(format!(r#"(data {} "{x}")"#, result));
+                ctx.index += x.len() as i32;
                 result
             }
             Expr::Pointer(expr) => {
