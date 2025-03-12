@@ -12,14 +12,16 @@ pub enum Value {
 pub enum Type {
     Integer,
     Float,
+    Pointer,
     Void,
 }
 
 impl Node for Type {
     fn parse(source: &str) -> Option<Self> {
         match source.trim() {
-            "int" | "ptr" => Some(Self::Integer),
+            "int" => Some(Self::Integer),
             "float" => Some(Self::Float),
+            "ptr" => Some(Self::Pointer),
             "void" => Some(Self::Void),
             _ => None,
         }
@@ -27,7 +29,7 @@ impl Node for Type {
 
     fn compile(&self, _: &mut Compiler) -> String {
         match self {
-            Self::Integer => "i32",
+            Self::Integer | Self::Pointer => "i32",
             Self::Float => "f64",
             Self::Void => todo!(),
         }
