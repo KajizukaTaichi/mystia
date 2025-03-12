@@ -93,3 +93,22 @@ pub fn tokenize(input: &str, delimiter: &[&str], is_expr: bool) -> Option<Vec<St
     }
     Some(tokens)
 }
+
+pub fn str_escape(str: &str) -> String {
+    let mut result = String::new();
+    let mut is_escape = false;
+    for c in str.chars() {
+        if is_escape {
+            result.push(c);
+            is_escape = false;
+        } else {
+            match c {
+                '\\' => {
+                    is_escape = true;
+                }
+                _ => result.push(c),
+            }
+        }
+    }
+    result
+}
