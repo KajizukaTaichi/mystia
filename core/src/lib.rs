@@ -23,6 +23,7 @@ use {
 pub struct Compiler {
     index: i32,
     stdout: bool,
+    data: Vec<String>,
     array: Vec<String>,
     declare: Vec<String>,
     variable: HashMap<String, Type>,
@@ -35,6 +36,7 @@ impl Compiler {
         Compiler {
             index: 0,
             stdout: false,
+            data: vec![],
             declare: vec![],
             array: vec![],
             variable: HashMap::new(),
@@ -50,9 +52,10 @@ impl Compiler {
         let ast = Block::parse(source)?;
         let ret = ast.type_infer(self);
         Some(format!(
-            r#"(module {4} (memory (export "mem") 1) {2} (func (export "_start") {1} {3} {0}))"#,
+            r#"(module {5} (memory (export "mem") 1) {2} {3} (func (export "_start") {1} {4} {0}))"#,
             ast.compile(self),
             config_return!(ret, self),
+            join!(self.data),
             join!(self.declare),
             expand_local(self),
             if self.stdout {
