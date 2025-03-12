@@ -7,7 +7,11 @@ impl Node for Block {
     fn parse(source: &str) -> Option<Block> {
         let mut result = vec![];
         for line in tokenize(source, &[";"], false)? {
-            result.push(Stmt::parse(&line)?);
+            result.push(if line.trim().is_empty() {
+                Stmt::Drop
+            } else {
+                Stmt::parse(&line)?
+            })
         }
         Some(Block(result))
     }
