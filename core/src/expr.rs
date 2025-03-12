@@ -1,4 +1,4 @@
-use crate::*;
+use crate::{lexer::str_escape, *};
 
 #[derive(Debug, Clone)]
 pub enum Expr {
@@ -33,7 +33,7 @@ impl Node for Expr {
                 // String literal
                 } else if token.starts_with("\"") && token.ends_with("\"") {
                     let token = token.get(1..token.len() - 1)?.trim();
-                    Expr::Value(Value::String(token.to_string()))
+                    Expr::Value(Value::String(str_escape(token)))
                 // Array
                 } else if token.starts_with("[") && token.ends_with("]") {
                     let token = token.get(1..token.len() - 1)?.trim();
