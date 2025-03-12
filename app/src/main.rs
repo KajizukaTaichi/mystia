@@ -5,7 +5,6 @@ use std::{
     io::Write,
     path::Path,
 };
-use wat::parse_bytes;
 
 #[derive(Parser)]
 #[command(
@@ -33,12 +32,11 @@ fn main() {
         eprintln!("Failed to create output WAT file");
         return;
     };
-    let code = wat_code.as_bytes();
-    let Ok(_) = output_file.write_all(code) else {
+    let Ok(_) = output_file.write_all(wat_code.as_bytes()) else {
         eprintln!("Failed to write output in the WAT file");
         return;
     };
-    let Ok(binary) = parse_bytes(code) else {
+    let Ok(binary) = wat::parse_str(wat_code) else {
         eprintln!("Failed to compile WAT file");
         return;
     };
