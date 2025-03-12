@@ -30,7 +30,7 @@ impl Node for Expr {
                 } else if token.starts_with("@") {
                     let token = token.get(1..)?.trim();
                     Expr::Pointer(Box::new(Expr::parse(token)?))
-                // Array
+                // String literal
                 } else if token.starts_with("\"") && token.ends_with("\"") {
                     let token = token.get(1..token.len() - 1)?.trim();
                     Expr::Value(Value::Array(token.chars().map(|x| x as i32).collect()))
