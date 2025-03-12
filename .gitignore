@@ -1,2 +1,3 @@
 /target
 *.wat
+*.wasm
