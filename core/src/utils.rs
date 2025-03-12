@@ -24,6 +24,17 @@ pub fn expand_local(ctx: &mut Compiler) -> String {
 }
 
 #[macro_export]
+macro_rules! config_return {
+    ($ret: expr, $ctx: expr) => {
+        if let Type::Void = $ret {
+            String::new()
+        } else {
+            format!("(result {})", $ret.compile($ctx))
+        }
+    };
+}
+
+#[macro_export]
 macro_rules! join {
     ($x:expr) => {
         $x.join(&SPACE[0].to_string())
