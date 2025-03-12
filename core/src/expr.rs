@@ -31,6 +31,10 @@ impl Node for Expr {
                     let token = token.get(1..)?.trim();
                     Expr::Pointer(Box::new(Expr::parse(token)?))
                 // Array
+                } else if token.starts_with("\"") && token.ends_with("\"") {
+                    let token = token.get(1..token.len() - 1)?.trim();
+                    Expr::Value(Value::Array(token.chars().map(|x| x as i32).collect()))
+                // Array
                 } else if token.starts_with("[") && token.ends_with("]") {
                     let token = token.get(1..token.len() - 1)?.trim();
                     Expr::Value(Value::Array(
@@ -121,10 +125,12 @@ impl Node for Expr {
             Expr::Pointer(_) => Type::Integer,
             Expr::Call(name, args) => {
                 if name == "fd_write" {
-                    ctx.stdout = true
+                    ctx.stdout = true;
+                    Type::Integer
+                } else {
+                    let _ = args.iter().map(|i| i.type_infer(ctx));
+                    ctx.function[name].clone()
                 }
-                let _ = args.iter().map(|i| i.type_infer(ctx));
-                ctx.function[name].clone()
             }
             Expr::Block(block) => block.type_infer(ctx),
             Expr::Access(_, _) => Type::Integer,
