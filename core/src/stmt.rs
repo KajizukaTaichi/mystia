@@ -22,6 +22,7 @@ pub enum Stmt {
         value: Expr,
     },
     Expr(Expr),
+    Drop,
 }
 
 impl Node for Stmt {
@@ -148,6 +149,7 @@ impl Node for Stmt {
                     _ => todo!(),
                 }
             }
+            Stmt::Drop => "drop".to_string(),
         }
     }
 
@@ -185,6 +187,7 @@ impl Node for Stmt {
                 Type::Void
             }
             Stmt::Let { name: _, value: _ } => Type::Void,
+            Stmt::Drop => Type::Void,
         }
     }
 }
