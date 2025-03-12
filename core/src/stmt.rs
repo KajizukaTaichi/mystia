@@ -93,11 +93,7 @@ impl Node for Stmt {
                             .map(|x| format!("(param ${} {})", x.0, x.1.compile(ctx)))
                             .collect::<Vec<_>>()
                     ),
-                    if let Type::Void = ret {
-                        String::new()
-                    } else {
-                        format!("(result {})", ret.compile(ctx))
-                    },
+                    config_return!(ret, ctx),
                     body.compile(ctx),
                     expand_local(ctx)
                 );
