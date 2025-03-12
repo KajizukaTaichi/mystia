@@ -5,6 +5,7 @@ pub enum Value {
     Integer(i32),
     Float(f64),
     Array(Vec<i32>),
+    String(String),
 }
 
 #[derive(Clone, Debug)]
