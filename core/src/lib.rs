@@ -15,14 +15,13 @@ use {
     node::Node,
     oper::Oper,
     stmt::Stmt,
-    utils::{IMPORT_WRITE, OPERATOR, SPACE, expand_local, include_letter},
+    utils::{OPERATOR, SPACE, expand_local, include_letter},
     value::{Type, Value},
 };
 
 #[derive(Debug, Clone)]
 pub struct Compiler {
     index: i32,
-    stdout: bool,
     data: Vec<String>,
     array: Vec<String>,
     declare: Vec<String>,
@@ -35,7 +34,6 @@ impl Compiler {
     pub fn new() -> Self {
         Compiler {
             index: 0,
-            stdout: false,
             data: vec![],
             declare: vec![],
             array: vec![],
@@ -52,13 +50,12 @@ impl Compiler {
         let ast = Block::parse(source)?;
         let ret = ast.type_infer(self);
         Some(format!(
-            r#"(module {5} (memory (export "mem") 1) {2} {3} (func (export "_start") {1} {4} {0}))"#,
+            r#"(module (memory (export "mem") 1) {2} {3} (func (export "_start") {1} {4} {0}))"#,
             ast.compile(self),
             config_return!(ret, self),
             join!(self.data),
             join!(self.declare),
             expand_local(self),
-            if self.stdout { IMPORT_WRITE } else { "" }
         ))
     }
 }
