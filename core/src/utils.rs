@@ -4,6 +4,7 @@ pub const SPACE: [&str; 5] = [" ", "　", "\n", "\t", "\r"];
 pub const OPERATOR: [&str; 12] = [
     "+", "-", "*", "/", "%", "^", "==", "!=", "<=", ">=", "<", ">",
 ];
+pub const IMPORT_WRITE: &str = r#"(import "wasi_snapshot_preview1" "fd_write" (func $fd_write (param i32 i32 i32 i32) (result i32)))"#;
 
 pub fn include_letter(query: &str, chars: &Vec<String>, idx: usize) -> bool {
     chars
