@@ -28,7 +28,8 @@ fn main() {
         eprintln!("Failed to compile Mystia code");
         return;
     };
-    let Ok(mut output_file) = File::create(Path::new(&cli.path).with_extension("wat")) else {
+    let filename = Path::new(&cli.path);
+    let Ok(mut output_file) = File::create(filename.with_extension("wat")) else {
         eprintln!("Failed to create output WAT file");
         return;
     };
@@ -40,7 +41,7 @@ fn main() {
         eprintln!("Failed to compile WAT file");
         return;
     };
-    let Ok(mut output_file) = File::create(Path::new(&cli.path).with_extension("wasm")) else {
+    let Ok(mut output_file) = File::create(filename.with_extension("wasm")) else {
         eprintln!("Failed to create output WASM file");
         return;
     };
