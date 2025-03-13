@@ -138,13 +138,8 @@ impl Node for Expr {
             Expr::Value(Value::String(_)) => Type::Pointer,
             Expr::Pointer(_) => Type::Pointer,
             Expr::Call(name, args) => {
-                if name == "fd_write" {
-                    ctx.stdout = true;
-                    Type::Integer
-                } else {
-                    let _ = args.iter().map(|i| i.type_infer(ctx));
-                    ctx.function[name].clone()
-                }
+                let _ = args.iter().map(|i| i.type_infer(ctx));
+                ctx.function[name].clone()
             }
             Expr::Block(block) => block.type_infer(ctx),
             Expr::Access(_, _) => Type::Integer,
