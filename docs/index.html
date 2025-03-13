@@ -2,7 +2,7 @@
 <html>
     <head>
         <title>
-            Mystia Playground |
+            Mystia |
             完全にWebブラウザ上で動作するコンパイラ型プログラミング言語を体験してみましょう。
         </title>
         <meta charset="utf-8" />
@@ -10,13 +10,20 @@
             rel="stylesheet"
             href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css"
         />
+        <style>
+            #code {
+                font-family: monospace;
+                height: 10rlh;
+                resize: none;
+            }
+        </style>
     </head>
     <body class="content">
         <section class="hero">
             <div class="hero-body has-text-centered">
-                <h1 class="title">Mystia Playground</h1>
+                <h1 class="title">Mystia</h1>
                 <p class="block">
-                    完全にWeb上で動作するコンパイラ型プログラミング言語を体験してみましょう。
+                    完全にWebブラウザ上で動作するコンパイラ型プログラミング言語を体験してみましょう。
                 </p>
             </div>
         </section>
@@ -37,8 +44,8 @@
                 </div>
             </div>
             <div class="field">
-                <label class="label" for="result">出力</label>
-                <div class="control"><p id="result" class="alert"></p></div>
+                <label class="label" for="result">結果：</label>
+                <p id="result" class="alert"></p>
             </div>
         </section>
         <script type="module">
@@ -65,7 +72,10 @@
                     if (program === undefined) {
                         await compile();
                     }
-                    resultArea.innerHTML = program();
+                    let result = program();
+                    if (result !== undefined) {
+                        resultArea.innerHTML = result;
+                    }
                 } catch (e) {
                     console.error(e);
                 }
