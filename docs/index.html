@@ -1,12 +1,47 @@
 <!doctype html>
 <html>
-    <head></head>
-    <body>
+    <head>
+        <title>Mystia Playground | 完全にWeb上で動作するコンパイラ型プログラミング言語を体験してみましょう。</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css" />
+    </head>
+    <body class="content">
+        <section class="hero">
+            <div class="hero-body has-text-centered">
+                <h1 class="title">Mystia Playground</h1>
+                <p class="block">
+                    完全にWeb上で動作するコンパイラ型プログラミング言語を体験してみましょう。
+                </p>
+            </div>
+        </section>
+        <hr />
+        <section class="section">
+            <h2>Playground</h2>
+            <div class="field">
+                <label class="label" for="ta_text">ソースコード</label>
+                <div class="control">
+                    <textarea id="ta_text" name="text" class="textarea"
+                        placeholder="ここにコードを入力..."></textarea>
+                </div>
+            </div>
+            <div class="field is-grouped">
+                <div class="control">
+                    <button id="b_complie" type="button" class="button is-primary">コンパイル</button>
+                </div>
+                <div class="control">
+                    <button id="b_run" type="button" class="button">コンパイル&実行</button>
+                </div>
+            </div>
+            <div class="field">
+                <label class="label" for="ta_text">出力</label>
+                <div class="control">
+                    <textarea id="ta_text" name="text" class="textarea" readonly></textarea>
+                </div>
+            </div>
+        </section>
         <script type="module">
             import { mystia } from "./main.js";
-            let code =
-                "fn fact(n as int) as int = { if n <= 0 then 1 else n * fact(n-1) }; fact(6)";
-            mystia(code).then((x) => console.log(x));
+            /** @type {WebAssembly.ExportValue} */
+            let program = undefined;
         </script>
     </body>
 </html>
