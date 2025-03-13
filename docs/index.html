@@ -3,14 +3,10 @@
     <head></head>
     <body>
         <script type="module">
-            import init, { mystia } from "./pkg/mystia_wasm.js";
-            init().then(() => {
-                WebAssembly.instantiate(mystia("1+2").buffer).then(
-                    ({ instance }) => {
-                        console.log("3 + 4 =", instance.exports._start());
-                    },
-                );
-            });
+            import { mystia } from "./main.js";
+            let code =
+                "fn fact(n as int) as int = { if n <= 0 then 1 else n * fact(n-1) }; fact(6)";
+            mystia(code).then((x) => console.log(x));
         </script>
     </body>
 </html>
