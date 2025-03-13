@@ -1,0 +1,12 @@
+[package]
+name = "mystia_wasm"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+wat = "1.227.1"
+wasm-bindgen = "0.2"
+mystia-core = { path = "../core" }
+
+[lib]
+crate-type = ["cdylib"]
