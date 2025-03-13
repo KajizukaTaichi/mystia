@@ -58,6 +58,7 @@
                 }
             }
 
+            codeEditor.addEventListener("input", () => (program = undefined));
             runBtn.addEventListener("click", async (e) => {
                 if (e.button) return;
                 try {
