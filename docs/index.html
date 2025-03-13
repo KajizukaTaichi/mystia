@@ -5,10 +5,11 @@
         <script type="module">
             import init, { mystia } from "./pkg/mystia_wasm.js";
             init().then(() => {
-                console.log(mystia("1+2"));
-                const bytes = mystia("1+2").arrayBuffer();
-                const { instance } = WebAssembly.instantiate(bytes);
-                console.log("3 + 4 =", instance.exports._start());
+                WebAssembly.instantiate(mystia("1+2").buffer).then(
+                    ({ instance }) => {
+                        console.log("3 + 4 =", instance.exports._start());
+                    },
+                );
             });
         </script>
     </body>
