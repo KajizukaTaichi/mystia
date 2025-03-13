@@ -15,7 +15,7 @@ use {
     node::Node,
     oper::Oper,
     stmt::Stmt,
-    utils::{OPERATOR, SPACE, expand_local, include_letter},
+    utils::{IMPORT_WRITE, OPERATOR, SPACE, expand_local, include_letter},
     value::{Type, Value},
 };
 
@@ -58,11 +58,7 @@ impl Compiler {
             join!(self.data),
             join!(self.declare),
             expand_local(self),
-            if self.stdout {
-                r#"(import "wasi_snapshot_preview1" "fd_write" (func $fd_write (param i32 i32 i32 i32) (result i32)))"#
-            } else {
-                ""
-            }
+            if self.stdout { IMPORT_WRITE } else { "" }
         ))
     }
 }
