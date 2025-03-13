@@ -1,12 +1,108 @@
 <!doctype html>
 <html>
-    <head></head>
-    <body>
+    <head>
+        <title>Mystia Playground | 完全にWeb上で動作するコンパイラ型プログラミング言語を体験してみましょう。</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css" />
+    </head>
+    <body class="content">
+        <section class="hero">
+            <div class="hero-body has-text-centered">
+                <h1 class="title">Mystia Playground</h1>
+                <p class="block">
+                    完全にWeb上で動作するコンパイラ型プログラミング言語を体験してみましょう。
+                </p>
+            </div>
+        </section>
+        <hr />
+        <section class="section">
+            <h2>Playground</h2>
+            <div class="field">
+                <label class="label" for="ta_code">ソースコード</label>
+                <div class="control">
+                    <textarea id="ta_code" name="text" class="textarea"
+                        placeholder="ここにコードを入力..."></textarea>
+                </div>
+            </div>
+            <div class="field is-grouped">
+                <div class="control">
+                    <button id="b_compile" type="button" class="button is-primary">コンパイル</button>
+                </div>
+                <div class="control">
+                    <button id="b_run" type="button" class="button">コンパイル&実行</button>
+                </div>
+            </div>
+            <div class="field">
+                <label class="label" for="ta_output">出力</label>
+                <div class="control">
+                    <textarea id="ta_output" name="text" class="textarea" readonly></textarea>
+                </div>
+            </div>
+        </section>
         <script type="module">
             import { mystia } from "./main.js";
-            let code =
-                "fn fact(n as int) as int = { if n <= 0 then 1 else n * fact(n-1) }; fact(6)";
-            mystia(code).then((x) => console.log(x));
+            /** @type {WebAssembly.ExportValue|undefined} */
+            let program = undefined;
+            /** @type {HTMLTextAreaElement} */
+            let ta_code = document.getElementById("ta_code")
+            /** @type {HTMLInputElement} */
+            let b_compile = document.getElementById("b_compile")
+            /** @type {HTMLInputElement} */
+            let b_run = document.getElementById("b_run")
+            /** @type {HTMLTextAreaElement} */
+            let ta_output = document.getElementById("ta_output")
+            ta_code.addEventListener("input",()=>{
+                [b_compile,b_run].map(x=>x.classList).forEach(x=>["is-success","is-danger"].forEach(y=>{
+                    x.remove(y)
+                }))
+                b_compile.classList.add("is-primary")
+                b_run.classList.remove("is-primary")
+                b_run.innerText="コンパイル&実行"
+            })
+            async function compile(){
+                try{
+                    program = await mystia(ta_code.value);
+                    b_compile.classList.remove("is-danger")
+                    b_compile.classList.remove("is-primary")
+                    b_compile.classList.add("is-success")
+                    b_run.classList.remove("is-danger")
+                    b_run.classList.remove("is-success")
+                    b_run.classList.add("is-primary")
+                    b_run.innerText="実行"
+                } catch (e) {
+                    program=undefined;
+                    b_compile.classList.remove("is-success")
+                    b_compile.classList.remove("is-primary")
+                    b_compile.classList.add("is-danger")
+                    b_run.innerText="再コンパイル&実行"
+                    throw e;
+                }
+            }
+            b_compile.addEventListener("click",async(e)=>{
+                if(e.button)return;
+                try {
+                    await compile()
+                } catch (e) {
+                    console.error(e)
+                }
+            })
+            b_run.addEventListener("click",async(e)=>{
+                if(e.button)return;
+                try {
+                    if(program===undefined){
+						await compile();
+					}
+					let res = program();
+					ta_output.value=""+res;
+                    b_run.classList.remove("is-danger")
+                    b_run.classList.remove("is-primary")
+                    b_run.classList.add("is-success")
+                } catch (e) {
+                    b_run.classList.remove("is-success")
+                    b_run.classList.remove("is-primary")
+                    b_run.classList.add("is-danger")
+                    console.error(e)
+                }
+            })
         </script>
     </body>
 </html>
