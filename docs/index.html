@@ -61,12 +61,16 @@
             async function compile(){
                 try{
                     program = await mystia(ta_code.value);
+                    b_compile.classList.remove("is-danger")
                     b_compile.classList.remove("is-primary")
                     b_compile.classList.add("is-success")
+                    b_run.classList.remove("is-danger")
+                    b_run.classList.remove("is-success")
                     b_run.classList.add("is-primary")
                     b_run.innerText="実行"
                 } catch (e) {
                     program=undefined;
+                    b_compile.classList.remove("is-success")
                     b_compile.classList.remove("is-primary")
                     b_compile.classList.add("is-danger")
                     b_run.innerText="再コンパイル&実行"
@@ -89,7 +93,13 @@
 					}
 					let res = program();
 					ta_output=""+res;
+                    b_run.classList.remove("is-danger")
+                    b_run.classList.remove("is-primary")
+                    b_run.classList.add("is-success")
                 } catch (e) {
+                    b_run.classList.remove("is-success")
+                    b_run.classList.remove("is-primary")
+                    b_run.classList.add("is-danger")
                     console.error(e)
                 }
             })
