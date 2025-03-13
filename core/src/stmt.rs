@@ -133,16 +133,19 @@ impl Node for Stmt {
                     }
                     Expr::Pointer(addr) => {
                         format!(
-                            "(i32.store (i32.mul {} (i32.const 4)) {})",
-                            addr.compile(ctx),
+                            "(i32.store {} {})",
+                            Oper::Mul(*addr.clone(), Expr::Value(Value::Integer(4))).compile(ctx),
                             value.compile(ctx)
                         )
                     }
                     Expr::Access(array, index) => {
                         format!(
-                            "(i32.store (i32.mul (i32.add {} {}) (i32.const 4)) {})",
-                            array.compile(ctx),
-                            index.compile(ctx),
+                            "(i32.store {} {})",
+                            Oper::Mul(
+                                Expr::Oper(Box::new(Oper::Add(*array.clone(), *index.clone()))),
+                                Expr::Value(Value::Integer(4))
+                            )
+                            .compile(ctx),
                             value.compile(ctx)
                         )
                     }
