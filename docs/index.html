@@ -1,5 +1,12 @@
 <!doctype html>
 <html>
     <head></head>
-    <body></body>
+    <body>
+        <script type="module" src="pkg/mystia_wasm.js"></script>
+        <script>
+            const bytes = mystia("1+2").arrayBuffer();
+            const { instance } = WebAssembly.instantiate(bytes);
+            console.log("3 + 4 =", instance.exports._start());
+        </script>
+    </body>
 </html>
