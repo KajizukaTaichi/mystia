@@ -1,3 +1,4 @@
 /target
 *.wat
 *.wasm
+!/docs/pkg/*.wasm
