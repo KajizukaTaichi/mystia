@@ -48,7 +48,7 @@ impl Node for Stmt {
                 ret: Type::parse(ret)?,
             })
         } else if let Some(source) = source.strip_prefix("if ") {
-            let code = tokenize(source, SPACE.as_ref(), false)?;
+            let code = tokenize(source, SPACE.as_ref(), false, true)?;
             let then_pos = code.iter().position(|i| i == "then")?;
             let else_pos = code.iter().position(|i| i == "else")?;
             let cond_sec = join!(code.get(0..then_pos)?);
@@ -60,7 +60,7 @@ impl Node for Stmt {
                 r#else: Box::new(Stmt::parse(&else_sec)?),
             })
         } else if let Some(source) = source.strip_prefix("while ") {
-            let code = tokenize(source, SPACE.as_ref(), false)?;
+            let code = tokenize(source, SPACE.as_ref(), false, true)?;
             let loop_pos = code.iter().position(|i| i == "loop")?;
             let cond_sec = join!(code.get(0..loop_pos)?);
             let body_sec = join!(code.get(loop_pos + 1..)?);
