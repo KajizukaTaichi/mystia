@@ -138,56 +138,20 @@ impl Node for Oper {
         })
     }
 
-    fn type_infer(&self, ctx: &mut Compiler) -> Type {
+    fn type_infer(&self, ctx: &mut Compiler) -> Option<Type> {
         match self {
-            Oper::Add(lhs, rhs) => {
-                lhs.type_infer(ctx);
-                rhs.type_infer(ctx)
-            }
-            Oper::Sub(lhs, rhs) => {
-                lhs.type_infer(ctx);
-                rhs.type_infer(ctx)
-            }
-            Oper::Mul(lhs, rhs) => {
-                lhs.type_infer(ctx);
-                rhs.type_infer(ctx)
-            }
-            Oper::Div(lhs, rhs) => {
-                lhs.type_infer(ctx);
-                rhs.type_infer(ctx)
-            }
-            Oper::Mod(lhs, rhs) => {
-                lhs.type_infer(ctx);
-                rhs.type_infer(ctx)
-            }
-            Oper::Eql(lhs, rhs) => {
-                lhs.type_infer(ctx);
-                rhs.type_infer(ctx)
-            }
-            Oper::Neq(lhs, rhs) => {
-                lhs.type_infer(ctx);
-                rhs.type_infer(ctx)
-            }
-            Oper::Lt(lhs, rhs) => {
-                lhs.type_infer(ctx);
-                rhs.type_infer(ctx)
-            }
-            Oper::Gt(lhs, rhs) => {
-                lhs.type_infer(ctx);
-                rhs.type_infer(ctx)
-            }
-            Oper::LtEq(lhs, rhs) => {
-                lhs.type_infer(ctx);
-                rhs.type_infer(ctx)
-            }
-            Oper::GtEq(lhs, rhs) => {
-                lhs.type_infer(ctx);
-                rhs.type_infer(ctx)
-            }
-            Oper::Cast(lhs, rhs) => {
-                lhs.type_infer(ctx);
-                rhs.type_infer(ctx)
-            }
+            Oper::Add(lhs, rhs) => type_check!(lhs, rhs, ctx),
+            Oper::Sub(lhs, rhs) => type_check!(lhs, rhs, ctx),
+            Oper::Mul(lhs, rhs) => type_check!(lhs, rhs, ctx),
+            Oper::Div(lhs, rhs) => type_check!(lhs, rhs, ctx),
+            Oper::Mod(lhs, rhs) => type_check!(lhs, rhs, ctx),
+            Oper::Eql(lhs, rhs) => type_check!(lhs, rhs, ctx),
+            Oper::Neq(lhs, rhs) => type_check!(lhs, rhs, ctx),
+            Oper::Lt(lhs, rhs) => type_check!(lhs, rhs, ctx),
+            Oper::Gt(lhs, rhs) => type_check!(lhs, rhs, ctx),
+            Oper::LtEq(lhs, rhs) => type_check!(lhs, rhs, ctx),
+            Oper::GtEq(lhs, rhs) => type_check!(lhs, rhs, ctx),
+            Oper::Cast(lhs, rhs) => rhs.type_infer(ctx),
         }
     }
 }

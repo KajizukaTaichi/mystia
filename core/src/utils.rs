@@ -36,9 +36,9 @@ macro_rules! config_return {
 
 #[macro_export]
 macro_rules! type_check {
-    ($lhs: expr, $rhs: expr) => {
-        if format!("{:?}", $lhs.type_infer()?) == format!("{:?}", $rhs.type_infer()?) {
-            Some(lhs)
+    ($lhs: expr, $rhs: expr, $ctx: expr) => {
+        if format!("{:?}", $lhs.type_infer($ctx)?) == format!("{:?}", $rhs.type_infer($ctx)?) {
+            Some($lhs.type_infer($ctx)?)
         } else {
             None
         }
