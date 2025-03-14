@@ -79,9 +79,9 @@ impl Node for Stmt {
         }
     }
 
-    fn compile(&self, ctx: &mut Compiler) -> String {
-        match self {
-            Stmt::Expr(expr) => expr.compile(ctx),
+    fn compile(&self, ctx: &mut Compiler) -> Option<String> {
+        Some(match self {
+            Stmt::Expr(expr) => expr.compile(ctx)?,
             Stmt::Defun {
                 name,
                 args,
@@ -91,13 +91,15 @@ impl Node for Stmt {
                 ctx.variable.clear();
                 let code = format!(
                     "(func ${name} {0} {1} {3} {2})",
-                    join!(
-                        args.iter()
-                            .map(|x| format!("(param ${} {})", x.0, x.1.compile(ctx)))
-                            .collect::<Vec<_>>()
-                    ),
+                    join!({
+                        let mut result = vec![];
+                        for (k, v) in args.iter() {
+                            result.push(format!("(param ${} {})", k, v.compile(ctx)?));
+                        }
+                        result
+                    }),
                     config_return!(ret, ctx),
-                    body.compile(ctx),
+                    body.compile(ctx)?,
                     expand_local(ctx)
                 );
                 ctx.variable.clear();
@@ -107,27 +109,27 @@ impl Node for Stmt {
             Stmt::If { cond, then, r#else } => {
                 format!(
                     "(if (result {}) (i32.eqz {}) (then {}) (else {}))",
-                    self.type_infer(ctx).compile(ctx),
-                    cond.compile(ctx),
-                    r#else.compile(ctx),
-                    then.compile(ctx)
+                    self.type_infer(ctx)?.compile(ctx)?,
+                    cond.compile(ctx)?,
+                    r#else.compile(ctx)?,
+                    then.compile(ctx)?
                 )
             }
             Stmt::While { cond, body } => {
                 format!(
                     "(block $outer (loop $while_start (br_if $outer (i32.eqz {})) {} (br $while_start)))",
-                    cond.compile(ctx),
-                    body.compile(ctx),
+                    cond.compile(ctx)?,
+                    body.compile(ctx)?,
                 )
             }
             Stmt::Let { name, value } => {
-                let value_type = value.type_infer(ctx);
+                let value_type = value.type_infer(ctx)?;
                 match name {
                     Expr::Refer(name) => {
                         ctx.variable.insert(name.to_string(), value_type);
                         let result = format!(
                             "{1} (local.set ${name} {0})",
-                            value.compile(ctx),
+                            value.compile(ctx)?,
                             join!(ctx.array)
                         );
                         ctx.array.clear();
@@ -136,8 +138,9 @@ impl Node for Stmt {
                     Expr::Pointer(addr) => {
                         format!(
                             "(i32.store {} {})",
-                            Oper::Mul(*addr.clone(), Expr::Value(Value::Integer(4))).compile(ctx),
-                            value.compile(ctx)
+                            Oper::Mul(*addr.clone(), Expr::Value(Value::Integer(4)))
+                                .compile(ctx)?,
+                            value.compile(ctx)?
                         )
                     }
                     Expr::Access(array, index) => {
@@ -147,20 +150,20 @@ impl Node for Stmt {
                                 Expr::Oper(Box::new(Oper::Add(*array.clone(), *index.clone()))),
                                 Expr::Value(Value::Integer(4))
                             )
-                            .compile(ctx),
-                            value.compile(ctx)
+                            .compile(ctx)?,
+                            value.compile(ctx)?
                         )
                     }
                     _ => todo!(),
                 }
             }
             Stmt::Drop => "drop".to_string(),
-        }
+        })
     }
 
-    fn type_infer(&self, ctx: &mut Compiler) -> Type {
-        match self {
-            Stmt::Expr(expr) => expr.type_infer(ctx),
+    fn type_infer(&self, ctx: &mut Compiler) -> Option<Type> {
+        Some(match self {
+            Stmt::Expr(expr) => expr.type_infer(ctx)?,
             Stmt::Defun {
                 name,
                 args,
@@ -177,22 +180,22 @@ impl Node for Stmt {
             Stmt::If { cond, then, r#else } => {
                 cond.type_infer(ctx);
                 then.type_infer(ctx);
-                r#else.type_infer(ctx)
+                r#else.type_infer(ctx)?
             }
             Stmt::While { cond, body } => {
                 cond.type_infer(ctx);
-                body.type_infer(ctx)
+                body.type_infer(ctx)?
             }
             Stmt::Let {
                 name: Expr::Refer(name),
                 value,
             } if !ctx.argument.contains_key(name) => {
-                let value_type = value.type_infer(ctx);
+                let value_type = value.type_infer(ctx)?;
                 ctx.variable.insert(name.to_string(), value_type);
                 Type::Void
             }
             Stmt::Let { name: _, value: _ } => Type::Void,
             Stmt::Drop => Type::Void,
-        }
+        })
     }
 }

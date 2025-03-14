@@ -151,7 +151,7 @@ impl Node for Oper {
             Oper::Gt(lhs, rhs) => type_check!(lhs, rhs, ctx),
             Oper::LtEq(lhs, rhs) => type_check!(lhs, rhs, ctx),
             Oper::GtEq(lhs, rhs) => type_check!(lhs, rhs, ctx),
-            Oper::Cast(lhs, rhs) => rhs.type_infer(ctx),
+            Oper::Cast(_, rhs) => rhs.type_infer(ctx),
         }
     }
 }
