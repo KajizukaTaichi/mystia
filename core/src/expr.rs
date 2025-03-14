@@ -15,7 +15,7 @@ pub enum Expr {
 impl Node for Expr {
     fn parse(source: &str) -> Option<Expr> {
         let source = source.trim();
-        let token_list: Vec<String> = tokenize(source.trim(), SPACE.as_ref(), true)?;
+        let token_list: Vec<String> = tokenize(source.trim(), SPACE.as_ref(), true, true)?;
         if token_list.len() >= 2 {
             Some(Expr::Oper(Box::new(Oper::parse(source)?)))
         } else {
@@ -39,7 +39,7 @@ impl Node for Expr {
                 } else if token.starts_with("[") && token.ends_with("]") {
                     let token = token.get(1..token.len() - 1)?.trim();
                     let mut result = vec![];
-                    for i in tokenize(token, &[","], false)? {
+                    for i in tokenize(token, &[","], false, true)? {
                         result.push(Expr::parse(&i)?);
                     }
                     Expr::Array(result)
@@ -62,7 +62,7 @@ impl Node for Expr {
                     let (name, args) = token.split_once("(")?;
                     let args = {
                         let mut result = vec![];
-                        for i in tokenize(args, &[","], false)? {
+                        for i in tokenize(args, &[","], false, true)? {
                             result.push(Expr::parse(&i)?)
                         }
                         result
