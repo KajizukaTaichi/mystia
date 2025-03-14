@@ -38,10 +38,7 @@ impl Compiler {
             declare: vec![],
             array: vec![],
             variable: HashMap::new(),
-            function: HashMap::from([
-                ("array.set".to_string(), Type::Void),
-                ("array.get".to_string(), Type::Integer),
-            ]),
+            function: HashMap::new(),
             argument: HashMap::new(),
         }
     }
