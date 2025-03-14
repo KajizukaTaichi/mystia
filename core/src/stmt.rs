@@ -100,8 +100,8 @@ impl Node for Stmt {
             }
             Stmt::If { cond, then, r#else } => {
                 format!(
-                    "(if (result {}) (i32.eqz {}) (then {}) (else {}))",
-                    self.type_infer(ctx)?.compile(ctx)?,
+                    "(if {} (i32.eqz {}) (then {}) (else {}))",
+                    config_return!(self.type_infer(ctx)?, ctx)?,
                     cond.compile(ctx)?,
                     r#else.compile(ctx)?,
                     then.compile(ctx)?
