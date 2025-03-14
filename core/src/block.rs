@@ -16,15 +16,15 @@ impl Node for Block {
         Some(Block(result))
     }
 
-    fn compile(&self, ctx: &mut Compiler) -> String {
-        join!(self.0.iter().map(|x| x.compile(ctx)).collect::<Vec<_>>())
+    fn compile(&self, ctx: &mut Compiler) -> Option<String> {
+        join!(iter_map!(self.0, |x| x.compile(ctx)))
     }
 
-    fn type_infer(&self, ctx: &mut Compiler) -> Type {
+    fn type_infer(&self, ctx: &mut Compiler) -> Option<Type> {
         let mut result = Type::Void;
         for line in &self.0 {
-            result = line.type_infer(ctx);
+            result = line.type_infer(ctx)?;
         }
-        result
+        Some(result)
     }
 }

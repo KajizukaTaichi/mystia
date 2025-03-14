@@ -46,6 +46,17 @@ macro_rules! type_check {
 }
 
 #[macro_export]
+macro_rules! iter_map {
+    ($iter: expr, $proc: expr) => {{
+        let mut result = vec![];
+        for i in $iter {
+            result.push($proc(i)?);
+        }
+        result
+    }};
+}
+
+#[macro_export]
 macro_rules! join {
     ($x:expr) => {
         $x.join(&SPACE[0].to_string())

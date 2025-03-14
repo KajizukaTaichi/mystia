@@ -76,9 +76,9 @@ impl Node for Expr {
         }
     }
 
-    fn compile(&self, ctx: &mut Compiler) -> String {
-        match self {
-            Expr::Oper(oper) => oper.compile(ctx),
+    fn compile(&self, ctx: &mut Compiler) -> Option<String> {
+        Some(match self {
+            Expr::Oper(oper) => oper.compile(ctx)?,
             Expr::Refer(to) => format!("(local.get ${to})"),
             Expr::Value(Value::Integer(n)) => format!("(i32.const {n})"),
             Expr::Value(Value::Float(n)) => format!("(f64.const {n})"),
@@ -89,14 +89,14 @@ impl Node for Expr {
                         name: Expr::Pointer(Box::new(Expr::Value(Value::Integer(ctx.index)))),
                         value: elm.clone(),
                     }
-                    .compile(ctx);
+                    .compile(ctx)?;
                     ctx.array.push(code);
                     ctx.index += 1;
                 }
-                result.compile(ctx)
+                result.compile(ctx)?
             }
             Expr::Value(Value::String(str)) => {
-                let result = Expr::Value(Value::Integer(ctx.index.clone())).compile(ctx);
+                let result = Expr::Value(Value::Integer(ctx.index.clone())).compile(ctx)?;
                 ctx.data.push(format!(r#"(data {} "{str}")"#, result));
                 ctx.index += str.len() as i32;
                 result
@@ -108,41 +108,41 @@ impl Node for Expr {
                         *expr.clone(),
                         Expr::Value(Value::Integer(4))
                     )))
-                    .compile(ctx)
+                    .compile(ctx)?
                 )
             }
             Expr::Call(name, args) => format!(
                 "(call ${name} {})",
-                join!(args.iter().map(|x| x.compile(ctx)).collect::<Vec<_>>())
+                join!(iter_map!(args, |x: &Expr| x.compile(ctx)))
             ),
             Expr::Access(array, index) => Expr::Pointer(Box::new(Expr::Oper(Box::new(Oper::Add(
                 *array.clone(),
                 *index.clone(),
             )))))
-            .compile(ctx),
-            Expr::Block(block) => block.compile(ctx),
-        }
+            .compile(ctx)?,
+            Expr::Block(block) => block.compile(ctx)?,
+        })
     }
 
-    fn type_infer(&self, ctx: &mut Compiler) -> Type {
-        match self {
-            Expr::Oper(oper) => oper.type_infer(ctx),
-            Expr::Refer(to) => {
-                let mut locals = ctx.variable.clone();
-                locals.extend(ctx.argument.clone());
-                locals[to].clone()
-            }
+    fn type_infer(&self, ctx: &mut Compiler) -> Option<Type> {
+        Some(match self {
+            Expr::Oper(oper) => oper.type_infer(ctx)?,
+            Expr::Refer(to) => ctx
+                .variable
+                .get(to)
+                .unwrap_or(ctx.argument.get(to)?)
+                .clone(),
             Expr::Array(_) => Type::Pointer,
             Expr::Value(Value::Integer(_)) => Type::Integer,
             Expr::Value(Value::Float(_)) => Type::Float,
             Expr::Value(Value::String(_)) => Type::Pointer,
             Expr::Pointer(_) => Type::Pointer,
             Expr::Call(name, args) => {
-                let _ = args.iter().map(|i| i.type_infer(ctx));
-                ctx.function[name].clone()
+                let _ = iter_map!(args, |x| x.type_infer(ctx));
+                ctx.function.get(name)?.clone()
             }
-            Expr::Block(block) => block.type_infer(ctx),
+            Expr::Block(block) => block.type_infer(ctx)?,
             Expr::Access(_, _) => Type::Integer,
-        }
+        })
     }
 }

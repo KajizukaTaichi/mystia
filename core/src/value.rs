@@ -26,16 +26,18 @@ impl Node for Type {
         }
     }
 
-    fn compile(&self, _: &mut Compiler) -> String {
-        match self {
-            Self::Integer | Self::Pointer => "i32",
-            Self::Float => "f64",
-            Self::Void => todo!(),
-        }
-        .to_string()
+    fn compile(&self, _: &mut Compiler) -> Option<String> {
+        Some(
+            match self {
+                Self::Integer | Self::Pointer => "i32",
+                Self::Float => "f64",
+                Self::Void => return None,
+            }
+            .to_string(),
+        )
     }
 
-    fn type_infer(&self, _: &mut Compiler) -> Type {
-        self.clone()
+    fn type_infer(&self, _: &mut Compiler) -> Option<Type> {
+        Some(self.clone())
     }
 }
