@@ -39,103 +39,103 @@ impl Node for Oper {
         })
     }
 
-    fn compile(&self, ctx: &mut Compiler) -> String {
-        match self {
+    fn compile(&self, ctx: &mut Compiler) -> Option<String> {
+        Some(match self {
             Oper::Add(lhs, rhs) => format!(
                 "({}.add {} {})",
-                self.type_infer(ctx).compile(ctx),
-                lhs.compile(ctx),
-                rhs.compile(ctx)
+                self.type_infer(ctx)?.compile(ctx)?,
+                lhs.compile(ctx)?,
+                rhs.compile(ctx)?
             ),
             Oper::Sub(lhs, rhs) => format!(
                 "({}.sub {} {})",
-                self.type_infer(ctx).compile(ctx),
-                lhs.compile(ctx),
-                rhs.compile(ctx)
+                self.type_infer(ctx)?.compile(ctx)?,
+                lhs.compile(ctx)?,
+                rhs.compile(ctx)?
             ),
             Oper::Mul(lhs, rhs) => format!(
                 "({}.mul {} {})",
-                self.type_infer(ctx).compile(ctx),
-                lhs.compile(ctx),
-                rhs.compile(ctx)
+                self.type_infer(ctx)?.compile(ctx)?,
+                lhs.compile(ctx)?,
+                rhs.compile(ctx)?
             ),
             Oper::Div(lhs, rhs) => format!(
                 "({}.div_s {} {})",
-                self.type_infer(ctx).compile(ctx),
-                lhs.compile(ctx),
-                rhs.compile(ctx)
+                self.type_infer(ctx)?.compile(ctx)?,
+                lhs.compile(ctx)?,
+                rhs.compile(ctx)?
             ),
             Oper::Mod(lhs, rhs) => format!(
                 "({}.rem_s {} {})",
-                self.type_infer(ctx).compile(ctx),
-                lhs.compile(ctx),
-                rhs.compile(ctx)
+                self.type_infer(ctx)?.compile(ctx)?,
+                lhs.compile(ctx)?,
+                rhs.compile(ctx)?
             ),
             Oper::Eql(lhs, rhs) => format!(
                 "({}.eq {} {})",
-                self.type_infer(ctx).compile(ctx),
-                lhs.compile(ctx),
-                rhs.compile(ctx)
+                self.type_infer(ctx)?.compile(ctx)?,
+                lhs.compile(ctx)?,
+                rhs.compile(ctx)?
             ),
             Oper::Neq(lhs, rhs) => format!(
                 "({}.ne {} {})",
-                self.type_infer(ctx).compile(ctx),
-                lhs.compile(ctx),
-                rhs.compile(ctx)
+                self.type_infer(ctx)?.compile(ctx)?,
+                lhs.compile(ctx)?,
+                rhs.compile(ctx)?
             ),
             Oper::Lt(lhs, rhs) => {
-                let ret = self.type_infer(ctx).compile(ctx);
+                let ret = self.type_infer(ctx)?.compile(ctx)?;
                 format!(
                     "({}.lt{} {} {})",
                     ret,
                     if ret == "i32" { "_s" } else { "" },
-                    lhs.compile(ctx),
-                    rhs.compile(ctx)
+                    lhs.compile(ctx)?,
+                    rhs.compile(ctx)?
                 )
             }
             Oper::LtEq(lhs, rhs) => {
-                let ret = self.type_infer(ctx).compile(ctx);
+                let ret = self.type_infer(ctx)?.compile(ctx)?;
                 format!(
                     "({}.le{} {} {})",
                     ret,
                     if ret == "i32" { "_s" } else { "" },
-                    lhs.compile(ctx),
-                    rhs.compile(ctx)
+                    lhs.compile(ctx)?,
+                    rhs.compile(ctx)?
                 )
             }
             Oper::Gt(lhs, rhs) => {
-                let ret = self.type_infer(ctx).compile(ctx);
+                let ret = self.type_infer(ctx)?.compile(ctx)?;
                 format!(
                     "({}.gt{} {} {})",
                     ret,
                     if ret == "i32" { "_s" } else { "" },
-                    lhs.compile(ctx),
-                    rhs.compile(ctx)
+                    lhs.compile(ctx)?,
+                    rhs.compile(ctx)?
                 )
             }
             Oper::GtEq(lhs, rhs) => {
-                let ret = self.type_infer(ctx).compile(ctx);
+                let ret = self.type_infer(ctx)?.compile(ctx)?;
                 format!(
                     "({}.ge{} {} {})",
                     ret,
                     if ret == "i32" { "_s" } else { "" },
-                    lhs.compile(ctx),
-                    rhs.compile(ctx)
+                    lhs.compile(ctx)?,
+                    rhs.compile(ctx)?
                 )
             }
             Oper::Cast(lhs, rhs) => {
                 format!(
                     "({}.{} {})",
-                    rhs.compile(ctx),
+                    rhs.compile(ctx)?,
                     match rhs {
                         Type::Float => "convert_i32_s",
                         Type::Integer => "trunc_f64_s",
                         _ => todo!(),
                     },
-                    lhs.compile(ctx),
+                    lhs.compile(ctx)?,
                 )
             }
-        }
+        })
     }
 
     fn type_infer(&self, ctx: &mut Compiler) -> Type {

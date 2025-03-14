@@ -27,9 +27,20 @@ pub fn expand_local(ctx: &mut Compiler) -> String {
 macro_rules! config_return {
     ($ret: expr, $ctx: expr) => {
         if let Type::Void = $ret {
-            String::new()
+            Some(String::new())
         } else {
-            format!("(result {})", $ret.compile($ctx))
+            Some(format!("(result {})", $ret.compile($ctx)?))
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! type_check {
+    ($lhs: expr, $rhs: expr) => {
+        if format!("{:?}", $lhs.type_infer()?) == format!("{:?}", $rhs.type_infer()?) {
+            Some(lhs)
+        } else {
+            None
         }
     };
 }

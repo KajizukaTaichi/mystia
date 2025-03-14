@@ -45,11 +45,11 @@ impl Compiler {
 
     pub fn build(&mut self, source: &str) -> Option<String> {
         let ast = Block::parse(source)?;
-        let ret = ast.type_infer(self);
+        let ret = ast.type_infer(self)?;
         Some(format!(
             r#"(module (memory (export "mem") 1) {2} {3} (func (export "_start") {1} {4} {0}))"#,
-            ast.compile(self),
-            config_return!(ret, self),
+            ast.compile(self)?,
+            config_return!(ret, self)?,
             join!(self.data),
             join!(self.declare),
             expand_local(self),
