@@ -14,10 +14,11 @@ pub fn include_letter(query: &str, chars: &Vec<String>, idx: usize) -> bool {
 }
 
 pub fn expand_local(ctx: &mut Compiler) -> Option<String> {
-    Some(join!(iter_map!(ctx.variable, |x: (String, Expr)| format!(
-        "(local ${} {})",
-        x.0,
-        x.1.compile(ctx)?
+    Some(join!(iter_map!(ctx.variable.clone(), |x: (
+        String,
+        Type
+    )| Some(
+        format!("(local ${} {})", x.0, x.1.compile(ctx)?)
     ))))
 }
 
