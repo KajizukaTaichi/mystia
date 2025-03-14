@@ -6,7 +6,7 @@ pub struct Block(Vec<Stmt>);
 impl Node for Block {
     fn parse(source: &str) -> Option<Block> {
         let mut result = vec![];
-        for line in tokenize(source, &[";"], false)? {
+        for line in tokenize(source, &[";"], false, false)? {
             result.push(if line.trim().is_empty() {
                 Stmt::Drop
             } else {
