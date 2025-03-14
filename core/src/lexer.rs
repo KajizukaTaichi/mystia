@@ -1,6 +1,11 @@
 use crate::*;
 
-pub fn tokenize(input: &str, delimiter: &[&str], is_expr: bool) -> Option<Vec<String>> {
+pub fn tokenize(
+    input: &str,
+    delimiter: &[&str],
+    is_expr: bool,
+    is_trim: bool,
+) -> Option<Vec<String>> {
     let mut tokens: Vec<String> = Vec::new();
     let mut current_token = String::new();
     let mut in_parentheses: usize = 0;
@@ -87,9 +92,8 @@ pub fn tokenize(input: &str, delimiter: &[&str], is_expr: bool) -> Option<Vec<St
     if is_escape || in_quote || in_parentheses != 0 {
         return None;
     }
-    if !current_token.is_empty() {
+    if !is_trim || (is_trim && !current_token.is_empty()) {
         tokens.push(current_token.clone());
-        current_token.clear();
     }
     Some(tokens)
 }
