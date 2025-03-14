@@ -36,9 +36,11 @@ impl Node for Stmt {
                 name: name.trim().to_string(),
                 args: {
                     let mut result = vec![];
-                    for arg in args.split(",") {
-                        let (arg, annotation) = arg.split_once(" as ")?;
-                        result.push((arg.trim().to_string(), Type::parse(annotation)?));
+                    if !args.trim().is_empty() {
+                        for arg in args.split(",") {
+                            let (arg, annotation) = arg.split_once(" as ")?;
+                            result.push((arg.trim().to_string(), Type::parse(annotation)?));
+                        }
                     }
                     result
                 },
