@@ -13,14 +13,12 @@ pub fn include_letter(query: &str, chars: &Vec<String>, idx: usize) -> bool {
         .unwrap_or(false)
 }
 
-pub fn expand_local(ctx: &mut Compiler) -> String {
-    join!(
-        ctx.variable
-            .clone()
-            .iter()
-            .map(|x| format!("(local ${} {})", x.0, x.1.compile(ctx)))
-            .collect::<Vec<_>>()
-    )
+pub fn expand_local(ctx: &mut Compiler) -> Option<String> {
+    Some(join!(iter_map!(ctx.variable, |x: (String, Expr)| format!(
+        "(local ${} {})",
+        x.0,
+        x.1.compile(ctx)?
+    ))))
 }
 
 #[macro_export]

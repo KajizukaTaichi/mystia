@@ -138,7 +138,7 @@ impl Node for Expr {
             Expr::Value(Value::String(_)) => Type::Pointer,
             Expr::Pointer(_) => Type::Pointer,
             Expr::Call(name, args) => {
-                let _ = iter_map!(args, |x| x.type_infer(ctx));
+                let _ = iter_map!(args, |x: &Expr| x.type_infer(ctx));
                 ctx.function.get(name)?.clone()
             }
             Expr::Block(block) => block.type_infer(ctx)?,

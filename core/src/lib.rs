@@ -52,7 +52,7 @@ impl Compiler {
             config_return!(ret, self)?,
             join!(self.data),
             join!(self.declare),
-            expand_local(self),
+            expand_local(self)?,
         ))
     }
 }

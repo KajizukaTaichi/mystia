@@ -98,9 +98,9 @@ impl Node for Stmt {
                         }
                         result
                     }),
-                    config_return!(ret, ctx),
+                    config_return!(ret, ctx)?,
                     body.compile(ctx)?,
-                    expand_local(ctx)
+                    expand_local(ctx)?
                 );
                 ctx.variable.clear();
                 ctx.declare.push(code);

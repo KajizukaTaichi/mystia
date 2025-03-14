@@ -17,7 +17,7 @@ impl Node for Block {
     }
 
     fn compile(&self, ctx: &mut Compiler) -> Option<String> {
-        join!(iter_map!(self.0, |x| x.compile(ctx)))
+        Some(join!(iter_map!(&self.0, |x: &Stmt| x.compile(ctx))))
     }
 
     fn type_infer(&self, ctx: &mut Compiler) -> Option<Type> {
