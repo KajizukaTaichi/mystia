@@ -6,7 +6,6 @@ pub enum Stmt {
         name: String,
         args: Vec<(String, Type)>,
         body: Expr,
-        ret: Type,
     },
     If {
         cond: Expr,
@@ -30,8 +29,7 @@ impl Node for Stmt {
         let source = source.trim();
         if let Some(source) = source.strip_prefix("fn ") {
             let (name, source) = source.split_once("(")?;
-            let (args, source) = source.split_once(") as ")?;
-            let (ret, body) = source.split_once("=")?;
+            let (args, body) = source.split_once(")")?;
             Some(Stmt::Defun {
                 name: name.trim().to_string(),
                 args: {
@@ -45,7 +43,6 @@ impl Node for Stmt {
                     result
                 },
                 body: Expr::parse(body)?,
-                ret: Type::parse(ret)?,
             })
         } else if let Some(source) = source.strip_prefix("if ") {
             let code = tokenize(source, SPACE.as_ref(), false, true)?;
@@ -82,12 +79,7 @@ impl Node for Stmt {
     fn compile(&self, ctx: &mut Compiler) -> Option<String> {
         Some(match self {
             Stmt::Expr(expr) => expr.compile(ctx)?,
-            Stmt::Defun {
-                name,
-                args,
-                body,
-                ret,
-            } => {
+            Stmt::Defun { name, args, body } => {
                 ctx.variable.clear();
                 let code = format!(
                     "(func ${name} {0} {1} {3} {2})",
@@ -98,7 +90,7 @@ impl Node for Stmt {
                         }
                         result
                     }),
-                    config_return!(ret, ctx)?,
+                    config_return!(body.type_infer(ctx)?, ctx)?,
                     body.compile(ctx)?,
                     expand_local(ctx)?
                 );
@@ -164,16 +156,12 @@ impl Node for Stmt {
     fn type_infer(&self, ctx: &mut Compiler) -> Option<Type> {
         Some(match self {
             Stmt::Expr(expr) => expr.type_infer(ctx)?,
-            Stmt::Defun {
-                name,
-                args,
-                body,
-                ret,
-            } => {
+            Stmt::Defun { name, args, body } => {
                 for (arg, anno) in args {
                     ctx.argument.insert(arg.to_string(), anno.clone());
                 }
-                ctx.function.insert(name.to_string(), ret.clone());
+                let ret = body.type_infer(ctx)?;
+                ctx.function.insert(name.to_string(), ret);
                 body.type_infer(ctx);
                 Type::Void
             }
