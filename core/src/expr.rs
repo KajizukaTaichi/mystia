@@ -136,7 +136,7 @@ impl Node for Expr {
             Expr::Value(Value::Integer(_)) => Type::Integer,
             Expr::Value(Value::Float(_)) => Type::Float,
             Expr::Value(Value::String(_)) => Type::Pointer,
-            Expr::Pointer(_) => Type::Pointer,
+            Expr::Pointer(_) => Type::Integer,
             Expr::Call(name, args) => {
                 let _ = iter_map!(args, |x: &Expr| x.type_infer(ctx));
                 ctx.function.get(name)?.clone()
