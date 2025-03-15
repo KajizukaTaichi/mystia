@@ -167,12 +167,12 @@ impl Node for Stmt {
             }
             Stmt::If { cond, then, r#else } => {
                 cond.type_infer(ctx);
-                then.type_infer(ctx);
-                r#else.type_infer(ctx)?
+                type_check!(then, r#else, ctx)?
             }
             Stmt::While { cond, body } => {
                 cond.type_infer(ctx);
-                body.type_infer(ctx)?
+                body.type_infer(ctx)?;
+                Type::Void
             }
             Stmt::Let {
                 name: Expr::Refer(name),
