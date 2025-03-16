@@ -2,11 +2,6 @@ use crate::*;
 
 #[derive(Clone, Debug)]
 pub enum Stmt {
-    Defun {
-        name: String,
-        args: Vec<String>,
-        body: Expr,
-    },
     If {
         cond: Expr,
         then: Expr,
@@ -27,23 +22,7 @@ pub enum Stmt {
 impl Node for Stmt {
     fn parse(source: &str) -> Option<Self> {
         let source = source.trim();
-        if let Some(source) = source.strip_prefix("fn ") {
-            let (name, source) = source.split_once("(")?;
-            let (args, body) = source.split_once(")")?;
-            Some(Stmt::Defun {
-                name: name.trim().to_string(),
-                args: {
-                    let mut result = vec![];
-                    if !args.trim().is_empty() {
-                        for arg in args.split(",") {
-                            result.push(arg.trim().to_string());
-                        }
-                    }
-                    result
-                },
-                body: Expr::parse(body)?,
-            })
-        } else if let Some(source) = source.strip_prefix("if ") {
+        if let Some(source) = source.strip_prefix("if ") {
             let code = tokenize(source, SPACE.as_ref(), false, true)?;
             let then_pos = code.iter().position(|i| i == "then")?;
             let else_pos = code.iter().position(|i| i == "else")?;
@@ -78,26 +57,6 @@ impl Node for Stmt {
     fn compile(&self, ctx: &mut Compiler) -> Option<String> {
         Some(match self {
             Stmt::Expr(expr) => expr.compile(ctx)?,
-            Stmt::Defun { name, args, body } => {
-                ctx.variable.clear();
-                let inf = ctx.function.get(name)?.clone();
-                let code = format!(
-                    "(func ${name} {0} {1} {3} {2})",
-                    join!({
-                        let mut result = vec![];
-                        for (k, v) in args.iter().zip(inf.0) {
-                            result.push(format!("(param ${} {})", k, v.compile(ctx)?));
-                        }
-                        result
-                    }),
-                    config_return!(inf.1, ctx)?,
-                    body.compile(ctx)?,
-                    expand_local(ctx)?
-                );
-                ctx.variable.clear();
-                ctx.declare.push(code);
-                String::new()
-            }
             Stmt::If { cond, then, r#else } => {
                 format!(
                     "(if {} (i32.eqz {}) (then {}) (else {}))",
@@ -146,6 +105,27 @@ impl Node for Stmt {
                             value.compile(ctx)?
                         )
                     }
+                    Expr::Call(name, args) => {
+                        ctx.variable.clear();
+                        let inf = ctx.function.get(name)?.clone();
+                        let code = format!(
+                            "(func ${name} {0} {1} {3} {2})",
+                            join!({
+                                let mut result = vec![];
+                                for (k, v) in args.iter().zip(inf.0) {
+                                    let Expr::Refer(k) = k else { return None };
+                                    result.push(format!("(param ${} {})", k, v.compile(ctx)?));
+                                }
+                                result
+                            }),
+                            config_return!(inf.1, ctx)?,
+                            value.compile(ctx)?,
+                            expand_local(ctx)?
+                        );
+                        ctx.variable.clear();
+                        ctx.declare.push(code);
+                        String::new()
+                    }
                     _ => todo!(),
                 }
             }
@@ -156,17 +136,6 @@ impl Node for Stmt {
     fn type_infer(&self, ctx: &mut Compiler) -> Option<Type> {
         Some(match self {
             Stmt::Expr(expr) => expr.type_infer(ctx)?,
-            Stmt::Defun {
-                name,
-                args: _,
-                body,
-            } => {
-                let ret = body.type_infer(ctx)?;
-                let inf = ctx.function.get_mut(name)?;
-                inf.1 = ret;
-                body.type_infer(ctx);
-                Type::Void
-            }
             Stmt::If { cond, then, r#else } => {
                 cond.type_infer(ctx);
                 type_check!(then, r#else, ctx)?
@@ -186,6 +155,16 @@ impl Node for Stmt {
                 } else {
                     ctx.variable.insert(name.to_string(), value_type);
                 }
+                Type::Void
+            }
+            Stmt::Let {
+                name: Expr::Call(name, _),
+                value,
+            } => {
+                let ret = value.type_infer(ctx)?;
+                let inf = ctx.function.get_mut(name)?;
+                inf.1 = ret;
+                value.type_infer(ctx);
                 Type::Void
             }
             Stmt::Let { name: _, value } => {
