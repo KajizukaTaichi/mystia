@@ -181,8 +181,9 @@ impl Node for Stmt {
                 let value_type = value.type_infer(ctx)?;
                 if let Some(exist_val) = ctx.clone().variable.get(name) {
                     type_check!(exist_val, value_type, ctx)?;
+                } else {
+                    ctx.variable.insert(name.to_string(), value_type);
                 }
-                ctx.variable.insert(name.to_string(), value_type);
                 Type::Void
             }
             Stmt::Let { name: _, value } => {
