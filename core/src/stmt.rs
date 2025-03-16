@@ -179,6 +179,9 @@ impl Node for Stmt {
                 value,
             } if !ctx.argument.contains_key(name) => {
                 let value_type = value.type_infer(ctx)?;
+                if let Some(exist_val) = ctx.clone().variable.get(name) {
+                    type_check!(exist_val, value_type, ctx)?;
+                }
                 ctx.variable.insert(name.to_string(), value_type);
                 Type::Void
             }
