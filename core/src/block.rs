@@ -27,4 +27,9 @@ impl Node for Block {
         }
         Some(result)
     }
+
+    fn func_scan(&self, ctx: &mut Compiler) -> Option<()> {
+        iter_map!(&self.0, |x: &Stmt| x.func_scan(ctx));
+        Some(())
+    }
 }
