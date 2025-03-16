@@ -153,18 +153,14 @@ impl Node for Expr {
                 ctx.function.insert(name.to_string(), (args, Type::Void));
             }
             Expr::Oper(oper) => oper.func_scan(ctx)?,
-            Expr::Refer(to) => {
-                let mut locals = ctx.variable.clone();
-                locals.extend(ctx.argument.clone());
-                locals.get(to)?.clone()
-            }
-            Expr::Array(_) => Type::Pointer,
+            Expr::Array(_) => iter_map!(args, |x: &Expr| x.type_infer(ctx))
             Expr::Value(Value::Integer(_)) => Type::Integer,
             Expr::Value(Value::Float(_)) => Type::Float,
             Expr::Value(Value::String(_)) => Type::Pointer,
             Expr::Pointer(_) => Type::Integer,
             Expr::Block(block) => block.type_infer(ctx)?,
             Expr::Access(_, _) => Type::Integer,
+            _ => {}
         }
         Some(())
     }
