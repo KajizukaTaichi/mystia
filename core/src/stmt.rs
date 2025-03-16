@@ -158,12 +158,16 @@ impl Node for Stmt {
                 Type::Void
             }
             Stmt::Let {
-                name: Expr::Call(name, _),
+                name: Expr::Call(name, args),
                 value,
             } => {
+                for (arg, (_, inf)) in args.iter().zip(ctx.argument.clone()) {
+                    let Expr::Refer(arg) = arg else { return None };
+                    ctx.argument.insert(arg.to_string(), inf);
+                }
                 let ret = value.type_infer(ctx)?;
-                let inf = ctx.function.get_mut(name)?;
-                inf.1 = ret;
+                let inf = ctx.function.get(name)?;
+                ctx.function.insert(name.to_owned(), (inf.0.clone(), ret));
                 value.type_infer(ctx);
                 Type::Void
             }

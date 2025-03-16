@@ -1,2 +1,2 @@
-fn a(x) x + 1;
-a(10)
+let inc(n) = n + 1;
+inc(5)

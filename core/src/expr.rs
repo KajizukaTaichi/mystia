@@ -149,8 +149,15 @@ impl Node for Expr {
     fn func_scan(&self, ctx: &mut Compiler) -> Option<()> {
         match self {
             Expr::Call(name, args) => {
-                let args = iter_map!(args, |x: &Expr| x.type_infer(ctx));
-                ctx.function.insert(name.to_string(), (args, Type::Void));
+                let args_type = iter_map!(args, |x: &Expr| x.type_infer(ctx));
+                ctx.argument = ["_"]
+                    .repeat(args_type.len())
+                    .iter()
+                    .map(|x| String::from(*x))
+                    .zip(args_type.clone())
+                    .collect();
+                ctx.function
+                    .insert(name.to_string(), (args_type, Type::Void));
                 Some(())
             }
             Expr::Oper(oper) => oper.func_scan(ctx),
