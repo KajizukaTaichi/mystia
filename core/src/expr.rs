@@ -139,10 +139,33 @@ impl Node for Expr {
             Expr::Pointer(_) => Type::Integer,
             Expr::Call(name, args) => {
                 let _ = iter_map!(args, |x: &Expr| x.type_infer(ctx));
-                ctx.function.get(name)?.clone()
+                ctx.function.get(name)?.1.clone()
             }
             Expr::Block(block) => block.type_infer(ctx)?,
             Expr::Access(_, _) => Type::Integer,
         })
+    }
+
+    fn func_scan(&self, ctx: &mut Compiler) -> Option<()> {
+        match self {
+            Expr::Call(name, args) => {
+                let args = iter_map!(args, |x: &Expr| x.type_infer(ctx));
+                ctx.function.insert(name.to_string(), (args, Type::Void));
+            }
+            Expr::Oper(oper) => oper.func_scan(ctx)?,
+            Expr::Refer(to) => {
+                let mut locals = ctx.variable.clone();
+                locals.extend(ctx.argument.clone());
+                locals.get(to)?.clone()
+            }
+            Expr::Array(_) => Type::Pointer,
+            Expr::Value(Value::Integer(_)) => Type::Integer,
+            Expr::Value(Value::Float(_)) => Type::Float,
+            Expr::Value(Value::String(_)) => Type::Pointer,
+            Expr::Pointer(_) => Type::Integer,
+            Expr::Block(block) => block.type_infer(ctx)?,
+            Expr::Access(_, _) => Type::Integer,
+        }
+        Some(())
     }
 }

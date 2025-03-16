@@ -26,7 +26,7 @@ pub struct Compiler {
     array: Vec<String>,
     declare: Vec<String>,
     variable: HashMap<String, Type>,
-    function: HashMap<String, Type>,
+    function: HashMap<String, (Vec<Type>, Type)>,
     argument: HashMap<String, Type>,
 }
 
