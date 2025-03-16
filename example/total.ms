@@ -1,4 +1,4 @@
-fn total(number as float) {
+fn total(number: float) {
     let count = 1;
     let result = 0;
 
