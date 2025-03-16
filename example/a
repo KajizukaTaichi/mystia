@@ -1,5 +1,2 @@
-let a = 25;
-while a < 100 loop {
-    let a = a * 2
-};
-a
+fn a(x) x + 1;
+a(10)
