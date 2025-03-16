@@ -36,8 +36,7 @@ impl Node for Stmt {
                     let mut result = vec![];
                     if !args.trim().is_empty() {
                         for arg in args.split(",") {
-                            let (arg, annotation) = arg.split_once(":")?;
-                            result.push((arg.trim().to_string(), Type::parse(annotation)?));
+                            result.push(arg.trim().to_string());
                         }
                     }
                     result
@@ -81,16 +80,17 @@ impl Node for Stmt {
             Stmt::Expr(expr) => expr.compile(ctx)?,
             Stmt::Defun { name, args, body } => {
                 ctx.variable.clear();
+                let inf = ctx.function.get(name)?;
                 let code = format!(
                     "(func ${name} {0} {1} {3} {2})",
                     join!({
                         let mut result = vec![];
-                        for (k, v) in args.iter() {
+                        for (k, v) in args.iter().zip(inf.0.clone()) {
                             result.push(format!("(param ${} {})", k, v.compile(ctx)?));
                         }
                         result
                     }),
-                    config_return!(body.type_infer(ctx)?, ctx)?,
+                    config_return!(inf.1.clone(), ctx)?,
                     body.compile(ctx)?,
                     expand_local(ctx)?
                 );
