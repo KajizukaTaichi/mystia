@@ -80,17 +80,17 @@ impl Node for Stmt {
             Stmt::Expr(expr) => expr.compile(ctx)?,
             Stmt::Defun { name, args, body } => {
                 ctx.variable.clear();
-                let inf = ctx.function.get(name)?;
+                let inf = ctx.function.get(name)?.clone();
                 let code = format!(
                     "(func ${name} {0} {1} {3} {2})",
                     join!({
                         let mut result = vec![];
-                        for (k, v) in args.iter().zip(inf.0.clone()) {
+                        for (k, v) in args.iter().zip(inf.0) {
                             result.push(format!("(param ${} {})", k, v.compile(ctx)?));
                         }
                         result
                     }),
-                    config_return!(inf.1.clone(), ctx)?,
+                    config_return!(inf.1, ctx)?,
                     body.compile(ctx)?,
                     expand_local(ctx)?
                 );
