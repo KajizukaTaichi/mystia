@@ -4,7 +4,7 @@ use crate::*;
 pub enum Stmt {
     Defun {
         name: String,
-        args: Vec<(String, Type)>,
+        args: Vec<String>,
         body: Expr,
     },
     If {
@@ -156,12 +156,14 @@ impl Node for Stmt {
     fn type_infer(&self, ctx: &mut Compiler) -> Option<Type> {
         Some(match self {
             Stmt::Expr(expr) => expr.type_infer(ctx)?,
-            Stmt::Defun { name, args, body } => {
-                for (arg, anno) in args {
-                    ctx.argument.insert(arg.to_string(), anno.clone());
-                }
+            Stmt::Defun {
+                name,
+                args: _,
+                body,
+            } => {
                 let ret = body.type_infer(ctx)?;
-                ctx.function.insert(name.to_string(), ret);
+                let inf = ctx.function.get_mut(name)?;
+                inf.1 = ret;
                 body.type_infer(ctx);
                 Type::Void
             }
@@ -192,5 +194,22 @@ impl Node for Stmt {
             }
             Stmt::Drop => Type::Void,
         })
+    }
+
+    fn func_scan(&self, ctx: &mut Compiler) -> Option<()> {
+        match self {
+            Stmt::Expr(expr) => expr.func_scan(ctx),
+            Stmt::If { cond, then, r#else } => {
+                cond.func_scan(ctx)?;
+                then.func_scan(ctx)?;
+                r#else.func_scan(ctx)
+            }
+            Stmt::While { cond, body } => {
+                cond.func_scan(ctx)?;
+                body.func_scan(ctx)
+            }
+            Stmt::Let { name: _, value } => value.func_scan(ctx),
+            _ => Some(()),
+        }
     }
 }
