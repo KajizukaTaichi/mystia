@@ -150,10 +150,10 @@ impl Node for Expr {
         match self {
             Expr::Call(name, args) => {
                 let args_type = iter_map!(args, |x: &Expr| x.type_infer(ctx));
-                ctx.argument = ["_"]
-                    .repeat(args_type.len())
+                ctx.argument = (0..args_type.len())
+                    .collect::<Vec<_>>()
                     .iter()
-                    .map(|x| String::from(*x))
+                    .map(|x| x.to_string())
                     .zip(args_type.clone())
                     .collect();
                 ctx.function
