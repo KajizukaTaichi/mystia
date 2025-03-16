@@ -1,2 +1,2 @@
-let add(x, y) = x + y;
-add(1, 2)
+let inc(n) = n + 1;
+inc(5)
