@@ -127,11 +127,11 @@ impl Node for Expr {
     fn type_infer(&self, ctx: &mut Compiler) -> Option<Type> {
         Some(match self {
             Expr::Oper(oper) => oper.type_infer(ctx)?,
-            Expr::Refer(to) => ctx
-                .variable
-                .get(to)
-                .unwrap_or(ctx.argument.get(to)?)
-                .clone(),
+            Expr::Refer(to) => {
+                let mut locals = ctx.variable.clone();
+                locals.extend(ctx.argument.clone());
+                locals.get(to)?.clone()
+            }
             Expr::Array(_) => Type::Pointer,
             Expr::Value(Value::Integer(_)) => Type::Integer,
             Expr::Value(Value::Float(_)) => Type::Float,
