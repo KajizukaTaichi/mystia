@@ -170,7 +170,7 @@ impl Node for Stmt {
                 type_check!(then, r#else, ctx)?
             }
             Stmt::While { cond, body } => {
-                cond.type_infer(ctx);
+                cond.type_infer(ctx)?;
                 body.type_infer(ctx)?;
                 Type::Void
             }
@@ -182,7 +182,10 @@ impl Node for Stmt {
                 ctx.variable.insert(name.to_string(), value_type);
                 Type::Void
             }
-            Stmt::Let { name: _, value: _ } => Type::Void,
+            Stmt::Let { name: _, value } => {
+                value.type_infer(ctx);
+                Type::Void
+            }
             Stmt::Drop => Type::Void,
         })
     }
