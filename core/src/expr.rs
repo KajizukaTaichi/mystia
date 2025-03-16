@@ -151,17 +151,20 @@ impl Node for Expr {
             Expr::Call(name, args) => {
                 let args = iter_map!(args, |x: &Expr| x.type_infer(ctx));
                 ctx.function.insert(name.to_string(), (args, Type::Void));
+                Some(())
             }
-            Expr::Oper(oper) => oper.func_scan(ctx)?,
-            Expr::Array(_) => iter_map!(args, |x: &Expr| x.type_infer(ctx))
-            Expr::Value(Value::Integer(_)) => Type::Integer,
-            Expr::Value(Value::Float(_)) => Type::Float,
-            Expr::Value(Value::String(_)) => Type::Pointer,
-            Expr::Pointer(_) => Type::Integer,
-            Expr::Block(block) => block.type_infer(ctx)?,
-            Expr::Access(_, _) => Type::Integer,
-            _ => {}
+            Expr::Oper(oper) => oper.func_scan(ctx),
+            Expr::Array(arr) => {
+                iter_map!(arr, |x: &Expr| x.func_scan(ctx));
+                Some(())
+            }
+            Expr::Pointer(to) => to.func_scan(ctx),
+            Expr::Block(block) => block.func_scan(ctx),
+            Expr::Access(arr, idx) => {
+                arr.func_scan(ctx);
+                idx.func_scan(ctx)
+            }
+            _ => Some(()),
         }
-        Some(())
     }
 }
