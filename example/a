@@ -1,2 +1,2 @@
-let inc(n) = n + 0.1;
-inc(5 as float)
+let add(x, y) = x + y;
+add(1, 2)
