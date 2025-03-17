@@ -1,2 +1,3 @@
 let inc(n) = n + 1;
-inc(5)
+let a = inc(5);
+inc(a)
