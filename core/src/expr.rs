@@ -149,7 +149,16 @@ impl Node for Expr {
     fn func_scan(&self, ctx: &mut Compiler) -> Option<()> {
         match self {
             Expr::Call(name, args) => {
-                let args_type = iter_map!(args, |x: &Expr| x.type_infer(ctx));
+                let args_type = {
+                    let mut result = vec![];
+                    for arg in args {
+                        let Some(inf) = arg.type_infer(ctx) else {
+                            return Some(());
+                        };
+                        result.push(inf)
+                    }
+                    result
+                };
                 ctx.argument = (0..args_type.len())
                     .collect::<Vec<_>>()
                     .iter()
