@@ -145,42 +145,4 @@ impl Node for Expr {
             Expr::Access(_, _) => Type::Integer,
         })
     }
-
-    fn func_scan(&self, ctx: &mut Compiler) -> Option<()> {
-        match self {
-            Expr::Call(name, args) => {
-                let args_type = {
-                    let mut result = vec![];
-                    for arg in args {
-                        let Some(inf) = arg.type_infer(ctx) else {
-                            return Some(());
-                        };
-                        result.push(inf)
-                    }
-                    result
-                };
-                ctx.argument = (0..args_type.len())
-                    .collect::<Vec<_>>()
-                    .iter()
-                    .map(|x| x.to_string())
-                    .zip(args_type.clone())
-                    .collect();
-                ctx.function
-                    .insert(name.to_string(), (args_type, Type::Void));
-                Some(())
-            }
-            Expr::Oper(oper) => oper.func_scan(ctx),
-            Expr::Array(arr) => {
-                iter_map!(arr, |x: &Expr| x.func_scan(ctx));
-                Some(())
-            }
-            Expr::Pointer(to) => to.func_scan(ctx),
-            Expr::Block(block) => block.func_scan(ctx),
-            Expr::Access(arr, idx) => {
-                arr.func_scan(ctx);
-                idx.func_scan(ctx)
-            }
-            _ => Some(()),
-        }
-    }
 }
