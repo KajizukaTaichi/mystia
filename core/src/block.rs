@@ -1,7 +1,7 @@
 use crate::*;
 
 #[derive(Clone, Debug)]
-pub struct Block(Vec<Stmt>);
+pub struct Block(pub Vec<Stmt>);
 
 impl Node for Block {
     fn parse(source: &str) -> Option<Block> {
@@ -26,10 +26,5 @@ impl Node for Block {
             result = line.type_infer(ctx)?;
         }
         Some(result)
-    }
-
-    fn func_scan(&self, ctx: &mut Compiler) -> Option<()> {
-        iter_map!(&self.0, |x: &Stmt| x.func_scan(ctx));
-        Some(())
     }
 }
