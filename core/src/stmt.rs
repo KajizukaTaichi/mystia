@@ -107,7 +107,6 @@ impl Node for Stmt {
                     }
                     Expr::Call(name, _) => {
                         ctx.variable.clear();
-                        self.func_scan(ctx)?;
                         let inf = ctx.function.get(name)?.clone();
                         let code = format!(
                             "(func ${name} {0} {1} {3} {2})",
@@ -184,22 +183,5 @@ impl Node for Stmt {
             }
             Stmt::Drop => Type::Void,
         })
-    }
-
-    fn func_scan(&self, ctx: &mut Compiler) -> Option<()> {
-        match self {
-            Stmt::Expr(expr) => expr.func_scan(ctx),
-            Stmt::If { cond, then, r#else } => {
-                cond.func_scan(ctx)?;
-                then.func_scan(ctx)?;
-                r#else.func_scan(ctx)
-            }
-            Stmt::While { cond, body } => {
-                cond.func_scan(ctx)?;
-                body.func_scan(ctx)
-            }
-            Stmt::Let { name: _, value } => value.func_scan(ctx),
-            _ => Some(()),
-        }
     }
 }
