@@ -176,9 +176,9 @@ impl Node for Stmt {
                 name: Expr::Call(name, args),
                 value,
             } => {
-                for (arg, (_, inf)) in args.iter().zip(ctx.argument.clone()) {
+                for arg in args {
                     if let Expr::Refer(arg) = arg {
-                        ctx.argument.insert(arg.to_string(), inf);
+                        ctx.argument.insert(arg.to_string(), Type::Pointer);
                     } else if let Expr::Oper(oper) = arg {
                         if let Oper::Cast(Expr::Refer(arg), typed) = *oper.clone() {
                             ctx.argument.insert(arg.to_string(), typed);
@@ -188,8 +188,10 @@ impl Node for Stmt {
                     };
                 }
                 let ret = value.type_infer(ctx)?;
-                let inf = ctx.function.get(name)?;
-                ctx.function.insert(name.to_owned(), (inf.0.clone(), ret));
+                ctx.function.insert(
+                    name.to_owned(),
+                    (ctx.argument.values().cloned().collect(), ret),
+                );
                 value.type_infer(ctx);
                 Type::Void
             }
