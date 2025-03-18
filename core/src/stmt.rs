@@ -112,8 +112,7 @@ impl Node for Stmt {
                             "(func ${name} {0} {1} {3} {2})",
                             join!({
                                 let mut result = vec![];
-                                for (k, v) in args.iter().zip(inf.0) {
-                                    let Expr::Refer(k) = k else { return None };
+                                for (k, v) in ctx.argument.clone() {
                                     result.push(format!("(param ${} {})", k, v.compile(ctx)?));
                                 }
                                 result
