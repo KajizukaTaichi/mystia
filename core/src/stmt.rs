@@ -162,8 +162,15 @@ impl Node for Stmt {
                 value,
             } => {
                 for (arg, (_, inf)) in args.iter().zip(ctx.argument.clone()) {
-                    let Expr::Refer(arg) = arg else { return None };
-                    ctx.argument.insert(arg.to_string(), inf);
+                    if let Expr::Refer(arg) = arg {
+                        ctx.argument.insert(arg.to_string(), inf);
+                    } else if let Expr::Oper(oper) = arg {
+                        if let Oper::Cast(Expr::Refer(arg), typed) = *oper.clone() {
+                            ctx.argument.insert(arg.to_string(), typed);
+                        }
+                    } else {
+                        return None;
+                    };
                 }
                 let ret = value.type_infer(ctx)?;
                 let inf = ctx.function.get(name)?;
