@@ -2,7 +2,7 @@ use crate::{lexer::str_escape, *};
 
 #[derive(Debug, Clone)]
 pub enum Expr {
-    Value(Value),
+    Literal(Value),
     Array(Vec<Expr>),
     Refer(String),
     Pointer(Box<Expr>),
@@ -23,10 +23,10 @@ impl Node for Expr {
             Some(
                 // Integer literal
                 if let Ok(n) = token.parse::<i32>() {
-                    Expr::Value(Value::Integer(n))
+                    Expr::Literal(Value::Integer(n))
                 // Float number literal
                 } else if let Ok(n) = token.parse::<f64>() {
-                    Expr::Value(Value::Float(n))
+                    Expr::Literal(Value::Float(n))
                 // Pointer access
                 } else if token.starts_with("@") {
                     let token = token.get(1..)?.trim();
@@ -34,7 +34,7 @@ impl Node for Expr {
                 // String literal
                 } else if token.starts_with("\"") && token.ends_with("\"") {
                     let token = token.get(1..token.len() - 1)?.trim();
-                    Expr::Value(Value::String(str_escape(token)))
+                    Expr::Literal(Value::String(str_escape(token)))
                 // Array
                 } else if token.starts_with("[") && token.ends_with("]") {
                     let token = token.get(1..token.len() - 1)?.trim();
@@ -80,13 +80,13 @@ impl Node for Expr {
         Some(match self {
             Expr::Oper(oper) => oper.compile(ctx)?,
             Expr::Refer(to) => format!("(local.get ${to})"),
-            Expr::Value(Value::Integer(n)) => format!("(i32.const {n})"),
-            Expr::Value(Value::Float(n)) => format!("(f64.const {n})"),
+            Expr::Literal(Value::Integer(n)) => format!("(i32.const {n})"),
+            Expr::Literal(Value::Float(n)) => format!("(f64.const {n})"),
             Expr::Array(array) => {
-                let result = Expr::Value(Value::Integer(ctx.index.clone()));
+                let result = Expr::Literal(Value::Integer(ctx.index.clone()));
                 for elm in array {
                     let code = Stmt::Let {
-                        name: Expr::Pointer(Box::new(Expr::Value(Value::Integer(ctx.index)))),
+                        name: Expr::Pointer(Box::new(Expr::Literal(Value::Integer(ctx.index)))),
                         value: elm.clone(),
                     }
                     .compile(ctx)?;
@@ -95,8 +95,8 @@ impl Node for Expr {
                 }
                 result.compile(ctx)?
             }
-            Expr::Value(Value::String(str)) => {
-                let result = Expr::Value(Value::Integer(ctx.index.clone())).compile(ctx)?;
+            Expr::Literal(Value::String(str)) => {
+                let result = Expr::Literal(Value::Integer(ctx.index.clone())).compile(ctx)?;
                 ctx.data.push(format!(r#"(data {} "{str}")"#, result));
                 ctx.index += str.len() as i32;
                 result
@@ -106,7 +106,7 @@ impl Node for Expr {
                     "(i32.load {})",
                     Expr::Oper(Box::new(Oper::Mul(
                         *expr.clone(),
-                        Expr::Value(Value::Integer(4))
+                        Expr::Literal(Value::Integer(4))
                     )))
                     .compile(ctx)?
                 )
@@ -133,9 +133,9 @@ impl Node for Expr {
                 locals.get(to)?.clone()
             }
             Expr::Array(_) => Type::Pointer,
-            Expr::Value(Value::Integer(_)) => Type::Integer,
-            Expr::Value(Value::Float(_)) => Type::Float,
-            Expr::Value(Value::String(_)) => Type::Pointer,
+            Expr::Literal(Value::Integer(_)) => Type::Integer,
+            Expr::Literal(Value::Float(_)) => Type::Float,
+            Expr::Literal(Value::String(_)) => Type::Pointer,
             Expr::Pointer(_) => Type::Integer,
             Expr::Call(name, args) => {
                 let _ = iter_map!(args, |x: &Expr| x.type_infer(ctx));

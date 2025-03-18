@@ -89,7 +89,7 @@ impl Node for Stmt {
                     Expr::Pointer(addr) => {
                         format!(
                             "(i32.store {} {})",
-                            Oper::Mul(*addr.clone(), Expr::Value(Value::Integer(4)))
+                            Oper::Mul(*addr.clone(), Expr::Literal(Value::Integer(4)))
                                 .compile(ctx)?,
                             value.compile(ctx)?
                         )
@@ -99,7 +99,7 @@ impl Node for Stmt {
                             "(i32.store {} {})",
                             Oper::Mul(
                                 Expr::Oper(Box::new(Oper::Add(*array.clone(), *index.clone()))),
-                                Expr::Value(Value::Integer(4))
+                                Expr::Literal(Value::Integer(4))
                             )
                             .compile(ctx)?,
                             value.compile(ctx)?
