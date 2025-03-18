@@ -40,8 +40,4 @@ impl Node for Type {
     fn type_infer(&self, _: &mut Compiler) -> Option<Type> {
         Some(self.clone())
     }
-
-    fn func_scan(&self, _: &mut Compiler) -> Option<()> {
-        Some(())
-    }
 }
