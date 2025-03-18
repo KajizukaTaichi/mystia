@@ -105,8 +105,9 @@ impl Node for Stmt {
                             value.compile(ctx)?
                         )
                     }
-                    Expr::Call(name, args) => {
+                    Expr::Call(name, _) => {
                         ctx.variable.clear();
+                        self.func_scan(ctx)?;
                         let inf = ctx.function.get(name)?.clone();
                         let code = format!(
                             "(func ${name} {0} {1} {3} {2})",
