@@ -105,15 +105,31 @@ impl Node for Stmt {
                             value.compile(ctx)?
                         )
                     }
-                    Expr::Call(name, _) => {
+                    Expr::Call(name, args) => {
                         ctx.variable.clear();
                         let inf = ctx.function.get(name)?.clone();
                         let code = format!(
                             "(func ${name} {0} {1} {3} {2})",
                             join!({
                                 let mut result = vec![];
-                                for (k, v) in ctx.argument.clone() {
-                                    result.push(format!("(param ${} {})", k, v.compile(ctx)?));
+                                for arg in args {
+                                    if let Expr::Oper(oper) = arg.clone() {
+                                        if let Oper::Cast(Expr::Refer(arg), t) = *oper.clone() {
+                                            result.push(format!(
+                                                "(param ${} {})",
+                                                arg,
+                                                t.compile(ctx)?
+                                            ));
+                                        }
+                                    } else if let Expr::Refer(arg) = arg.clone() {
+                                        result.push(format!(
+                                            "(param ${} {})",
+                                            arg,
+                                            Type::Pointer.compile(ctx)?
+                                        ));
+                                    } else {
+                                        return None;
+                                    }
                                 }
                                 result
                             }),
