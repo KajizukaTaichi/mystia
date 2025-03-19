@@ -141,8 +141,12 @@ impl Node for Expr {
             Expr::Literal(Value::String(_)) => Type::Pointer,
             Expr::Pointer(_) => Type::Integer,
             Expr::Call(name, args) => {
-                let _ = iter_map!(args, |x: &Expr| x.type_infer(ctx));
-                ctx.function.get(name)?.1.clone()
+                let (args_type, ret_type) = ctx.function.get(name)?.clone();
+                let _ = iter_map!(
+                    args.iter().zip(args_type),
+                    |(x, t): (&Expr, Type)| type_check!(x, t, ctx)
+                );
+                ret_type.clone()
             }
             Expr::Block(block) => block.type_infer(ctx)?,
             Expr::Access(_, _) => Type::Integer,
