@@ -1,7 +1,6 @@
 mod block;
 mod expr;
 mod lexer;
-mod node;
 mod oper;
 mod stmt;
 mod utils;
@@ -14,12 +13,19 @@ use {
     block::Block,
     expr::Expr,
     lexer::tokenize,
-    node::Node,
     oper::Oper,
     stmt::Stmt,
     utils::{OPERATOR, SPACE, expand_local, include_letter},
     value::{Type, Value},
 };
+
+pub trait Node {
+    fn compile(&self, ctx: &mut Compiler) -> Option<String>;
+    fn type_infer(&self, ctx: &mut Compiler) -> Option<Type>;
+    fn parse(source: &str) -> Option<Self>
+    where
+        Self: Node + Sized;
+}
 
 #[derive(Debug, Clone)]
 pub struct Compiler {
