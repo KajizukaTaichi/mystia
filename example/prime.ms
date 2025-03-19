@@ -1,18 +1,15 @@
-let sqrt(n) = {
-    let i = 0;
-    while i * i <= n loop {
-        let i = i + 1
-    };
-    i - 1
-};
-
 let is_prime(n) = {
-    let i = 2;
-    while i < sqrt(n) loop {
+    if n < 2 then { return false };
+    if n < 4 then { return true };
+    if n % 2 == 0 then { return false };
+    if n % 3 == 0 then { return false };
+
+    let i = 5;
+    while i * i < n loop {
         if n % i == 0 then {
             return false
         };
-        let i = i + 1
+        let i = i + 6
     };
     true
 };
