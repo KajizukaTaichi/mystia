@@ -28,15 +28,24 @@ impl Node for Stmt {
         if let Some(source) = source.strip_prefix("if ") {
             let code = tokenize(source, SPACE.as_ref(), false, true)?;
             let then_pos = code.iter().position(|i| i == "then")?;
-            let else_pos = code.iter().position(|i| i == "else")?;
-            let cond_sec = join!(code.get(0..then_pos)?);
-            let then_sec = join!(code.get(then_pos + 1..else_pos)?);
-            let else_sec = join!(code.get(else_pos + 1..)?);
-            Some(Stmt::If {
-                cond: Expr::parse(&cond_sec)?,
-                then: Expr::parse(&then_sec)?,
-                r#else: Box::new(Stmt::parse(&else_sec)?),
-            })
+            if let Some(else_pos) = code.iter().position(|i| i == "else") {
+                let cond_sec = join!(code.get(0..then_pos)?);
+                let then_sec = join!(code.get(then_pos + 1..else_pos)?);
+                let else_sec = join!(code.get(else_pos + 1..)?);
+                Some(Stmt::If {
+                    cond: Expr::parse(&cond_sec)?,
+                    then: Expr::parse(&then_sec)?,
+                    r#else: Box::new(Stmt::parse(&else_sec)?),
+                })
+            } else {
+                let cond_sec = join!(code.get(0..then_pos)?);
+                let then_sec = join!(code.get(then_pos + 1..)?);
+                Some(Stmt::If {
+                    cond: Expr::parse(&cond_sec)?,
+                    then: Expr::parse(&then_sec)?,
+                    r#else: Box::new(Stmt::Expr(Expr::Block(Block(vec![])))),
+                })
+            }
         } else if let Some(source) = source.strip_prefix("while ") {
             let code = tokenize(source, SPACE.as_ref(), false, true)?;
             let loop_pos = code.iter().position(|i| i == "loop")?;
