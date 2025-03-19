@@ -227,8 +227,7 @@ impl Node for Stmt {
                 Type::Void
             }
             Stmt::Drop => Type::Void,
-            Stmt::Return(Some(value)) => value.type_infer(ctx)?,
-            Stmt::Return(None) => Type::Void,
+            Stmt::Return(_) => Type::Void,
         })
     }
 }
