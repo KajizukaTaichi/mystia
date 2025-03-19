@@ -52,6 +52,14 @@ impl Node for Stmt {
                 name: Expr::parse(name)?,
                 value: Expr::parse(value)?,
             })
+        } else if let Some(source) = source.strip_prefix("return ") {
+            Some(Stmt::Return(Some(Expr::parse(source)?)))
+        } else if source == "return" {
+            Some(Stmt::Return(None))
+        } else if source == "next" {
+            Some(Stmt::Next)
+        } else if source == "break" {
+            Some(Stmt::Break)
         } else {
             Some(Stmt::Expr(Expr::parse(source)?))
         }
@@ -168,6 +176,8 @@ impl Node for Stmt {
                 body.type_infer(ctx)?;
                 Type::Void
             }
+            Stmt::Break => Type::Void,
+            Stmt::Next => Type::Void,
             Stmt::Let {
                 name: Expr::Refer(name),
                 value,
@@ -208,6 +218,8 @@ impl Node for Stmt {
                 Type::Void
             }
             Stmt::Drop => Type::Void,
+            Stmt::Return(Some(value)) => value.type_infer(ctx)?,
+            Stmt::Return(None) => Type::Void,
         })
     }
 }
