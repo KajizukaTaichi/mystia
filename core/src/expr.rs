@@ -27,7 +27,7 @@ impl Node for Expr {
                 // Float number literal
                 } else if let Ok(n) = token.parse::<f64>() {
                     Expr::Literal(Value::Float(n))
-                // Float number literal
+                // Boolean literal
                 } else if let Ok(n) = token.parse::<bool>() {
                     Expr::Literal(Value::Integer(if n { 1 } else { 0 }))
                 // Pointer access
