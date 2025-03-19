@@ -16,6 +16,9 @@ pub enum Stmt {
         value: Expr,
     },
     Expr(Expr),
+    Next,
+    Break,
+    Return(Option<Expr>),
     Drop,
 }
 
@@ -68,11 +71,14 @@ impl Node for Stmt {
             }
             Stmt::While { cond, body } => {
                 format!(
-                    "(block $outer (loop $while_start (br_if $outer (i32.eqz {})) {} (br $while_start)))",
+                    "(block $outer (loop $while_start (br_if $outer (i32.eqz {})) {} {}))",
                     cond.compile(ctx)?,
                     body.compile(ctx)?,
+                    Stmt::Next.compile(ctx)?
                 )
             }
+            Stmt::Next => "(br $while_start)".to_string(),
+            Stmt::Break => "(br $outer)".to_string(),
             Stmt::Let { name, value } => {
                 let value_type = value.type_infer(ctx)?;
                 match name {
@@ -144,7 +150,9 @@ impl Node for Stmt {
                     _ => todo!(),
                 }
             }
-            Stmt::Drop => "drop".to_string(),
+            Stmt::Drop => "(drop)".to_string(),
+            Stmt::Return(Some(expr)) => format!("(return {})", expr.compile(ctx)?),
+            Stmt::Return(None) => "(return)".to_string(),
         })
     }
 
