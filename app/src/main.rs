@@ -9,7 +9,7 @@ use std::{
 #[derive(Parser)]
 #[command(
     name = "Mystia",
-    about = "Web frontend programming language outputs wasm"
+    about = "The front-end programming language be compiled to WebAssembly"
 )]
 struct Cli {
     /// Source code file path
