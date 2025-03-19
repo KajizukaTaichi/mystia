@@ -28,7 +28,6 @@ pub struct Compiler {
     variable: HashMap<String, Type>,
     function: HashMap<String, (Vec<Type>, Type)>,
     argument: HashMap<String, Type>,
-    program: Block,
 }
 
 impl Compiler {
@@ -41,13 +40,11 @@ impl Compiler {
             variable: HashMap::new(),
             function: HashMap::new(),
             argument: HashMap::new(),
-            program: Block(vec![]),
         }
     }
 
     pub fn build(&mut self, source: &str) -> Option<String> {
         let ast = Block::parse(source)?;
-        self.program = ast.clone();
         let ret = ast.type_infer(self)?;
         Some(format!(
             "{5}\n(module (memory $mem 1) {2} {3} (func (export \"_start\") {1} {4} {0}))",
