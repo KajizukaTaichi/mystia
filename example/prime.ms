@@ -9,4 +9,4 @@ let is_prime(n) = {
     true
 };
 
-is_prime(5987)
+is_prime(1234567891)
