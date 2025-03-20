@@ -17,6 +17,9 @@ pub fn include_letter(query: &str, chars: &Vec<String>, idx: usize) -> bool {
 }
 
 pub fn expand_local(ctx: &mut Compiler) -> Option<String> {
+    for key in ctx.argument.keys() {
+        ctx.variable.remove(key);
+    }
     Some(join!(iter_map!(ctx.variable.clone(), |x: (
         String,
         Type
