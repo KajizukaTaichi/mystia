@@ -87,6 +87,9 @@ impl Node for Expr {
             Expr::Refer(to) => format!("(local.get ${to})"),
             Expr::Literal(Value::Integer(n)) => format!("(i32.const {n})"),
             Expr::Literal(Value::Float(n)) => format!("(f64.const {n})"),
+            Expr::Literal(Value::Bool(n)) => {
+                Expr::Literal(Value::Integer(if *n { 1 } else { 0 })).compile(ctx)?
+            }
             Expr::Array(array) => {
                 let result = Expr::Literal(Value::Integer(ctx.index.clone()));
                 for elm in array {
@@ -139,6 +142,7 @@ impl Node for Expr {
             }
             Expr::Array(_) => Type::Pointer,
             Expr::Literal(Value::Integer(_)) => Type::Integer,
+            Expr::Literal(Value::Bool(_)) => Type::Bool,
             Expr::Literal(Value::Float(_)) => Type::Float,
             Expr::Literal(Value::String(_)) => Type::Pointer,
             Expr::Pointer(_) => Type::Integer,
