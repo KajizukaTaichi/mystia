@@ -38,7 +38,7 @@ impl Node for Expr {
                 } else if token.starts_with("\"") && token.ends_with("\"") {
                     let token = token.get(1..token.len() - 1)?.trim();
                     Expr::Literal(Value::String(str_escape(token)))
-                // Array
+                // Array `[expr, ...]`
                 } else if token.starts_with("[") && token.ends_with("]") {
                     let token = token.get(1..token.len() - 1)?.trim();
                     let mut result = vec![];
@@ -46,11 +46,11 @@ impl Node for Expr {
                         result.push(Expr::parse(&i)?);
                     }
                     Expr::Array(result)
-                // Code block
+                // Code block `{ stmt; ... }`
                 } else if token.starts_with("{") && token.ends_with("}") {
                     let token = token.get(1..token.len() - 1)?.trim();
                     Expr::Block(Block::parse(token)?)
-                // prioritize higher than others
+                // Prioritize higher than others
                 } else if token.starts_with("(") && token.ends_with(")") {
                     let token = token.get(1..token.len() - 1)?.trim();
                     Expr::parse(token)?
