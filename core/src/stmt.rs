@@ -177,11 +177,11 @@ impl Node for Stmt {
         Some(match self {
             Stmt::Expr(expr) => expr.type_infer(ctx)?,
             Stmt::If { cond, then, r#else } => {
-                cond.type_infer(ctx);
+                type_check!(cond, Type::Bool, ctx)?;
                 type_check!(then, r#else, ctx)?
             }
             Stmt::While { cond, body } => {
-                cond.type_infer(ctx)?;
+                type_check!(cond, Type::Bool, ctx)?;
                 body.type_infer(ctx)?;
                 Type::Void
             }
