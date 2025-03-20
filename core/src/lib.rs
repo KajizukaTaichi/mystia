@@ -43,8 +43,8 @@ impl Compiler {
         Compiler {
             index: 0,
             data: vec![],
-            declare: vec![],
             array: vec![],
+            declare: vec![],
             variable: HashMap::new(),
             function: HashMap::new(),
             argument: HashMap::new(),
