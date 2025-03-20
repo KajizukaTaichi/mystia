@@ -50,6 +50,21 @@ macro_rules! type_check {
 }
 
 #[macro_export]
+macro_rules! compile_compare {
+    ($oper: expr, $self: expr, $ctx: expr, $lhs: expr, $rhs: expr) => {{
+        let ret = $self.type_infer($ctx)?.compile($ctx)?;
+        format!(
+            "({}.{}{} {} {})",
+            ret,
+            $oper,
+            if ret == "i32" { "_s" } else { "" },
+            $lhs.compile($ctx)?,
+            $rhs.compile($ctx)?
+        )
+    }};
+}
+
+#[macro_export]
 macro_rules! iter_map {
     ($iter: expr, $proc: expr) => {{
         let mut result = vec![];
