@@ -19,8 +19,9 @@ struct Cli {
 fn main() {
     let cli = Cli::parse();
     let mut compiler = Compiler::new();
+    let filename = Path::new(&cli.path);
 
-    let Ok(source) = read_to_string(cli.path.clone()) else {
+    let Ok(source) = read_to_string(filename) else {
         eprintln!("Failed to read source file");
         return;
     };
@@ -28,7 +29,6 @@ fn main() {
         eprintln!("Failed to compile Mystia code");
         return;
     };
-    let filename = Path::new(&cli.path);
     let Ok(mut output_file) = File::create(filename.with_extension("wat")) else {
         eprintln!("Failed to create output WAT file");
         return;
@@ -46,7 +46,7 @@ fn main() {
         return;
     };
     let Ok(_) = output_file.write_all(&binary) else {
-        eprintln!("Failed to write output in the WASM file");
+        eprintln!("Failed to write generated binary in the WASM file");
         return;
     };
 }
