@@ -41,48 +41,13 @@ impl Node for Oper {
 
     fn compile(&self, ctx: &mut Compiler) -> Option<String> {
         Some(match self {
-            Oper::Add(lhs, rhs) => format!(
-                "({}.add {} {})",
-                self.type_infer(ctx)?.compile(ctx)?,
-                lhs.compile(ctx)?,
-                rhs.compile(ctx)?
-            ),
-            Oper::Sub(lhs, rhs) => format!(
-                "({}.sub {} {})",
-                self.type_infer(ctx)?.compile(ctx)?,
-                lhs.compile(ctx)?,
-                rhs.compile(ctx)?
-            ),
-            Oper::Mul(lhs, rhs) => format!(
-                "({}.mul {} {})",
-                self.type_infer(ctx)?.compile(ctx)?,
-                lhs.compile(ctx)?,
-                rhs.compile(ctx)?
-            ),
-            Oper::Div(lhs, rhs) => format!(
-                "({}.div_s {} {})",
-                self.type_infer(ctx)?.compile(ctx)?,
-                lhs.compile(ctx)?,
-                rhs.compile(ctx)?
-            ),
-            Oper::Mod(lhs, rhs) => format!(
-                "({}.rem_s {} {})",
-                self.type_infer(ctx)?.compile(ctx)?,
-                lhs.compile(ctx)?,
-                rhs.compile(ctx)?
-            ),
-            Oper::Eql(lhs, rhs) => format!(
-                "({}.eq {} {})",
-                self.type_infer(ctx)?.compile(ctx)?,
-                lhs.compile(ctx)?,
-                rhs.compile(ctx)?
-            ),
-            Oper::Neq(lhs, rhs) => format!(
-                "({}.ne {} {})",
-                self.type_infer(ctx)?.compile(ctx)?,
-                lhs.compile(ctx)?,
-                rhs.compile(ctx)?
-            ),
+            Oper::Add(lhs, rhs) => compile_arithmetic!("add", self, ctx, lhs, rhs),
+            Oper::Sub(lhs, rhs) => compile_arithmetic!("sub", self, ctx, lhs, rhs),
+            Oper::Mul(lhs, rhs) => compile_arithmetic!("mul", self, ctx, lhs, rhs),
+            Oper::Div(lhs, rhs) => compile_compare!("div", self, ctx, lhs, rhs),
+            Oper::Mod(lhs, rhs) => compile_compare!("rem", self, ctx, lhs, rhs),
+            Oper::Eql(lhs, rhs) => compile_arithmetic!("eq", self, ctx, lhs, rhs),
+            Oper::Neq(lhs, rhs) => compile_arithmetic!("ne", self, ctx, lhs, rhs),
             Oper::Lt(lhs, rhs) => compile_compare!("lt", self, ctx, lhs, rhs),
             Oper::LtEq(lhs, rhs) => compile_compare!("le", self, ctx, lhs, rhs),
             Oper::Gt(lhs, rhs) => compile_compare!("gt", self, ctx, lhs, rhs),
