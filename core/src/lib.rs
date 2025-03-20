@@ -29,12 +29,19 @@ pub trait Node {
 
 #[derive(Debug, Clone)]
 pub struct Compiler {
+    /// メモリ
     index: i32,
+    /// 文字列データ
     data: Vec<String>,
+    /// 代入時に展開される配列
     array: Vec<String>,
+    /// 関数定義コードの集合
     declare: Vec<String>,
+    /// 型推論：変数の名前と型
     variable: HashMap<String, Type>,
+    /// 型推論：関数の名前と引数と戻り値の型
     function: HashMap<String, (Vec<Type>, Type)>,
+    /// 型推論：引数の名前と型
     argument: HashMap<String, Type>,
 }
 
