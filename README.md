@@ -1,5 +1,5 @@
 # Mystia
-The front-end programming language be compiled to WebAssembly
+A programming language that's compiled to WebAssembly
 
 ## Features
 - **Type inference**: You can use variable without having declare and annotation
