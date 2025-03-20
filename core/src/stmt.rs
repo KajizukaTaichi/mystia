@@ -132,7 +132,7 @@ impl Node for Stmt {
                         ctx.variable.clear();
                         let inf = ctx.function.get(name)?.clone();
                         let code = format!(
-                            "(func ${name} {0} {1} {3} {2})",
+                            "(func ${name} (export \"{name}\") {0} {1} {3} {2})",
                             join!({
                                 let mut result = vec![];
                                 for arg in args {
