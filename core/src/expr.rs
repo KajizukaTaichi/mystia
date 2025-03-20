@@ -1,4 +1,4 @@
-use crate::{lexer::str_escape, *};
+use crate::*;
 
 #[derive(Debug, Clone)]
 pub enum Expr {
@@ -72,8 +72,10 @@ impl Node for Expr {
                     };
                     Expr::Call(name.to_string(), args)
                 // Variable reference
-                } else {
+                } else if !RESERVED.contains(&token.as_str()) {
                     Expr::Refer(token)
+                } else {
+                    return None;
                 },
             )
         }
