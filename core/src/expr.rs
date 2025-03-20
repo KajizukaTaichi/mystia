@@ -57,7 +57,7 @@ impl Node for Expr {
                 // Index access `array[index]`
                 } else if token.contains("[") && token.ends_with("]") {
                     let token = token.get(..token.len() - 1)?.trim();
-                    let (array, index) = token.split_once("[")?;
+                    let (array, index) = token.rsplit_once("[")?;
                     Expr::Access(Box::new(Expr::parse(array)?), Box::new(Expr::parse(index)?))
                 // Function call `name(args, ...)`
                 } else if token.contains("(") && token.ends_with(")") {
