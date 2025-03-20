@@ -1,12 +1,10 @@
-let total(number) = {
-    let count = 1;
-    let result = 0;
-
-    while count < number loop {
-        let result = result + count;
-        let count = count + 1
+let fact(number) = {
+    let result = 1;
+    while number > 0 loop {
+        let result = result * number;
+        let number = number - 1
     };
     result
 };
 
-total(10)
+fact(6)
