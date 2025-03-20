@@ -12,10 +12,10 @@ use std::collections::HashMap;
 use {
     block::Block,
     expr::Expr,
-    lexer::tokenize,
+    lexer::{str_escape, tokenize},
     oper::Oper,
     stmt::Stmt,
-    utils::{OPERATOR, SPACE, expand_local, include_letter},
+    utils::{OPERATOR, RESERVED, SPACE, expand_local, include_letter},
     value::{Type, Value},
 };
 
