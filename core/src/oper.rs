@@ -140,18 +140,26 @@ impl Node for Oper {
 
     fn type_infer(&self, ctx: &mut Compiler) -> Option<Type> {
         match self {
-            Oper::Add(lhs, rhs) => type_check!(lhs, rhs, ctx),
-            Oper::Sub(lhs, rhs) => type_check!(lhs, rhs, ctx),
-            Oper::Mul(lhs, rhs) => type_check!(lhs, rhs, ctx),
-            Oper::Div(lhs, rhs) => type_check!(lhs, rhs, ctx),
-            Oper::Mod(lhs, rhs) => type_check!(lhs, rhs, ctx),
-            Oper::Eql(lhs, rhs) => type_check!(lhs, rhs, ctx),
-            Oper::Neq(lhs, rhs) => type_check!(lhs, rhs, ctx),
-            Oper::Lt(lhs, rhs) => type_check!(lhs, rhs, ctx),
-            Oper::Gt(lhs, rhs) => type_check!(lhs, rhs, ctx),
-            Oper::LtEq(lhs, rhs) => type_check!(lhs, rhs, ctx),
-            Oper::GtEq(lhs, rhs) => type_check!(lhs, rhs, ctx),
-            Oper::Cast(_, rhs) => Some(rhs.clone()),
+            Oper::Add(lhs, rhs)
+            | Oper::Sub(lhs, rhs)
+            | Oper::Mul(lhs, rhs)
+            | Oper::Div(lhs, rhs)
+            | Oper::Mod(lhs, rhs) => {
+                type_check!(lhs, rhs, ctx)
+            }
+            Oper::Eql(lhs, rhs)
+            | Oper::Neq(lhs, rhs)
+            | Oper::Lt(lhs, rhs)
+            | Oper::Gt(lhs, rhs)
+            | Oper::LtEq(lhs, rhs)
+            | Oper::GtEq(lhs, rhs) => {
+                type_check!(lhs, rhs, ctx);
+                Some(Type::Bool)
+            }
+            Oper::Cast(lhs, rhs) => {
+                lhs.type_infer(ctx)?;
+                Some(rhs.clone())
+            }
         }
     }
 }
