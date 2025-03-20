@@ -38,13 +38,15 @@ macro_rules! config_return {
 
 #[macro_export]
 macro_rules! type_check {
-    ($lhs: expr, $rhs: expr, $ctx: expr) => {
-        if $lhs.type_infer($ctx)?.compile($ctx) == $rhs.type_infer($ctx)?.compile($ctx) {
-            Some($lhs.type_infer($ctx)?)
+    ($lhs: expr, $rhs: expr, $ctx: expr) => {{
+        let lhs = $lhs.type_infer($ctx)?;
+        let rhs = $rhs.type_infer($ctx)?;
+        if lhs.compile($ctx) == rhs.compile($ctx) {
+            Some(lhs)
         } else {
             None
         }
-    };
+    }};
 }
 
 #[macro_export]
