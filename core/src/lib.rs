@@ -29,7 +29,7 @@ pub trait Node {
 
 #[derive(Debug, Clone)]
 pub struct Compiler {
-    /// メモリ
+    /// メモリアロケーション用のアドレス
     index: i32,
     /// 文字列データ
     data: Vec<String>,
