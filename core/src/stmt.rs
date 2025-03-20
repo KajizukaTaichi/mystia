@@ -5,7 +5,7 @@ pub enum Stmt {
     If {
         cond: Expr,
         then: Expr,
-        r#else: Box<Stmt>,
+        r#else: Option<Box<Stmt>>,
     },
     While {
         cond: Expr,
@@ -35,7 +35,7 @@ impl Node for Stmt {
                 Some(Stmt::If {
                     cond: Expr::parse(&cond_sec)?,
                     then: Expr::parse(&then_sec)?,
-                    r#else: Box::new(Stmt::parse(&else_sec)?),
+                    r#else: Some(Box::new(Stmt::parse(&else_sec)?)),
                 })
             } else {
                 let cond_sec = join!(code.get(0..then_pos)?);
@@ -43,7 +43,7 @@ impl Node for Stmt {
                 Some(Stmt::If {
                     cond: Expr::parse(&cond_sec)?,
                     then: Expr::parse(&then_sec)?,
-                    r#else: Box::new(Stmt::Expr(Expr::Block(Block(vec![])))),
+                    r#else: None,
                 })
             }
         } else if let Some(source) = source.strip_prefix("while ") {
@@ -79,11 +79,15 @@ impl Node for Stmt {
             Stmt::Expr(expr) => expr.compile(ctx)?,
             Stmt::If { cond, then, r#else } => {
                 format!(
-                    "(if {} (i32.eqz {}) (then {}) (else {}))",
+                    "(if {} {} (then {}) (else {}))",
                     config_return!(self.type_infer(ctx)?, ctx)?,
                     cond.compile(ctx)?,
-                    r#else.compile(ctx)?,
-                    then.compile(ctx)?
+                    then.compile(ctx)?,
+                    if let Some(r#else) = r#else {
+                        r#else.compile(ctx)?
+                    } else {
+                        String::new()
+                    },
                 )
             }
             Stmt::While { cond, body } => {
@@ -178,7 +182,11 @@ impl Node for Stmt {
             Stmt::Expr(expr) => expr.type_infer(ctx)?,
             Stmt::If { cond, then, r#else } => {
                 type_check!(cond, Type::Bool, ctx)?;
-                type_check!(then, r#else, ctx)?
+                if let Some(r#else) = r#else {
+                    type_check!(then, r#else, ctx)?
+                } else {
+                    then.type_infer(ctx)?
+                }
             }
             Stmt::While { cond, body } => {
                 type_check!(cond, Type::Bool, ctx)?;
