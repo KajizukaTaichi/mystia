@@ -29,7 +29,7 @@ impl Node for Expr {
                     Expr::Literal(Value::Float(n))
                 // Boolean literal
                 } else if let Ok(n) = token.parse::<bool>() {
-                    Expr::Literal(Value::Integer(if n { 1 } else { 0 }))
+                    Expr::Literal(Value::Bool(n))
                 // Pointer access
                 } else if token.starts_with("@") {
                     let token = token.get(1..)?.trim();
