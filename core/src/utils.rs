@@ -4,6 +4,9 @@ pub const SPACE: [&str; 5] = [" ", "　", "\n", "\t", "\r"];
 pub const OPERATOR: [&str; 12] = [
     "+", "-", "*", "/", "%", "^", "==", "!=", "<=", ">=", "<", ">",
 ];
+pub const RESERVED: [&str; 9] = [
+    "let", "if", "then", "else", "while", "loop", "break", "next", "return",
+];
 
 pub fn include_letter(query: &str, chars: &Vec<String>, idx: usize) -> bool {
     chars
