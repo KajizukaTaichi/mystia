@@ -4,8 +4,8 @@ let swap(a as ptr, b as ptr) = {
     let @b = temp
 };
 
-let nums = [3, 7];
-let a = nums;
-let b = nums +1;
+
+let @0 = 3; let a = 0;
+let @1 = 7; let b = 1;
 swap(a, b);
 @a - @b
