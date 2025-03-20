@@ -3,6 +3,7 @@ use crate::*;
 #[derive(Debug, Clone)]
 pub enum Value {
     Integer(i32),
+    Bool(bool),
     Float(f64),
     String(String),
 }
@@ -11,6 +12,7 @@ pub enum Value {
 pub enum Type {
     Integer,
     Float,
+    Bool,
     Pointer,
     Void,
 }
@@ -29,7 +31,7 @@ impl Node for Type {
     fn compile(&self, _: &mut Compiler) -> Option<String> {
         Some(
             match self {
-                Self::Integer | Self::Pointer => "i32",
+                Self::Integer | Self::Pointer | Self::Bool => "i32",
                 Self::Float => "f64",
                 Self::Void => return None,
             }
