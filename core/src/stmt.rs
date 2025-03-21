@@ -116,19 +116,15 @@ impl Node for Stmt {
                     Expr::Deref(addr) => {
                         format!(
                             "(i32.store {} {})",
-                            Oper::Mul(*addr.clone(), Expr::Literal(Value::Pointer(4)))
-                                .compile(ctx)?,
+                            addr.clone().compile(ctx)?,
                             value.compile(ctx)?
                         )
                     }
                     Expr::Access(array, index) => {
                         format!(
                             "(i32.store {} {})",
-                            Oper::Mul(
-                                Expr::Oper(Box::new(Oper::Add(*array.clone(), *index.clone()))),
-                                Expr::Literal(Value::Pointer(4))
-                            )
-                            .compile(ctx)?,
+                            Expr::Oper(Box::new(Oper::Add(*array.clone(), *index.clone())))
+                                .compile(ctx)?,
                             value.compile(ctx)?
                         )
                     }
