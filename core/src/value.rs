@@ -52,9 +52,9 @@ impl Node for Value {
     fn type_infer(&self, _: &mut Compiler) -> Option<Type> {
         Some(match self {
             Value::Integer(_) => Type::Integer,
+            Value::String(_) | Value::Pointer(_) => Type::Pointer,
             Value::Float(_) => Type::Float,
             Value::Bool(_) => Type::Bool,
-            Value::String(_) => Type::Pointer,
         })
     }
 }
