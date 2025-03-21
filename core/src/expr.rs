@@ -3,7 +3,6 @@ use crate::*;
 #[derive(Debug, Clone)]
 pub enum Expr {
     Literal(Value),
-    Array(Vec<Expr>),
     Variable(String),
     Deref(Box<Expr>),
     Oper(Box<Oper>),
@@ -28,14 +27,6 @@ impl Node for Expr {
                 } else if token.starts_with("@") {
                     let token = token.get(1..)?.trim();
                     Expr::Deref(Box::new(Expr::parse(token)?))
-                // Array `[expr, ...]`
-                } else if token.starts_with("[") && token.ends_with("]") {
-                    let token = token.get(1..token.len() - 1)?.trim();
-                    let mut result = vec![];
-                    for i in tokenize(token, &[","], false, true)? {
-                        result.push(Expr::parse(&i)?);
-                    }
-                    Expr::Array(result)
                 // Code block `{ stmt; ... }`
                 } else if token.starts_with("{") && token.ends_with("}") {
                     let token = token.get(1..token.len() - 1)?.trim();
@@ -76,23 +67,6 @@ impl Node for Expr {
             Expr::Oper(oper) => oper.compile(ctx)?,
             Expr::Variable(to) => format!("(local.get ${to})"),
             Expr::Literal(literal) => literal.compile(ctx)?,
-            Expr::Array(array) => {
-                let result = Expr::Literal(Value::Pointer(ctx.index.clone()));
-                for elm in array {
-                    let code = Stmt::Let {
-                        name: Expr::Deref(Box::new(Expr::Literal(Value::Pointer(ctx.index)))),
-                        value: elm.clone(),
-                    }
-                    .compile(ctx)?;
-                    ctx.array.push(code);
-                    match elm.type_infer(ctx)? {
-                        Type::Integer | Type::Pointer | Type::Bool => ctx.index += 4,
-                        Type::Float => ctx.index += 8,
-                        Type::Void => {}
-                    }
-                }
-                result.compile(ctx)?
-            }
             Expr::Deref(expr) => format!("(i32.load {})", expr.compile(ctx)?),
             Expr::Call(name, args) => format!(
                 "(call ${name} {})",
@@ -115,7 +89,6 @@ impl Node for Expr {
                 locals.extend(ctx.argument.clone());
                 locals.get(to)?.clone()
             }
-            Expr::Array(_) => Type::Pointer,
             Expr::Literal(literal) => literal.type_infer(ctx)?,
             Expr::Deref(_) => Type::Integer,
             Expr::Call(name, args) => {
