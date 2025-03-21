@@ -1,4 +1,4 @@
-let swap(a as ptr, b as ptr) = {
+let swap(a: ptr, b: ptr) = {
     let temp = @a;
     let @a = @b;
     let @b = temp
