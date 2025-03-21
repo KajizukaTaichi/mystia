@@ -165,6 +165,7 @@ impl Node for Stmt {
                             expand_local(ctx)?
                         );
                         ctx.variable.clear();
+                        ctx.argument.clear();
                         ctx.declare.push(code);
                         String::new()
                     }
