@@ -103,7 +103,7 @@ impl Node for Stmt {
             Stmt::Let { name, value } => {
                 let value_type = value.type_infer(ctx)?;
                 match name {
-                    Expr::Refer(name) => {
+                    Expr::Variable(name) => {
                         ctx.variable.insert(name.to_string(), value_type);
                         let result = format!(
                             "{1} (local.set ${name} {0})",
@@ -113,10 +113,10 @@ impl Node for Stmt {
                         ctx.array.clear();
                         result
                     }
-                    Expr::Pointer(addr) => {
+                    Expr::Deref(addr) => {
                         format!(
                             "(i32.store {} {})",
-                            Oper::Mul(*addr.clone(), Expr::Literal(Value::Integer(4)))
+                            Oper::Mul(*addr.clone(), Expr::Literal(Value::Pointer(4)))
                                 .compile(ctx)?,
                             value.compile(ctx)?
                         )
@@ -141,14 +141,14 @@ impl Node for Stmt {
                                 let mut result = vec![];
                                 for arg in args {
                                     if let Expr::Oper(oper) = arg.clone() {
-                                        if let Oper::Cast(Expr::Refer(arg), t) = *oper.clone() {
+                                        if let Oper::Cast(Expr::Variable(arg), t) = *oper.clone() {
                                             result.push(format!(
                                                 "(param ${} {})",
                                                 arg,
                                                 t.compile(ctx)?
                                             ));
                                         }
-                                    } else if let Expr::Refer(arg) = arg.clone() {
+                                    } else if let Expr::Variable(arg) = arg.clone() {
                                         result.push(format!(
                                             "(param ${} {})",
                                             arg,
@@ -197,7 +197,7 @@ impl Node for Stmt {
             Stmt::Break => Type::Void,
             Stmt::Next => Type::Void,
             Stmt::Let {
-                name: Expr::Refer(name),
+                name: Expr::Variable(name),
                 value,
             } if !ctx.argument.contains_key(name) => {
                 let value_type = value.type_infer(ctx)?;
@@ -213,10 +213,10 @@ impl Node for Stmt {
                 value,
             } => {
                 for arg in args {
-                    if let Expr::Refer(arg) = arg {
+                    if let Expr::Variable(arg) = arg {
                         ctx.argument.insert(arg.to_string(), Type::Pointer);
                     } else if let Expr::Oper(oper) = arg {
-                        if let Oper::Cast(Expr::Refer(arg), typed) = *oper.clone() {
+                        if let Oper::Cast(Expr::Variable(arg), typed) = *oper.clone() {
                             ctx.argument.insert(arg.to_string(), typed);
                         }
                     } else {
