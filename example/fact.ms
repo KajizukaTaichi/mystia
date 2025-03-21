@@ -1,4 +1,4 @@
-let fact(number) = {
+let fact(number: int) = {
     let result = 1;
     while number > 0 loop {
         let result = result * number;
