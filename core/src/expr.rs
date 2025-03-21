@@ -4,8 +4,8 @@ use crate::*;
 pub enum Expr {
     Literal(Value),
     Array(Vec<Expr>),
-    Refer(String),
-    Pointer(Box<Expr>),
+    Variable(String),
+    Deref(Box<Expr>),
     Oper(Box<Oper>),
     Call(String, Vec<Expr>),
     Access(Box<Expr>, Box<Expr>),
@@ -27,7 +27,7 @@ impl Node for Expr {
                 // Pointer access
                 } else if token.starts_with("@") {
                     let token = token.get(1..)?.trim();
-                    Expr::Pointer(Box::new(Expr::parse(token)?))
+                    Expr::Deref(Box::new(Expr::parse(token)?))
                 // Array `[expr, ...]`
                 } else if token.starts_with("[") && token.ends_with("]") {
                     let token = token.get(1..token.len() - 1)?.trim();
@@ -63,7 +63,7 @@ impl Node for Expr {
                     Expr::Call(name.to_string(), args)
                 // Variable reference
                 } else if !RESERVED.contains(&token.as_str()) {
-                    Expr::Refer(token)
+                    Expr::Variable(token)
                 } else {
                     return None;
                 },
@@ -74,13 +74,13 @@ impl Node for Expr {
     fn compile(&self, ctx: &mut Compiler) -> Option<String> {
         Some(match self {
             Expr::Oper(oper) => oper.compile(ctx)?,
-            Expr::Refer(to) => format!("(local.get ${to})"),
+            Expr::Variable(to) => format!("(local.get ${to})"),
             Expr::Literal(literal) => literal.compile(ctx)?,
             Expr::Array(array) => {
                 let result = Expr::Literal(Value::Integer(ctx.index.clone()));
                 for elm in array {
                     let code = Stmt::Let {
-                        name: Expr::Pointer(Box::new(Expr::Literal(Value::Integer(ctx.index)))),
+                        name: Expr::Deref(Box::new(Expr::Literal(Value::Pointer(ctx.index)))),
                         value: elm.clone(),
                     }
                     .compile(ctx)?;
@@ -89,7 +89,7 @@ impl Node for Expr {
                 }
                 result.compile(ctx)?
             }
-            Expr::Pointer(expr) => {
+            Expr::Deref(expr) => {
                 format!(
                     "(i32.load {})",
                     Expr::Oper(Box::new(Oper::Mul(
@@ -103,7 +103,7 @@ impl Node for Expr {
                 "(call ${name} {})",
                 join!(iter_map!(args, |x: &Expr| x.compile(ctx)))
             ),
-            Expr::Access(array, index) => Expr::Pointer(Box::new(Expr::Oper(Box::new(Oper::Add(
+            Expr::Access(array, index) => Expr::Deref(Box::new(Expr::Oper(Box::new(Oper::Add(
                 *array.clone(),
                 *index.clone(),
             )))))
@@ -115,14 +115,14 @@ impl Node for Expr {
     fn type_infer(&self, ctx: &mut Compiler) -> Option<Type> {
         Some(match self {
             Expr::Oper(oper) => oper.type_infer(ctx)?,
-            Expr::Refer(to) => {
+            Expr::Variable(to) => {
                 let mut locals = ctx.variable.clone();
                 locals.extend(ctx.argument.clone());
                 locals.get(to)?.clone()
             }
             Expr::Array(_) => Type::Pointer,
             Expr::Literal(literal) => literal.type_infer(ctx)?,
-            Expr::Pointer(_) => Type::Integer,
+            Expr::Deref(_) => Type::Integer,
             Expr::Call(name, args) => {
                 let (args_type, ret_type) = ctx.function.get(name)?.clone();
                 let _ = iter_map!(
