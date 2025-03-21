@@ -85,14 +85,14 @@ impl Node for Expr {
         Some(match self {
             Expr::Oper(oper) => oper.type_infer(ctx)?,
             Expr::Variable(to) => {
-                let mut locals = ctx.variable.clone();
-                locals.extend(ctx.argument.clone());
+                let mut locals = ctx.variable_type.clone();
+                locals.extend(ctx.argument_type.clone());
                 locals.get(to)?.clone()
             }
             Expr::Literal(literal) => literal.type_infer(ctx)?,
             Expr::Deref(_) => Type::Integer,
             Expr::Call(name, args) => {
-                let (args_type, ret_type) = ctx.function.get(name)?.clone();
+                let (args_type, ret_type) = ctx.function_type.get(name)?.clone();
                 let _ = iter_map!(
                     args.iter().zip(args_type),
                     |(x, t): (&Expr, Type)| type_check!(x, t, ctx)
