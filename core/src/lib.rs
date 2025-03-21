@@ -7,8 +7,8 @@ mod utils;
 mod value;
 
 use chrono::Local;
+use indexmap::IndexMap;
 use sha2::{Digest, Sha256};
-use std::collections::HashMap;
 
 use {
     block::Block,
@@ -37,11 +37,11 @@ pub struct Compiler {
     /// 関数定義コードの集合
     declare_code: Vec<String>,
     /// 型推論：変数の名前と型
-    variable_type: HashMap<String, Type>,
+    variable_type: IndexMap<String, Type>,
     /// 型推論：関数の名前と引数と戻り値の型
-    function_type: HashMap<String, (Vec<Type>, Type)>,
+    function_type: IndexMap<String, (Vec<Type>, Type)>,
     /// 型推論：引数の名前と型
-    argument_type: HashMap<String, Type>,
+    argument_type: IndexMap<String, Type>,
 }
 
 impl Compiler {
@@ -50,9 +50,9 @@ impl Compiler {
             alloc_index: 0,
             static_data: vec![],
             declare_code: vec![],
-            variable_type: HashMap::new(),
-            function_type: HashMap::new(),
-            argument_type: HashMap::new(),
+            variable_type: IndexMap::new(),
+            function_type: IndexMap::new(),
+            argument_type: IndexMap::new(),
         }
     }
 
