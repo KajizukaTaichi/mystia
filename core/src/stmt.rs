@@ -124,8 +124,8 @@ impl Node for Stmt {
                         )
                     }
                     Expr::Call(name, args) => {
-                        ctx.variable.clear();
-                        let inf = ctx.function.get(name)?.clone();
+                        ctx.variable_type.clear();
+                        let inf = ctx.function_type.get(name)?.clone();
                         let code = format!(
                             "(func ${name} (export \"{name}\") {0} {1} {3} {2})",
                             join!({
@@ -155,9 +155,9 @@ impl Node for Stmt {
                             value.compile(ctx)?,
                             expand_local(ctx)?
                         );
-                        ctx.variable.clear();
-                        ctx.argument.clear();
-                        ctx.declare.push(code);
+                        ctx.variable_type.clear();
+                        ctx.argument_type.clear();
+                        ctx.declare_code.push(code);
                         String::new()
                     }
                     _ => todo!(),
