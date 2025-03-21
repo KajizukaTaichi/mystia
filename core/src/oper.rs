@@ -34,7 +34,7 @@ impl Node for Oper {
             ">" => Oper::Gt(has_lhs(2)?, token()?),
             ">=" => Oper::GtEq(has_lhs(2)?, token()?),
             "<=" => Oper::LtEq(has_lhs(2)?, token()?),
-            "as" => Oper::Cast(has_lhs(2)?, Type::parse(token_list.last()?)?),
+            ":" => Oper::Cast(has_lhs(2)?, Type::parse(token_list.last()?)?),
             _ => return None,
         })
     }
