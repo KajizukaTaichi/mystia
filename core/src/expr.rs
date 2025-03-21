@@ -94,7 +94,7 @@ impl Node for Expr {
                     "(i32.load {})",
                     Expr::Oper(Box::new(Oper::Mul(
                         *expr.clone(),
-                        Expr::Literal(Value::Integer(4))
+                        Expr::Literal(Value::Pointer(4))
                     )))
                     .compile(ctx)?
                 )
