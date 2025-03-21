@@ -139,12 +139,6 @@ impl Node for Stmt {
                                                 t.compile(ctx)?
                                             ));
                                         }
-                                    } else if let Expr::Variable(arg) = arg.clone() {
-                                        result.push(format!(
-                                            "(param ${} {})",
-                                            arg,
-                                            Type::Integer.compile(ctx)?
-                                        ));
                                     } else {
                                         return None;
                                     }
@@ -204,9 +198,7 @@ impl Node for Stmt {
                 value,
             } => {
                 for arg in args {
-                    if let Expr::Variable(arg) = arg {
-                        ctx.argument_type.insert(arg.to_string(), Type::Integer);
-                    } else if let Expr::Oper(oper) = arg {
+                    if let Expr::Oper(oper) = arg {
                         if let Oper::Cast(Expr::Variable(arg), typed) = *oper.clone() {
                             ctx.argument_type.insert(arg.to_string(), typed);
                         }
