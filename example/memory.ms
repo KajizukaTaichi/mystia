@@ -5,6 +5,6 @@ let swap(a as ptr, b as ptr) = {
 };
 
 let a = 0x00; let @a = 3;
-let b = 0x01; let @b = 7;
+let b = 0x04; let @b = 7;
 swap(a, b);
 @a - @b
