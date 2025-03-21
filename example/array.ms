@@ -5,8 +5,8 @@ let sum(array as ptr, length) = {
 
     while count < length loop {
         let result = result + array[index];
-        let idx = index + 0x04;
-        let index = index + 1
+        let index = index + 0x04;
+        let count = count + 1
     };
     result
 };
