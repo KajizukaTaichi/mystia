@@ -11,5 +11,4 @@ let sum(array as ptr, length) = {
     result
 };
 
-let fuga = [100, 200, 300];
-sum(fuga, 3)
+sum([100, 200, 300], 3)
