@@ -5,6 +5,7 @@ pub enum Value {
     Integer(i32),
     Bool(bool),
     Float(f64),
+    Pointer(i32),
     String(String),
 }
 
@@ -20,6 +21,11 @@ impl Node for Value {
             // Boolean literal
             } else if let Ok(n) = source.parse::<bool>() {
                 Value::Bool(n)
+            } else if let Some(source) = source.strip_prefix("0x") {
+                let Ok(addr) = i32::from_str_radix(source, 16) else {
+                    return None;
+                };
+                Value::Pointer(addr)
             } else if source.starts_with("\"") && source.ends_with("\"") {
                 let source = source.get(1..source.len() - 1)?.trim();
                 Value::String(str_escape(source))
@@ -31,7 +37,7 @@ impl Node for Value {
 
     fn compile(&self, ctx: &mut Compiler) -> Option<String> {
         Some(match self {
-            Value::Integer(n) => format!("(i32.const {n})"),
+            Value::Integer(n) | Value::Pointer(n) => format!("(i32.const {n})"),
             Value::Float(n) => format!("(f64.const {n})"),
             Value::Bool(n) => Value::Integer(if *n { 1 } else { 0 }).compile(ctx)?,
             Value::String(str) => {
