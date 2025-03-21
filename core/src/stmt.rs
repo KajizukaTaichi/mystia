@@ -105,12 +105,7 @@ impl Node for Stmt {
                 match name {
                     Expr::Variable(name) => {
                         ctx.variable.insert(name.to_string(), value_type);
-                        let result = format!(
-                            "{1} (local.set ${name} {0})",
-                            value.compile(ctx)?,
-                            join!(ctx.array)
-                        );
-                        ctx.array.clear();
+                        let result = format!("(local.set ${name} {0})", value.compile(ctx)?);
                         result
                     }
                     Expr::Deref(addr) => {
