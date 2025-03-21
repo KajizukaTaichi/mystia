@@ -1,4 +1,4 @@
-let is_prime(n) = {
+let is_prime(n: int) = {
     let i = 2;
     while i * i < n loop {
         if n % i == 0 then {
