@@ -77,7 +77,7 @@ impl Node for Expr {
             Expr::Variable(to) => format!("(local.get ${to})"),
             Expr::Literal(literal) => literal.compile(ctx)?,
             Expr::Array(array) => {
-                let result = Expr::Literal(Value::Integer(ctx.index.clone()));
+                let result = Expr::Literal(Value::Pointer(ctx.index.clone()));
                 for elm in array {
                     let code = Stmt::Let {
                         name: Expr::Deref(Box::new(Expr::Literal(Value::Pointer(ctx.index)))),
@@ -85,20 +85,15 @@ impl Node for Expr {
                     }
                     .compile(ctx)?;
                     ctx.array.push(code);
-                    ctx.index += 1;
+                    match elm.type_infer(ctx)? {
+                        Type::Integer | Type::Pointer | Type::Bool => ctx.index += 4,
+                        Type::Float => ctx.index += 8,
+                        Type::Void => {}
+                    }
                 }
                 result.compile(ctx)?
             }
-            Expr::Deref(expr) => {
-                format!(
-                    "(i32.load {})",
-                    Expr::Oper(Box::new(Oper::Mul(
-                        *expr.clone(),
-                        Expr::Literal(Value::Pointer(4))
-                    )))
-                    .compile(ctx)?
-                )
-            }
+            Expr::Deref(expr) => format!("(i32.load {})", expr.compile(ctx)?),
             Expr::Call(name, args) => format!(
                 "(call ${name} {})",
                 join!(iter_map!(args, |x: &Expr| x.compile(ctx)))
