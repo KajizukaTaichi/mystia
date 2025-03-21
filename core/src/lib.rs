@@ -30,12 +30,10 @@ pub trait Node {
 
 #[derive(Debug, Clone)]
 pub struct Compiler {
-    /// メモリアロケーション用のアドレス
+    /// メモリ配置用のアドレス
     index: i32,
-    /// 文字列データ
+    /// 静的文字列データ
     data: Vec<String>,
-    /// 代入時に展開される配列
-    array: Vec<String>,
     /// 関数定義コードの集合
     declare: Vec<String>,
     /// 型推論：変数の名前と型
@@ -51,7 +49,6 @@ impl Compiler {
         Compiler {
             index: 0,
             data: vec![],
-            array: vec![],
             declare: vec![],
             variable: HashMap::new(),
             function: HashMap::new(),
