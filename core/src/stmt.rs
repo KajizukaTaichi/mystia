@@ -104,7 +104,7 @@ impl Node for Stmt {
                 let value_type = value.type_infer(ctx)?;
                 match name {
                     Expr::Variable(name) => {
-                        ctx.variable.insert(name.to_string(), value_type);
+                        ctx.variable_type.insert(name.to_string(), value_type);
                         let result = format!("(local.set ${name} {0})", value.compile(ctx)?);
                         result
                     }
@@ -190,12 +190,12 @@ impl Node for Stmt {
             Stmt::Let {
                 name: Expr::Variable(name),
                 value,
-            } if !ctx.argument.contains_key(name) => {
+            } if !ctx.argument_type.contains_key(name) => {
                 let value_type = value.type_infer(ctx)?;
-                if let Some(exist_val) = ctx.clone().variable.get(name) {
+                if let Some(exist_val) = ctx.clone().variable_type.get(name) {
                     type_check!(exist_val, value_type, ctx)?;
                 } else {
-                    ctx.variable.insert(name.to_string(), value_type);
+                    ctx.variable_type.insert(name.to_string(), value_type);
                 }
                 Type::Void
             }
@@ -205,19 +205,19 @@ impl Node for Stmt {
             } => {
                 for arg in args {
                     if let Expr::Variable(arg) = arg {
-                        ctx.argument.insert(arg.to_string(), Type::Integer);
+                        ctx.argument_type.insert(arg.to_string(), Type::Integer);
                     } else if let Expr::Oper(oper) = arg {
                         if let Oper::Cast(Expr::Variable(arg), typed) = *oper.clone() {
-                            ctx.argument.insert(arg.to_string(), typed);
+                            ctx.argument_type.insert(arg.to_string(), typed);
                         }
                     } else {
                         return None;
                     };
                 }
                 let ret = value.type_infer(ctx)?;
-                ctx.function.insert(
+                ctx.function_type.insert(
                     name.to_owned(),
-                    (ctx.argument.values().cloned().collect(), ret),
+                    (ctx.argument_type.values().cloned().collect(), ret),
                 );
                 value.type_infer(ctx);
                 Type::Void
