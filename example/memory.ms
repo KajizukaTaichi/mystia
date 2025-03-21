@@ -4,7 +4,7 @@ let swap(a as ptr, b as ptr) = {
     let @b = temp
 };
 
-let @0x00 = 3; let a = 0x00;
-let @0x01 = 7; let b = 0x01;
+let a = 0x00; let @a = 3;
+let b = 0x01; let @b = 7;
 swap(a, b);
 @a - @b
