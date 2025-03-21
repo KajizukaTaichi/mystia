@@ -126,7 +126,7 @@ impl Node for Stmt {
                             "(i32.store {} {})",
                             Oper::Mul(
                                 Expr::Oper(Box::new(Oper::Add(*array.clone(), *index.clone()))),
-                                Expr::Literal(Value::Integer(4))
+                                Expr::Literal(Value::Pointer(4))
                             )
                             .compile(ctx)?,
                             value.compile(ctx)?
@@ -214,7 +214,7 @@ impl Node for Stmt {
             } => {
                 for arg in args {
                     if let Expr::Variable(arg) = arg {
-                        ctx.argument.insert(arg.to_string(), Type::Pointer);
+                        ctx.argument.insert(arg.to_string(), Type::Integer);
                     } else if let Expr::Oper(oper) = arg {
                         if let Oper::Cast(Expr::Variable(arg), typed) = *oper.clone() {
                             ctx.argument.insert(arg.to_string(), typed);
