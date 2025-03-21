@@ -143,7 +143,7 @@ impl Node for Stmt {
                                         result.push(format!(
                                             "(param ${} {})",
                                             arg,
-                                            Type::Pointer.compile(ctx)?
+                                            Type::Integer.compile(ctx)?
                                         ));
                                     } else {
                                         return None;
