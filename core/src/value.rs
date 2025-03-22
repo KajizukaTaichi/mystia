@@ -21,11 +21,13 @@ impl Node for Value {
             // Boolean literal
             } else if let Ok(n) = source.parse::<bool>() {
                 Value::Bool(n)
+            // Pointer: memory address
             } else if let Some(source) = source.strip_prefix("0x") {
                 let Ok(addr) = i32::from_str_radix(source, 16) else {
                     return None;
                 };
                 Value::Pointer(addr)
+            // String litera;
             } else if source.starts_with("\"") && source.ends_with("\"") {
                 let source = source.get(1..source.len() - 1)?.trim();
                 Value::String(str_escape(source))
