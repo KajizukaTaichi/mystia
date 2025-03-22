@@ -90,7 +90,7 @@ impl Node for Oper {
             | Oper::Gt(lhs, rhs)
             | Oper::LtEq(lhs, rhs)
             | Oper::GtEq(lhs, rhs) => {
-                type_check!(lhs, rhs, ctx);
+                type_check!(lhs, rhs, ctx)?;
                 Some(Type::Bool)
             }
             Oper::Cast(lhs, rhs) => {
