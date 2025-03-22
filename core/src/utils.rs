@@ -69,15 +69,16 @@ macro_rules! compile_compare {
 
 #[macro_export]
 macro_rules! compile_arithmetic {
-    ($oper: expr, $self: expr, $ctx: expr, $lhs: expr, $rhs: expr) => {
+    ($oper: expr, $self: expr, $ctx: expr, $lhs: expr, $rhs: expr) => {{
+        type_check!($lhs, $rhs, $ctx)?;
         format!(
             "({}.{} {} {})",
-            $self.type_infer($ctx)?.compile($ctx)?,
+            $lhs.type_infer($ctx)?.compile($ctx)?,
             $oper,
             $lhs.compile($ctx)?,
             $rhs.compile($ctx)?
         )
-    };
+    }};
 }
 
 #[macro_export]
