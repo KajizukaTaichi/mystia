@@ -79,12 +79,12 @@ impl Node for Stmt {
             Stmt::Expr(expr) => expr.compile(ctx)?,
             Stmt::If { cond, then, r#else } => {
                 format!(
-                    "(if {} {} (then {}) (else {}))",
+                    "(if {} {} (then {}) {})",
                     config_return!(self.type_infer(ctx)?, ctx)?,
                     cond.compile(ctx)?,
                     then.compile(ctx)?,
                     if let Some(r#else) = r#else {
-                        r#else.compile(ctx)?
+                        format!("(else {})", r#else.compile(ctx)?)
                     } else {
                         String::new()
                     },
