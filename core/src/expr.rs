@@ -94,7 +94,11 @@ impl Node for Expr {
                 }
                 format!("{} {}", index.compile(ctx)?, join!(result))
             }
-            Expr::Deref(expr) => format!("(i32.load {})", expr.compile(ctx)?),
+            Expr::Deref(expr) => format!(
+                "({}.load {})",
+                ctx.deref_type.clone().compile(ctx)?,
+                expr.compile(ctx)?
+            ),
             Expr::Call(name, args) => format!(
                 "(call ${name} {})",
                 join!(iter_map!(args, |x: &Expr| x.compile(ctx)))
