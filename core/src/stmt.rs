@@ -110,19 +110,20 @@ impl Node for Stmt {
                     }
                     Expr::Deref(addr) => {
                         format!(
-                            "(i32.store {} {})",
+                            "({}.store {} {})",
+                            value.type_infer(ctx)?.compile(ctx)?,
                             addr.clone().compile(ctx)?,
                             value.compile(ctx)?
                         )
                     }
-                    Expr::Access(array, index) => {
-                        format!(
-                            "(i32.store {} {})",
-                            Expr::Oper(Box::new(Oper::Add(*array.clone(), *index.clone())))
-                                .compile(ctx)?,
-                            value.compile(ctx)?
-                        )
+                    Expr::Access(array, index) => Stmt::Let {
+                        name: Expr::Deref(Box::new(Expr::Oper(Box::new(Oper::Add(
+                            *array.clone(),
+                            *index.clone(),
+                        ))))),
+                        value: value.clone(),
                     }
+                    .compile(ctx)?,
                     Expr::Call(name, args) => {
                         ctx.variable_type.clear();
                         let inf = ctx.function_type.get(name)?.clone();
