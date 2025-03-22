@@ -28,19 +28,22 @@ pub trait Node {
         Self: Node + Sized;
 }
 
+/// Context in compiling
 #[derive(Debug, Clone)]
 pub struct Compiler {
-    /// メモリ配置用のアドレス
+    /// Address for memory allocation
     alloc_index: i32,
-    /// 静的文字列データ
+    /// Static string data
     static_data: Vec<String>,
-    /// 関数定義コードの集合
+    /// Type of dereference point
+    deref_type: Type,
+    /// Set of function declare code
     declare_code: Vec<String>,
-    /// 型推論：変数の名前と型
+    /// Type inference for variable
     variable_type: IndexMap<String, Type>,
-    /// 型推論：関数の名前と引数と戻り値の型
+    /// Type inference for function
     function_type: IndexMap<String, (Vec<Type>, Type)>,
-    /// 型推論：引数の名前と型
+    /// Type inference for argument
     argument_type: IndexMap<String, Type>,
 }
 
@@ -50,6 +53,7 @@ impl Compiler {
             alloc_index: 0,
             static_data: vec![],
             declare_code: vec![],
+            deref_type: Type::Integer,
             variable_type: IndexMap::new(),
             function_type: IndexMap::new(),
             argument_type: IndexMap::new(),
