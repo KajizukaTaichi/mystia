@@ -1,3 +1,5 @@
+use std::f32::consts::E;
+
 use crate::*;
 
 #[derive(Debug, Clone)]
@@ -140,7 +142,14 @@ impl Node for Expr {
         Some(match self {
             Expr::Variable(to) => ctx.variable_addr.get(to)?.clone(),
             Expr::Literal(val) => val.addr_infer(ctx)?,
-            _ => return None,
+            Expr::Deref(to) => to.addr_infer(ctx)?,
+            Expr::Block(block) => block.addr_infer(ctx)?,
+            Expr::Oper(oper) => oper.addr_infer(ctx)?,
+            Expr::Call(_, args) => *iter_map!(args, |x: &Expr| x.addr_infer(ctx)).last()?,
+            Expr::Access(arr, idx) => {
+                *iter_map!([arr, idx], |x: &Expr| x.addr_infer(ctx)).last()?
+            }
+            Expr::Array(arr) => *iter_map!(arr, |x: &Expr| x.addr_infer(ctx)).last()?,
         })
     }
 }
