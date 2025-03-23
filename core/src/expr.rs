@@ -140,8 +140,6 @@ impl Node for Expr {
         Some(match self {
             Expr::Variable(to) => ctx.variable_addr.get(to)?.clone(),
             Expr::Literal(val) => val.addr_infer(ctx)?,
-            Expr::Deref(to) => to.addr_infer(ctx)?,
-            Expr::Block(block) => block.addr_infer(ctx)?,
             _ => return None,
         })
     }
