@@ -54,6 +54,7 @@ impl Compiler {
             static_data: vec![],
             declare_code: vec![],
             address_type: IndexMap::new(),
+            variable_addr: IndexMap::new(),
             variable_type: IndexMap::new(),
             function_type: IndexMap::new(),
             argument_type: IndexMap::new(),

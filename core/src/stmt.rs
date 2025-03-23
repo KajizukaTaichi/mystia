@@ -226,4 +226,8 @@ impl Node for Stmt {
             Stmt::Return(_) => Type::Void,
         })
     }
+
+    fn addr_infer(&self, _: &mut Compiler) -> Option<i32> {
+        None
+    }
 }

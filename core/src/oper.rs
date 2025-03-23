@@ -52,14 +52,6 @@ impl Node for Oper {
             Oper::LtEq(lhs, rhs) => compile_compare!("le", self, ctx, lhs, rhs),
             Oper::Gt(lhs, rhs) => compile_compare!("gt", self, ctx, lhs, rhs),
             Oper::GtEq(lhs, rhs) => compile_compare!("ge", self, ctx, lhs, rhs),
-            Oper::Cast(Expr::Deref(expr), rhs) => {
-                ctx.deref_type = rhs.clone();
-                Expr::Deref(expr.clone()).compile(ctx)?
-            }
-            Oper::Cast(Expr::Access(array, expr), rhs) => {
-                ctx.deref_type = rhs.clone();
-                Expr::Access(array.clone(), expr.clone()).compile(ctx)?
-            }
             Oper::Cast(lhs, rhs) => {
                 format!(
                     "({}.{} {})",
@@ -98,5 +90,9 @@ impl Node for Oper {
                 Some(rhs.clone())
             }
         }
+    }
+
+    fn addr_infer(&self, _: &mut Compiler) -> Option<i32> {
+        None
     }
 }

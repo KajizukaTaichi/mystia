@@ -28,7 +28,7 @@ impl Node for Block {
         Some(result)
     }
 
-    fn addr_infer(&self, c_tx: &mut Compiler) -> Option<i32> {
+    fn addr_infer(&self, _: &mut Compiler) -> Option<i32> {
         None
     }
 }
