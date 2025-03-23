@@ -64,7 +64,7 @@ impl Node for Value {
     fn addr_infer(&self, _: &mut Compiler) -> Option<i32> {
         Some(match self {
             Value::Pointer(to) => *to,
-            _ => return None,
+            _ => 0,
         })
     }
 }
