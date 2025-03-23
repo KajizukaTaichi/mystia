@@ -64,6 +64,7 @@ impl Compiler {
     pub fn build(&mut self, source: &str) -> Option<String> {
         let ast = Block::parse(source)?;
         let ret = ast.type_infer(self)?;
+        ast.addr_infer(self)?;
         Some(format!(
             "(module (memory $mem 1) {2} {3} (func (export \"_start\") {1} {4} {0}))",
             ast.compile(self)?,
