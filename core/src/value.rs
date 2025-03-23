@@ -105,6 +105,6 @@ impl Node for Type {
     }
 
     fn addr_infer(&self, _: &mut Compiler) -> Option<i32> {
-        None
+        Some(0)
     }
 }
