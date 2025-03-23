@@ -227,7 +227,16 @@ impl Node for Stmt {
         })
     }
 
-    fn addr_infer(&self, _: &mut Compiler) -> Option<i32> {
-        None
+    fn addr_infer(&self, ctx: &mut Compiler) -> Option<i32> {
+        match self {
+            Stmt::Let {
+                name: Expr::Variable(name),
+                value,
+            } => {
+                let addr = value.addr_infer(ctx)?;
+                ctx.variable_addr.insert(name.clone(), addr)
+            }
+            _ => None,
+        }
     }
 }

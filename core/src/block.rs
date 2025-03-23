@@ -28,7 +28,11 @@ impl Node for Block {
         Some(result)
     }
 
-    fn addr_infer(&self, _: &mut Compiler) -> Option<i32> {
-        None
+    fn addr_infer(&self, ctx: &mut Compiler) -> Option<i32> {
+        let mut result = None;
+        for line in &self.0 {
+            result = Some(line.addr_infer(ctx)?)
+        }
+        result
     }
 }
