@@ -107,6 +107,7 @@ impl Node for Oper {
             | Oper::GtEq(lhs, rhs) => {
                 *iter_map!([lhs, rhs], |x: &Expr| x.addr_infer(ctx)).last()?
             }
+            Oper::Cast(expr, _) => expr.addr_infer(ctx)?,
         })
     }
 }
