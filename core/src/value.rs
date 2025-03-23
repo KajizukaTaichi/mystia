@@ -60,6 +60,13 @@ impl Node for Value {
             Value::Bool(_) => Type::Bool,
         })
     }
+
+    fn addr_infer(&self, _: &mut Compiler) -> Option<i32> {
+        Some(match self {
+            Value::Pointer(to) => *to,
+            _ => return None,
+        })
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -95,5 +102,9 @@ impl Node for Type {
 
     fn type_infer(&self, _: &mut Compiler) -> Option<Type> {
         Some(self.clone())
+    }
+
+    fn addr_infer(&self, _: &mut Compiler) -> Option<i32> {
+        None
     }
 }
