@@ -109,9 +109,11 @@ impl Node for Stmt {
                         result
                     }
                     Expr::Deref(addr) => {
+                        let val_type = value.type_infer(ctx)?;
+                        ctx.addr_type.insert(name, value);
                         format!(
                             "({}.store {} {})",
-                            value.type_infer(ctx)?.compile(ctx)?,
+                            val_type.compile(ctx)?,
                             addr.clone().compile(ctx)?,
                             value.compile(ctx)?
                         )

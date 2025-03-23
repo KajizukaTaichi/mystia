@@ -94,11 +94,11 @@ impl Node for Expr {
                 }
                 format!("{} {}", index.compile(ctx)?, join!(result))
             }
-            Expr::Deref(expr) => format!(
-                "({}.load {})",
-                ctx.deref_type.clone().compile(ctx)?,
-                expr.compile(ctx)?
-            ),
+            Expr::Deref(expr) => {
+                let addr = &expr.addr_infer(ctx)?.clone();
+                let typ = ctx.address_type.get(addr)?.clone();
+                format!("({}.load {})", typ.compile(ctx)?, addr)
+            }
             Expr::Call(name, args) => format!(
                 "(call ${name} {})",
                 join!(iter_map!(args, |x: &Expr| x.compile(ctx)))
@@ -133,6 +133,16 @@ impl Node for Expr {
             }
             Expr::Block(block) => block.type_infer(ctx)?,
             Expr::Access(_, _) => Type::Integer,
+        })
+    }
+
+    fn addr_infer(&self, ctx: &mut Compiler) -> Option<i32> {
+        Some(match self {
+            Expr::Variable(to) => ctx.variable_addr.get(to)?.clone(),
+            Expr::Literal(val) => val.addr_infer(ctx)?,
+            Expr::Deref(to) => to.addr_infer(ctx)?,
+            Expr::Block(block) => block.addr_infer(ctx)?,
+            _ => return None,
         })
     }
 }

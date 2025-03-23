@@ -20,6 +20,7 @@ use {
 pub trait Node {
     fn compile(&self, ctx: &mut Compiler) -> Option<String>;
     fn type_infer(&self, ctx: &mut Compiler) -> Option<Type>;
+    fn addr_infer(&self, ctx: &mut Compiler) -> Option<i32>;
     fn parse(source: &str) -> Option<Self>
     where
         Self: Node + Sized;
@@ -32,8 +33,10 @@ pub struct Compiler {
     alloc_index: i32,
     /// Static string data
     static_data: Vec<String>,
-    /// Type of dereference point
-    deref_type: Type,
+    /// Type of address pointer specified
+    address_type: IndexMap<i32, Type>,
+    /// Address that's variable stored
+    variable_addr: IndexMap<String, i32>,
     /// Set of function declare code
     declare_code: Vec<String>,
     /// Type inference for variable
@@ -50,7 +53,7 @@ impl Compiler {
             alloc_index: 0,
             static_data: vec![],
             declare_code: vec![],
-            deref_type: Type::Integer,
+            address_type: IndexMap::new(),
             variable_type: IndexMap::new(),
             function_type: IndexMap::new(),
             argument_type: IndexMap::new(),
