@@ -237,7 +237,10 @@ impl Node for Stmt {
                 ctx.variable_addr.insert(name.clone(), addr)?
             }
             Stmt::Let { name, value } => {
-                *iter_map!([name, value], |x: &Expr| x.addr_infer(ctx)).last()?
+                let name = name.addr_infer(ctx)?;
+                let value = value.type_infer(ctx)?;
+                ctx.address_type.insert(name, value.clone());
+                value.addr_infer(ctx)?
             }
             Stmt::If { cond, then, r#else } => {
                 iter_map!([cond, then], |x: &Expr| x.addr_infer(ctx));
