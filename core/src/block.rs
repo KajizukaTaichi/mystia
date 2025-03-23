@@ -21,18 +21,14 @@ impl Node for Block {
     }
 
     fn type_infer(&self, ctx: &mut Compiler) -> Option<Type> {
-        let mut result = Type::Void;
-        for line in &self.0 {
-            result = line.type_infer(ctx)?;
-        }
-        Some(result)
+        Some(
+            iter_map!(self.0.clone(), |x: Stmt| x.type_infer(ctx))
+                .last()?
+                .clone(),
+        )
     }
 
     fn addr_infer(&self, ctx: &mut Compiler) -> Option<i32> {
-        let mut result = None;
-        for line in &self.0 {
-            result = Some(line.addr_infer(ctx)?)
-        }
-        result
+        Some(*iter_map!(self.0.clone(), |x: Stmt| x.addr_infer(ctx)).last()?)
     }
 }
