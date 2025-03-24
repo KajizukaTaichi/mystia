@@ -1,7 +1,7 @@
 let swap(a: ptr, b: ptr) = {
-    let temp = @a;
+    let tmp = @a;
     let @a = @b;
-    let @b = temp
+    let @b = tmp
 };
 
 let a = 0x00; let @a = 3;
