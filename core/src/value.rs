@@ -57,7 +57,7 @@ impl Node for Value {
 pub enum Type {
     Number,
     Bool,
-    Array,
+    Array(Box<Type>),
     String,
     Void,
 }
@@ -67,16 +67,25 @@ impl Node for Type {
         match source.trim() {
             "num" => Some(Self::Number),
             "str" => Some(Self::String),
-            "arr" => Some(Self::Array),
             "nil" => Some(Self::Void),
-            _ => None,
+            _ => {
+                if let Some(source) = source.strip_prefix("arr<") {
+                    if let Some(source) = source.strip_suffix(">") {
+                        Some(Type::Array(Box::new(Type::parse(source)?)))
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                }
+            }
         }
     }
 
     fn compile(&self, _: &mut Compiler) -> Option<String> {
         Some(
             match self {
-                Self::Array | Self::String | Self::Bool => "i32",
+                Self::Array(_) | Self::String | Self::Bool => "i32",
                 Self::Number => "f64",
                 Self::Void => return None,
             }
