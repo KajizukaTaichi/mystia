@@ -32,10 +32,6 @@ pub struct Compiler {
     alloc_index: i32,
     /// Static string data
     static_data: Vec<String>,
-    /// Type of address pointer specified
-    address_type: IndexMap<i32, Type>,
-    /// Address that's variable stored
-    variable_addr: IndexMap<String, i32>,
     /// Set of function declare code
     declare_code: Vec<String>,
     /// Type inference for variable
@@ -52,8 +48,6 @@ impl Compiler {
             alloc_index: 0,
             static_data: vec![],
             declare_code: vec![],
-            address_type: IndexMap::new(),
-            variable_addr: IndexMap::new(),
             variable_type: IndexMap::new(),
             function_type: IndexMap::new(),
             argument_type: IndexMap::new(),
