@@ -72,29 +72,32 @@ impl Node for Expr {
             Expr::Variable(to) => format!("(local.get ${to})"),
             Expr::Literal(literal) => literal.compile(ctx)?,
             Expr::Array(array) => {
-                let index = || {
-                    Some(Expr::Literal(Value::Array(
-                        ctx.alloc_index.clone(),
-                        array.len(),
-                        array.first()?.type_infer(ctx)?,
-                    )))
-                };
+                let index = Expr::Literal(Value::Array(
+                    ctx.alloc_index.clone(),
+                    array.len(),
+                    array.first()?.type_infer(ctx)?,
+                ));
                 let mut result: Vec<_> = vec![];
                 for elm in array {
                     let elm_type = elm.type_infer(ctx)?;
                     result.push(format!(
                         "({type}.store {address} {value})",
                         r#type = elm_type.compile(ctx)?,
-                        address = index()?.compile(ctx)?,
+                        address = Expr::Literal(Value::Array(
+                            ctx.alloc_index.clone(),
+                            array.len(),
+                            array.first()?.type_infer(ctx)?,
+                        ))
+                        .compile(ctx)?,
                         value = elm.compile(ctx)?
                     ));
                     match elm_type {
-                        Type::Array | Type::String | Type::Bool => ctx.alloc_index += 4,
+                        Type::Array(_) | Type::String | Type::Bool => ctx.alloc_index += 4,
                         Type::Number => ctx.alloc_index += 8,
                         Type::Void => {}
                     }
                 }
-                format!("{} {}", index()?.compile(ctx)?, join!(result))
+                format!("{} {}", index.compile(ctx)?, join!(result))
             }
             Expr::Call(name, args) => format!(
                 "(call ${name} {})",
@@ -102,8 +105,10 @@ impl Node for Expr {
             ),
             Expr::Access(array, index) => {
                 let addr = Oper::Add(*array.clone(), *index.clone());
-                let typ = ctx.address_type.get(addr)?.clone();
-                format!("({}.load {})", typ.compile(ctx)?, addr)
+                let Type::Array(typ) = array.type_infer(ctx)? else {
+                    return None;
+                };
+                format!("({}.load {})", typ.compile(ctx)?, addr.compile(ctx)?)
             }
             Expr::Block(block) => block.compile(ctx)?,
         })
@@ -117,9 +122,8 @@ impl Node for Expr {
                 locals.extend(ctx.argument_type.clone());
                 locals.get(to)?.clone()
             }
-            Expr::Array(_) => Type::Pointer,
+            Expr::Array(e) => Type::Array(Box::new(e.first()?.type_infer(ctx)?)),
             Expr::Literal(literal) => literal.type_infer(ctx)?,
-            Expr::Deref(_) => Type::Integer,
             Expr::Call(name, args) => {
                 let (args_type, ret_type) = ctx.function_type.get(name)?.clone();
                 let _ = iter_map!(
@@ -129,7 +133,12 @@ impl Node for Expr {
                 ret_type.clone()
             }
             Expr::Block(block) => block.type_infer(ctx)?,
-            Expr::Access(_, _) => Type::Integer,
+            Expr::Access(arr, _) => {
+                let Type::Array(typ) = arr.type_infer(ctx)? else {
+                    return None;
+                };
+                *typ
+            }
         })
     }
 }
