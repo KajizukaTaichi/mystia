@@ -83,7 +83,7 @@ impl Node for Expr {
                         value = elm.compile(ctx)?
                     ));
                     match elm_type {
-                        Type::Integer | Type::Pointer | Type::Bool => ctx.alloc_index += 4,
+                        Type::Integer | Type::Bool => ctx.alloc_index += 4,
                         Type::Float => ctx.alloc_index += 8,
                         Type::Void => {}
                     }
