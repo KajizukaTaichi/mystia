@@ -4,7 +4,7 @@ use crate::*;
 pub enum Value {
     Number(f64),
     Bool(bool),
-    Array(i32, usize),
+    Array(i32, usize, Type),
     String(String),
 }
 
@@ -29,11 +29,12 @@ impl Node for Value {
 
     fn compile(&self, ctx: &mut Compiler) -> Option<String> {
         Some(match self {
-            Value::Array(n, _) => format!("(i32.const {n})"),
+            Value::Array(n, _, _) => format!("(i32.const {n})"),
             Value::Number(n) => format!("(f64.const {n})"),
-            Value::Bool(n) => Value::Array(if *n { 1 } else { 0 }, 0).compile(ctx)?,
+            Value::Bool(n) => Value::Array(if *n { 1 } else { 0 }, 0, Type::Bool).compile(ctx)?,
             Value::String(str) => {
-                let result = Value::Array(ctx.alloc_index.clone(), str.len()).compile(ctx)?;
+                let result =
+                    Value::Array(ctx.alloc_index.clone(), str.len(), Type::String).compile(ctx)?;
                 ctx.static_data
                     .push(format!(r#"(data {} "{str}")"#, result));
                 ctx.alloc_index += str.len() as i32;
@@ -46,7 +47,7 @@ impl Node for Value {
         Some(match self {
             Value::Number(_) => Type::Number,
             Value::String(_) => Type::String,
-            Value::Array(_, _) => Type::Array,
+            Value::Array(_, _, _) => Type::Array,
             Value::Bool(_) => Type::Bool,
         })
     }
