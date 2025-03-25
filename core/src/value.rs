@@ -43,7 +43,7 @@ impl Node for Value {
             Value::Float(n) => format!("(f64.const {n})"),
             Value::Bool(n) => Value::Integer(if *n { 1 } else { 0 }).compile(ctx)?,
             Value::String(str) => {
-                let result = Expr::Literal(Value::Pointer(ctx.alloc_index.clone())).compile(ctx)?;
+                let result = Value::Pointer(ctx.alloc_index.clone()).compile(ctx)?;
                 ctx.static_data
                     .push(format!(r#"(data {} "{str}")"#, result));
                 ctx.alloc_index += str.len() as i32;
