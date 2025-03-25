@@ -13,4 +13,6 @@ let sum(array: [num], length: num) = {
     result
 };
 
-sum([100, 200, 300], 64)
+let hoge = [100, 200, 300];
+let hoge[0] = hoge[0] * 10;
+sum(hoge, 64)
