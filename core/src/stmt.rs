@@ -109,11 +109,23 @@ impl Node for Stmt {
                         result
                     }
                     Expr::Access(array, index) => {
-                        let addr = Oper::Add(*array.clone(), *index.clone());
-                        let val_type = value.type_infer(ctx)?;
+                        let typ = value.type_infer(ctx)?;
+                        let addr = Oper::Add(
+                            *array.clone(),
+                            Expr::Oper(Box::new(Oper::Mul(
+                                Expr::Oper(Box::new(Oper::Cast(
+                                    *index.clone(),
+                                    Type::Array(Box::new(typ.clone())),
+                                ))),
+                                Expr::Literal(Value::Array(
+                                    if let Type::Number = typ.clone() { 8 } else { 4 },
+                                    typ.clone(),
+                                )),
+                            ))),
+                        );
                         format!(
                             "({}.store {} {})",
-                            val_type.compile(ctx)?,
+                            typ.compile(ctx)?,
                             addr.compile(ctx)?,
                             value.compile(ctx)?
                         )
