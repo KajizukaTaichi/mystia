@@ -75,7 +75,7 @@ impl Node for Type {
     fn compile(&self, _: &mut Compiler) -> Option<String> {
         Some(
             match self {
-                Self::Array | Self::String => "i32",
+                Self::Array | Self::String | Self::Bool => "i32",
                 Self::Number => "f64",
                 Self::Void => return None,
             }
