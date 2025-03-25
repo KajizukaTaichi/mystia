@@ -2,9 +2,8 @@ use crate::*;
 
 #[derive(Debug, Clone)]
 pub enum Value {
-    Integer(i32),
+    Nimber(f64),
     Bool(bool),
-    Float(f64),
     Array(i32, usize),
     String(String),
 }
@@ -12,12 +11,9 @@ pub enum Value {
 impl Node for Value {
     fn parse(source: &str) -> Option<Self> {
         Some(
-            // Integer literal
-            if let Ok(n) = source.parse::<i32>() {
-                Value::Integer(n)
-            // Float number literal
-            } else if let Ok(n) = source.parse::<f64>() {
-                Value::Float(n)
+            // Number literal
+            if let Ok(n) = source.parse::<f64>() {
+                Value::Number(n)
             // Boolean literal
             } else if let Ok(n) = source.parse::<bool>() {
                 Value::Bool(n)
@@ -58,20 +54,20 @@ impl Node for Value {
 
 #[derive(Clone, Debug)]
 pub enum Type {
-    Integer,
-    Float,
+    Number,
     Bool,
-    Pointer,
+    Array,
+    String,
     Void,
 }
 
 impl Node for Type {
     fn parse(source: &str) -> Option<Self> {
         match source.trim() {
-            "int" => Some(Self::Integer),
-            "float" => Some(Self::Float),
-            "ptr" => Some(Self::Pointer),
-            "void" => Some(Self::Void),
+            "num" => Some(Self::Number),
+            "str" => Some(Self::String),
+            "arr" => Some(Self::Array),
+            "nil" => Some(Self::Void),
             _ => None,
         }
     }
@@ -79,8 +75,8 @@ impl Node for Type {
     fn compile(&self, _: &mut Compiler) -> Option<String> {
         Some(
             match self {
-                Self::Integer | Self::Pointer | Self::Bool => "i32",
-                Self::Float => "f64",
+                Self::Array | Self::String => "i32",
+                Self::Number => "f64",
                 Self::Void => return None,
             }
             .to_string(),
@@ -89,9 +85,5 @@ impl Node for Type {
 
     fn type_infer(&self, _: &mut Compiler) -> Option<Type> {
         Some(self.clone())
-    }
-
-    fn addr_infer(&self, _: &mut Compiler) -> Option<i32> {
-        Some(0)
     }
 }
