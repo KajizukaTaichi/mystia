@@ -218,7 +218,6 @@ impl Node for Stmt {
                     name.to_owned(),
                     (ctx.argument_type.values().cloned().collect(), ret),
                 );
-                value.type_infer(ctx);
                 Type::Void
             }
             Stmt::Let { name: _, value } => {
