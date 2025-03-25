@@ -72,23 +72,23 @@ impl Node for Expr {
             Expr::Variable(to) => format!("(local.get ${to})"),
             Expr::Literal(literal) => literal.compile(ctx)?,
             Expr::Array(array) => {
-                let index = Expr::Literal(Value::Pointer(ctx.alloc_index.clone()));
+                let index = || Expr::Literal(Value::Array(ctx.alloc_index.clone(), array.len()));
                 let mut result: Vec<_> = vec![];
                 for elm in array {
                     let elm_type = elm.type_infer(ctx)?;
                     result.push(format!(
                         "({type}.store {address} {value})",
                         r#type = elm_type.compile(ctx)?,
-                        address = Value::Integer(ctx.alloc_index).compile(ctx)?,
+                        address = index().compile(ctx)?,
                         value = elm.compile(ctx)?
                     ));
                     match elm_type {
-                        Type::Integer | Type::Pointer | Type::Bool => ctx.alloc_index += 4,
-                        Type::Float => ctx.alloc_index += 8,
+                        Type::Array | Type::String | Type::Bool => ctx.alloc_index += 4,
+                        Type::Number => ctx.alloc_index += 8,
                         Type::Void => {}
                     }
                 }
-                format!("{} {}", index.compile(ctx)?, join!(result))
+                format!("{} {}", index().compile(ctx)?, join!(result))
             }
             Expr::Deref(expr) => {
                 let addr = &expr.addr_infer(ctx)?.clone();
@@ -99,11 +99,11 @@ impl Node for Expr {
                 "(call ${name} {})",
                 join!(iter_map!(args, |x: &Expr| x.compile(ctx)))
             ),
-            Expr::Access(array, index) => Expr::Deref(Box::new(Expr::Oper(Box::new(Oper::Add(
-                *array.clone(),
-                *index.clone(),
-            )))))
-            .compile(ctx)?,
+            Expr::Access(array, index) => {
+                let addr = Oper::Add(*array.clone(), *index.clone());
+                let typ = ctx.address_type.get(addr)?.clone();
+                format!("({}.load {})", typ.compile(ctx)?, addr)
+            }
             Expr::Block(block) => block.compile(ctx)?,
         })
     }
