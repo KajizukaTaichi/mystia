@@ -56,9 +56,9 @@ impl Node for Oper {
                 format!(
                     "({}.{} {})",
                     rhs.compile(ctx)?,
-                    match rhs {
-                        Type::Float => "convert_i32_s",
-                        Type::Integer => "trunc_f64_s",
+                    match rhs.compile(ctx)?.as_str() {
+                        "f64" => "convert_i32_s",
+                        "i32" => "trunc_f64_s",
                         _ => return lhs.compile(ctx),
                     },
                     lhs.compile(ctx)?,
