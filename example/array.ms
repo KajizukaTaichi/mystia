@@ -1,3 +1,12 @@
-let arr = [199, 299];
-let arr[0] = arr[1] * 2;
-arr[0]
+let sum(array: [num], length: num) = {
+    let index = 0;
+    let result = 0;
+
+    while index < length loop {
+        let result = result + array[index];
+        let index = index + 1
+    };
+    result
+};
+
+sum([100, 200, 300], 3)
