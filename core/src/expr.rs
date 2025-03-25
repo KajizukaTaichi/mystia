@@ -102,10 +102,23 @@ impl Node for Expr {
                 join!(iter_map!(args, |x: &Expr| x.compile(ctx)))
             ),
             Expr::Access(array, index) => {
-                let addr = Oper::Add(*array.clone(), *index.clone());
                 let Type::Array(typ) = array.type_infer(ctx)? else {
                     return None;
                 };
+                let addr = Oper::Add(
+                    *array.clone(),
+                    Expr::Oper(Box::new(Oper::Mul(
+                        *index.clone(),
+                        Expr::Literal(Value::Array(
+                            if let Type::Number = *typ.clone() {
+                                8
+                            } else {
+                                4
+                            },
+                            *typ.clone(),
+                        )),
+                    ))),
+                );
                 format!("({}.load {})", typ.compile(ctx)?, addr.compile(ctx)?)
             }
             Expr::Block(block) => block.compile(ctx)?,
