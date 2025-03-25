@@ -163,7 +163,7 @@ impl Node for Stmt {
             }
             Stmt::Drop => "(drop)".to_string(),
             Stmt::Return(Some(expr)) => format!("(return {})", expr.compile(ctx)?),
-            Stmt::Return(None) => "(return)".to_string(),
+            Stmt::Return(_) => "(return)".to_string(),
         })
     }
 
