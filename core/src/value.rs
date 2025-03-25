@@ -68,8 +68,8 @@ impl Node for Type {
             "str" => Some(Self::String),
             "nil" => Some(Self::Void),
             _ => {
-                if let Some(source) = source.strip_prefix("arr<") {
-                    if let Some(source) = source.strip_suffix(">") {
+                if let Some(source) = source.strip_prefix("[") {
+                    if let Some(source) = source.strip_suffix("]") {
                         Some(Type::Array(Box::new(Type::parse(source)?)))
                     } else {
                         None
