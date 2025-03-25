@@ -108,14 +108,16 @@ impl Node for Stmt {
                         let result = format!("(local.set ${name} {0})", value.compile(ctx)?);
                         result
                     }
-                    Expr::Access(array, index) => Stmt::Let {
-                        name: Expr::Deref(Box::new(Expr::Oper(Box::new(Oper::Add(
-                            *array.clone(),
-                            *index.clone(),
-                        ))))),
-                        value: value.clone(),
+                    Expr::Access(array, index) => {
+                        let addr = Oper::Add(*array.clone(), *index.clone());
+                        let val_type = value.type_infer(ctx)?;
+                        format!(
+                            "({}.store {} {})",
+                            val_type.compile(ctx)?,
+                            addr.compile(ctx)?,
+                            value.compile(ctx)?
+                        )
                     }
-                    .compile(ctx)?,
                     Expr::Call(name, args) => {
                         ctx.variable_type.clear();
                         let inf = ctx.function_type.get(name)?.clone();
