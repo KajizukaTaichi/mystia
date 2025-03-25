@@ -74,7 +74,6 @@ impl Node for Expr {
             Expr::Array(array) => {
                 let index = Expr::Literal(Value::Array(
                     ctx.alloc_index.clone(),
-                    array.len(),
                     array.first()?.type_infer(ctx)?,
                 ));
                 let mut result: Vec<_> = vec![];
@@ -85,7 +84,6 @@ impl Node for Expr {
                         r#type = elm_type.compile(ctx)?,
                         address = Expr::Literal(Value::Array(
                             ctx.alloc_index.clone(),
-                            array.len(),
                             array.first()?.type_infer(ctx)?,
                         ))
                         .compile(ctx)?,
