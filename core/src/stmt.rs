@@ -108,17 +108,6 @@ impl Node for Stmt {
                         let result = format!("(local.set ${name} {0})", value.compile(ctx)?);
                         result
                     }
-                    Expr::Deref(addr) => {
-                        let val_type = value.type_infer(ctx)?;
-                        let addr = addr.addr_infer(ctx)?;
-                        ctx.address_type.insert(addr, val_type.clone());
-                        format!(
-                            "({}.store {} {})",
-                            val_type.compile(ctx)?,
-                            addr.clone(),
-                            value.compile(ctx)?
-                        )
-                    }
                     Expr::Access(array, index) => Stmt::Let {
                         name: Expr::Deref(Box::new(Expr::Oper(Box::new(Oper::Add(
                             *array.clone(),
