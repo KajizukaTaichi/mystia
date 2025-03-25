@@ -1,2 +1,2 @@
-let inc(n: int) = n + 1;
+let inc(n: num) = n + 1;
 inc(5)
