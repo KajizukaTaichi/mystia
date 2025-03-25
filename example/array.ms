@@ -9,4 +9,5 @@ let sum(array: [num], length: num) = {
     result
 };
 
-sum([100, 200, 300], 3)
+let x = [1, 2, 3];
+sum([x[2], 200, 300], 3)
