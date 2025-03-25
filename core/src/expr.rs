@@ -5,7 +5,6 @@ pub enum Expr {
     Literal(Value),
     Array(Vec<Expr>),
     Variable(String),
-    Deref(Box<Expr>),
     Oper(Box<Oper>),
     Call(String, Vec<Expr>),
     Access(Box<Expr>, Box<Expr>),
@@ -24,10 +23,6 @@ impl Node for Expr {
                 // Literal value
                 if let Some(literal) = Value::parse(&token) {
                     Expr::Literal(literal)
-                // Pointer access
-                } else if token.starts_with("@") {
-                    let token = token.get(1..)?.trim();
-                    Expr::Deref(Box::new(Expr::parse(token)?))
                 // Array `[expr, ...]`
                 } else if token.starts_with("[") && token.ends_with("]") {
                     let token = token.get(1..token.len() - 1)?.trim();
@@ -80,13 +75,14 @@ impl Node for Expr {
                 let index = Expr::Literal(Value::Pointer(ctx.alloc_index.clone()));
                 let mut result: Vec<_> = vec![];
                 for elm in array {
-                    let code = Stmt::Let {
-                        name: Expr::Deref(Box::new(Expr::Literal(Value::Pointer(ctx.alloc_index)))),
-                        value: elm.clone(),
-                    }
-                    .compile(ctx)?;
-                    result.push(code);
-                    match elm.type_infer(ctx)? {
+                    let elm_type = elm.type_infer(ctx)?;
+                    result.push(format!(
+                        "({type}.store {address} {value})",
+                        r#type = elm_type.compile(ctx)?,
+                        address = Value::Integer(ctx.alloc_index).compile(ctx)?,
+                        value = elm.compile(ctx)?
+                    ));
+                    match elm_type {
                         Type::Integer | Type::Pointer | Type::Bool => ctx.alloc_index += 4,
                         Type::Float => ctx.alloc_index += 8,
                         Type::Void => {}
