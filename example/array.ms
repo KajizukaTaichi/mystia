@@ -1,3 +1,3 @@
-let y = [1, 2, 3];
+let y = ["abc", "hoge"];
 let x = [1, 2];
-x
+x[1]
