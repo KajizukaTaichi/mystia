@@ -10,4 +10,4 @@ let sum(array: [num], length: num) = {
 };
 
 let x = [1, 2, 3];
-sum([x[2], 200, 300], 3)
+sum([200, sum(x, 3), 300], 3)
