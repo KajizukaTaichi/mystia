@@ -215,31 +215,4 @@ impl Node for Stmt {
             Stmt::Return(_) => Type::Void,
         })
     }
-
-    fn addr_infer(&self, ctx: &mut Compiler) -> Option<i32> {
-        Some(match self {
-            Stmt::Let {
-                name: Expr::Variable(name),
-                value,
-            } => {
-                let addr = value.addr_infer(ctx)?;
-                ctx.variable_addr.insert(name.clone(), addr)?
-            }
-            Stmt::Let { name, value } => {
-                let name = name.addr_infer(ctx)?;
-                let value = value.type_infer(ctx)?;
-                ctx.address_type.insert(name, value.clone());
-                value.addr_infer(ctx)?
-            }
-            Stmt::If { cond, then, r#else } => {
-                iter_map!([cond, then], |x: &Expr| x.addr_infer(ctx));
-                r#else.clone().map(|x| x.addr_infer(ctx)).flatten()?
-            }
-            Stmt::While { cond, body } => {
-                *iter_map!([cond, body], |x: &Expr| x.addr_infer(ctx)).last()?
-            }
-            Stmt::Return(Some(val)) | Stmt::Expr(val) => val.addr_infer(ctx)?,
-            Stmt::Return(None) | Stmt::Break | Stmt::Drop | Stmt::Next => 0,
-        })
-    }
 }

@@ -83,7 +83,7 @@ impl Node for Expr {
                         value = elm.compile(ctx)?
                     ));
                     match elm_type {
-                        Type::Integer | Type::Bool => ctx.alloc_index += 4,
+                        Type::Integer | Type::Pointer | Type::Bool => ctx.alloc_index += 4,
                         Type::Float => ctx.alloc_index += 8,
                         Type::Void => {}
                     }
@@ -129,21 +129,6 @@ impl Node for Expr {
             }
             Expr::Block(block) => block.type_infer(ctx)?,
             Expr::Access(_, _) => Type::Integer,
-        })
-    }
-
-    fn addr_infer(&self, ctx: &mut Compiler) -> Option<i32> {
-        Some(match self {
-            Expr::Variable(to) => ctx.variable_addr.get(to)?.clone(),
-            Expr::Literal(val) => val.addr_infer(ctx)?,
-            Expr::Deref(to) => to.addr_infer(ctx)?,
-            Expr::Block(block) => block.addr_infer(ctx)?,
-            Expr::Oper(oper) => oper.addr_infer(ctx)?,
-            Expr::Call(_, args) => *iter_map!(args, |x: &Expr| x.addr_infer(ctx)).last()?,
-            Expr::Access(arr, idx) => {
-                *iter_map!([arr, idx], |x: &Expr| x.addr_infer(ctx)).last()?
-            }
-            Expr::Array(arr) => *iter_map!(arr, |x: &Expr| x.addr_infer(ctx)).last()?,
         })
     }
 }

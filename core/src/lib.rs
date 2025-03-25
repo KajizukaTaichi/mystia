@@ -20,7 +20,6 @@ use {
 pub trait Node {
     fn compile(&self, ctx: &mut Compiler) -> Option<String>;
     fn type_infer(&self, ctx: &mut Compiler) -> Option<Type>;
-    fn addr_infer(&self, ctx: &mut Compiler) -> Option<i32>;
     fn parse(source: &str) -> Option<Self>
     where
         Self: Node + Sized;
@@ -64,7 +63,6 @@ impl Compiler {
     pub fn build(&mut self, source: &str) -> Option<String> {
         let ast = Block::parse(source)?;
         let ret = ast.type_infer(self)?;
-        ast.addr_infer(self)?;
         Some(format!(
             "(module (memory $mem 1) {2} {3} (func (export \"_start\") {1} {4} {0}))",
             ast.compile(self)?,

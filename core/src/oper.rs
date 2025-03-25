@@ -91,23 +91,4 @@ impl Node for Oper {
             }
         }
     }
-
-    fn addr_infer(&self, ctx: &mut Compiler) -> Option<i32> {
-        Some(match self {
-            Oper::Add(lhs, rhs)
-            | Oper::Sub(lhs, rhs)
-            | Oper::Mul(lhs, rhs)
-            | Oper::Div(lhs, rhs)
-            | Oper::Mod(lhs, rhs)
-            | Oper::Eql(lhs, rhs)
-            | Oper::Neq(lhs, rhs)
-            | Oper::Lt(lhs, rhs)
-            | Oper::Gt(lhs, rhs)
-            | Oper::LtEq(lhs, rhs)
-            | Oper::GtEq(lhs, rhs) => {
-                *iter_map!([lhs, rhs], |x: &Expr| x.addr_infer(ctx)).last()?
-            }
-            Oper::Cast(expr, _) => expr.addr_infer(ctx)?,
-        })
-    }
 }

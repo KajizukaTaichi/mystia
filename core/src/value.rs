@@ -5,7 +5,7 @@ pub enum Value {
     Integer(i32),
     Bool(bool),
     Float(f64),
-    Pointer(i32),
+    Array(i32, usize),
     String(String),
 }
 
@@ -21,12 +21,6 @@ impl Node for Value {
             // Boolean literal
             } else if let Ok(n) = source.parse::<bool>() {
                 Value::Bool(n)
-            // Pointer: memory address
-            } else if let Some(source) = source.strip_prefix("0x") {
-                let Ok(addr) = i32::from_str_radix(source, 16) else {
-                    return None;
-                };
-                Value::Pointer(addr)
             // String litera;
             } else if source.starts_with("\"") && source.ends_with("\"") {
                 let source = source.get(1..source.len() - 1)?.trim();
@@ -39,11 +33,11 @@ impl Node for Value {
 
     fn compile(&self, ctx: &mut Compiler) -> Option<String> {
         Some(match self {
-            Value::Integer(n) | Value::Pointer(n) => format!("(i32.const {n})"),
+            Value::Integer(n) | Value::Array(n, _) => format!("(i32.const {n})"),
             Value::Float(n) => format!("(f64.const {n})"),
             Value::Bool(n) => Value::Integer(if *n { 1 } else { 0 }).compile(ctx)?,
             Value::String(str) => {
-                let result = Value::Pointer(ctx.alloc_index.clone()).compile(ctx)?;
+                let result = Value::Array(ctx.alloc_index.clone(), str.len()).compile(ctx)?;
                 ctx.static_data
                     .push(format!(r#"(data {} "{str}")"#, result));
                 ctx.alloc_index += str.len() as i32;
@@ -55,16 +49,9 @@ impl Node for Value {
     fn type_infer(&self, _: &mut Compiler) -> Option<Type> {
         Some(match self {
             Value::Integer(_) => Type::Integer,
-            Value::String(_) | Value::Pointer(_) => Type::Pointer,
+            Value::String(_) => Type::Pointer,
             Value::Float(_) => Type::Float,
             Value::Bool(_) => Type::Bool,
-        })
-    }
-
-    fn addr_infer(&self, _: &mut Compiler) -> Option<i32> {
-        Some(match self {
-            Value::Pointer(to) => *to,
-            _ => 0,
         })
     }
 }
