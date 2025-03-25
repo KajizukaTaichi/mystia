@@ -3,10 +3,14 @@ let sum(array: [num], length: num) = {
     let result = 0;
 
     while index < length loop {
-        let result = result + array[index];
+        let value = array[index];
+        if value == 0 then {
+            break
+        };
+        let result = result + value;
         let index = index + 1
     };
     result
 };
 
-sum([100, 200, 300], 3)
+sum([100, 200, 300], 64)
