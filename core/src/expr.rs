@@ -72,14 +72,20 @@ impl Node for Expr {
             Expr::Variable(to) => format!("(local.get ${to})"),
             Expr::Literal(literal) => literal.compile(ctx)?,
             Expr::Array(array) => {
-                let index = || Expr::Literal(Value::Array(ctx.alloc_index.clone(), array.len()));
+                let index = || {
+                    Some(Expr::Literal(Value::Array(
+                        ctx.alloc_index.clone(),
+                        array.len(),
+                        array.first()?.type_infer(ctx)?,
+                    )))
+                };
                 let mut result: Vec<_> = vec![];
                 for elm in array {
                     let elm_type = elm.type_infer(ctx)?;
                     result.push(format!(
                         "({type}.store {address} {value})",
                         r#type = elm_type.compile(ctx)?,
-                        address = index().compile(ctx)?,
+                        address = index()?.compile(ctx)?,
                         value = elm.compile(ctx)?
                     ));
                     match elm_type {
@@ -88,12 +94,7 @@ impl Node for Expr {
                         Type::Void => {}
                     }
                 }
-                format!("{} {}", index().compile(ctx)?, join!(result))
-            }
-            Expr::Deref(expr) => {
-                let addr = &expr.addr_infer(ctx)?.clone();
-                let typ = ctx.address_type.get(addr)?.clone();
-                format!("({}.load {})", typ.compile(ctx)?, addr)
+                format!("{} {}", index()?.compile(ctx)?, join!(result))
             }
             Expr::Call(name, args) => format!(
                 "(call ${name} {})",
