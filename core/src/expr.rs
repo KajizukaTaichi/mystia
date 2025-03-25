@@ -108,7 +108,10 @@ impl Node for Expr {
                 let addr = Oper::Add(
                     *array.clone(),
                     Expr::Oper(Box::new(Oper::Mul(
-                        *index.clone(),
+                        Expr::Oper(Box::new(Oper::Cast(
+                            *index.clone(),
+                            Type::Array(Box::new(*typ.clone())),
+                        ))),
                         Expr::Literal(Value::Array(
                             if let Type::Number = *typ.clone() {
                                 8
