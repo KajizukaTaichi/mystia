@@ -46,9 +46,9 @@ impl Node for Value {
     fn type_infer(&self, _: &mut Compiler) -> Option<Type> {
         Some(match self {
             Value::Number(_) => Type::Number,
-            Value::String(_) => Type::String,
-            Value::Array(_, _, _) => Type::Array,
             Value::Bool(_) => Type::Bool,
+            Value::String(_) => Type::String,
+            Value::Array(_, _, t) => Type::Array(Box::new(t.clone())),
         })
     }
 }
