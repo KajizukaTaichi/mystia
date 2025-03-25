@@ -27,8 +27,4 @@ impl Node for Block {
                 .clone(),
         )
     }
-
-    fn addr_infer(&self, ctx: &mut Compiler) -> Option<i32> {
-        Some(*iter_map!(self.0.clone(), |x: Stmt| x.addr_infer(ctx)).last()?)
-    }
 }
