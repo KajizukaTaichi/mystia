@@ -70,10 +70,20 @@ impl Compiler {
     pub fn show(&self) {
         println!("Functions:");
         for (name, (var, arg, ret)) in &self.function_type {
-            println!("\t{name}:");
-            for (name, (var, arg, ret)) var {
-                println!("\t{name}:");
+            println!("  {name}:");
+            println!("    Locals:");
+            for (name, typ) in var {
+                println!("      {name}: {typ:?}");
             }
+            println!("    Arguments:");
+            for (name, typ) in arg {
+                println!("      {name}: {typ:?}");
+            }
+            println!("    Returns: {ret:?}");
+        }
+        println!("Variables:");
+        for (name, typ) in &self.variable_type {
+            println!("  {name}: {typ:?}");
         }
     }
 }
