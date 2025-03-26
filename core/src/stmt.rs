@@ -75,6 +75,7 @@ impl Node for Stmt {
     }
 
     fn compile(&self, ctx: &mut Compiler) -> Option<String> {
+        dbg!(&self);
         Some(match self {
             Stmt::Expr(expr) => expr.compile(ctx)?,
             Stmt::If { cond, then, r#else } => {
@@ -100,58 +101,53 @@ impl Node for Stmt {
             }
             Stmt::Next => "(br $while_start)".to_string(),
             Stmt::Break => "(br $outer)".to_string(),
-            Stmt::Let { name, value } => {
-                let value_type = value.type_infer(ctx)?;
-                match name {
-                    Expr::Variable(name) => {
-                        ctx.variable_type.insert(name.to_string(), value_type);
-                        let result = format!("(local.set ${name} {0})", value.compile(ctx)?);
-                        result
-                    }
-                    Expr::Access(array, index) => {
-                        let typ = value.type_infer(ctx)?;
-                        let addr = Oper::Add(
-                            Expr::Oper(Box::new(Oper::Cast(*array.clone(), Type::Integer))),
-                            Expr::Oper(Box::new(Oper::Mul(
-                                *index.clone(),
-                                Expr::Literal(Value::Integer(typ.bytes_length())),
-                            ))),
-                        );
-                        format!(
-                            "({}.store {} {})",
-                            typ.compile(ctx)?,
-                            addr.compile(ctx)?,
-                            value.compile(ctx)?
-                        )
-                    }
-                    Expr::Call(name, _) => {
-                        ctx.variable_type.clear();
-                        let (var_inf, arg_inf, ret_inf) = ctx.function_type.get(name)?.clone();
-                        let code = format!(
-                            "(func ${name} (export \"{name}\") {0} {1} {3} {2})",
-                            join!({
-                                let mut result = vec![];
-                                for (name, typ) in &arg_inf {
-                                    result.push(format!("(param ${} {})", name, typ.compile(ctx)?));
-                                }
-                                result
-                            }),
-                            config_return!(ret_inf, ctx)?,
-                            {
-                                ctx.variable_type = var_inf;
-                                ctx.argument_type = arg_inf;
-                                value.compile(ctx)?
-                            },
-                            expand_local(ctx)?
-                        );
-                        ctx.variable_type.clear();
-                        ctx.argument_type.clear();
-                        ctx.declare_code.push(code);
-                        String::new()
-                    }
-                    _ => todo!(),
+            Stmt::Let { name, value } => match name {
+                Expr::Variable(name) => {
+                    let result = format!("(local.set ${name} {0})", value.compile(ctx)?);
+                    result
                 }
-            }
+                Expr::Access(array, index) => {
+                    let typ = value.type_infer(ctx)?;
+                    let addr = Oper::Add(
+                        Expr::Oper(Box::new(Oper::Cast(*array.clone(), Type::Integer))),
+                        Expr::Oper(Box::new(Oper::Mul(
+                            *index.clone(),
+                            Expr::Literal(Value::Integer(typ.bytes_length())),
+                        ))),
+                    );
+                    format!(
+                        "({}.store {} {})",
+                        typ.compile(ctx)?,
+                        addr.compile(ctx)?,
+                        value.compile(ctx)?
+                    )
+                }
+                Expr::Call(name, _) => {
+                    let (var_inf, arg_inf, ret_inf) = ctx.function_type.get(name)?.clone();
+                    let code = format!(
+                        "(func ${name} (export \"{name}\") {0} {1} {3} {2})",
+                        join!({
+                            let mut result = vec![];
+                            for (name, typ) in &arg_inf {
+                                result.push(format!("(param ${} {})", name, typ.compile(ctx)?));
+                            }
+                            result
+                        }),
+                        config_return!(ret_inf, ctx)?,
+                        value.compile(ctx)?,
+                        {
+                            ctx.variable_type = var_inf;
+                            ctx.argument_type = arg_inf;
+                            expand_local(ctx)?
+                        }
+                    );
+                    ctx.variable_type.clear();
+                    ctx.argument_type.clear();
+                    ctx.declare_code.push(code);
+                    String::new()
+                }
+                _ => todo!(),
+            },
             Stmt::Drop => "(drop)".to_string(),
             Stmt::Return(Some(expr)) => format!("(return {})", expr.compile(ctx)?),
             Stmt::Return(_) => "(return)".to_string(),
