@@ -73,8 +73,8 @@ impl Node for Expr {
             Expr::Literal(literal) => literal.compile(ctx)?,
             Expr::Array(array) => {
                 let inner_type = array.first()?.type_infer(ctx)?;
-                let pointer = Value::Array(ctx.alloc_index.clone(), inner_type.clone());
                 let mut result: Vec<_> = vec![];
+                ctx.pointer_index = ctx.alloc_index;
                 for elm in array {
                     type_check!(inner_type, elm.type_infer(ctx)?, ctx)?;
                     result.push(format!(
@@ -86,7 +86,11 @@ impl Node for Expr {
                     ));
                     ctx.alloc_index += inner_type.bytes_length();
                 }
-                format!("{} {}", pointer.compile(ctx)?, join!(result))
+                format!(
+                    "{} {}",
+                    Value::Array(ctx.pointer_index.clone(), inner_type.clone()).compile(ctx)?,
+                    join!(result)
+                )
             }
             Expr::Call(name, args) => format!(
                 "(call ${name} {})",
