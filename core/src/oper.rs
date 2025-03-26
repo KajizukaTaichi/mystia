@@ -53,13 +53,16 @@ impl Node for Oper {
             Oper::LtEq(lhs, rhs) => compile_compare!("le", self, ctx, lhs, rhs),
             Oper::GtEq(lhs, rhs) => compile_compare!("ge", self, ctx, lhs, rhs),
             Oper::Cast(lhs, rhs) => {
+                if lhs.type_infer(ctx)?.compile(ctx)? == rhs.compile(ctx)? {
+                    return lhs.compile(ctx);
+                }
                 format!(
                     "({}.{} {})",
                     rhs.compile(ctx)?,
                     match rhs.compile(ctx)?.as_str() {
                         "f64" => "convert_i32_s",
                         "i32" => "trunc_f64_s",
-                        _ => return lhs.compile(ctx),
+                        _ => return None,
                     },
                     lhs.compile(ctx)?,
                 )
