@@ -97,7 +97,7 @@ impl Node for Expr {
                     return None;
                 };
                 let addr = Oper::Add(
-                    *array.clone(),
+                    Expr::Oper(Box::new(Oper::Cast(*array.clone(), Type::Integer))),
                     Expr::Oper(Box::new(Oper::Mul(
                         *index.clone(),
                         Expr::Literal(Value::Integer(typ.bytes_length())),
