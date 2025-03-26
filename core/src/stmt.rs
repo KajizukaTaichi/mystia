@@ -75,7 +75,6 @@ impl Node for Stmt {
     }
 
     fn compile(&self, ctx: &mut Compiler) -> Option<String> {
-        dbg!(&self);
         Some(match self {
             Stmt::Expr(expr) => expr.compile(ctx)?,
             Stmt::If { cond, then, r#else } => {
