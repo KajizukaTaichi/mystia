@@ -137,7 +137,7 @@ impl Node for Stmt {
                             "(func ${name} (export \"{name}\") {0} {1} {3} {2})",
                             join!({
                                 let mut result = vec![];
-                                for (name, typ) in arg_inf {
+                                for (name, typ) in &arg_inf {
                                     result.push(format!("(param ${} {})", name, typ.compile(ctx)?));
                                 }
                                 result
@@ -145,6 +145,7 @@ impl Node for Stmt {
                             config_return!(ret_inf, ctx)?,
                             {
                                 ctx.variable_type = var_inf;
+                                ctx.argument_type = arg_inf;
                                 value.compile(ctx)?
                             },
                             expand_local(ctx)?
