@@ -29,17 +29,17 @@ pub trait Node {
 #[derive(Debug, Clone)]
 pub struct Compiler {
     /// Address for memory allocation
-    alloc_index: i32,
+    pub alloc_index: i32,
     /// Static string data
-    static_data: Vec<String>,
+    pub static_data: Vec<String>,
     /// Set of function declare code
-    declare_code: Vec<String>,
+    pub declare_code: Vec<String>,
     /// Type inference for variable
-    variable_type: IndexMap<String, Type>,
+    pub variable_type: IndexMap<String, Type>,
     /// Type inference for function includes local variables, arguments, and returns
-    function_type: IndexMap<String, (IndexMap<String, Type>, IndexMap<String, Type>, Type)>,
+    pub function_type: IndexMap<String, (IndexMap<String, Type>, IndexMap<String, Type>, Type)>,
     /// Type inference for argument
-    argument_type: IndexMap<String, Type>,
+    pub argument_type: IndexMap<String, Type>,
 }
 
 impl Compiler {
@@ -65,25 +65,5 @@ impl Compiler {
             join!(self.declare_code),
             expand_local(self)?,
         ))
-    }
-
-    pub fn show(&self) {
-        println!("Functions:");
-        for (name, (var, arg, ret)) in &self.function_type {
-            println!("  {name}:");
-            println!("    Locals:");
-            for (name, typ) in var {
-                println!("      {name}: {typ:?}");
-            }
-            println!("    Arguments:");
-            for (name, typ) in arg {
-                println!("      {name}: {typ:?}");
-            }
-            println!("    Returns: {ret:?}");
-        }
-        println!("Variables:");
-        for (name, typ) in &self.variable_type {
-            println!("  {name}: {typ:?}");
-        }
     }
 }
