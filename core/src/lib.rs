@@ -30,6 +30,8 @@ pub trait Node {
 pub struct Compiler {
     /// Address for memory allocation
     pub alloc_index: i32,
+    /// Address of pointer
+    pub pointer_index: i32,
     /// Static string data
     pub static_data: Vec<String>,
     /// Set of function declare code
@@ -46,6 +48,7 @@ impl Compiler {
     pub fn new() -> Self {
         Compiler {
             alloc_index: 0,
+            pointer_index: 0,
             static_data: vec![],
             declare_code: vec![],
             variable_type: IndexMap::new(),
@@ -57,6 +60,7 @@ impl Compiler {
     pub fn build(&mut self, source: &str) -> Option<String> {
         let ast = Block::parse(source)?;
         let ret = ast.type_infer(self)?;
+        dbg!(self.pointer_index, self.alloc_index);
         Some(format!(
             "(module (memory $mem 1) {2} {3} (func (export \"_start\") {1} {4} {0}))",
             ast.compile(self)?,
