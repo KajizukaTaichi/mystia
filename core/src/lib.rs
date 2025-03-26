@@ -37,7 +37,7 @@ pub struct Compiler {
     /// Type inference for variable
     variable_type: IndexMap<String, Type>,
     /// Type inference for function
-    function_type: IndexMap<String, (IndexMap<String, Type>, Type)>,
+    function_type: IndexMap<String, (IndexMap<String, Type>, IndexMap<String, Type>, Type)>,
     /// Type inference for argument
     argument_type: IndexMap<String, Type>,
 }
@@ -57,6 +57,7 @@ impl Compiler {
     pub fn build(&mut self, source: &str) -> Option<String> {
         let ast = Block::parse(source)?;
         let ret = ast.type_infer(self)?;
+        dbg!(&self);
         Some(format!(
             "(module (memory $mem 1) {2} {3} (func (export \"_start\") {1} {4} {0}))",
             ast.compile(self)?,
