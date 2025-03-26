@@ -111,7 +111,7 @@ impl Node for Stmt {
                     Expr::Access(array, index) => {
                         let typ = value.type_infer(ctx)?;
                         let addr = Oper::Add(
-                            *array.clone(),
+                            Expr::Oper(Box::new(Oper::Cast(*array.clone(), Type::Integer))),
                             Expr::Oper(Box::new(Oper::Mul(
                                 *index.clone(),
                                 Expr::Literal(Value::Integer(typ.bytes_length())),
