@@ -47,7 +47,6 @@ macro_rules! type_check {
         if lhs.format() == rhs.format() {
             Some(lhs)
         } else {
-            dbg!(lhs, rhs);
             None
         }
     }};
