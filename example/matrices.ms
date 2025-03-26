@@ -1,5 +1,5 @@
 let add_matrices(
-    X: [[num]],　Y: [[num]],
+    X: [[num]], Y: [[num]],
     rows: int,　cols: int
 ) = {
     let result = [[0.0]];
