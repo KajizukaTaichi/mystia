@@ -72,30 +72,21 @@ impl Node for Expr {
             Expr::Variable(to) => format!("(local.get ${to})"),
             Expr::Literal(literal) => literal.compile(ctx)?,
             Expr::Array(array) => {
-                let index = Expr::Literal(Value::Array(
-                    ctx.alloc_index.clone(),
-                    array.first()?.type_infer(ctx)?,
-                ));
+                let inner_type = array.first()?.type_infer(ctx)?;
+                let pointer = Value::Array(ctx.alloc_index.clone(), inner_type.clone());
                 let mut result: Vec<_> = vec![];
                 for elm in array {
-                    let elm_type = elm.type_infer(ctx)?;
+                    type_check!(inner_type, elm.type_infer(ctx)?, ctx)?;
                     result.push(format!(
                         "({type}.store {address} {value})",
-                        r#type = elm_type.compile(ctx)?,
-                        address = Expr::Literal(Value::Array(
-                            ctx.alloc_index.clone(),
-                            array.first()?.type_infer(ctx)?,
-                        ))
-                        .compile(ctx)?,
+                        r#type = inner_type.clone().compile(ctx)?,
+                        address = Value::Array(ctx.alloc_index.clone(), inner_type.clone())
+                            .compile(ctx)?,
                         value = elm.compile(ctx)?
                     ));
-                    match elm_type {
-                        Type::Array(_) | Type::String | Type::Bool => ctx.alloc_index += 4,
-                        Type::Number => ctx.alloc_index += 8,
-                        Type::Void => {}
-                    }
+                    ctx.alloc_index += inner_type.bytes_length();
                 }
-                format!("{} {}", index.compile(ctx)?, join!(result))
+                format!("{} {}", pointer.compile(ctx)?, join!(result))
             }
             Expr::Call(name, args) => format!(
                 "(call ${name} {})",
