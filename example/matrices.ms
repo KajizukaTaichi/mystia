@@ -1,4 +1,7 @@
-let add_matrices(X: [[num]], Y: [[num]], rows: int, cols: int) = {
+let add_matrices(
+    X: [[num]],　Y: [[num]],
+    rows: int,　cols: int
+) = {
     let result = [[0.0]];
     let i = 0;
     while i < rows loop {
@@ -23,4 +26,4 @@ let r2 = [6.0, 6.0];
 let m2 = [r1, r2];
 
 let m3 = add_matrices(m1, m2, 2, 2);
-m3[1][1]
+m3[1][0]
