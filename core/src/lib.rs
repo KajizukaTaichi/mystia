@@ -36,7 +36,7 @@ pub struct Compiler {
     declare_code: Vec<String>,
     /// Type inference for variable
     variable_type: IndexMap<String, Type>,
-    /// Type inference for function
+    /// Type inference for function includes local variables, arguments, and returns
     function_type: IndexMap<String, (IndexMap<String, Type>, IndexMap<String, Type>, Type)>,
     /// Type inference for argument
     argument_type: IndexMap<String, Type>,
