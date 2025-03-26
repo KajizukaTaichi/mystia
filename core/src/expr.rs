@@ -120,7 +120,7 @@ impl Node for Expr {
             Expr::Array(e) => Type::Array(Box::new(e.first()?.type_infer(ctx)?)),
             Expr::Literal(literal) => literal.type_infer(ctx)?,
             Expr::Call(name, args) => {
-                let (args_type, ret_type) = ctx.function_type.get(name)?.clone();
+                let (_, args_type, ret_type) = ctx.function_type.get(name)?.clone();
                 let _ = iter_map!(args.iter().zip(args_type.values()), |(x, t): (
                     &Expr,
                     &Type
