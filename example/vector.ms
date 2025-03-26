@@ -7,5 +7,6 @@ let scalar_mul(vector: [num], dimension: int, value: num) = {
     vector
 };
 
-let result = scalar_mul([1.0, 2.0, 3.0], 3, 1.5);
+let vec = [1.0,　2.0, 3.0];
+let result = scalar_mul(vec, 3, 1.5);
 result[1]
