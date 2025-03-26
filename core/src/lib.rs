@@ -38,10 +38,12 @@ pub struct Compiler {
     pub declare_code: Vec<String>,
     /// Type inference for variable
     pub variable_type: IndexMap<String, Type>,
-    /// Type inference for function includes local variables, arguments, and returns
-    pub function_type: IndexMap<String, (IndexMap<String, Type>, IndexMap<String, Type>, Type)>,
     /// Type inference for argument
     pub argument_type: IndexMap<String, Type>,
+    /// Type inference for function includes local variables, arguments, and returns
+    pub function_type: IndexMap<String, (IndexMap<String, Type>, IndexMap<String, Type>, Type)>,
+    /// Error message if it was fault
+    pub error: Option<String>,
 }
 
 impl Compiler {
@@ -52,8 +54,9 @@ impl Compiler {
             static_data: vec![],
             declare_code: vec![],
             variable_type: IndexMap::new(),
-            function_type: IndexMap::new(),
             argument_type: IndexMap::new(),
+            function_type: IndexMap::new(),
+            error: vec![],
         }
     }
 
