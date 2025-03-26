@@ -35,6 +35,7 @@ fn main() {
         return;
     };
     if cli.summary {
+        println!("# Type Inference Summary");
         println!("Functions:");
         for (name, (var, arg, ret)) in &compiler.function_type {
             println!("  {name}:");
