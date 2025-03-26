@@ -12,8 +12,11 @@ pub enum Value {
 impl Node for Value {
     fn parse(source: &str) -> Option<Self> {
         Some(
+            // Integer literal
+            if let Ok(n) = source.parse::<i32>() {
+                Value::Integer(n)
             // Number literal
-            if let Ok(n) = source.parse::<f64>() {
+            } else if let Ok(n) = source.parse::<f64>() {
                 Value::Number(n)
             // Boolean literal
             } else if let Ok(n) = source.parse::<bool>() {
@@ -67,6 +70,7 @@ pub enum Type {
 impl Node for Type {
     fn parse(source: &str) -> Option<Self> {
         match source.trim() {
+            "int" => Some(Self::Integer),
             "num" => Some(Self::Number),
             "str" => Some(Self::String),
             "nil" => Some(Self::Void),
