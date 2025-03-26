@@ -56,7 +56,7 @@ impl Compiler {
             variable_type: IndexMap::new(),
             argument_type: IndexMap::new(),
             function_type: IndexMap::new(),
-            error: vec![],
+            error: None,
         }
     }
 
