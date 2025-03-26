@@ -130,29 +130,19 @@ impl Node for Stmt {
                             value.compile(ctx)?
                         )
                     }
-                    Expr::Call(name, args) => {
+                    Expr::Call(name, _) => {
                         ctx.variable_type.clear();
-                        let inf = ctx.function_type.get(name)?.clone();
+                        let (arg_inf, ret_inf) = ctx.function_type.get(name)?.clone();
                         let code = format!(
                             "(func ${name} (export \"{name}\") {0} {1} {3} {2})",
                             join!({
                                 let mut result = vec![];
-                                for arg in args {
-                                    if let Expr::Oper(oper) = arg.clone() {
-                                        if let Oper::Cast(Expr::Variable(arg), t) = *oper.clone() {
-                                            result.push(format!(
-                                                "(param ${} {})",
-                                                arg,
-                                                t.compile(ctx)?
-                                            ));
-                                        }
-                                    } else {
-                                        return None;
-                                    }
+                                for (name, typ) in arg_inf {
+                                    result.push(format!("(param ${} {})", name, typ.compile(ctx)?));
                                 }
                                 result
                             }),
-                            config_return!(inf.1, ctx)?,
+                            config_return!(ret_inf, ctx)?,
                             value.compile(ctx)?,
                             expand_local(ctx)?
                         );
@@ -214,8 +204,12 @@ impl Node for Stmt {
                     };
                 }
                 let ret = value.type_infer(ctx)?;
-                ctx.function_type
-                    .insert(name.to_owned(), (ctx.argument_type.clone(), ret));
+                ctx.function_type.insert(
+                    name.to_owned(),
+                    (ctx.variable_type.clone(), ctx.argument_type.clone(), ret),
+                );
+                ctx.variable_type.clear();
+                ctx.argument_type.clear();
                 Type::Void
             }
             Stmt::Let { name: _, value } => {
