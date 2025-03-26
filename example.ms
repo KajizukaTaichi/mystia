@@ -1,4 +1,4 @@
-let sum(array: [num], length: num) = {
+let sum(array: [int], length: int) = {
     let index = 0;
     let result = 0;
 
