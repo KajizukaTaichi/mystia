@@ -14,4 +14,5 @@ let sum(array: [num], length: int) = {
 };
 
 let foo = [1.2, 2.56, 3.14];
+let foo[0] = foo[0] + 1.0;
 sum(foo, 64)
