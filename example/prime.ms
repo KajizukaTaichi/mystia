@@ -9,4 +9,6 @@ let is_prime(n: int) = {
     true
 };
 
-is_prime(1234567891)
+if is_prime(1234567891)
+    then "just a prime number"
+    else "not a prime number"
