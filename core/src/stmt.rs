@@ -146,7 +146,7 @@ impl Node for Stmt {
                     ctx.declare_code.push(code);
                     String::new()
                 }
-                _ => todo!(),
+                _ => return None,
             },
             Stmt::Drop => "(drop)".to_string(),
             Stmt::Return(Some(expr)) => format!("(return {})", expr.compile(ctx)?),
