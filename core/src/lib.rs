@@ -3,6 +3,7 @@ mod expr;
 mod lexer;
 mod oper;
 mod stmt;
+mod r#type;
 mod utils;
 mod value;
 
@@ -13,8 +14,9 @@ use {
     lexer::{str_escape, tokenize},
     oper::Oper,
     stmt::Stmt,
+    r#type::Type,
     utils::{OPERATOR, RESERVED, SPACE, expand_local, include_letter},
-    value::{Type, Value},
+    value::Value,
 };
 
 pub trait Node {
