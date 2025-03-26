@@ -102,6 +102,8 @@ impl Node for Stmt {
             Stmt::Break => "(br $outer)".to_string(),
             Stmt::Let { name, value } => match name {
                 Expr::Variable(name) => {
+                    let typ = value.type_infer(ctx)?;
+                    ctx.variable_type.insert(name.to_string(), typ);
                     let result = format!("(local.set ${name} {0})", value.compile(ctx)?);
                     result
                 }
