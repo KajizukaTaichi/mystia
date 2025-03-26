@@ -66,4 +66,14 @@ impl Compiler {
             expand_local(self)?,
         ))
     }
+
+    pub fn show(&self) {
+        println!("Functions:");
+        for (name, (var, arg, ret)) in &self.function_type {
+            println!("\t{name}:");
+            for (name, (var, arg, ret)) var {
+                println!("\t{name}:");
+            }
+        }
+    }
 }
