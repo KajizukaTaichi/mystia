@@ -132,7 +132,7 @@ impl Node for Stmt {
                     }
                     Expr::Call(name, _) => {
                         ctx.variable_type.clear();
-                        let (arg_inf, ret_inf) = ctx.function_type.get(name)?.clone();
+                        let (var_inf, arg_inf, ret_inf) = ctx.function_type.get(name)?.clone();
                         let code = format!(
                             "(func ${name} (export \"{name}\") {0} {1} {3} {2})",
                             join!({
@@ -143,7 +143,10 @@ impl Node for Stmt {
                                 result
                             }),
                             config_return!(ret_inf, ctx)?,
-                            value.compile(ctx)?,
+                            {
+                                ctx.variable_type = var_inf;
+                                value.compile(ctx)?
+                            },
                             expand_local(ctx)?
                         );
                         ctx.variable_type.clear();
