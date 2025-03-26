@@ -37,7 +37,7 @@ pub struct Compiler {
     /// Type inference for variable
     variable_type: IndexMap<String, Type>,
     /// Type inference for function
-    function_type: IndexMap<String, (Vec<Type>, Type)>,
+    function_type: IndexMap<String, (IndexMap<String, Type>, Type)>,
     /// Type inference for argument
     argument_type: IndexMap<String, Type>,
 }

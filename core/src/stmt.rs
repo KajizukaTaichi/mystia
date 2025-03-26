@@ -214,10 +214,8 @@ impl Node for Stmt {
                     };
                 }
                 let ret = value.type_infer(ctx)?;
-                ctx.function_type.insert(
-                    name.to_owned(),
-                    (ctx.argument_type.values().cloned().collect(), ret),
-                );
+                ctx.function_type
+                    .insert(name.to_owned(), (ctx.argument_type.clone(), ret));
                 Type::Void
             }
             Stmt::Let { name: _, value } => {

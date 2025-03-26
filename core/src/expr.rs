@@ -121,10 +121,12 @@ impl Node for Expr {
             Expr::Literal(literal) => literal.type_infer(ctx)?,
             Expr::Call(name, args) => {
                 let (args_type, ret_type) = ctx.function_type.get(name)?.clone();
-                let _ = iter_map!(
-                    args.iter().zip(args_type),
-                    |(x, t): (&Expr, Type)| type_check!(x, t, ctx)
-                );
+                let _ = iter_map!(args.iter().zip(args_type.values()), |(x, t): (
+                    &Expr,
+                    &Type
+                )| type_check!(
+                    x, t, ctx
+                ));
                 ret_type.clone()
             }
             Expr::Block(block) => block.type_infer(ctx)?,
