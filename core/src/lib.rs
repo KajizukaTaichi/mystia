@@ -61,12 +61,12 @@ impl Compiler {
         let ast = Block::parse(source)?;
         let ret = ast.type_infer(self)?;
         Some(format!(
-            "(module (memory $mem 1) {2} {3} (func (export \"_start\") {1} {4} {0}))",
-            ast.compile(self)?,
-            config_return!(ret, self)?,
-            join!(self.static_data),
-            join!(self.declare_code),
-            expand_local(self)?,
+            "(module (memory $mem 1) {data} {declare} (func (export \"_start\") {returns} {locals} {code}))",
+            code = ast.compile(self)?,
+            returns = config_return!(ret, self)?,
+            data = join!(self.static_data),
+            declare = join!(self.declare_code),
+            locals = expand_local(self)?,
         ))
     }
 }
