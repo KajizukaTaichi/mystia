@@ -44,7 +44,7 @@ macro_rules! type_check {
     ($lhs: expr, $rhs: expr, $ctx: expr) => {{
         let lhs = $lhs.type_infer($ctx)?;
         let rhs = $rhs.type_infer($ctx)?;
-        if format!("{lhs:?}") == format!("{rhs:?}") {
+        if lhs.format() == rhs.format() {
             Some(lhs)
         } else {
             dbg!(lhs, rhs);
