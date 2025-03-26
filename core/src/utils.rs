@@ -47,6 +47,7 @@ macro_rules! type_check {
         if format!("{lhs:?}") == format!("{rhs:?}") {
             Some(lhs)
         } else {
+            dbg!(lhs, rhs);
             None
         }
     }};
