@@ -1,10 +1,10 @@
-let sum(array: [int], length: int) = {
+let sum(array: [num], length: int) = {
     let index = 0;
-    let result = 0;
+    let result = 0.0;
 
     while index < length loop {
         let value = array[index];
-        if value == 0 then {
+        if value == 0.0 then {
             break
         };
         let result = result + value;
@@ -13,6 +13,6 @@ let sum(array: [int], length: int) = {
     result
 };
 
-let hoge = [100, 200, 300];
+let hoge = [1.5, 2.59, 3.14];
 let hoge[0] = hoge[0] * 10;
 sum(hoge, 64)
