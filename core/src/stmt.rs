@@ -113,14 +113,8 @@ impl Node for Stmt {
                         let addr = Oper::Add(
                             *array.clone(),
                             Expr::Oper(Box::new(Oper::Mul(
-                                Expr::Oper(Box::new(Oper::Cast(
-                                    *index.clone(),
-                                    Type::Array(Box::new(typ.clone())),
-                                ))),
-                                Expr::Literal(Value::Array(
-                                    if let Type::Number = typ.clone() { 8 } else { 4 },
-                                    typ.clone(),
-                                )),
+                                *index.clone(),
+                                Expr::Literal(Value::Integer(typ.bytes_length())),
                             ))),
                         );
                         format!(
