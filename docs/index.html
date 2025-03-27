@@ -55,7 +55,6 @@
             let resultArea = document.getElementById("result");
             let runBtn = document.getElementById("run");
 
-            codeEditor.addEventListener("input", () => (program = undefined));
             runBtn.addEventListener("click", async (e) => {
                 try {
                     let result = await mystia(codeEditor.value);
