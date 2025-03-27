@@ -39,15 +39,15 @@ fn main() {
         println!("Functions:");
         for (name, (var, arg, ret)) in &compiler.function_type {
             println!(" - {name}:");
-            println!("    Locals:");
+            println!("     Locals:");
             for (name, typ) in var {
-                println!("     - {name}: {}", typ.format());
+                println!("      - {name}: {}", typ.format());
             }
-            println!("    Arguments:");
+            println!("     Arguments:");
             for (name, typ) in arg {
-                println!("     - {name}: {}", typ.format());
+                println!("      - {name}: {}", typ.format());
             }
-            println!("    Returns: {}", ret.format());
+            println!("     Returns: {}", ret.format());
         }
         println!("Variables:");
         for (name, typ) in &compiler.variable_type {
