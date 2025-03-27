@@ -17,7 +17,7 @@ class MystiaValue {
 
     getString() {
         const address = this.getValue();
-        const memoryView = new Uint8Array(this.instance.exports.memory.buffer);
+        const memoryView = new Uint8Array(this.instance.exports.mem.buffer);
 
         const stringLength = address;
         while (memoryView[stringLength] !== 0) {
