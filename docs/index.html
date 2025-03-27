@@ -58,9 +58,9 @@
             codeEditor.addEventListener("input", () => (program = undefined));
             runBtn.addEventListener("click", async (e) => {
                 try {
-                    let result = mystia(codeEditor.value).getString();
+                    let result = await mystia(codeEditor.value);
                     if (result !== undefined) {
-                        resultArea.innerHTML = result;
+                        resultArea.innerHTML = result.getString();
                     }
                 } catch (e) {
                     console.error(e);
