@@ -39,8 +39,8 @@ impl Node for Value {
             Value::String(str) => {
                 let result = Value::Array(ctx.alloc_index.clone(), Type::String).compile(ctx)?;
                 ctx.static_data
-                    .push(format!(r#"(data {} "{str}")"#, result));
-                ctx.alloc_index += str.len() as i32;
+                    .push(format!(r#"(data {} "{str}\00")"#, result));
+                ctx.alloc_index += str.len() as i32 + 1;
                 result
             }
         })
