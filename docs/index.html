@@ -51,28 +51,14 @@
         <script type="module">
             import { mystia } from "./main.js";
 
-            let program = undefined;
             let codeEditor = document.getElementById("code");
             let resultArea = document.getElementById("result");
             let runBtn = document.getElementById("run");
 
-            async function compile() {
-                try {
-                    program = await mystia(codeEditor.value);
-                } catch (e) {
-                    program = undefined;
-                    throw e;
-                }
-            }
-
             codeEditor.addEventListener("input", () => (program = undefined));
             runBtn.addEventListener("click", async (e) => {
-                if (e.button) return;
                 try {
-                    if (program === undefined) {
-                        await compile();
-                    }
-                    let result = program();
+                    let result = mystia(codeEditor.value).getString();
                     if (result !== undefined) {
                         resultArea.innerHTML = result;
                     }
