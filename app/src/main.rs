@@ -53,6 +53,7 @@ fn main() {
         for (name, typ) in &compiler.variable_type {
             println!(" - {name}: {}", typ.format());
         }
+        println!("Returns: {}", compiler.program_return.format());
     }
 
     let wat_code = format!(
