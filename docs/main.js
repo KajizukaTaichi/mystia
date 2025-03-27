@@ -7,7 +7,7 @@ class MystiaValue {
         this.instance = instance;
     }
 
-    get_value() {
+    getValue() {
         return instance.exports._start();
     }
 
@@ -15,7 +15,7 @@ class MystiaValue {
         return instance.exports[name]();
     }
 
-    get_string() {
+    getString() {
         const address = instance.exports._start();
         const memoryView = new Uint8Array(instance.exports.memory.buffer);
 
