@@ -44,6 +44,8 @@ pub struct Compiler {
     pub argument_type: IndexMap<String, Type>,
     /// Type inference for function includes local variables, arguments, and returns
     pub function_type: IndexMap<String, (IndexMap<String, Type>, IndexMap<String, Type>, Type)>,
+    /// Type inference for returns of main program
+    pub program_return: Type,
 }
 
 impl Compiler {
@@ -56,16 +58,17 @@ impl Compiler {
             variable_type: IndexMap::new(),
             argument_type: IndexMap::new(),
             function_type: IndexMap::new(),
+            program_return: Type::Void,
         }
     }
 
     pub fn build(&mut self, source: &str) -> Option<String> {
         let ast = Block::parse(source)?;
-        let ret = ast.type_infer(self)?;
+        self.program_return = ast.type_infer(self)?;
         Some(format!(
             "(module (memory $mem (export \"mem\") 1) {strings} {declare} (func (export \"_start\") {returns} {locals} {code}))",
             code = ast.compile(self)?,
-            returns = config_return!(ret, self)?,
+            returns = config_return!(self.program_return.clone(), self)?,
             strings = join!(self.static_data),
             declare = join!(self.declare_code),
             locals = expand_local(self)?,
