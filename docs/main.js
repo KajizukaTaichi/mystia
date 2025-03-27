@@ -8,16 +8,16 @@ class MystiaValue {
     }
 
     getValue() {
-        return instance.exports._start();
+        return this.instance.exports._start();
     }
 
     invoke(name) {
-        return instance.exports[name]();
+        return this.instance.exports[name]();
     }
 
     getString() {
-        const address = instance.exports._start();
-        const memoryView = new Uint8Array(instance.exports.memory.buffer);
+        const address = this.getValue();
+        const memoryView = new Uint8Array(this.instance.exports.memory.buffer);
 
         const stringLength = address;
         while (memoryView[stringLength] !== 0) {
@@ -32,5 +32,5 @@ class MystiaValue {
 export async function mystia(code) {
     const bytecodes = compile(code).buffer;
     const { instance } = await WebAssembly.instantiate(bytecodes);
-    return MystiaValue(instance);
+    return new MystiaValue(instance);
 }
