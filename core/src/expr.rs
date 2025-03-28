@@ -80,15 +80,14 @@ impl Node for Expr {
                     result.push(format!(
                         "({type}.store {address} {value})",
                         r#type = inner_type.clone().compile(ctx)?,
-                        address = Value::Array(ctx.alloc_index.clone(), inner_type.clone())
-                            .compile(ctx)?,
+                        address = Value::Array(ctx.alloc_index, inner_type.clone()).compile(ctx)?,
                         value = elm.compile(ctx)?
                     ));
                     ctx.alloc_index += inner_type.bytes_length();
                 }
                 format!(
                     "{} {}",
-                    Value::Array(ctx.pointer_index.clone(), inner_type.clone()).compile(ctx)?,
+                    Value::Array(ctx.pointer_index, inner_type.clone()).compile(ctx)?,
                     join!(result)
                 )
             }
