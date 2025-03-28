@@ -104,7 +104,7 @@ impl Node for Stmt {
                 Expr::Variable(name) => {
                     let typ = value.type_infer(ctx)?;
                     ctx.variable_type.insert(name.to_string(), typ);
-                    format!("(local.set ${name} {0})", value.compile(ctx)?)
+                    format!("(local.set ${name} {})", value.compile(ctx)?)
                 }
                 Expr::Access(array, index) => {
                     let typ = value.type_infer(ctx)?;
@@ -126,17 +126,17 @@ impl Node for Stmt {
                     let (var_inf, arg_inf, ret_inf) = ctx.function_type.get(name)?.clone();
                     (ctx.variable_type, ctx.argument_type) = (var_inf, arg_inf.clone());
                     let code = format!(
-                        "(func ${name} (export \"{name}\") {0} {1} {3} {2})",
-                        join!({
+                        "(func ${name} (export \"{name}\") {args} {ret} {locals} {body})",
+                        args = join!({
                             let mut result = vec![];
                             for (name, typ) in &arg_inf {
                                 result.push(format!("(param ${} {})", name, typ.compile(ctx)?));
                             }
                             result
                         }),
-                        config_return!(ret_inf, ctx)?,
-                        value.compile(ctx)?,
-                        expand_local(ctx)?
+                        ret = config_return!(ret_inf, ctx)?,
+                        body = value.compile(ctx)?,
+                        locals = expand_local(ctx)?
                     );
                     ctx.variable_type.clear();
                     ctx.argument_type.clear();
