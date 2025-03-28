@@ -10,6 +10,10 @@
             href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css"
         />
         <style>
+            .alert {
+                font-family: monospace;
+            }
+
             body {
                 font-size: large;
             }
@@ -47,25 +51,19 @@
                         language (e.g. define function using let statement)
                     </li>
                 </ol>
-                <a
-                    href="https://github.com/KajizukaTaichi/mystia"
-                    class="button"
-                    >Repository</a
+                <a href="https://github.com/KajizukaTaichi/mystia"
+                    >Go to repository</a
                 >
             </div>
         </section>
-        <hr />
+
         <section class="section">
             <div class="inline-elements">
-                <button id="run" type="button" class="button">Run</button>
                 <h4 class="inline-elements">Playground</h4>
+                <button id="run" type="button" class="button">Run</button>
             </div>
 
-            <div class="field">
-                <div class="control">
-                    <textarea id="code" class="textarea"></textarea>
-                </div>
-            </div>
+            <textarea id="code" class="textarea"></textarea>
             <div class="field is-grouped">
                 <div class="control"></div>
             </div>
@@ -74,6 +72,7 @@
                 <p id="result" class="alert"></p>
             </div>
         </section>
+
         <script type="module">
             import { mystia } from "./main.js";
 
