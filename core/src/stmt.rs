@@ -104,8 +104,7 @@ impl Node for Stmt {
                 Expr::Variable(name) => {
                     let typ = value.type_infer(ctx)?;
                     ctx.variable_type.insert(name.to_string(), typ);
-                    let result = format!("(local.set ${name} {0})", value.compile(ctx)?);
-                    result
+                    format!("(local.set ${name} {0})", value.compile(ctx)?)
                 }
                 Expr::Access(array, index) => {
                     let typ = value.type_infer(ctx)?;
