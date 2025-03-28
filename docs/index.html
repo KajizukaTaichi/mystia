@@ -61,7 +61,7 @@
                     if (result !== undefined) {
                         let string = result.getString();
                         if (string !== "") {
-                            resultArea.innerHTML = string;
+                            resultArea.innerHTML = `"${string}"`;
                         } else {
                             resultArea.innerHTML = result.getValue();
                         }
