@@ -2,8 +2,7 @@
 <html>
     <head>
         <title>
-            Mystia |
-            完全にWebブラウザ上で動作するコンパイラ型プログラミング言語を体験してみましょう。
+            Mystia | A programming language that will be compiled to WebAssembly
         </title>
         <meta charset="utf-8" />
         <link
@@ -11,6 +10,9 @@
             href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css"
         />
         <style>
+            body {
+                font-size: larger;
+            }
             #code {
                 font-family: monospace;
                 height: 10rlh;
@@ -20,31 +22,39 @@
     </head>
     <body class="content">
         <section class="hero">
-            <div class="hero-body has-text-centered">
+            <div class="hero-body">
                 <h1 class="title">Mystia</h1>
                 <p class="block">
-                    完全にWebブラウザ上で動作するコンパイラ型プログラミング言語を体験してみましょう。
+                    A programming language that will be compiled to WebAssembly
                 </p>
+                <h4>Features</h4>
+                <ol>
+                    <li>
+                        Type inference: You can use variable without having
+                        declare and annotation
+                    </li>
+                    <li>
+                        ML-like syntax: The syntax is inspired by ML-family
+                        language (e.g. define function using let statement)
+                    </li>
+                </ol>
             </div>
         </section>
         <hr />
         <section class="section">
-            <h2>Playground</h2>
+            <h4>Playground</h4>
             <div class="field">
-                <label class="label" for="code">ソースコード</label>
                 <div class="control">
                     <textarea id="code" class="textarea"></textarea>
                 </div>
             </div>
             <div class="field is-grouped">
                 <div class="control">
-                    <button id="run" type="button" class="button is-primary">
-                        Run
-                    </button>
+                    <button id="run" type="button" class="button">Run</button>
                 </div>
             </div>
             <div class="field">
-                <label class="label" for="result">結果：</label>
+                <label class="label" for="result">Result：</label>
                 <p id="result" class="alert"></p>
             </div>
         </section>
@@ -54,6 +64,25 @@
             let codeEditor = document.getElementById("code");
             let resultArea = document.getElementById("result");
             let runBtn = document.getElementById("run");
+
+            codeEditor.value = `let is_prime(n: int) = {
+    let i = 2;
+    if n < i then {
+        return false
+    };
+    while i * i <= n loop {
+        if n % i == 0 then {
+            return false
+        };
+        let i = i + 1
+    };
+    true
+};
+
+if is_prime(5987)
+    then "just a prime number"
+    else "not a prime number"
+`;
 
             runBtn.addEventListener("click", async (e) => {
                 try {
