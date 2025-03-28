@@ -65,26 +65,13 @@
             let resultArea = document.getElementById("result");
             let runBtn = document.getElementById("run");
 
-            codeEditor.value = `let is_prime(n: int) = {
-    let i = 2;
-    if n < i then {
-        return false
-    };
-    while i * i <= n loop {
-        if n % i == 0 then {
-            return false
-        };
-        let i = i + 1
-    };
-    true
-};
+            const exampleCodeUrl =
+                "https://raw.githubusercontent.com/KajizukaTaichi/mystia/refs/heads/master/example/prime.ms";
+            fetch(exampleCodeUrl)
+                .then((response) => response.text())
+                .then((data) => (codeEditor.value = data));
 
-if is_prime(5987)
-    then "just a prime number"
-    else "not a prime number"
-`;
-
-            runBtn.addEventListener("click", async (e) => {
+            codeEditor.value = runBtn.addEventListener("click", async (e) => {
                 try {
                     let result = await mystia(codeEditor.value);
                     if (result !== undefined) {
