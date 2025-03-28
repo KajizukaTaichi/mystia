@@ -38,13 +38,13 @@ pub struct Compiler {
     pub static_data: Vec<String>,
     /// Set of function declare code
     pub declare_code: Vec<String>,
-    /// Type inference for variable
+    /// Type environment for variable
     pub variable_type: IndexMap<String, Type>,
-    /// Type inference for argument
+    /// Type environment for argument
     pub argument_type: IndexMap<String, Type>,
-    /// Type inference for function includes local variables, arguments, and returns
+    /// Type environment for function includes local variables, arguments, and returns
     pub function_type: IndexMap<String, (IndexMap<String, Type>, IndexMap<String, Type>, Type)>,
-    /// Type inference for returns of main program
+    /// Type environment for returns of main program
     pub program_return: Type,
 }
 
