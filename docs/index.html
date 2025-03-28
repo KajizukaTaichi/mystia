@@ -11,7 +11,16 @@
         />
         <style>
             body {
-                font-size: larger;
+                font-size: large;
+            }
+            .inline-elements {
+                display: flex;
+                gap: 10px;
+                align-items: center;
+                margin-bottom: 10px;
+            }
+            .inline-elements h4 {
+                margin: 0;
             }
             #code {
                 font-family: monospace;
@@ -38,20 +47,27 @@
                         language (e.g. define function using let statement)
                     </li>
                 </ol>
+                <a
+                    href="https://github.com/KajizukaTaichi/mystia"
+                    class="button"
+                    >Repository</a
+                >
             </div>
         </section>
         <hr />
         <section class="section">
-            <h4>Playground</h4>
+            <div class="inline-elements">
+                <button id="run" type="button" class="button">Run</button>
+                <h4 class="inline-elements">Playground</h4>
+            </div>
+
             <div class="field">
                 <div class="control">
                     <textarea id="code" class="textarea"></textarea>
                 </div>
             </div>
             <div class="field is-grouped">
-                <div class="control">
-                    <button id="run" type="button" class="button">Run</button>
-                </div>
+                <div class="control"></div>
             </div>
             <div class="field">
                 <label class="label" for="result">Result：</label>
