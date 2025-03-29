@@ -68,6 +68,17 @@ macro_rules! compile_compare {
 }
 
 #[macro_export]
+macro_rules! ok {
+    ($result:expr) => {
+        if let Ok(val) = $result {
+            Some(val)
+        } else {
+            None
+        }
+    };
+}
+
+#[macro_export]
 macro_rules! compile_arithmetic {
     ($oper: expr, $self: expr, $ctx: expr, $lhs: expr, $rhs: expr) => {{
         type_check!($lhs, $rhs, $ctx)?;

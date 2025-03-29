@@ -5,7 +5,7 @@ pub enum Type {
     Integer,
     Number,
     Bool,
-    Array(Box<Type>),
+    Array(Box<Type>, usize),
     String,
     Void,
 }
@@ -21,7 +21,8 @@ impl Node for Type {
             _ => {
                 if let Some(source) = source.strip_prefix("[") {
                     if let Some(source) = source.strip_suffix("]") {
-                        Some(Type::Array(Box::new(Type::parse(source)?)))
+                        let (typ, len) = source.rsplit_once(";")?;
+                        Some(Type::Array(Box::new(Type::parse(source)?), len.parse()))
                     } else {
                         None
                     }

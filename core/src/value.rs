@@ -5,7 +5,7 @@ pub enum Value {
     Integer(i32),
     Number(f64),
     Bool(bool),
-    Array(i32, Type),
+    Array(i32, usize, Type),
     String(String),
 }
 
@@ -34,13 +34,15 @@ impl Node for Value {
     fn compile(&self, ctx: &mut Compiler) -> Option<String> {
         Some(match self {
             Value::Number(n) => format!("(f64.const {n})"),
-            Value::Array(n, _) | Value::Integer(n) => format!("(i32.const {n})"),
+            Value::Array(n,_, _) | Value::Integer(n) => format!("(i32.const {n})"),
             Value::Bool(n) => Value::Integer(if *n { 1 } else { 0 }).compile(ctx)?,
             Value::String(str) => {
-                let result = Value::Array(ctx.alloc_index.clone(), Type::String).compile(ctx)?;
+                let len = str.len() + 1;
+                let result = Value::Array(ctx.alloc_index.clone(), , Type::String)
+                    .compile(ctx)?;
                 ctx.static_data
                     .push(format!(r#"(data {} "{str}\00")"#, result));
-                ctx.alloc_index += str.len() as i32 + 1;
+                ctx.alloc_index += len as i32;
                 result
             }
         })
@@ -52,7 +54,7 @@ impl Node for Value {
             Value::Integer(_) => Type::Integer,
             Value::Bool(_) => Type::Bool,
             Value::String(_) => Type::String,
-            Value::Array(_, t) => Type::Array(Box::new(t.clone())),
+            Value::Array(_, _,t) => Type::Array(Box::new(t.clone())),
         })
     }
 }
