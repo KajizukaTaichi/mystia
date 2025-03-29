@@ -19,19 +19,12 @@ impl Node for Type {
             "str" => Some(Self::String),
             "nil" => Some(Self::Void),
             _ => {
-                if let Some(source) = source.strip_prefix("[") {
-                    if let Some(source) = source.strip_suffix("]") {
-                        let (typ, len) = source.rsplit_once(";")?;
-                        Some(Type::Array(
-                            Box::new(Type::parse(typ)?),
-                            ok!(len.trim().parse())?,
-                        ))
-                    } else {
-                        None
-                    }
-                } else {
-                    None
-                }
+                let source = source.strip_prefix("[")?.strip_suffix("]")?;
+                let (typ, len) = source.rsplit_once(";")?;
+                Some(Type::Array(
+                    Box::new(Type::parse(typ)?),
+                    ok!(len.trim().parse())?,
+                ))
             }
         }
     }
