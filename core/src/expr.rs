@@ -89,7 +89,7 @@ impl Node for Expr {
                 }
                 format!(
                     "{} {}",
-                    Value::Array(ctx.pointer_index, len, inner_type.clone()).compile(ctx)?,
+                    Value::Array(ctx.pointer_index, len, inner_type).compile(ctx)?,
                     join!(result)
                 )
             }
@@ -104,7 +104,10 @@ impl Node for Expr {
                 let addr = Oper::Add(
                     Expr::Oper(Box::new(Oper::Cast(*array.clone(), Type::Integer))),
                     Expr::Oper(Box::new(Oper::Mul(
-                        *index.clone(),
+                        Expr::Oper(Box::new(Oper::Mod(
+                            *index.clone(),
+                            Expr::Literal(Value::Integer(len as i32)),
+                        ))),
                         Expr::Literal(Value::Integer(typ.bytes_length())),
                     ))),
                 );
@@ -122,7 +125,7 @@ impl Node for Expr {
                 locals.extend(ctx.argument_type.clone());
                 locals.get(to)?.clone()
             }
-            Expr::Array(e) => Type::Array(Box::new(e.first()?.type_infer(ctx)?)),
+            Expr::Array(e) => Type::Array(Box::new(e.first()?.type_infer(ctx)?), e.len()),
             Expr::Literal(literal) => literal.type_infer(ctx)?,
             Expr::Call(name, args) => {
                 let (_, args_type, ret_type) = ctx.function_type.get(name)?.clone();
@@ -136,7 +139,7 @@ impl Node for Expr {
             }
             Expr::Block(block) => block.type_infer(ctx)?,
             Expr::Access(arr, _) => {
-                let Type::Array(typ) = arr.type_infer(ctx)? else {
+                let Type::Array(typ, _) = arr.type_infer(ctx)? else {
                     return None;
                 };
                 *typ
