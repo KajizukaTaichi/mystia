@@ -37,7 +37,7 @@ impl Node for Type {
         Some(
             match self {
                 Self::Number => "f64",
-                Self::Array(_) | Self::String | Self::Bool | Type::Integer => "i32",
+                Self::Array(_, _) | Self::String | Self::Bool | Type::Integer => "i32",
                 Self::Void => return None,
             }
             .to_string(),
@@ -52,7 +52,7 @@ impl Node for Type {
 impl Type {
     pub fn bytes_length(&self) -> i32 {
         match self {
-            Type::Array(_) | Type::String | Type::Bool | Type::Integer => 4,
+            Type::Array(_, _) | Type::String | Type::Bool | Type::Integer => 4,
             Type::Number => 8,
             Type::Void => 0,
         }
