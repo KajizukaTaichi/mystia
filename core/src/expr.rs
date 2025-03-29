@@ -72,6 +72,7 @@ impl Node for Expr {
             Expr::Variable(to) => format!("(local.get ${to})"),
             Expr::Literal(literal) => literal.compile(ctx)?,
             Expr::Array(array) => {
+                let len = array.len();
                 let inner_type = array.first()?.type_infer(ctx)?;
                 let mut result: Vec<_> = vec![];
                 ctx.pointer_index = ctx.alloc_index;
@@ -80,14 +81,15 @@ impl Node for Expr {
                     result.push(format!(
                         "({type}.store {address} {value})",
                         r#type = inner_type.clone().compile(ctx)?,
-                        address = Value::Array(ctx.alloc_index, inner_type.clone()).compile(ctx)?,
+                        address =
+                            Value::Array(ctx.alloc_index, len, inner_type.clone()).compile(ctx)?,
                         value = elm.compile(ctx)?
                     ));
                     ctx.alloc_index += inner_type.bytes_length();
                 }
                 format!(
                     "{} {}",
-                    Value::Array(ctx.pointer_index, inner_type.clone()).compile(ctx)?,
+                    Value::Array(ctx.pointer_index, len, inner_type.clone()).compile(ctx)?,
                     join!(result)
                 )
             }
@@ -96,7 +98,7 @@ impl Node for Expr {
                 join!(iter_map!(args, |x: &Expr| x.compile(ctx)))
             ),
             Expr::Access(array, index) => {
-                let Type::Array(typ) = array.type_infer(ctx)? else {
+                let Type::Array(typ, len) = array.type_infer(ctx)? else {
                     return None;
                 };
                 let addr = Oper::Add(
