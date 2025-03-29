@@ -54,7 +54,7 @@ impl Node for Value {
             Value::Integer(_) => Type::Integer,
             Value::Bool(_) => Type::Bool,
             Value::String(_) => Type::String,
-            Value::Array(_, _,t) => Type::Array(Box::new(t.clone())),
+            Value::Array(_, len,typ) => Type::Array(Box::new(typ.clone()),*len),
         })
     }
 }
