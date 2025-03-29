@@ -34,12 +34,11 @@ impl Node for Value {
     fn compile(&self, ctx: &mut Compiler) -> Option<String> {
         Some(match self {
             Value::Number(n) => format!("(f64.const {n})"),
-            Value::Array(n,_, _) | Value::Integer(n) => format!("(i32.const {n})"),
+            Value::Array(n, _, _) | Value::Integer(n) => format!("(i32.const {n})"),
             Value::Bool(n) => Value::Integer(if *n { 1 } else { 0 }).compile(ctx)?,
             Value::String(str) => {
                 let len = str.len() + 1;
-                let result = Value::Array(ctx.alloc_index.clone(), , Type::String)
-                    .compile(ctx)?;
+                let result = Value::Array(ctx.alloc_index, len, Type::String).compile(ctx)?;
                 ctx.static_data
                     .push(format!(r#"(data {} "{str}\00")"#, result));
                 ctx.alloc_index += len as i32;
@@ -54,7 +53,7 @@ impl Node for Value {
             Value::Integer(_) => Type::Integer,
             Value::Bool(_) => Type::Bool,
             Value::String(_) => Type::String,
-            Value::Array(_, len,typ) => Type::Array(Box::new(typ.clone()),*len),
+            Value::Array(_, len, typ) => Type::Array(Box::new(typ.clone()), *len),
         })
     }
 }
