@@ -22,7 +22,10 @@ impl Node for Type {
                 if let Some(source) = source.strip_prefix("[") {
                     if let Some(source) = source.strip_suffix("]") {
                         let (typ, len) = source.rsplit_once(";")?;
-                        Some(Type::Array(Box::new(Type::parse(typ)?), ok!(len.parse())?))
+                        Some(Type::Array(
+                            Box::new(Type::parse(typ)?),
+                            ok!(len.trim().parse())?,
+                        ))
                     } else {
                         None
                     }
