@@ -22,7 +22,7 @@ impl Node for Type {
                 if let Some(source) = source.strip_prefix("[") {
                     if let Some(source) = source.strip_suffix("]") {
                         let (typ, len) = source.rsplit_once(";")?;
-                        Some(Type::Array(Box::new(Type::parse(source)?), len.parse()))
+                        Some(Type::Array(Box::new(Type::parse(typ)?), ok!(len.parse())?))
                     } else {
                         None
                     }
@@ -65,7 +65,7 @@ impl Type {
             Self::Bool => "bool".to_string(),
             Self::String => "str".to_string(),
             Self::Void => "nil".to_string(),
-            Self::Array(a) => format!("[{}]", a.format()),
+            Self::Array(typ, len) => format!("[{}; {len}]", typ.format()),
         }
     }
 }
