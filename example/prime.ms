@@ -1,15 +1,18 @@
 let is_prime(n: int) = {
-    let i = 2;
-    if n < i then {
-        return false
-    };
-    while i * i <= n loop {
-        if n % i == 0 then {
-            return false
+    if n < 2 then false
+    else if n < 4 then true
+    else if n % 2 == 0 then false
+    else if n % 3 == 0 then false
+    else {
+        let i = 5;
+        while i * i <= n loop {
+            if n % i == 0 then {
+                return false
+            };
+            let i = i + 6
         };
-        let i = i + 1
-    };
-    true
+        true
+    }
 };
 
 if is_prime(5987)
