@@ -1,4 +1,4 @@
-let scalar_mul(vector: [num], dimension: int, value: num) = {
+let scalar_mul(vector: [num; 3], dimension: int, value: num) = {
     let index = 0;
     while index < dimension loop {
         let vector[index] = vector[index] * value;
