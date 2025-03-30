@@ -58,6 +58,10 @@ impl Node for Expr {
                         result
                     };
                     Expr::Call(name.to_string(), args)
+                // Dictionary access
+                } else if token.contains(".") {
+                    let (name, key) = token.rsplit_once(".")?;
+                    Expr::Property(Box::new(Expr::parse(name)?), key.to_string())
                 // Variable reference
                 } else if !RESERVED.contains(&token.as_str()) {
                     Expr::Variable(token)
