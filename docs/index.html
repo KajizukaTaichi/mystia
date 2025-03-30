@@ -2,7 +2,8 @@
 <html>
     <head>
         <title>
-            Mystia | A programming language that will be compiled to WebAssembly
+            Mystia | Let's try out Mystia, a programming language that will be
+            compiled to WebAssembly on your browser
         </title>
         <meta charset="utf-8" />
         <link
@@ -10,9 +11,6 @@
             href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css"
         />
         <style>
-            .alert {
-                font-family: monospace;
-            }
             body {
                 font-size: large;
             }
@@ -21,14 +19,18 @@
                 display: flex;
                 align-items: center;
                 margin-bottom: 10px;
+                align-items: center;
             }
-            .inline-elements h4 {
-                margin: 0;
+            #example-guide {
+                white-space: nowrap;
             }
             #code {
                 font-family: monospace;
                 height: 15rlh;
                 resize: none;
+            }
+            #result {
+                font-family: monospace;
             }
         </style>
     </head>
@@ -37,7 +39,8 @@
             <div class="hero-body content">
                 <h1 class="title">Mystia Playground</h1>
                 <p class="block">
-                    A programming language that will be compiled to WebAssembly
+                    Let's try out Mystia, a programming language that will be
+                    compiled to WebAssembly on your browser
                 </p>
                 <a href="https://github.com/KajizukaTaichi/mystia"
                     >Repository</a
@@ -47,19 +50,16 @@
 
                 <div class="inline-elements">
                     <button id="run" type="button" class="button">Run</button>
-                    <input
-                        id="example-field"
-                        type="input"
-                        class="input"
-                        value="prime"
-                    />
+                    <p id="example-guide">Example code:</p>
+                    <input id="example-field" class="input" value="prime" />
                     <button id="example-select" type="button" class="button">
-                        Run
+                        Select
                     </button>
                 </div>
                 <textarea id="code" class="textarea"></textarea>
+                <br />
                 <div class="field">
-                    <label class="label" for="result">Result：</label>
+                    <label class="label" for="result">Result: </label>
                     <p id="result" class="alert"></p>
                 </div>
             </div>
@@ -72,6 +72,9 @@
             let resultArea = document.getElementById("result");
             let runBtn = document.getElementById("run");
 
+            let exampleFieldInput = document.getElementById("example-field");
+            let exampleSelectBtn = document.getElementById("example-select");
+
             function loadExample(name) {
                 const exampleCodeUrl = `https://raw.githubusercontent.com/KajizukaTaichi/mystia/refs/heads/master/example/${name}.ms`;
                 try {
@@ -80,6 +83,10 @@
                         .then((data) => (codeEditor.value = data));
                 } catch {}
             }
+
+            exampleSelectBtn.addEventListener("click", () => {
+                loadExample(exampleFieldInput.value);
+            });
 
             codeEditor.value = runBtn.addEventListener("click", async (e) => {
                 try {
