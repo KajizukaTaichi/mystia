@@ -131,7 +131,7 @@ impl Node for Expr {
                 }
                 format!(
                     "{} {}",
-                    Value::Dict(ctx.alloc_index, infered).compile(ctx)?,
+                    Value::Dict(ctx.pointer_index, infered).compile(ctx)?,
                     join!(result)
                 )
             }
