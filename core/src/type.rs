@@ -5,10 +5,9 @@ pub enum Type {
     Integer,
     Number,
     Bool,
-    Array(Box<Type>, usize),
-    Dict(IndexMap<String, Type>),
     String,
     Void,
+    Array(Box<Type>, usize),
 }
 
 impl Node for Type {
@@ -18,7 +17,7 @@ impl Node for Type {
             "num" => Some(Self::Number),
             "bool" => Some(Self::Bool),
             "str" => Some(Self::String),
-            "nil" => Some(Self::Void),
+            "void" => Some(Self::Void),
             _ => {
                 let source = source.strip_prefix("[")?.strip_suffix("]")?;
                 let (typ, len) = source.rsplit_once(";")?;
@@ -34,9 +33,7 @@ impl Node for Type {
         Some(
             match self {
                 Self::Number => "f64",
-                Self::Array(_, _) | Self::Dict(_) | Self::String | Self::Bool | Type::Integer => {
-                    "i32"
-                }
+                Self::Array(_, _) | Self::String | Self::Bool | Type::Integer => "i32",
                 Self::Void => return None,
             }
             .to_string(),
@@ -51,7 +48,7 @@ impl Node for Type {
 impl Type {
     pub fn bytes_length(&self) -> i32 {
         match self {
-            Type::Array(_, _) | Type::String | Type::Bool | Type::Dict(_) | Type::Integer => 4,
+            Type::Array(_, _) | Type::String | Type::Bool | Type::Integer => 4,
             Type::Number => 8,
             Type::Void => 0,
         }
@@ -64,14 +61,6 @@ impl Type {
             Self::Bool => "bool".to_string(),
             Self::String => "str".to_string(),
             Self::Void => "nil".to_string(),
-            Self::Dict(dict) => format!(
-                "dict{{ {} }}",
-                join!(
-                    dict.iter()
-                        .map(|(k, t)| format!("{k} {}", t.format()))
-                        .collect::<Vec<_>>()
-                )
-            ),
             Self::Array(typ, len) => format!("[{}; {len}]", typ.format()),
         }
     }
