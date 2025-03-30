@@ -45,10 +45,8 @@ impl Node for Expr {
                         if let Some((name, value)) = line.split_once(":") {
                             result.insert(name.trim().to_string(), Expr::parse(value)?);
                         } else {
-                            result.insert(
-                                line.trim().to_string(),
-                                Expr::Variable(line.trim().to_string()),
-                            );
+                            let line = line.trim().to_string();
+                            result.insert(line.clone(), Expr::Variable(line));
                         }
                     }
                     Expr::Dict(result)
