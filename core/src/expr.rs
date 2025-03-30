@@ -162,10 +162,7 @@ impl Node for Expr {
                 let (addr, typ) = dict.get(key)?.clone();
                 let addr = Oper::Add(
                     Expr::Oper(Box::new(Oper::Cast(*expr.clone(), Type::Integer))),
-                    Expr::Oper(Box::new(Oper::Mod(
-                        Expr::Literal(Value::Integer(addr)),
-                        Expr::Literal(Value::Integer(dict.keys().len() as i32)),
-                    ))),
+                    Expr::Literal(Value::Integer(addr)),
                 );
                 format!("({}.load {})", typ.compile(ctx)?, addr.compile(ctx)?)
             }
