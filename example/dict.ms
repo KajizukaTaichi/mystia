@@ -17,4 +17,5 @@ if alice.exam.science >= 80 then {
     let alice.result = true
 };
 
+let alice.exam.english = 100;
 alice.age * alice.exam.english
