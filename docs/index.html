@@ -34,22 +34,11 @@
     </head>
     <body class="content">
         <section class="hero">
-            <div class="hero-body">
-                <h1 class="title">Mystia</h1>
+            <div class="hero-body content">
+                <h1 class="title">Mystia Playground</h1>
                 <p class="block">
                     A programming language that will be compiled to WebAssembly
                 </p>
-                <h4>Features</h4>
-                <ol>
-                    <li>
-                        Type inference: You can use variable without having
-                        declare and annotation
-                    </li>
-                    <li>
-                        ML-like syntax: The syntax is inspired by ML-family
-                        language (e.g. define function using let statement)
-                    </li>
-                </ol>
                 <a href="https://github.com/KajizukaTaichi/mystia"
                     >Repository</a
                 >
@@ -57,8 +46,16 @@
                 <hr />
 
                 <div class="inline-elements">
-                    <h4 class="inline-elements">Playground</h4>
                     <button id="run" type="button" class="button">Run</button>
+                    <input
+                        id="example-field"
+                        type="input"
+                        class="input"
+                        value="prime"
+                    />
+                    <button id="example-select" type="button" class="button">
+                        Run
+                    </button>
                 </div>
                 <textarea id="code" class="textarea"></textarea>
                 <div class="field">
@@ -75,11 +72,14 @@
             let resultArea = document.getElementById("result");
             let runBtn = document.getElementById("run");
 
-            const exampleCodeUrl =
-                "https://raw.githubusercontent.com/KajizukaTaichi/mystia/refs/heads/master/example/prime.ms";
-            fetch(exampleCodeUrl)
-                .then((response) => response.text())
-                .then((data) => (codeEditor.value = data));
+            function loadExample(name) {
+                const exampleCodeUrl = `https://raw.githubusercontent.com/KajizukaTaichi/mystia/refs/heads/master/example/${name}.ms`;
+                try {
+                    fetch(exampleCodeUrl)
+                        .then((response) => response.text())
+                        .then((data) => (codeEditor.value = data));
+                } catch {}
+            }
 
             codeEditor.value = runBtn.addEventListener("click", async (e) => {
                 try {
