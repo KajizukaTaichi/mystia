@@ -1,5 +1,6 @@
 use crate::*;
 
+pub type Dict = IndexMap<String, Type>;
 #[derive(Clone, Debug)]
 pub enum Type {
     Integer,
@@ -7,7 +8,7 @@ pub enum Type {
     Bool,
     String,
     Array(Box<Type>, usize),
-    Dict(IndexMap<String, Type>),
+    Dict(Dict),
     Void,
 }
 
@@ -34,7 +35,9 @@ impl Node for Type {
         Some(
             match self {
                 Self::Number => "f64",
-                Self::Array(_, _) | Self::String | Self::Bool | Type::Integer => "i32",
+                Type::Integer | Self::Bool | Self::String | Self::Array(_, _) | Self::Dict(_) => {
+                    "i32"
+                }
                 Self::Void => return None,
             }
             .to_string(),
