@@ -42,8 +42,14 @@ impl Node for Expr {
                     let token = token.get("dict{".len()..token.len() - 1)?.trim();
                     let mut result = IndexMap::new();
                     for line in tokenize(token, &[","], false, true)? {
-                        let (name, value) = line.split_once(":")?;
-                        result.insert(name.trim().to_string(), Expr::parse(value)?);
+                        if let Some((name, value)) = line.split_once(":") {
+                            result.insert(name.trim().to_string(), Expr::parse(value)?);
+                        } else {
+                            result.insert(
+                                line.trim().to_string(),
+                                Expr::Variable(line.trim().to_string()),
+                            );
+                        }
                     }
                     Expr::Dict(result)
                 // Prioritize higher than others
