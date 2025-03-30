@@ -37,6 +37,20 @@ impl Node for Expr {
                 } else if token.starts_with("{") && token.ends_with("}") {
                     let token = token.get(1..token.len() - 1)?.trim();
                     Expr::Block(Block::parse(token)?)
+                // Dictionary `dict{ let key = value; ... }`
+                } else if token.starts_with("dict{") && token.ends_with("}") {
+                    let token = token.get("dict{".len()..token.len() - 1)?.trim();
+                    let mut result = IndexMap::new();
+                    for line in Block::parse(token)?.0 {
+                        if let Stmt::Let {
+                            name: Expr::Variable(name),
+                            value,
+                        } = line
+                        {
+                            result.insert(name, value);
+                        }
+                    }
+                    Expr::Dict(result)
                 // Prioritize higher than others
                 } else if token.starts_with("(") && token.ends_with(")") {
                     let token = token.get(1..token.len() - 1)?.trim();
