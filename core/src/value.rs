@@ -6,6 +6,7 @@ pub enum Value {
     Number(f64),
     Bool(bool),
     Array(i32, usize, Type),
+    Dict(i32, Dict),
     String(String),
 }
 
@@ -34,7 +35,9 @@ impl Node for Value {
     fn compile(&self, ctx: &mut Compiler) -> Option<String> {
         Some(match self {
             Value::Number(n) => format!("(f64.const {n})"),
-            Value::Array(n, _, _) | Value::Integer(n) => format!("(i32.const {n})"),
+            Value::Integer(n) | Value::Array(n, _, _) | Value::Dict(n, _) => {
+                format!("(i32.const {n})")
+            }
             Value::Bool(n) => Value::Integer(if *n { 1 } else { 0 }).compile(ctx)?,
             Value::String(str) => {
                 let len = str.len() + 1;
@@ -54,6 +57,7 @@ impl Node for Value {
             Value::Bool(_) => Type::Bool,
             Value::String(_) => Type::String,
             Value::Array(_, len, typ) => Type::Array(Box::new(typ.clone()), *len),
+            Value::Dict(_, typ) => Type::Dict(typ.clone()),
         })
     }
 }
