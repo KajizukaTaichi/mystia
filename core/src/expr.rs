@@ -42,13 +42,14 @@ impl Node for Expr {
                     let token = token.get("dict{".len()..token.len() - 1)?.trim();
                     let mut result = IndexMap::new();
                     for line in Block::parse(token)?.0 {
-                        if let Stmt::Let {
+                        let Stmt::Let {
                             name: Expr::Variable(name),
                             value,
                         } = line
-                        {
-                            result.insert(name, value);
-                        }
+                        else {
+                            return None;
+                        };
+                        result.insert(name, value);
                     }
                     Expr::Dict(result)
                 // Prioritize higher than others
