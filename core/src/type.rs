@@ -1,6 +1,6 @@
 use crate::*;
 
-pub type Dict = IndexMap<String, Type>;
+pub type Dict = IndexMap<String, (i32, Type)>;
 #[derive(Clone, Debug)]
 pub enum Type {
     Integer,
@@ -69,7 +69,7 @@ impl Type {
                 "dict{{ {} }}",
                 join!(
                     dict.iter()
-                        .map(|(k, t)| format!("{k} {}", t.format()))
+                        .map(|(k, t)| format!("{k} {}", t.1.format()))
                         .collect::<Vec<_>>()
                 )
             ),
