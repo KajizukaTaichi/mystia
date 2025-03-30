@@ -168,10 +168,12 @@ impl Node for Expr {
             }
             Expr::Array(e) => Type::Array(Box::new(e.first()?.type_infer(ctx)?), e.len()),
             Expr::Dict(dict) => {
-                let mut result: IndexMap<String, Type> = IndexMap::new();
+                let mut result = IndexMap::new();
+                let mut index: i32 = 0;
                 for (name, elm) in dict {
                     let typ = elm.type_infer(ctx)?;
-                    result.insert(name.to_string(), typ);
+                    result.insert(name.to_string(), (index, typ));
+                    index += typ.bytes_length();
                 }
                 Type::Dict(result)
             }
