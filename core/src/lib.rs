@@ -27,6 +27,7 @@ pub trait Node {
         Self: Node + Sized;
 }
 
+type Function = (IndexMap<String, Type>, IndexMap<String, Type>, Type);
 /// Context in compiling
 #[derive(Debug, Clone)]
 pub struct Compiler {
@@ -43,7 +44,7 @@ pub struct Compiler {
     /// Type environment for argument
     pub argument_type: IndexMap<String, Type>,
     /// Type environment for function includes local variables, arguments, and returns
-    pub function_type: IndexMap<String, (IndexMap<String, Type>, IndexMap<String, Type>, Type)>,
+    pub function_type: IndexMap<String, Function>,
     /// Type of main program returns
     pub program_return: Type,
 }
