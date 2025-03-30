@@ -1,12 +1,20 @@
-let profile = dict{
-    let age = 13;
-    let fuga = true
+let attended_days = [
+    1, 5, 8, 12,
+    15, 19, 22, 26
+];
+let scores = dict{
+    math: 50,
+    english: 10,
+    science: 100
 };
-let b = [1, 2];
-let members = dict{
-    let alice = b;
-    let bob = profile
+let alice = dict{
+    age: 13,
+    attended_days,
+    exam: scores,
+    result: false
+};
+if alice.exam.science >= 80 then {
+    let alice.result = true
 };
 
-let members.alice[0] = 100;
-members.bob.age * members.alice[1]
+alice.age * alice.exam.english
