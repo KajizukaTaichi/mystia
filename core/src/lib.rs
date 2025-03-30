@@ -14,7 +14,7 @@ use {
     lexer::{str_escape, tokenize},
     oper::Oper,
     stmt::Stmt,
-    r#type::Type,
+    r#type::{Dict, Type},
     utils::{OPERATOR, RESERVED, SPACE, expand_local, include_letter},
     value::Value,
 };
