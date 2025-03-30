@@ -67,11 +67,10 @@ impl Type {
             Self::Void => "nil".to_string(),
             Self::Dict(dict) => format!(
                 "dict{{ {} }}",
-                join!(
-                    dict.iter()
-                        .map(|(k, t)| format!("{k} {}", t.1.format()))
-                        .collect::<Vec<_>>()
-                )
+                dict.iter()
+                    .map(|(k, t)| format!("{k}: {}", t.1.format()))
+                    .collect::<Vec<_>>()
+                    .join(", ")
             ),
             Self::Array(typ, len) => format!("[{}; {len}]", typ.format()),
         }
