@@ -3,4 +3,5 @@ let members = dict{
     let bob = true
 };
 
+let members.alice = 100;
 members.alice
