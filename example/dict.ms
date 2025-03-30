@@ -4,4 +4,6 @@ let members = dict{
 };
 
 let members.alice = 100;
-members.alice
+if members.bob
+    then members.alice
+    else 50
