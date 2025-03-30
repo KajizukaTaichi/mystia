@@ -8,6 +8,7 @@ pub enum Expr {
     Variable(String),
     Oper(Box<Oper>),
     Call(String, Vec<Expr>),
+    Property(Box<Expr>, String),
     Access(Box<Expr>, Box<Expr>),
     Block(Block),
 }
@@ -177,6 +178,12 @@ impl Node for Expr {
                     return None;
                 };
                 *typ
+            }
+            Expr::Property(dict, key) => {
+                let Type::Dict(dict) = dict.type_infer(ctx)? else {
+                    return None;
+                };
+                dict.get(key)?.clone()
             }
         })
     }
