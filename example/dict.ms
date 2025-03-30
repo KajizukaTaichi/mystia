@@ -1,9 +1,12 @@
+let profile = dict{
+    let age = 13;
+    let fuga = true
+};
+let b = [1, 2];
 let members = dict{
-    let alice = 13;
-    let bob = true
+    let alice = b;
+    let bob = profile
 };
 
-let members.alice = 100;
-if members.bob
-    then members.alice
-    else 50
+let members.alice[0] = 100;
+members.bob.age * members.alice[1]
