@@ -96,21 +96,23 @@ impl Node for Expr {
             }
             Expr::Dict(dict) => {
                 let mut result: Vec<_> = vec![];
+                let Type::Dict(infered) = self.type_infer(ctx)? else {
+                    return None;
+                };
                 ctx.pointer_index = ctx.alloc_index;
-                for (name, elm) in dict {
+                for (_, elm) in dict {
                     let typ = elm.type_infer(ctx)?;
                     result.push(format!(
                         "({type}.store {address} {value})",
                         r#type = typ.clone().compile(ctx)?,
-                        address =
-                            Value::Array(ctx.alloc_index, len, inner_type.clone()).compile(ctx)?,
+                        address = Value::Dict(ctx.alloc_index, infered.clone()).compile(ctx)?,
                         value = elm.compile(ctx)?
                     ));
                     ctx.alloc_index += typ.bytes_length();
                 }
                 format!(
                     "{} {}",
-                    Value::Array(ctx.pointer_index, len, inner_type).compile(ctx)?,
+                    Value::Dict(ctx.pointer_index, infered).compile(ctx)?,
                     join!(result)
                 )
             }
@@ -147,6 +149,14 @@ impl Node for Expr {
                 locals.get(to)?.clone()
             }
             Expr::Array(e) => Type::Array(Box::new(e.first()?.type_infer(ctx)?), e.len()),
+            Expr::Dict(dict) => {
+                let mut result: IndexMap<String, Type> = IndexMap::new();
+                for (name, elm) in dict {
+                    let typ = elm.type_infer(ctx)?;
+                    result.insert(name.to_string(), typ);
+                }
+                Type::Dict(result)
+            }
             Expr::Literal(literal) => literal.type_infer(ctx)?,
             Expr::Call(name, args) => {
                 let (_, args_type, ret_type) = ctx.function_type.get(name)?.clone();
