@@ -172,7 +172,7 @@ impl Node for Expr {
                 let mut index: i32 = 0;
                 for (name, elm) in dict {
                     let typ = elm.type_infer(ctx)?;
-                    result.insert(name.to_string(), (index, typ));
+                    result.insert(name.to_string(), (index, typ.clone()));
                     index += typ.bytes_length();
                 }
                 Type::Dict(result)
@@ -199,7 +199,7 @@ impl Node for Expr {
                 let Type::Dict(dict) = dict.type_infer(ctx)? else {
                     return None;
                 };
-                dict.get(key)?.clone()
+                dict.get(key)?.1.clone()
             }
         })
     }
