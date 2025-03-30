@@ -4,6 +4,7 @@ use crate::*;
 pub enum Expr {
     Literal(Value),
     Array(Vec<Expr>),
+    Dict(IndexMap<String, Expr>),
     Variable(String),
     Oper(Box<Oper>),
     Call(String, Vec<Expr>),
@@ -86,6 +87,26 @@ impl Node for Expr {
                         value = elm.compile(ctx)?
                     ));
                     ctx.alloc_index += inner_type.bytes_length();
+                }
+                format!(
+                    "{} {}",
+                    Value::Array(ctx.pointer_index, len, inner_type).compile(ctx)?,
+                    join!(result)
+                )
+            }
+            Expr::Dict(dict) => {
+                let mut result: Vec<_> = vec![];
+                ctx.pointer_index = ctx.alloc_index;
+                for (name, elm) in dict {
+                    let typ = elm.type_infer(ctx)?;
+                    result.push(format!(
+                        "({type}.store {address} {value})",
+                        r#type = typ.clone().compile(ctx)?,
+                        address =
+                            Value::Array(ctx.alloc_index, len, inner_type.clone()).compile(ctx)?,
+                        value = elm.compile(ctx)?
+                    ));
+                    ctx.alloc_index += typ.bytes_length();
                 }
                 format!(
                     "{} {}",
