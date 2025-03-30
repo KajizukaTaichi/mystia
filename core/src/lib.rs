@@ -44,7 +44,7 @@ pub struct Compiler {
     pub argument_type: IndexMap<String, Type>,
     /// Type environment for function includes local variables, arguments, and returns
     pub function_type: IndexMap<String, (IndexMap<String, Type>, IndexMap<String, Type>, Type)>,
-    /// Type environment for returns of main program
+    /// Type of main program returns
     pub program_return: Type,
 }
 
