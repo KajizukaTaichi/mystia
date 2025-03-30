@@ -140,6 +140,20 @@ impl Node for Expr {
                 );
                 format!("({}.load {})", typ.compile(ctx)?, addr.compile(ctx)?)
             }
+            Expr::Property(expr, key) => {
+                let Type::Dict(dict) = expr.type_infer(ctx)? else {
+                    return None;
+                };
+                let (addr, typ) = dict.get(key)?.clone();
+                let addr = Oper::Add(
+                    Expr::Oper(Box::new(Oper::Cast(*expr.clone(), Type::Integer))),
+                    Expr::Oper(Box::new(Oper::Mod(
+                        Expr::Literal(Value::Integer(addr)),
+                        Expr::Literal(Value::Integer(dict.keys().len() as i32)),
+                    ))),
+                );
+                format!("({}.load {})", typ.compile(ctx)?, addr.compile(ctx)?)
+            }
             Expr::Block(block) => block.compile(ctx)?,
         })
     }
