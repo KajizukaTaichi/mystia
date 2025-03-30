@@ -115,26 +115,23 @@ impl Node for Expr {
             }
             Expr::Dict(dict) => {
                 let mut result: Vec<_> = vec![];
-                let mut table = IndexMap::new();
                 let Type::Dict(infered) = self.type_infer(ctx)? else {
                     return None;
                 };
                 ctx.pointer_index = ctx.alloc_index;
-                for (name, elm) in dict {
+                for (_, elm) in dict {
                     let typ = elm.type_infer(ctx)?;
-                    table.insert(name.to_string(), ctx.alloc_index);
                     result.push(format!(
                         "({type}.store {address} {value})",
                         r#type = typ.clone().compile(ctx)?,
-                        address = Value::Dict(ctx.alloc_index, table.clone(), infered.clone())
-                            .compile(ctx)?,
+                        address = Value::Dict(ctx.alloc_index, infered.clone()).compile(ctx)?,
                         value = elm.compile(ctx)?
                     ));
                     ctx.alloc_index += typ.bytes_length();
                 }
                 format!(
                     "{} {}",
-                    Value::Dict(ctx.alloc_index, table, infered).compile(ctx)?,
+                    Value::Dict(ctx.alloc_index, infered).compile(ctx)?,
                     join!(result)
                 )
             }
