@@ -135,14 +135,8 @@ impl Node for Stmt {
                     let (addr, typ) = dict.get(key)?.clone();
                     type_check!(typ, value.type_infer(ctx)?, ctx)?;
                     let addr = Oper::Add(
-                        Expr::Oper(Box::new(Oper::Cast(*array.clone(), Type::Integer))),
-                        Expr::Oper(Box::new(Oper::Mul(
-                            Expr::Oper(Box::new(Oper::Mod(
-                                *index.clone(),
-                                Expr::Literal(Value::Integer(len as i32)),
-                            ))),
-                            Expr::Literal(Value::Integer(typ.bytes_length())),
-                        ))),
+                        Expr::Oper(Box::new(Oper::Cast(*expr.clone(), Type::Integer))),
+                        Expr::Literal(Value::Integer(addr)),
                     );
                     format!(
                         "({}.store {} {})",
