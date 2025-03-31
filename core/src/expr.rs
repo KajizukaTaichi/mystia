@@ -136,7 +136,6 @@ impl Node for Expr {
                 let Type::Dict(infered) = self.type_infer(ctx)? else {
                     return None;
                 };
-                ctx.pointer_index = ctx.alloc_index;
 
                 let mut prestore = IndexMap::new();
                 for (name, elm) in dict {
@@ -146,6 +145,7 @@ impl Node for Expr {
                     }
                 }
 
+                ctx.pointer_index = ctx.alloc_index;
                 for (name, elm) in dict {
                     let typ = elm.type_infer(ctx)?;
                     result.push(format!(
