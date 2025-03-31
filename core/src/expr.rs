@@ -214,17 +214,7 @@ impl Node for Expr {
 
                 for (name, elm) in dict {
                     let typ = elm.type_infer(ctx)?;
-                    if_ptr!(typ, {
-                        index += typ.size_of();
-                        result.insert(name.to_string(), (index, typ.clone()));
-                    })
-                }
-                for (name, elm) in dict {
-                    let typ = elm.type_infer(ctx)?;
-                    if_ptr!(typ, {}, {
-                        index += typ.size_of();
-                        result.insert(name.to_string(), (index, typ.clone()));
-                    });
+                    result.insert(name.to_string(), (index, typ.clone()));
                     index += typ.size_of();
                 }
                 Type::Dict(result)
