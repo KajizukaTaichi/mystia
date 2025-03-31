@@ -1,7 +1,3 @@
-let attended_days = [
-    1, 5, 8, 12,
-    15, 19, 22, 26
-];
 let scores = dict{
     math: 50,
     english: 10,
@@ -9,7 +5,6 @@ let scores = dict{
 };
 let alice = dict{
     age: 13,
-    attended_days,
     exam: scores,
     result: false
 };
