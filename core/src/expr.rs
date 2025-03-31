@@ -93,42 +93,31 @@ impl Node for Expr {
             Expr::Array(array) => {
                 let len = array.len();
                 let inner_type = array.first()?.type_infer(ctx)?;
+                let mut array = array.clone();
                 let mut result: Vec<_> = vec![];
 
-                if_ptr!(
-                    inner_type,
-                    {
-                        let mut inner_codes = vec![];
-                        for elm in array {
-                            type_check!(inner_type, elm.type_infer(ctx)?, ctx)?;
-                            inner_codes.push(elm.compile(ctx)?)
-                        }
-                        ctx.pointer_index = ctx.alloc_index;
-                        for code in inner_codes {
-                            result.push(format!(
-                                "({type}.store {address} {code})",
-                                r#type = &inner_type.compile(ctx)?,
-                                address = Value::Array(ctx.alloc_index, len, inner_type.clone())
-                                    .compile(ctx)?,
-                            ));
-                            ctx.alloc_index += inner_type.bytes_length();
-                        }
-                    },
-                    {
-                        ctx.pointer_index = ctx.alloc_index;
-                        for elm in array {
-                            type_check!(inner_type, elm.type_infer(ctx)?, ctx)?;
-                            result.push(format!(
-                                "({type}.store {address} {value})",
-                                r#type = &inner_type.compile(ctx)?,
-                                address = Value::Array(ctx.alloc_index, len, inner_type.clone())
-                                    .compile(ctx)?,
-                                value = elm.compile(ctx)?
-                            ));
-                            ctx.alloc_index += inner_type.bytes_length();
-                        }
+                if_ptr!(inner_type, {
+                    let mut inner_codes = vec![];
+                    for elm in array {
+                        type_check!(inner_type, elm.type_infer(ctx)?, ctx)?;
+                        inner_codes.push(elm)
                     }
-                );
+                    array = inner_codes;
+                });
+
+                ctx.pointer_index = ctx.alloc_index;
+                for elm in array {
+                    type_check!(inner_type, elm.type_infer(ctx)?, ctx)?;
+                    result.push(format!(
+                        "({type}.store {address} {value})",
+                        r#type = &inner_type.compile(ctx)?,
+                        address =
+                            Value::Array(ctx.alloc_index, len, inner_type.clone()).compile(ctx)?,
+                        value = elm.compile(ctx)?
+                    ));
+                    ctx.alloc_index += inner_type.bytes_length();
+                }
+
                 format!(
                     "{} {}",
                     Value::Array(ctx.pointer_index, len, inner_type).compile(ctx)?,
@@ -141,20 +130,27 @@ impl Node for Expr {
                     return None;
                 };
 
-                let mut prestore = IndexMap::new();
-                for (name, elm) in dict {
+                for (_, elm) in dict {
                     let typ = elm.type_infer(ctx)?;
-                    if_ptr!(typ, { prestore.insert(name, elm.compile(ctx)?) });
+                    if_ptr!(typ, {
+                        result.push(format!(
+                            "({type}.store {address} {value})",
+                            r#type = typ.clone().compile(ctx)?,
+                            address = Value::Dict(ctx.alloc_index, infered.clone()).compile(ctx)?,
+                            value = elm.compile(ctx)?
+                        ));
+                    });
+                    ctx.alloc_index += typ.bytes_length();
                 }
 
                 ctx.pointer_index = ctx.alloc_index;
-                for (name, elm) in dict {
+                for (_, elm) in dict {
                     let typ = elm.type_infer(ctx)?;
                     result.push(format!(
                         "({type}.store {address} {value})",
                         r#type = typ.clone().compile(ctx)?,
                         address = Value::Dict(ctx.alloc_index, infered.clone()).compile(ctx)?,
-                        value = prestore.get(name).unwrap_or(&elm.compile(ctx)?)
+                        value = elm.compile(ctx)?
                     ));
                     ctx.alloc_index += typ.bytes_length();
                 }
@@ -214,6 +210,17 @@ impl Node for Expr {
 
                 for (name, elm) in dict {
                     let typ = elm.type_infer(ctx)?;
+                    if_ptr!(typ, {
+                        result.insert(name.to_string(), (index, typ.clone()));
+                        index += typ.size_of();
+                    })
+                }
+                for (name, elm) in dict {
+                    let typ = elm.type_infer(ctx)?;
+                    if_ptr!(typ, {}, {
+                        result.insert(name.to_string(), (index, typ.clone()));
+                        index += typ.size_of();
+                    });
                     result.insert(name.to_string(), (index, typ.clone()));
                     index += typ.size_of();
                 }
