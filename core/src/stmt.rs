@@ -150,13 +150,9 @@ impl Node for Stmt {
                     (ctx.variable_type, ctx.argument_type) = (var_inf, arg_inf.clone());
                     let code = format!(
                         "(func ${name} (export \"{name}\") {args} {ret} {locals} {body})",
-                        args = join!({
-                            let mut result = vec![];
-                            for (name, typ) in &arg_inf {
-                                result.push(format!("(param ${} {})", name, typ.compile(ctx)?));
-                            }
-                            result
-                        }),
+                        args = join!(iter_map!(&arg_inf, |(name, typ): (&String, &Type)| Some(
+                            format!("(param ${name} {})", typ.compile(ctx)?)
+                        ))),
                         ret = config_return!(ret_inf, ctx)?,
                         body = value.compile(ctx)?,
                         locals = expand_local(ctx)?
