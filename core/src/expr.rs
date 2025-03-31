@@ -137,13 +137,22 @@ impl Node for Expr {
                     return None;
                 };
                 ctx.pointer_index = ctx.alloc_index;
-                for (_, elm) in dict {
+
+                let mut prestore = IndexMap::new();
+                for (name, elm) in dict {
+                    let typ = elm.type_infer(ctx)?;
+                    if let Type::String | Type::Array(_, _) | Type::Dict(_) = typ {
+                        prestore.insert(name, elm.compile(ctx)?);
+                    }
+                }
+
+                for (name, elm) in dict {
                     let typ = elm.type_infer(ctx)?;
                     result.push(format!(
                         "({type}.store {address} {value})",
                         r#type = typ.clone().compile(ctx)?,
                         address = Value::Dict(ctx.alloc_index, infered.clone()).compile(ctx)?,
-                        value = elm.compile(ctx)?
+                        value = prestore.get(name).unwrap_or(&elm.compile(ctx)?)
                     ));
                     ctx.alloc_index += typ.bytes_length();
                 }
