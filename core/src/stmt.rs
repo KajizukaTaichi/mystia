@@ -192,44 +192,41 @@ impl Node for Stmt {
             }
             Stmt::Break => Type::Void,
             Stmt::Next => Type::Void,
-            Stmt::Let {
-                name: Expr::Variable(name),
-                value,
-            } if !ctx.argument_type.contains_key(name) => {
-                let value_type = value.type_infer(ctx)?;
-                if let Some(exist_val) = ctx.clone().variable_type.get(name) {
-                    type_check!(exist_val, value_type, ctx)?;
-                } else {
-                    ctx.variable_type.insert(name.to_string(), value_type);
-                }
-                Type::Void
-            }
-            Stmt::Let {
-                name: Expr::Call(name, args),
-                value,
-            } => {
-                for arg in args {
-                    if let Expr::Oper(oper) = arg {
-                        if let Oper::Cast(Expr::Variable(arg), typed) = *oper.clone() {
-                            ctx.argument_type.insert(arg.to_string(), typed);
+            Stmt::Let { name, value } => {
+                match name {
+                    Expr::Variable(name) if !ctx.argument_type.contains_key(name) => {
+                        let value_type = value.type_infer(ctx)?;
+                        if let Some(exist_val) = ctx.clone().variable_type.get(name) {
+                            type_check!(exist_val, value_type, ctx)?;
+                        } else {
+                            ctx.variable_type.insert(name.to_string(), value_type);
                         }
-                    } else {
-                        return None;
-                    };
+                    }
+                    Expr::Call(name, args) => {
+                        for arg in args {
+                            if let Expr::Oper(oper) = arg {
+                                if let Oper::Cast(Expr::Variable(arg), typed) = *oper.clone() {
+                                    ctx.argument_type.insert(arg.to_string(), typed);
+                                }
+                            } else {
+                                return None;
+                            };
+                        }
+                        let ret = value.type_infer(ctx)?;
+                        ctx.function_type.insert(
+                            name.to_owned(),
+                            (ctx.variable_type.clone(), ctx.argument_type.clone(), ret),
+                        );
+                        ctx.variable_type.clear();
+                        ctx.argument_type.clear();
+                    }
+                    _ => {
+                        value.type_infer(ctx);
+                    }
                 }
-                let ret = value.type_infer(ctx)?;
-                ctx.function_type.insert(
-                    name.to_owned(),
-                    (ctx.variable_type.clone(), ctx.argument_type.clone(), ret),
-                );
-                ctx.variable_type.clear();
-                ctx.argument_type.clear();
                 Type::Void
             }
-            Stmt::Let { name: _, value } => {
-                value.type_infer(ctx);
-                Type::Void
-            }
+
             Stmt::Drop => Type::Void,
             Stmt::Return(_) => Type::Void,
         })
