@@ -128,32 +128,16 @@ impl Node for Expr {
                 let Type::Dict(infered) = self.type_infer(ctx)? else {
                     return None;
                 };
-
-                for (_, elm) in dict {
-                    let typ = elm.type_infer(ctx)?;
-                    if_ptr!(typ, {
-                        result.push(format!(
-                            "({type}.store {address} {value})",
-                            r#type = typ.clone().compile(ctx)?,
-                            address = Value::Dict(ctx.alloc_index, infered.clone()).compile(ctx)?,
-                            value = elm.compile(ctx)?
-                        ));
-                        ctx.alloc_index += typ.bytes_length();
-                    });
-                }
-
                 ctx.pointer_index = ctx.alloc_index;
                 for (_, elm) in dict {
                     let typ = elm.type_infer(ctx)?;
-                    if_ptr!(typ, {}, {
-                        result.push(format!(
-                            "({type}.store {address} {value})",
-                            r#type = typ.clone().compile(ctx)?,
-                            address = Value::Dict(ctx.alloc_index, infered.clone()).compile(ctx)?,
-                            value = elm.compile(ctx)?
-                        ));
-                        ctx.alloc_index += typ.bytes_length();
-                    })
+                    result.push(format!(
+                        "({type}.store {address} {value})",
+                        r#type = typ.clone().compile(ctx)?,
+                        address = Value::Dict(ctx.alloc_index, infered.clone()).compile(ctx)?,
+                        value = elm.compile(ctx)?
+                    ));
+                    ctx.alloc_index += typ.bytes_length();
                 }
                 format!(
                     "{} {}",
