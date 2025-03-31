@@ -103,7 +103,9 @@ impl Node for Stmt {
             Stmt::Let { name, value } => match name {
                 Expr::Variable(name) => {
                     let typ = value.type_infer(ctx)?;
-                    ctx.variable_type.insert(name.to_string(), typ);
+                    if !ctx.argument_type.contains_key(name) {
+                        ctx.variable_type.insert(name.to_string(), typ);
+                    }
                     format!("(local.set ${name} {})", value.compile(ctx)?)
                 }
                 Expr::Access(array, index) => {
