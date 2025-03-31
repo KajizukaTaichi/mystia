@@ -132,11 +132,11 @@ impl Node for Stmt {
                     let Type::Dict(dict) = expr.type_infer(ctx)? else {
                         return None;
                     };
-                    let (addr, typ) = dict.get(key)?.clone();
+                    let (offset, typ) = dict.get(key)?.clone();
                     type_check!(typ, value.type_infer(ctx)?, ctx)?;
                     let addr = Oper::Add(
                         Expr::Oper(Box::new(Oper::Cast(*expr.clone(), Type::Integer))),
-                        Expr::Literal(Value::Integer(addr)),
+                        Expr::Literal(Value::Integer(offset)),
                     );
                     format!(
                         "({}.store {} {})",
