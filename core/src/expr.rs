@@ -140,9 +140,7 @@ impl Node for Expr {
                 let mut prestore = IndexMap::new();
                 for (name, elm) in dict {
                     let typ = elm.type_infer(ctx)?;
-                    if let Type::String(_) | Type::Array(_, _) | Type::Dict(_) = typ {
-                        prestore.insert(name, elm.compile(ctx)?);
-                    }
+                    if_ptr!({ prestore.insert(name, elm.compile(ctx)?) });
                 }
 
                 ctx.pointer_index = ctx.alloc_index;
