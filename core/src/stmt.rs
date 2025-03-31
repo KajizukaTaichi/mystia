@@ -204,13 +204,11 @@ impl Node for Stmt {
                     }
                     Expr::Call(name, args) => {
                         for arg in args {
-                            if let Expr::Oper(oper) = arg {
-                                if let Oper::Cast(Expr::Variable(arg), typed) = *oper.clone() {
-                                    ctx.argument_type.insert(arg.to_string(), typed);
-                                }
-                            } else {
+                            let Expr::Oper(oper) = arg else { return None };
+                            let Oper::Cast(Expr::Variable(arg), typed) = *oper.clone() else {
                                 return None;
                             };
+                            ctx.argument_type.insert(arg.to_string(), typed);
                         }
                         let ret = value.type_infer(ctx)?;
                         ctx.function_type.insert(
@@ -226,7 +224,6 @@ impl Node for Stmt {
                 }
                 Type::Void
             }
-
             Stmt::Drop => Type::Void,
             Stmt::Return(_) => Type::Void,
         })
