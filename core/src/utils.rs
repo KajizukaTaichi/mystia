@@ -37,6 +37,15 @@ macro_rules! config_return {
 }
 
 #[macro_export]
+macro_rules! if_ptr {
+    ($typ: expr, $block: block) => {
+        if let Type::String(_) | Type::Array(_, _) | Type::Dict(_) = typ {
+            $block
+        }
+    };
+}
+
+#[macro_export]
 macro_rules! type_check {
     ($lhs: expr, $rhs: expr, $ctx: expr) => {{
         let lhs = $lhs.type_infer($ctx)?;
