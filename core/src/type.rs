@@ -60,23 +60,6 @@ impl Type {
         }
     }
 
-    pub fn size_of(&self) -> i32 {
-        match self {
-            Type::Array(typ, len) => typ.size_of() * *len as i32,
-            Type::Dict(dict) => {
-                let mut sum = 0;
-                for i in dict.values() {
-                    sum += i.1.size_of()
-                }
-                sum
-            }
-            Type::String(len) => *len as i32,
-            Type::Bool | Type::Integer => 4,
-            Type::Number => 8,
-            Type::Void => 0,
-        }
-    }
-
     pub fn format(&self) -> String {
         match self {
             Self::Integer => "int".to_string(),
