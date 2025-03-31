@@ -6,7 +6,7 @@ pub enum Type {
     Integer,
     Number,
     Bool,
-    String,
+    String(usize),
     Array(Box<Type>, usize),
     Dict(Dict),
     Void,
@@ -18,7 +18,7 @@ impl Node for Type {
             "int" => Some(Self::Integer),
             "num" => Some(Self::Number),
             "bool" => Some(Self::Bool),
-            "str" => Some(Self::String),
+            "str" => Some(Self::String(10)),
             "nil" => Some(Self::Void),
             _ => {
                 let source = source.strip_prefix("[")?.strip_suffix("]")?;
@@ -35,9 +35,11 @@ impl Node for Type {
         Some(
             match self {
                 Self::Number => "f64",
-                Type::Integer | Self::Bool | Self::String | Self::Array(_, _) | Self::Dict(_) => {
-                    "i32"
-                }
+                Type::Integer
+                | Self::Bool
+                | Self::String(_)
+                | Self::Array(_, _)
+                | Self::Dict(_) => "i32",
                 Self::Void => return None,
             }
             .to_string(),
@@ -52,7 +54,7 @@ impl Node for Type {
 impl Type {
     pub fn bytes_length(&self) -> i32 {
         match self {
-            Type::Array(_, _) | Type::String | Type::Bool | Type::Dict(_) | Type::Integer => 4,
+            Type::Array(_, _) | Type::String(_) | Type::Bool | Type::Dict(_) | Type::Integer => 4,
             Type::Number => 8,
             Type::Void => 0,
         }
@@ -68,7 +70,7 @@ impl Type {
                 }
                 sum
             }
-            Type::String => 0,
+            Type::String(len) => *len as i32,
             Type::Bool | Type::Integer => 4,
             Type::Number => 8,
             Type::Void => 0,
@@ -80,7 +82,7 @@ impl Type {
             Self::Integer => "int".to_string(),
             Self::Number => "num".to_string(),
             Self::Bool => "bool".to_string(),
-            Self::String => "str".to_string(),
+            Self::String(_) => "str".to_string(),
             Self::Void => "nil".to_string(),
             Self::Dict(dict) => format!(
                 "dict{{ {} }}",
