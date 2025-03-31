@@ -211,9 +211,20 @@ impl Node for Expr {
             Expr::Dict(dict) => {
                 let mut result = IndexMap::new();
                 let mut index: i32 = 0;
+
                 for (name, elm) in dict {
                     let typ = elm.type_infer(ctx)?;
-                    result.insert(name.to_string(), (index, typ.clone()));
+                    if_ptr!(typ, {
+                        index += typ.size_of();
+                        result.insert(name.to_string(), (index, typ.clone()));
+                    })
+                }
+                for (name, elm) in dict {
+                    let typ = elm.type_infer(ctx)?;
+                    if_ptr!(typ, {}, {
+                        index += typ.size_of();
+                        result.insert(name.to_string(), (index, typ.clone()));
+                    });
                     index += typ.size_of();
                 }
                 Type::Dict(result)
