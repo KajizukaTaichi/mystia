@@ -95,16 +95,34 @@ impl Node for Expr {
                 let inner_type = array.first()?.type_infer(ctx)?;
                 let mut result: Vec<_> = vec![];
                 ctx.pointer_index = ctx.alloc_index;
-                for elm in array {
-                    type_check!(inner_type, elm.type_infer(ctx)?, ctx)?;
-                    result.push(format!(
-                        "({type}.store {address} {value})",
-                        r#type = &inner_type.compile(ctx)?,
-                        address =
-                            Value::Array(ctx.alloc_index, len, inner_type.clone()).compile(ctx)?,
-                        value = elm.compile(ctx)?
-                    ));
-                    ctx.alloc_index += inner_type.bytes_length();
+
+                if let Type::String | Type::Array(_, _) | Type::Dict(_) = inner_type {
+                    let mut inner_codes = vec![];
+                    for elm in array {
+                        type_check!(inner_type, elm.type_infer(ctx)?, ctx)?;
+                        inner_codes.push(elm.compile(ctx)?)
+                    }
+                    for code in inner_codes {
+                        result.push(format!(
+                            "({type}.store {address} {code})",
+                            r#type = &inner_type.compile(ctx)?,
+                            address = Value::Array(ctx.alloc_index, len, inner_type.clone())
+                                .compile(ctx)?,
+                        ));
+                        ctx.alloc_index += inner_type.bytes_length();
+                    }
+                } else {
+                    for elm in array {
+                        type_check!(inner_type, elm.type_infer(ctx)?, ctx)?;
+                        result.push(format!(
+                            "({type}.store {address} {value})",
+                            r#type = &inner_type.compile(ctx)?,
+                            address = Value::Array(ctx.alloc_index, len, inner_type.clone())
+                                .compile(ctx)?,
+                            value = elm.compile(ctx)?
+                        ));
+                        ctx.alloc_index += inner_type.bytes_length();
+                    }
                 }
                 format!(
                     "{} {}",
