@@ -7,4 +7,4 @@ if alice.score >= 80 then {
     let alice.result = true
 };
 
-alice.result
+alice.age * alice.score
