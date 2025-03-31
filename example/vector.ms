@@ -13,6 +13,8 @@ let scalar_mul(matrix: [[num; 3]; 3], value: num) = {
 
 let matrix = [
     [1.0, 2.0, 3.0],
-    [4.0, 5.0, 6.0]
+    [4.0, 5.0, 6.0],
+    [7.0, 8.0, 9.0]
 ];
-matrix[0][2]
+let result = scalar_mul(matrix, 1.5);
+result[1][2]
