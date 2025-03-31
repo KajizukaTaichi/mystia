@@ -95,7 +95,7 @@ impl Node for Expr {
                 let inner_type = array.first()?.type_infer(ctx)?;
                 let mut result: Vec<_> = vec![];
 
-                if let Type::String | Type::Array(_, _) | Type::Dict(_) = inner_type {
+                if let Type::String(_) | Type::Array(_, _) | Type::Dict(_) = inner_type {
                     let mut inner_codes = vec![];
                     for elm in array {
                         type_check!(inner_type, elm.type_infer(ctx)?, ctx)?;
@@ -140,7 +140,7 @@ impl Node for Expr {
                 let mut prestore = IndexMap::new();
                 for (name, elm) in dict {
                     let typ = elm.type_infer(ctx)?;
-                    if let Type::String | Type::Array(_, _) | Type::Dict(_) = typ {
+                    if let Type::String(_) | Type::Array(_, _) | Type::Dict(_) = typ {
                         prestore.insert(name, elm.compile(ctx)?);
                     }
                 }
@@ -212,7 +212,7 @@ impl Node for Expr {
                 for (name, elm) in dict {
                     let typ = elm.type_infer(ctx)?;
                     result.insert(name.to_string(), (index, typ.clone()));
-                    index += typ.bytes_length();
+                    index += typ.size_of();
                 }
                 Type::Dict(result)
             }
