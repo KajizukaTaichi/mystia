@@ -99,7 +99,7 @@ impl Node for Expr {
                     type_check!(inner_type, elm.type_infer(ctx)?, ctx)?;
                     result.push(format!(
                         "({type}.store {address} {value})",
-                        r#type = inner_type.clone().compile(ctx)?,
+                        r#type = &inner_type.compile(ctx)?,
                         address =
                             Value::Array(ctx.alloc_index, len, inner_type.clone()).compile(ctx)?,
                         value = elm.compile(ctx)?
