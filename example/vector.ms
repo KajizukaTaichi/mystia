@@ -4,16 +4,17 @@ let scalar_mul(matrix: [[num; 3]; 3], value: num) = {
         let j = 0;
         while j < 3 loop {
             let matrix[i][j] = matrix[i][j] * value;
-            let j = k + 1
-        }
+            let j = j + 1
+        };
+        let i = i + 1
     };
     matrix
 };
 
 let matrix = [
-    [1.0, 2.0, 3.0]
+    [1.0, 2.0, 3.0],
     [4.0, 5.0, 6.0],
     [7.0, 8.0, 9.0]
 ];
-let result = scalar_mul(vec_3d, 3, 1.5);
-result[1][2]
+let result = scalar_mul(matrix, 1.5);
+result[1]
