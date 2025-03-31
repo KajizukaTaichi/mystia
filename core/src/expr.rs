@@ -152,11 +152,9 @@ impl Node for Expr {
                             address = Value::Dict(ctx.alloc_index, infered.clone()).compile(ctx)?,
                             value = elm.compile(ctx)?
                         ));
-                        dbg!(ctx.alloc_index);
                         ctx.alloc_index += typ.bytes_length();
                     })
                 }
-                dbg!(&infered);
                 format!(
                     "{} {}",
                     Value::Dict(ctx.pointer_index, infered).compile(ctx)?,
