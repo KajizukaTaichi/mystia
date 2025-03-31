@@ -1,13 +1,9 @@
 let alice = dict{
     age: 13,
-    exam: dict{
-        math: 50,
-        english: 18,
-        science: 100
-    },
+    score: 95,
     result: false
 };
-if alice.exam.science >= 80 then {
+if alice.score >= 80 then {
     let alice.result = true
 };
 
