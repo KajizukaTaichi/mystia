@@ -11,4 +11,4 @@ if alice.exam.science >= 80 then {
     let alice.result = true
 };
 
-alice.exam.english
+alice.result
