@@ -38,8 +38,8 @@ impl Node for Expr {
                     let token = token.get(1..token.len() - 1)?.trim();
                     Expr::Block(Block::parse(token)?)
                 // Dictionary `dict{ let key = value; ... }`
-                } else if token.starts_with("dict{") && token.ends_with("}") {
-                    let token = token.get("dict{".len()..token.len() - 1)?.trim();
+                } else if token.starts_with("!{") && token.ends_with("}") {
+                    let token = token.get("!{".len()..token.len() - 1)?.trim();
                     let mut result = IndexMap::new();
                     for line in tokenize(token, &[","], false, true)? {
                         if let Some((name, value)) = line.split_once(":") {
