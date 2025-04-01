@@ -42,7 +42,7 @@ impl Node for Expr {
                     let token = token.get("!{".len()..token.len() - 1)?.trim();
                     let mut result = IndexMap::new();
                     for line in tokenize(token, &[","], false, true)? {
-                        if let Some((name, value)) = line.split_once(":") {
+                        if let Some((name, value)) = line.split_once("=") {
                             result.insert(name.trim().to_string(), Expr::parse(value)?);
                         } else {
                             let line = line.trim().to_string();
