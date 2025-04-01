@@ -67,8 +67,8 @@ macro_rules! type_check {
 
 #[macro_export]
 macro_rules! compile_compare {
-    ($oper: expr, $self: expr, $ctx: expr, $lhs: expr, $rhs: expr) => {{
-        let ret = $self.type_infer($ctx)?.compile($ctx)?;
+    ($oper: expr, $ctx: expr, $lhs: expr, $rhs: expr) => {{
+        let ret = type_check!($lhs, $rhs, $ctx)?.compile($ctx)?;
         format!(
             "({}.{}{} {} {})",
             ret,
