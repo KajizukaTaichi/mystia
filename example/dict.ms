@@ -1,4 +1,4 @@
-let alice = dict{
+let alice = !{
     age: 13,
     score: 95.2,
     result: false
