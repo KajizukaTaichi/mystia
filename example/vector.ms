@@ -16,5 +16,5 @@ let matrix = [
     [4.0, 5.0, 6.0],
     [7.0, 8.0, 9.0]
 ];
-let result = scalar_mul(matrix, 1.5);
+let result = scalar_mul(matrix, 2.5);
 result[1][2]
