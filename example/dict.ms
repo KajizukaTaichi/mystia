@@ -1,10 +1,10 @@
 let alice = dict{
     age: 13,
-    score: 95.2,
+    score: 95,
     result: false
 };
-if alice.score >= 80.0 then {
+if alice.score >= 80 then {
     let alice.result = true
 };
 
-alice.age:num * alice.score
+alice.age * alice.score
