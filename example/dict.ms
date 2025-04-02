@@ -1,10 +1,14 @@
 let alice = !{
-    age = 13,
-    score = 95.2,
-    result = false
+    age: 13,
+    score: !{
+        math: 10,
+        english: 12,
+        science: 6
+    },
+    result: false
 };
-if alice.score >= 80.0 then {
+if alice.score.math >= 80 then {
     let alice.result = true
 };
 
-alice.score: int * alice.age
+alice.score.math
