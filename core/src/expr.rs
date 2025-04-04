@@ -159,6 +159,7 @@ impl Node for Expr {
                     ));
                     ctx.alloc_index += typ.bytes_length();
                 }
+
                 format!(
                     "{} {}",
                     Value::Dict(ctx.pointer_index, infered).compile(ctx)?,
