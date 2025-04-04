@@ -92,12 +92,7 @@
                 try {
                     let result = await mystia(codeEditor.value);
                     if (result !== undefined) {
-                        let string = result.getString();
-                        if (string !== "") {
-                            resultArea.innerHTML = `"${string}"`;
-                        } else {
-                            resultArea.innerHTML = result.getValue();
-                        }
+                        resultArea.innerHTML = result;
                     }
                 } catch (e) {
                     console.error(e);
