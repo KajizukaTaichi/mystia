@@ -1,3 +1,5 @@
+use std::intrinsics::powf16;
+
 use crate::*;
 
 #[derive(Debug, Clone)]
@@ -95,6 +97,7 @@ impl Node for Expr {
                 let inner_type = array.first()?.type_infer(ctx)?;
                 let array = array.clone();
                 let mut result: Vec<_> = vec![];
+                let pointer;
 
                 if_ptr!(
                     inner_type,
@@ -104,7 +107,7 @@ impl Node for Expr {
                             type_check!(inner_type, elm.type_infer(ctx)?, ctx)?;
                             inner_codes.push(elm.compile(ctx)?)
                         }
-                        ctx.pointer_index = ctx.alloc_index;
+                        pointer = ctx.alloc_index;
                         for code in inner_codes {
                             result.push(format!(
                                 "({type}.store {address} {code})",
@@ -116,7 +119,7 @@ impl Node for Expr {
                         }
                     },
                     {
-                        ctx.pointer_index = ctx.alloc_index;
+                        pointer = ctx.alloc_index;
                         for elm in array {
                             type_check!(inner_type, elm.type_infer(ctx)?, ctx)?;
                             result.push(format!(
@@ -132,7 +135,7 @@ impl Node for Expr {
                 );
                 format!(
                     "{} {}",
-                    Value::Array(ctx.pointer_index, len, inner_type).compile(ctx)?,
+                    Value::Array(pointer, len, inner_type).compile(ctx)?,
                     join!(result)
                 )
             }
@@ -148,7 +151,7 @@ impl Node for Expr {
                     if_ptr!(typ, { prestore.insert(name, elm.compile(ctx)?) });
                 }
 
-                ctx.pointer_index = ctx.alloc_index;
+                let pointer = ctx.alloc_index;
                 for (name, elm) in dict {
                     let typ = elm.type_infer(ctx)?;
                     result.push(format!(
@@ -162,7 +165,7 @@ impl Node for Expr {
 
                 format!(
                     "{} {}",
-                    Value::Dict(ctx.pointer_index, infered).compile(ctx)?,
+                    Value::Dict(pointer, infered).compile(ctx)?,
                     join!(result)
                 )
             }
