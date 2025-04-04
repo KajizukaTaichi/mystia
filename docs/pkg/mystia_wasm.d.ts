@@ -1,16 +1,25 @@
 /* tslint:disable */
 /* eslint-disable */
-export function mystia(source: string): Uint8Array | undefined;
+export function mystia(source: string): Result | undefined;
+export class Result {
+  private constructor();
+  free(): void;
+  get_bytecode(): Uint8Array;
+  get_return_type(): string;
+}
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
-  readonly mystia: (a: number, b: number) => [number, number];
+  readonly __wbg_result_free: (a: number, b: number) => void;
+  readonly result_get_bytecode: (a: number) => [number, number];
+  readonly result_get_return_type: (a: number) => [number, number];
+  readonly mystia: (a: number, b: number) => number;
   readonly __wbindgen_export_0: WebAssembly.Table;
+  readonly __wbindgen_free: (a: number, b: number, c: number) => void;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
-  readonly __wbindgen_free: (a: number, b: number, c: number) => void;
   readonly __wbindgen_start: () => void;
 }
 
