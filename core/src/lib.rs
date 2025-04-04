@@ -33,8 +33,6 @@ type Function = (IndexMap<String, Type>, IndexMap<String, Type>, Type);
 pub struct Compiler {
     /// Address for memory allocation
     pub alloc_index: i32,
-    /// Address of pointer
-    pub pointer_index: i32,
     /// Static string data
     pub static_data: Vec<String>,
     /// Set of function declare code
