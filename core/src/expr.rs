@@ -71,7 +71,7 @@ impl Node for Expr {
                         result
                     };
                     Expr::Call(name.to_string(), args)
-                // Dictionary access
+                // Dictionary access `dict.key`
                 } else if token.contains(".") {
                     let (name, key) = token.rsplit_once(".")?;
                     Expr::Property(Box::new(Expr::parse(name)?), key.to_string())
