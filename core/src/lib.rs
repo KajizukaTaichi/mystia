@@ -51,7 +51,6 @@ impl Compiler {
     pub fn new() -> Self {
         Compiler {
             alloc_index: 0,
-            pointer_index: 0,
             static_data: vec![],
             declare_code: vec![],
             variable_type: IndexMap::new(),
