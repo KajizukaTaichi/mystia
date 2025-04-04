@@ -76,7 +76,7 @@ impl Node for Expr {
                     let (name, key) = token.rsplit_once(".")?;
                     Expr::Property(Box::new(Expr::parse(name)?), key.to_string())
                 // Variable reference
-                } else if !RESERVED.contains(&token.as_str()) {
+                } else if !RESERVED.contains(&token.as_str()) && token.is_ascii() {
                     Expr::Variable(token)
                 } else {
                     return None;
