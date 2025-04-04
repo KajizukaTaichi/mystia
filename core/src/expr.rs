@@ -1,5 +1,3 @@
-use std::intrinsics::powf16;
-
 use crate::*;
 
 #[derive(Debug, Clone)]
