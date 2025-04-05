@@ -36,20 +36,20 @@ impl Node for Expr {
                 // Code block `{ stmt; ... }`
                 } else if token.starts_with("{") && token.ends_with("}") {
                     let token = token.get(1..token.len() - 1)?.trim();
-                    Expr::Block(Block::parse(token)?)
-                // Dictionary `dict{ let key = value; ... }`
-                } else if token.starts_with("!{") && token.ends_with("}") {
-                    let token = token.get("!{".len()..token.len() - 1)?.trim();
-                    let mut result = IndexMap::new();
-                    for line in tokenize(token, &[","], false, true)? {
-                        if let Some((name, value)) = line.split_once(":") {
-                            result.insert(name.trim().to_string(), Expr::parse(value)?);
-                        } else {
-                            let line = line.trim().to_string();
-                            result.insert(line.clone(), Expr::Variable(line));
+                    if let Some(block) = Block::parse(token) {
+                        Expr::Block(block)
+                    } else {
+                        let mut result = IndexMap::new();
+                        for line in tokenize(token, &[";"], false, true)? {
+                            if let Some((name, value)) = line.split_once("=") {
+                                result.insert(name.trim().to_string(), Expr::parse(value)?);
+                            } else {
+                                let line = line.trim().to_string();
+                                result.insert(line.clone(), Expr::Variable(line));
+                            }
                         }
+                        Expr::Dict(result)
                     }
-                    Expr::Dict(result)
                 // Prioritize higher than others
                 } else if token.starts_with("(") && token.ends_with(")") {
                     let token = token.get(1..token.len() - 1)?.trim();
