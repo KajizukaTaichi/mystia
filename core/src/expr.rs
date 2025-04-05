@@ -115,8 +115,7 @@ impl Node for Expr {
                             ));
                             ctx.alloc_index += inner_type.bytes_length();
                         }
-                    },
-                    {
+                    } else {
                         pointer = ctx.alloc_index;
                         for elm in array {
                             type_check!(inner_type, elm.type_infer(ctx)?, ctx)?;
