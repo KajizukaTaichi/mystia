@@ -40,7 +40,7 @@ impl Node for Expr {
                         Expr::Block(block)
                     } else {
                         let mut result = IndexMap::new();
-                        for line in tokenize(token, &[";"], false, true)? {
+                        for line in tokenize(token, &[","], false, true)? {
                             if let Some((name, value)) = line.split_once("=") {
                                 result.insert(name.trim().to_string(), Expr::parse(value)?);
                             } else {
