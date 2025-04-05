@@ -68,20 +68,18 @@
         <script type="module">
             import { mystia } from "./main.js";
 
-            let codeEditor = document.getElementById("code");
-            let resultArea = document.getElementById("result");
-            let runBtn = document.getElementById("run");
+            const codeEditor = document.getElementById("code");
+            const resultArea = document.getElementById("result");
+            const runBtn = document.getElementById("run");
 
-            let exampleFieldInput = document.getElementById("example-field");
-            let exampleSelectBtn = document.getElementById("example-select");
+            const exampleFieldInput = document.getElementById("example-field");
+            const exampleSelectBtn = document.getElementById("example-select");
 
             function loadExample(name) {
                 const exampleCodeUrl = `https://raw.githubusercontent.com/KajizukaTaichi/mystia/refs/heads/master/example/${name}.ms`;
-                try {
-                    fetch(exampleCodeUrl)
-                        .then((response) => response.text())
-                        .then((data) => (codeEditor.value = data));
-                } catch {}
+                fetch(exampleCodeUrl)
+                    .then((response) => response.text())
+                    .then((data) => (codeEditor.value = data));
             }
 
             exampleSelectBtn.addEventListener("click", () => {
@@ -93,7 +91,8 @@
                     let result = await mystia(codeEditor.value);
                     resultArea.innerHTML = result;
                 } catch (e) {
-                    resultArea.innerHTML = "Error: " + e.message;
+                    resultArea.innerHTML =
+                        "<span style='color: orange;'>Error occurred during compilation. Check out if the program is correct</span>";
                 }
             });
         </script>
