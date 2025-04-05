@@ -68,7 +68,7 @@ impl Type {
             Self::String(_) => "str".to_string(),
             Self::Void => "nil".to_string(),
             Self::Dict(dict) => format!(
-                "dict{{ {} }}",
+                "{{ {} }}",
                 dict.iter()
                     .map(|(k, t)| format!("{k}: {}", t.1.format()))
                     .collect::<Vec<_>>()
