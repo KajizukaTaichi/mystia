@@ -39,12 +39,12 @@ macro_rules! config_return {
 #[macro_export]
 macro_rules! if_ptr {
     ($typ: expr, $block: block) => {
-        if let Type::String(_) | Type::Array(_, _) | Type::Dict(_) = $typ {
+        if let Type::String | Type::Array(_, _) | Type::Dict(_) = $typ {
             $block;
         }
     };
     ($typ: expr, $block: block, $els: block) => {
-        if let Type::String(_) | Type::Array(_, _) | Type::Dict(_) = $typ {
+        if let Type::String | Type::Array(_, _) | Type::Dict(_) = $typ {
             $block;
         } else {
             $els;
