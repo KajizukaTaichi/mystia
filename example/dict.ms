@@ -9,8 +9,8 @@ let alice = {
     result = false
 };
 
-let score = alice.score;
-let alice.total = score.math + score.english + score.science;
+let exam = alice.score;
+let alice.total = exam.math + exam.english + exam.science;
 
 if alice.total >= 80 then {
     let alice.result = true
