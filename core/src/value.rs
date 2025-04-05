@@ -41,7 +41,7 @@ impl Node for Value {
             Value::Bool(n) => Value::Integer(if *n { 1 } else { 0 }).compile(ctx)?,
             Value::String(str) => {
                 let len = str.len() + 1;
-                let result = Value::Array(ctx.alloc_index, len, Type::String(len)).compile(ctx)?;
+                let result = Value::Array(ctx.alloc_index, len, Type::String).compile(ctx)?;
                 ctx.static_data
                     .push(format!(r#"(data {} "{str}\00")"#, result));
                 ctx.alloc_index += len as i32;
@@ -55,7 +55,7 @@ impl Node for Value {
             Value::Number(_) => Type::Number,
             Value::Integer(_) => Type::Integer,
             Value::Bool(_) => Type::Bool,
-            Value::String(str) => Type::String(str.len()),
+            Value::String(_) => Type::String,
             Value::Array(_, len, typ) => Type::Array(Box::new(typ.clone()), *len),
             Value::Dict(_, typ) => Type::Dict(typ.clone()),
         })
