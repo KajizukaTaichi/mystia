@@ -20,21 +20,21 @@ impl Node for Oper {
     fn parse(source: &str) -> Option<Self> {
         let token_list: Vec<String> = tokenize(source, SPACE.as_ref(), true, true)?;
         let operator = token_list.get(token_list.len().checked_sub(2)?)?;
-        let has_lhs = |len: usize| Expr::parse(&join!(token_list.get(..token_list.len() - len)?));
-        let token = token_list.last()?;
+        let lhs = &join!(token_list.get(..token_list.len() - 2)?);
+        let rhs = token_list.last()?;
         Some(match operator.as_str() {
-            "+" => Oper::Add(has_lhs(2)?, Expr::parse(token)?),
-            "-" => Oper::Sub(has_lhs(2)?, Expr::parse(token)?),
-            "*" => Oper::Mul(has_lhs(2)?, Expr::parse(token)?),
-            "/" => Oper::Div(has_lhs(2)?, Expr::parse(token)?),
-            "%" => Oper::Mod(has_lhs(2)?, Expr::parse(token)?),
-            "==" => Oper::Eql(has_lhs(2)?, Expr::parse(token)?),
-            "!=" => Oper::Neq(has_lhs(2)?, Expr::parse(token)?),
-            "<" => Oper::Lt(has_lhs(2)?, Expr::parse(token)?),
-            ">" => Oper::Gt(has_lhs(2)?, Expr::parse(token)?),
-            ">=" => Oper::GtEq(has_lhs(2)?, Expr::parse(token)?),
-            "<=" => Oper::LtEq(has_lhs(2)?, Expr::parse(token)?),
-            ":" => Oper::Cast(has_lhs(2)?, Type::parse(token)?),
+            "+" => Oper::Add(Expr::parse(lhs)?, Expr::parse(rhs)?),
+            "-" => Oper::Sub(Expr::parse(lhs)?, Expr::parse(rhs)?),
+            "*" => Oper::Mul(Expr::parse(lhs)?, Expr::parse(rhs)?),
+            "/" => Oper::Div(Expr::parse(lhs)?, Expr::parse(rhs)?),
+            "%" => Oper::Mod(Expr::parse(lhs)?, Expr::parse(rhs)?),
+            "==" => Oper::Eql(Expr::parse(lhs)?, Expr::parse(rhs)?),
+            "!=" => Oper::Neq(Expr::parse(lhs)?, Expr::parse(rhs)?),
+            "<" => Oper::Lt(Expr::parse(lhs)?, Expr::parse(rhs)?),
+            ">" => Oper::Gt(Expr::parse(lhs)?, Expr::parse(rhs)?),
+            ">=" => Oper::GtEq(Expr::parse(lhs)?, Expr::parse(rhs)?),
+            "<=" => Oper::LtEq(Expr::parse(lhs)?, Expr::parse(rhs)?),
+            ":" => Oper::Cast(Expr::parse(lhs)?, Type::parse(rhs)?),
             _ => return None,
         })
     }
