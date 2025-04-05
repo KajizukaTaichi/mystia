@@ -43,7 +43,7 @@ macro_rules! if_ptr {
             $block;
         }
     };
-    ($typ: expr, $block: block, $els: block) => {
+    ($typ: expr, $block: block else $els: block) => {
         if let Type::String | Type::Array(_, _) | Type::Dict(_) = $typ {
             $block;
         } else {
