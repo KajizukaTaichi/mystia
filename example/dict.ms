@@ -1,11 +1,11 @@
 let alice = {
-    age = 13.2;
+    age = 13.2,
     score = {
-        math = 10;
-        english = 49;
-        science = 87;
-    };
-    total = 0;
+        math = 10,
+        english = 49,
+        science = 87,
+    },
+    total = 0,
     result = false
 };
 
