@@ -41,12 +41,8 @@ impl Node for Expr {
                     } else {
                         let mut result = IndexMap::new();
                         for line in tokenize(token, &[","], false, true)? {
-                            if let Some((name, value)) = line.split_once("=") {
-                                result.insert(name.trim().to_string(), Expr::parse(value)?);
-                            } else {
-                                let line = line.trim().to_string();
-                                result.insert(line.clone(), Expr::Variable(line));
-                            }
+                            let (name, value) = line.split_once("=")?;
+                            result.insert(name.trim().to_string(), Expr::parse(value)?);
                         }
                         Expr::Dict(result)
                     }
