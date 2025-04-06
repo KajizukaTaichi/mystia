@@ -20,10 +20,10 @@ rl.on("line", async (input) => {
                 if (x === undefined) {
                     code += `;${input}`;
                 } else {
-                    console.log(x);
+                    console.log(eval(x));
                 }
             })
-            .catch(() => console.log("Error"))
+            .catch(() => {})
             .then(() => rl.prompt());
     } else {
         rl.prompt();
