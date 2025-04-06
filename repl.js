@@ -8,7 +8,16 @@ const rl = createInterface({
 });
 
 console.log("Mystia REPL");
-rl.question("You: ", async (code) => {
-    console.log(`Mystia: ${await mystia(code)}`);
-    rl.close();
-});
+function mainloop() {
+    rl.question("You: ", async (code) => {
+        try {
+            console.log(`Mystia: ${await mystia(code)}`);
+        } catch {
+            console.error(
+                "Error occurred during compilation. Check out if the program is correct",
+            );
+        }
+        rl.close();
+        mainloop();
+    });
+}
