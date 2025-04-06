@@ -14,16 +14,18 @@ console.log("Mystia REPL");
 rl.prompt();
 
 rl.on("line", async (input) => {
-    mystia(`${code};${input}`)
-        .then((x) => {
-            if (x === undefined) {
-                code += `;${input}`;
-            } else {
-                console.log(x);
-            }
-        })
-        .catch(() => console.log("Error"))
-        .then(() => rl.prompt());
+    if (input.trim() !== "") {
+        mystia(`${code};${input}`)
+            .then((x) => {
+                if (x === undefined) {
+                    code += `;${input}`;
+                } else {
+                    console.log(x);
+                }
+            })
+            .catch(() => console.log("Error"))
+            .then(() => rl.prompt());
+    }
 });
 
 rl.on("close", () => {
