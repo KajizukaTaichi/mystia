@@ -2,23 +2,27 @@ import init, { mystia as compile } from "./mystia_wasm.js";
 
 await init();
 export async function mystia(code) {
-    const compileResult = compile(code);
-    const type = compileResult.get_return_type();
-    const bytecodes = compileResult.get_bytecode().buffer;
+    const result = compile(code);
+    const type = result.get_return_type();
+    const bytecodes = result.get_bytecode().buffer;
     const { instance } = await WebAssembly.instantiate(bytecodes);
-    const returns = instance.exports._start();
+    const value = instance.exports._start();
+    return ffi(type, value);
+}
+
+function ffi(type, value) {
     if (type == "str") {
-        let stringLength = returns;
+        let stringLength = value;
         const memoryView = new Uint8Array(instance.exports.mem.buffer);
         while (memoryView[stringLength] !== 0) {
             stringLength++;
         }
-        const stringBytes = memoryView.slice(returns, stringLength);
+        const stringBytes = memoryView.slice(value, stringLength);
         const textDecoder = new TextDecoder("utf-8");
         return textDecoder.decode(stringBytes);
     } else if (type == "int" || type == "num") {
-        return returns;
+        return value;
     } else if (type == "bool") {
-        return returns != 0;
+        return value != 0;
     }
 }
