@@ -25,6 +25,8 @@ rl.on("line", async (input) => {
             })
             .catch(() => console.log("Error"))
             .then(() => rl.prompt());
+    } else {
+        rl.prompt();
     }
 });
 
