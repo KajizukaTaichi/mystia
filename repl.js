@@ -6,7 +6,8 @@ const rl = createInterface({
     output: process.stdout,
 });
 
-rl.question("何か入力してください: ", async (code) => {
-    console.log(`あなたの入力: ${await mystia(code)}`);
+console.log("Mystia REPL");
+rl.question("You: ", async (code) => {
+    console.log(`Mystia: ${await mystia(code)}`);
     rl.close();
 });
