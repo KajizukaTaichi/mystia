@@ -55,10 +55,23 @@ macro_rules! if_ptr {
 #[macro_export]
 macro_rules! type_check {
     ($lhs: expr, $rhs: expr, $ctx: expr) => {{
-        let lhs = $lhs.type_infer($ctx)?;
-        let rhs = $rhs.type_infer($ctx)?;
-        if lhs.format() == rhs.format() {
-            Some(lhs)
+        let lhs = $lhs.type_infer($ctx);
+        let rhs = $rhs.type_infer($ctx);
+        if let (Some(lhs), Some(rhs)) = (&lhs, &rhs) {
+            if lhs.format() == rhs.format() {
+                Some(lhs.clone())
+            } else {
+                None
+            }
+        } else if let (Some(typ), _) | (_, Some(typ)) = (lhs, rhs) {
+            $ctx.expect_type = Some(typ);
+            let lhs = $lhs.type_infer($ctx)?;
+            let rhs = $rhs.type_infer($ctx)?;
+            if lhs.format() == rhs.format() {
+                Some(lhs.clone())
+            } else {
+                None
+            }
         } else {
             None
         }
