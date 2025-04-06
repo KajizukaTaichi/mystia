@@ -1,6 +1,5 @@
-import init, { mystia as compile } from "./pkg/mystia_wasm.js";
+import { mystia as compile } from "./node/mystia_wasm.js";
 
-await init();
 export async function mystia(code) {
     const compileResult = compile(code);
     const type = compileResult.get_return_type();
