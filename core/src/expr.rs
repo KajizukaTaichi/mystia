@@ -207,7 +207,7 @@ impl Node for Expr {
             Expr::Variable(to) => {
                 let mut locals = ctx.variable_type.clone();
                 locals.extend(ctx.argument_type.clone());
-                locals.get(to)?.clone()
+                ctx.variable_type.get(to)?.clone()
             }
             Expr::Array(e) => Type::Array(Box::new(e.first()?.type_infer(ctx)?), e.len()),
             Expr::Dict(dict) => {
