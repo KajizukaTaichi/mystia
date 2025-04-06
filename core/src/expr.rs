@@ -205,9 +205,16 @@ impl Node for Expr {
         Some(match self {
             Expr::Oper(oper) => oper.type_infer(ctx)?,
             Expr::Variable(to) => {
-                let mut locals = ctx.variable_type.clone();
-                locals.extend(ctx.argument_type.clone());
-                ctx.variable_type.get(to)?.clone()
+                if let Some(local) = ctx.variable_type.get(to) {
+                    local.clone()
+                } else if let Some(arg) = ctx.argument_type.get(to) {
+                    arg.clone()
+                } else if let Some(expect) = ctx.expect_type.clone() {
+                    ctx.expect_type = None;
+                    expect.clone()
+                } else {
+                    return None;
+                }
             }
             Expr::Array(e) => Type::Array(Box::new(e.first()?.type_infer(ctx)?), e.len()),
             Expr::Dict(dict) => {
