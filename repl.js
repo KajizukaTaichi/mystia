@@ -13,21 +13,16 @@ console.log("Mystia REPL");
 rl.prompt();
 
 // ユーザーからの入力を受け取り、評価して表示する
-rl.on("line", async (input) => {
-    // 'exit' と入力された場合に終了
-    if (input.trim() === "exit") {
-        rl.close();
-        return;
-    }
-
+rl.on("line", async (code) => {
     try {
-        mystia(code).then((x) => console.log(x));
+        mystia(code)
+            .then((x) => console.log(x))
+            .then(() => rl.prompt());
     } catch {
         console.error(
             "Error occurred during compilation. Check out if the program is correct",
         );
     }
-    rl.prompt();
 });
 
 // REPLを閉じる時の処理
