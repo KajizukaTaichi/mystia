@@ -7,20 +7,25 @@ const rl = createInterface({
     prompt: "> ",
 });
 
+let code = "";
+
 console.clear();
 console.log("Mystia REPL");
-
 rl.prompt();
 
-// ユーザーからの入力を受け取り、評価して表示する
-rl.on("line", async (code) => {
-    mystia(code)
-        .then((x) => console.log(x))
+rl.on("line", async (input) => {
+    mystia(`${code};${input}`)
+        .then((x) => {
+            if (x === undefined) {
+                code += `;${input}`;
+            } else {
+                console.log(x);
+            }
+        })
         .then(() => rl.prompt());
 });
 
-// REPLを閉じる時の処理
 rl.on("close", () => {
-    console.log("REPLを終了します。");
+    console.log("Bye");
     process.exit(0);
 });
