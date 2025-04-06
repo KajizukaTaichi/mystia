@@ -1,0 +1,11 @@
+{
+  "name": "mystia_wasm",
+  "version": "0.1.0",
+  "files": [
+    "mystia_wasm_bg.wasm",
+    "mystia_wasm.js",
+    "mystia_wasm.d.ts"
+  ],
+  "main": "mystia_wasm.js",
+  "types": "mystia_wasm.d.ts"
+}
