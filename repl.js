@@ -20,7 +20,7 @@ rl.on("line", (input) => {
                 if (x === undefined) {
                     code += `;${input}`;
                 } else {
-                    console.log(eval(x));
+                    console.log(x);
                 }
             })
             .catch(() => {})
