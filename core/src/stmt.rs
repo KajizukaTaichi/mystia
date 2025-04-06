@@ -200,14 +200,7 @@ impl Node for Stmt {
                             ctx.variable_type.insert(name.to_string(), value_type);
                         }
                     }
-                    Expr::Call(name, args) => {
-                        for arg in args {
-                            let Expr::Oper(oper) = arg else { return None };
-                            let Oper::Cast(Expr::Variable(arg), typed) = *oper.clone() else {
-                                return None;
-                            };
-                            ctx.argument_type.insert(arg.to_string(), typed);
-                        }
+                    Expr::Call(name, _) => {
                         let ret = value.type_infer(ctx)?;
                         ctx.function_type.insert(
                             name.to_owned(),
