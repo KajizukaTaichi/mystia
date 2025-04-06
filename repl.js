@@ -13,7 +13,7 @@ console.clear();
 console.log("Mystia REPL");
 rl.prompt();
 
-rl.on("line", async (input) => {
+rl.on("line", (input) => {
     if (input.trim() !== "") {
         mystia(`${code};${input}`)
             .then((x) => {
