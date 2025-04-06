@@ -237,10 +237,14 @@ impl Node for Expr {
             }
             Expr::Block(block) => block.type_infer(ctx)?,
             Expr::Access(arr, _) => {
-                let Type::Array(typ, _) = arr.type_infer(ctx)? else {
+                if let Some(Type::Array(typ, _)) = arr.type_infer(ctx) {
+                    *typ
+                } else if let Some(typ) = ctx.expect_type.clone() {
+                    ctx.expect_type = Some(Type::Array(Box::new(typ.clone()), 64));
+                    arr.type_infer(ctx)?
+                } else {
                     return None;
-                };
-                *typ
+                }
             }
             Expr::Property(dict, key) => {
                 let Type::Dict(dict) = dict.type_infer(ctx)? else {
