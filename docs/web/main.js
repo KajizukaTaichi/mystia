@@ -15,10 +15,10 @@ export async function mystia(code) {
         }
         const stringBytes = memoryView.slice(returns, stringLength);
         const textDecoder = new TextDecoder("utf-8");
-        return `"${textDecoder.decode(stringBytes)}"`;
+        return textDecoder.decode(stringBytes);
     } else if (type == "int" || type == "num") {
-        return returns.toString();
+        return returns;
     } else if (type == "bool") {
-        return returns == 1 ? "true" : "false";
+        return returns == 1;
     }
 }
