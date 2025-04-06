@@ -211,6 +211,7 @@ impl Node for Expr {
                     arg.clone()
                 } else if let Some(expect) = ctx.expect_type.clone() {
                     ctx.expect_type = None;
+                    ctx.argument_type.insert(to.to_owned(), expect.clone());
                     expect.clone()
                 } else {
                     return None;
