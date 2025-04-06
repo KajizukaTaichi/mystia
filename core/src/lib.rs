@@ -38,6 +38,8 @@ pub struct Compiler {
     pub static_data: Vec<String>,
     /// Set of function declare code
     pub declare_code: Vec<String>,
+    /// Type inference for unknown
+    pub expect_type: Option<Type>,
     /// Type environment for variable
     pub variable_type: IndexMap<String, Type>,
     /// Type environment for argument
@@ -54,6 +56,7 @@ impl Compiler {
             alloc_index: 0,
             static_data: vec![],
             declare_code: vec![],
+            expect_type: None,
             variable_type: IndexMap::new(),
             argument_type: IndexMap::new(),
             function_type: IndexMap::new(),
