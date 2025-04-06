@@ -1,6 +1,7 @@
 import { createInterface } from "readline";
 import { mystia } from "./docs/node/main.js";
 
+console.clear();
 const rl = createInterface({
     input: process.stdin,
     output: process.stdout,
