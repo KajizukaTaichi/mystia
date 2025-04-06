@@ -1,6 +1,12 @@
-import { mystia } from "./main.js";
-async function main() {
-    console.log(await mystia("let inc(n) = n + 1; inc(2)"));
-}
+const readline = require("readline");
+const mystia = require("./node/main.js");
 
-main();
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+});
+
+rl.question("何か入力してください: ", async (code) => {
+    console.log(`あなたの入力: ${await mystia.mystia(code)}`);
+    rl.close();
+});
