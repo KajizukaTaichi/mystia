@@ -31,8 +31,9 @@ function ffi(instance, type, value) {
             innerType == "num" ? [BigUint64Array, 8] : [Uint32Array, 4];
         const memoryView = new arrayClass(instance.exports.mem.buffer);
         let result = [];
-        let index = value / byte;
-        while (index < index + length) {
+        const pointer = value / byte;
+        let index = pointer;
+        while (index < pointer + length) {
             result.push(ffi(instance, innerType, memoryView[index]));
             index++;
         }
