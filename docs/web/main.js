@@ -7,10 +7,10 @@ export async function mystia(code) {
     const bytecodes = result.get_bytecode().buffer;
     const { instance } = await WebAssembly.instantiate(bytecodes);
     const value = instance.exports._start();
-    return ffi(type, value);
+    return ffi(instance, type, value);
 }
 
-function ffi(type, value) {
+function ffi(instance, type, value) {
     if (type == "int" || type == "num") {
         return value;
     } else if (type == "bool") {
@@ -25,12 +25,18 @@ function ffi(type, value) {
         const textDecoder = new TextDecoder("utf-8");
         return textDecoder.decode(stringBytes);
     } else if (type.startsWith("[") && type.endsWith("]")) {
+        type = type.slice(1, type.length);
+        let [innerType, length] = rsplitOnce(type, ";");
+        length = parseInt(length.trim());
+        const [arrayClass, byte] =
+            innerType == "num" ? [BigUint64Array, 8] : [Uint32Array, 4];
+        const memoryView = new arrayClass(instance.exports.mem.buffer);
         let result = [];
-        const [innerType, length] = rsplitOnce(";");
-        const bytes = innerType == "num" ? Uint16Array : Uint8Array;
-        const memoryView = new bytes(instance.exports.mem.buffer);
-        for (let index = 0; index < length; index++) {
-            result.push(ffi(innerType), memoryView[index]);
+        const pointer = value / byte;
+        let index = pointer;
+        while (index < pointer + length) {
+            result.push(ffi(instance, innerType, memoryView[index]));
+            index++;
         }
         return result;
     }
