@@ -27,12 +27,14 @@ function ffi(instance, type, value) {
         type = type.slice(1, type.length);
         let [innerType, length] = rsplitOnce(type, ";");
         length = parseInt(length.trim());
-        const bytes = innerType == "num" ? BigUint64Array : Uint32Array;
-        const memoryView = new bytes(instance.exports.mem.buffer);
-        console.log(innerType);
+        const [arrayClass, byte] =
+            innerType == "num" ? [BigUint64Array, 8] : [Uint32Array, 4];
+        const memoryView = new arrayClass(instance.exports.mem.buffer);
         let result = [];
-        for (let index = 0; index < length; index++) {
+        let index = value / byte;
+        while (index < index + length) {
             result.push(ffi(instance, innerType, memoryView[index]));
+            index++;
         }
         return result;
     }
