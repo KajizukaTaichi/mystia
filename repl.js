@@ -23,7 +23,6 @@ rl.on("line", (input) => {
                     console.log(x);
                 }
             })
-            .catch(() => {})
             .then(() => rl.prompt());
     } else {
         rl.prompt();
