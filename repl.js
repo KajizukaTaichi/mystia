@@ -22,6 +22,7 @@ rl.on("line", async (input) => {
                 console.log(x);
             }
         })
+        .catch(() => console.log("Error"))
         .then(() => rl.prompt());
 });
 
