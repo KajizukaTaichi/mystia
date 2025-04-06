@@ -19,6 +19,6 @@ export async function mystia(code) {
     } else if (type == "int" || type == "num") {
         return returns;
     } else if (type == "bool") {
-        return returns == 1;
+        return returns != 0;
     }
 }
