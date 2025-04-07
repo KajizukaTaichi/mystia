@@ -1,4 +1,4 @@
-import init, { mystia as compile } from "./mystia_wasm.js";
+import init, { mystia as compile } from "../web/mystia_wasm.js";
 
 await init();
 export async function mystia(code) {
