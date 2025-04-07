@@ -24,9 +24,9 @@ function ffi(instance, type, value) {
         const textDecoder = new TextDecoder("utf-8");
         return textDecoder.decode(stringBytes);
     } else if (type.startsWith("[") && type.endsWith("]")) {
-        type = type.slice(1, type.length);
-        let [innerType, length] = rsplitOnce(type, ";");
-        length = parseInt(length.trim());
+        const token = type.slice(1, type.length);
+        const [innerType, lengthSource] = rsplitOnce(token, ";");
+        const length = parseInt(lengthSource.trim());
         const [arrayClass, byte] =
             innerType == "num" ? [BigInt64Array, 8] : [Int32Array, 4];
         const memoryView = new arrayClass(instance.exports.mem.buffer);
