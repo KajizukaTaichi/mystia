@@ -74,7 +74,6 @@ impl Compiler {
             strings = join!(self.static_data),
             declare = join!(self.declare_code),
             locals = expand_local(self)?,
-            addr = self.alloc_index
         ))
     }
 }
