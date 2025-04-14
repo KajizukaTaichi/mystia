@@ -241,7 +241,7 @@ impl Node for Expr {
                     *typ
                 } else if let Some(typ) = ctx.expect_type.clone() {
                     ctx.expect_type = Some(Type::Array(Box::new(typ.clone()), 64));
-                    arr.type_infer(ctx)?
+                    self.type_infer(ctx)?
                 } else {
                     return None;
                 }
