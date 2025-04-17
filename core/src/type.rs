@@ -87,4 +87,25 @@ impl Type {
             Self::Array(typ, len) => format!("[{}; {len}]", typ.format()),
         }
     }
+
+    pub fn ffi_json(&self) -> String {
+        match self {
+            Self::Integer => "\"int\"".to_string(),
+            Self::Number => "\"num\"".to_string(),
+            Self::Bool => "\"bool\"".to_string(),
+            Self::String => "\"str\"".to_string(),
+            Self::Void => "null".to_string(),
+            Self::Dict(dict) => format!(
+                "{{ {} }}",
+                dict.iter()
+                    .map(|(k, (offset, typ))| format!(
+                        "{k}: {{ type: {}, offset: {offset} }}",
+                        typ.ffi_json()
+                    ))
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            ),
+            Self::Array(typ, len) => format!("{{ type: {}, len: {len} }}", typ.format()),
+        }
+    }
 }
