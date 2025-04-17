@@ -22,7 +22,7 @@ pub fn mystia(source: &str) -> Option<Result> {
     let mut compiler = Compiler::new();
     if let Some(wat_code) = compiler.build(source) {
         if let Ok(bytes) = wat::parse_str(wat_code) {
-            Some(Result(bytes, compiler.program_return.format()))
+            Some(Result(bytes, compiler.program_return.ffi_json()))
         } else {
             None
         }
