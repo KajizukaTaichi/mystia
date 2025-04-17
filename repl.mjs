@@ -16,13 +16,13 @@ rl.on("line", (input) => {
     if (input.trim() !== "") {
         mystia(`${code};${input}`)
             .then((result) => {
-                if (result === undefined) {
+                if (result === null) {
                     code += `;${input}`;
                 } else {
                     console.log(result);
                 }
             })
-            .catch((e) => console.log(e))
+            .catch((e) => console.log(e, code))
             .then(() => rl.prompt());
     } else {
         rl.prompt();
