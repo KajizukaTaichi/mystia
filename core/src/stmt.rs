@@ -176,7 +176,7 @@ impl Node for Stmt {
             Stmt::MemCpy { from } => {
                 let size = from.type_infer(ctx)?.byte_size()?;
                 format!(
-                    "(call $memcpy {} {})",
+                    "(global.get $alloc_index) (memory.copy (global.get $alloc_index) {} {})",
                     from.compile(ctx)?,
                     Value::Integer(size).compile(ctx)?
                 )
