@@ -237,11 +237,10 @@ impl Node for Expr {
             }
             Expr::Block(block) => block.type_infer(ctx)?,
             Expr::Access(arr, _) => {
-                if let Some(Type::Array(typ, _)) = arr.type_infer(ctx) {
-                    *typ
-                } else {
+                let Some(Type::Array(typ, _)) = arr.type_infer(ctx) else {
                     return None;
-                }
+                };
+                *typ
             }
             Expr::Property(dict, key) => {
                 let Type::Dict(dict) = dict.type_infer(ctx)? else {
