@@ -174,10 +174,15 @@ impl Node for Stmt {
                 _ => return None,
             },
             Stmt::MemCpy { from } => {
+                let size = from.type_infer(ctx)?.byte_size()?;
                 format!(
                     "(call $memcpy {} {})",
-                    from.compile(ctx)?,
-                    Value::Integer(from.type_infer(ctx)?.byte_size()?).compile(ctx)?
+                    Oper::Sub(
+                        Expr::Oper(Box::new(Oper::Cast(from.clone(), Type::Integer))),
+                        Expr::Literal(Value::Integer(if size == 1 { size } else { 1 - size }))
+                    )
+                    .compile(ctx)?,
+                    Value::Integer(size).compile(ctx)?
                 )
             }
             Stmt::Drop => "(drop)".to_string(),
