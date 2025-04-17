@@ -27,15 +27,9 @@ export function ffi(instance, type, value) {
     } else if (type.type == "dict") {
         let result = {};
         const memoryView32bit = new Int32Array(instance.exports.mem.buffer);
-        const memoryView64bit = new Float64Array(instance.exports.mem.buffer);
         for (let [name, field] of Object.entries(type.fields)) {
-            result[name] = ffi(
-                instance,
-                field.type,
-                field.type == "num"
-                    ? memoryView64bit[value + field.offset]
-                    : memoryView32bit[value + field.offset],
-            );
+            const address = value + field.offset / 4;
+            result[name] = ffi(instance, field.type, memoryView32bit[address]);
         }
         return result;
     }
