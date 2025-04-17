@@ -239,9 +239,6 @@ impl Node for Expr {
             Expr::Access(arr, _) => {
                 if let Some(Type::Array(typ, _)) = arr.type_infer(ctx) {
                     *typ
-                } else if let Some(typ) = ctx.expect_type.clone() {
-                    ctx.expect_type = Some(Type::Array(Box::new(typ.clone()), 64));
-                    self.type_infer(ctx)?
                 } else {
                     return None;
                 }
