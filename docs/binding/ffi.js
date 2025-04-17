@@ -17,7 +17,7 @@ export function ffi(instance, type, value) {
         const [innerType, lengthSource] = rsplitOnce(token, ";");
         const length = parseInt(lengthSource.trim());
         const [arrayClass, byte] =
-            innerType == "num" ? [BigInt64Array, 8] : [Int32Array, 4];
+            innerType == "num" ? [Float64Array, 8] : [Int32Array, 4];
         const memoryView = new arrayClass(instance.exports.mem.buffer);
         const pointer = value / byte;
         let [result, index] = [[], pointer];
