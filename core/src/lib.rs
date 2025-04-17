@@ -54,8 +54,8 @@ pub struct Compiler {
 
 impl Compiler {
     const MEMCPY: &str = r#"
-        (global $alloc_index (mut i32) (i32.const 0))
-        (func $memcpy (param $src i32) (param $size i32)
+        (global $alloc_index (mut i32) (i32.const {LAST_STATIC_ALLOC}))
+        (func $memcpy (param $src i32) (param $size i32) (result i32)
             (local $idx i32) (local $dst i32)
             (local.set $dst (global.get $alloc_index))
             (block $exit
@@ -67,7 +67,8 @@ impl Compiler {
                     (br_if $loop (i32.lt_s (local.get $idx) (local.get $size)))
                 )
             )
-            (global.tee $alloc_index (i32.add (global.get $alloc_index) (i32.mul (local.get $size) (i32.const 8))))
+            (global.set $alloc_index (i32.add (global.get $alloc_index) (i32.mul (local.get $size) (i32.const 8))))
+            (global.get $alloc_index)
         )
     "#;
 
@@ -95,9 +96,9 @@ impl Compiler {
             strings = join!(self.static_data),
             declare = join!(self.declare_code),
             memcpy = if self.is_memory_copied {
-                Compiler::MEMCPY
+                Compiler::MEMCPY.replace("{LAST_STATIC_ALLOC}", &self.alloc_index.to_string())
             } else {
-                ""
+                String::new()
             },
             locals = expand_local(self)?,
         ))
