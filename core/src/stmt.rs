@@ -240,7 +240,10 @@ impl Node for Stmt {
                 }
                 Type::Void
             }
-            Stmt::MemCpy { from } => from.type_infer(ctx)?,
+            Stmt::MemCpy { from } => {
+                ctx.is_memory_copied = true;
+                from.type_infer(ctx)?
+            }
             Stmt::Drop => Type::Void,
             Stmt::Return(_) => Type::Void,
         })
