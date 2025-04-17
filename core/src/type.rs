@@ -50,11 +50,23 @@ impl Node for Type {
 }
 
 impl Type {
-    pub fn bytes_length(&self) -> i32 {
+    pub fn pointer_length(&self) -> i32 {
         match self {
             Type::Array(_, _) | Type::String | Type::Bool | Type::Dict(_) | Type::Integer => 4,
             Type::Number => 8,
             Type::Void => 0,
+        }
+    }
+
+    pub fn bytes_length(&self) -> Option<usize> {
+        match self {
+            Self::Integer => Some(4),
+            Self::Number => Some(8),
+            Self::Bool => Some(4),
+            Self::Void => Some(0),
+            Self::Dict(dict) => Some(dict.len() * 4),
+            Self::Array(_, len) => Some(len * 4),
+            Self::String => None,
         }
     }
 
@@ -73,21 +85,6 @@ impl Type {
                     .join(", ")
             ),
             Self::Array(typ, len) => format!("[{}; {len}]", typ.format()),
-        }
-    }
-
-    pub fn byte_size(&self) -> Option<i32> {
-        match self {
-            Self::Integer => Some(1),
-            Self::Number => Some(1),
-            Self::Bool => Some(1),
-            Self::String => None,
-            Self::Void => Some(0),
-            Self::Dict(dict) => iter_map!(dict, |x: (&String, &(i32, Type))| x.1.1.byte_size())
-                .iter()
-                .copied()
-                .reduce(|a, b| a + b),
-            Self::Array(typ, len) => typ.byte_size().map(|size| size * *len as i32),
         }
     }
 }
