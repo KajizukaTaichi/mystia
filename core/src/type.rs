@@ -96,7 +96,7 @@ impl Type {
             Self::String => "\"str\"".to_string(),
             Self::Void => "null".to_string(),
             Self::Dict(dict) => format!(
-                "{{ {} }}",
+                "{{ type: \"dict\", fields: {{ {} }} }}",
                 dict.iter()
                     .map(|(k, (offset, typ))| format!(
                         "{k}: {{ type: {}, offset: {offset} }}",
@@ -105,7 +105,10 @@ impl Type {
                     .collect::<Vec<_>>()
                     .join(", ")
             ),
-            Self::Array(typ, len) => format!("{{ type: {}, len: {len} }}", typ.format()),
+            Self::Array(typ, len) => format!(
+                "{{ type: \"array\", element: {}, len: {len} }}",
+                typ.ffi_json()
+            ),
         }
     }
 }
