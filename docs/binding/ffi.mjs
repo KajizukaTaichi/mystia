@@ -34,8 +34,3 @@ export function ffi(instance, type, value) {
         return result;
     }
 }
-
-function rsplitOnce(str, delimiter) {
-    const idx = str.lastIndexOf(delimiter);
-    return [str.slice(0, idx), str.slice(idx + delimiter.length)];
-}
