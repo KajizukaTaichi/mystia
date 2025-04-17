@@ -15,6 +15,9 @@ pub enum Stmt {
         name: Expr,
         value: Expr,
     },
+    MemCpy {
+        from: Expr,
+    },
     Expr(Expr),
     Next,
     Break,
@@ -166,6 +169,9 @@ impl Node for Stmt {
                 }
                 _ => return None,
             },
+            Stmt::MemCpy { from } => {
+                format!("(memory.copy {})", from.compile(ctx)?)
+            }
             Stmt::Drop => "(drop)".to_string(),
             Stmt::Return(Some(expr)) => format!("(return {})", expr.compile(ctx)?),
             Stmt::Return(_) => "(return)".to_string(),
