@@ -53,8 +53,6 @@ pub struct Compiler {
 }
 
 impl Compiler {
-    const MEMCPY: &str = "(global $alloc_index (mut i32) (i32.const {LAST_STATIC_ALLOC}))";
-
     pub fn new() -> Self {
         Compiler {
             alloc_index: 0,
@@ -79,7 +77,10 @@ impl Compiler {
             strings = join!(self.static_data),
             declare = join!(self.declare_code),
             memcpy = if self.is_memory_copied {
-                Compiler::MEMCPY.replace("{LAST_STATIC_ALLOC}", &self.alloc_index.to_string())
+                format!(
+                    "(global $alloc_index (mut i32) (i32.const {}))",
+                    self.alloc_index
+                )
             } else {
                 String::new()
             },
