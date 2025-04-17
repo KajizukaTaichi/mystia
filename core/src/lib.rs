@@ -67,7 +67,7 @@ impl Compiler {
                     (br_if $loop (i32.lt_s (local.get $idx) (local.get $size)))
                 )
             )
-            (global.set $alloc_index (i32.add (global.get $alloc_index) (i32.mul (local.get $size) (i32.const 8))))
+            (global.tee $alloc_index (i32.add (global.get $alloc_index) (i32.mul (local.get $size) (i32.const 8))))
         )
     "#;
 
