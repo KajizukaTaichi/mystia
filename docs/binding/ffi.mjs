@@ -12,7 +12,7 @@ export function ffi(instance, type, value) {
         const stringBytes = memoryView.slice(value, stringLength);
         const textDecoder = new TextDecoder("utf-8");
         return textDecoder.decode(stringBytes);
-    } else if (type.startsWith("[") && type.endsWith("]")) {
+    } else if (type == "array") {
         const token = type.slice(1, type.length);
         const [innerType, lengthSource] = rsplitOnce(token, ";");
         const length = parseInt(lengthSource.trim());
