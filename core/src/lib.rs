@@ -34,6 +34,8 @@ type Function = (IndexMap<String, Type>, IndexMap<String, Type>, Type);
 pub struct Compiler {
     /// Address for memory allocation
     pub alloc_index: i32,
+    /// The code will copies memory?
+    pub is_memory_copied: bool,
     /// Static string data
     pub static_data: Vec<String>,
     /// Set of function declare code
@@ -72,6 +74,7 @@ impl Compiler {
     pub fn new() -> Self {
         Compiler {
             alloc_index: 0,
+            is_memory_copied: false,
             static_data: vec![],
             declare_code: vec![],
             expect_type: None,
