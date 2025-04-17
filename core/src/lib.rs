@@ -51,6 +51,21 @@ pub struct Compiler {
 }
 
 impl Compiler {
+    const MEMCPY: &str = r#"
+        (func $memcpy (param $src i32) (param $dst i32) (param $size i32)
+            (local $idx i32)
+            (block $exit
+                (loop $loop
+                    (i64.store (local.get $dst) (i64.load (local.get $src)))
+                    (local.set $src (i32.add (local.get $src) (i32.const 8)))
+                    (local.set $dst (i32.add (local.get $dst) (i32.const 8)))
+                    (local.set $idx (i32.add (local.get $idx) (i32.const 1)))
+                    (br_if $loop (i32.lt_s (local.get $idx) (local.get $size)))
+                )
+            )
+        )
+    "#;
+
     pub fn new() -> Self {
         Compiler {
             alloc_index: 0,
