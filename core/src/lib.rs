@@ -57,18 +57,18 @@ impl Compiler {
         (global $alloc_index (mut i32) (i32.const {LAST_STATIC_ALLOC}))
         (func $memcpy (param $src i32) (param $size i32) (result i32)
             (local $idx i32) (local $dst i32)
+            (global.get $alloc_index)
             (local.set $dst (global.get $alloc_index))
-            (block $exit
-                (loop $loop
+            (block $outer
+                (loop $start
                     (i64.store (local.get $dst) (i64.load (local.get $src)))
                     (local.set $src (i32.add (local.get $src) (i32.const 8)))
                     (local.set $dst (i32.add (local.get $dst) (i32.const 8)))
                     (local.set $idx (i32.add (local.get $idx) (i32.const 1)))
-                    (br_if $loop (i32.lt_s (local.get $idx) (local.get $size)))
+                    (br_if $start (i32.lt_s (local.get $idx) (local.get $size)))
                 )
             )
             (global.set $alloc_index (i32.add (global.get $alloc_index) (i32.mul (local.get $size) (i32.const 8))))
-            (global.get $alloc_index)
         )
     "#;
 
