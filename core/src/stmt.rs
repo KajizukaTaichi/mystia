@@ -127,7 +127,7 @@ impl Node for Stmt {
                                 *index.clone(),
                                 Expr::Literal(Value::Integer(len as i32)),
                             ))),
-                            Expr::Literal(Value::Integer(typ.bytes_length())),
+                            Expr::Literal(Value::Integer(typ.pointer_length())),
                         ))),
                     );
                     format!(
@@ -174,11 +174,11 @@ impl Node for Stmt {
                 _ => return None,
             },
             Stmt::MemCpy { from } => {
-                let size = from.type_infer(ctx)?.byte_size()?;
+                let size = from.type_infer(ctx)?.bytes_length()?;
                 format!(
                     "(global.get $alloc_index) (memory.copy (global.get $alloc_index) {} {})",
                     from.compile(ctx)?,
-                    Value::Integer(size).compile(ctx)?
+                    Value::Integer(size as i32).compile(ctx)?
                 )
             }
             Stmt::Drop => "(drop)".to_string(),
