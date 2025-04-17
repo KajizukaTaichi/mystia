@@ -28,7 +28,7 @@ export function ffi(instance, type, value) {
         let result = {};
         const memoryView32bit = new Int32Array(instance.exports.mem.buffer);
         const memoryView64bit = new Float64Array(instance.exports.mem.buffer);
-        for (let [name, field] of type.fields.entries()) {
+        for (let [name, field] of Object.entries(type.fields)) {
             result[name] = ffi(
                 instance,
                 field.type,
