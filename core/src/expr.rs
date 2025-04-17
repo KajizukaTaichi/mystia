@@ -109,7 +109,7 @@ impl Node for Expr {
                                 address = Value::Array(ctx.alloc_index, len, inner_type.clone())
                                     .compile(ctx)?,
                             ));
-                            ctx.alloc_index += inner_type.bytes_length();
+                            ctx.alloc_index += inner_type.pointer_length();
                         }
                     } else {
                         pointer = ctx.alloc_index;
@@ -122,7 +122,7 @@ impl Node for Expr {
                                     .compile(ctx)?,
                                 value = elm.compile(ctx)?
                             ));
-                            ctx.alloc_index += inner_type.bytes_length();
+                            ctx.alloc_index += inner_type.pointer_length();
                         }
                     }
                 );
@@ -153,7 +153,7 @@ impl Node for Expr {
                         address = Value::Dict(ctx.alloc_index, infered.clone()).compile(ctx)?,
                         value = prestore.get(name).unwrap_or(&elm.compile(ctx)?)
                     ));
-                    ctx.alloc_index += typ.bytes_length();
+                    ctx.alloc_index += typ.pointer_length();
                 }
 
                 format!(
@@ -177,7 +177,7 @@ impl Node for Expr {
                             *index.clone(),
                             Expr::Literal(Value::Integer(len as i32)),
                         ))),
-                        Expr::Literal(Value::Integer(typ.bytes_length())),
+                        Expr::Literal(Value::Integer(typ.pointer_length())),
                     ))),
                 );
                 format!("({}.load {})", typ.compile(ctx)?, addr.compile(ctx)?)
@@ -220,7 +220,7 @@ impl Node for Expr {
                 for (name, elm) in dict {
                     let typ = elm.type_infer(ctx)?;
                     result.insert(name.to_string(), (index, typ.clone()));
-                    index += typ.bytes_length();
+                    index += typ.pointer_length();
                 }
                 Type::Dict(result)
             }
