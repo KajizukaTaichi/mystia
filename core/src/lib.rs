@@ -89,11 +89,16 @@ impl Compiler {
         let ast = Block::parse(source)?;
         self.program_return = ast.type_infer(self)?;
         Some(format!(
-            "(module (memory $mem (export \"mem\") 1) {strings} {declare} (func (export \"_start\") {ret} {locals} {code}))",
+            "(module (memory $mem (export \"mem\") 1) {memcpy} {strings} {declare} (func (export \"_start\") {ret} {locals} {code}))",
             code = ast.compile(self)?,
             ret = config_return!(self.program_return.clone(), self)?,
             strings = join!(self.static_data),
             declare = join!(self.declare_code),
+            memcpy = if self.is_memory_copied {
+                Compiler::MEMCPY
+            } else {
+                ""
+            },
             locals = expand_local(self)?,
         ))
     }
