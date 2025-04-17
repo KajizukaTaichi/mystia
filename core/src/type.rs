@@ -106,7 +106,7 @@ impl Type {
                     .join(", ")
             ),
             Self::Array(typ, len) => format!(
-                "{{ type: \"array\", element: {}, len: {len} }}",
+                "{{ type: \"array\", element: {}, length: {len} }}",
                 typ.ffi_json()
             ),
         }
