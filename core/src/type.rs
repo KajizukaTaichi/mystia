@@ -81,7 +81,7 @@ impl Type {
             Self::Integer => Some(1),
             Self::Number => Some(1),
             Self::Bool => Some(1),
-            Self::String => Some(4),
+            Self::String => None,
             Self::Void => Some(0),
             Self::Dict(dict) => iter_map!(dict, |x: (&String, &(i32, Type))| x.1.1.byte_size())
                 .iter()
