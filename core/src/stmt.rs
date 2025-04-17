@@ -170,7 +170,11 @@ impl Node for Stmt {
                 _ => return None,
             },
             Stmt::MemCpy { from } => {
-                format!("(memory.copy {})", from.compile(ctx)?)
+                format!(
+                    "(call $memcpy {} {})",
+                    from.compile(ctx)?,
+                    Value::Integer(from.type_infer(ctx)?.byte_size()?).compile(ctx)?
+                )
             }
             Stmt::Drop => "(drop)".to_string(),
             Stmt::Return(Some(expr)) => format!("(return {})", expr.compile(ctx)?),
@@ -232,6 +236,7 @@ impl Node for Stmt {
                 }
                 Type::Void
             }
+            Stmt::MemCpy { from } => from.type_infer(ctx)?,
             Stmt::Drop => Type::Void,
             Stmt::Return(_) => Type::Void,
         })
