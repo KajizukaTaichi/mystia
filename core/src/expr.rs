@@ -157,7 +157,11 @@ impl Node for Expr {
                         "({type}.store {address} {value})",
                         r#type = typ.clone().compile(ctx)?,
                         address = Value::Dict(ctx.alloc_index, infered.clone()).compile(ctx)?,
-                        value = prestore.get(name).unwrap_or(&elm.compile(ctx)?)
+                        value = if let Some(precode) = prestore.get(name) {
+                            precode.clone()
+                        } else {
+                            elm.compile(ctx)?
+                        }
                     ));
                     ctx.alloc_index += typ.pointer_length();
                 }
