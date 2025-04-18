@@ -50,6 +50,12 @@ impl Node for Expr {
                 } else if token.starts_with("(") && token.ends_with(")") {
                     let token = token.get(1..token.len() - 1)?.trim();
                     Expr::parse(token)?
+                // syntax sugar of memcpy statement
+                } else if token.starts_with("memcpy(") && token.ends_with(")") {
+                    let token = token.get("memcpy(".len()..token.len() - 1)?.trim();
+                    Expr::Block(vec![Stmt::MemCpy {
+                        from: Expr::parse(token)?,
+                    }])
                 // Index access `array[index]`
                 } else if token.contains("[") && token.ends_with("]") {
                     let token = token.get(..token.len() - 1)?.trim();
