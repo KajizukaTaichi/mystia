@@ -175,10 +175,11 @@ impl Node for Stmt {
             },
             Stmt::MemCpy { from } => {
                 let size = from.type_infer(ctx)?.bytes_length()?;
+                let size = Value::Integer(size as i32);
                 format!(
-                    "(global.get $alloc_index) (memory.copy (global.get $alloc_index) {} {})",
+                    "(global.get $alloc_index) (memory.copy (global.get $alloc_index) {} {size}) (global.set $alloc_index (i32.add (global.get $alloc_index) {size}))",
                     from.compile(ctx)?,
-                    Value::Integer(size as i32).compile(ctx)?
+                    size = size.compile(ctx)?
                 )
             }
             Stmt::Drop => "(drop)".to_string(),
