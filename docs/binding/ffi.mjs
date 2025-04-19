@@ -28,7 +28,8 @@ export function ffi(instance, type, value) {
         let result = {};
         const memoryView = new Int32Array(instance.exports.mem.buffer);
         for (let [name, field] of Object.entries(type.fields)) {
-            const address = (value + field.offset) / 4;
+            const address = Math.floor((value + field.offset) / 4);
+            console.log(name, field, address);
             result[name] = ffi(
                 instance,
                 field.type,
@@ -37,7 +38,7 @@ export function ffi(instance, type, value) {
                           memoryView[address],
                           memoryView[address + 1],
                       )
-                    : memoryView[Math.floor(address)],
+                    : memoryView[address],
             );
         }
         return result;
