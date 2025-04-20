@@ -7,7 +7,7 @@ A programming language that will be compiled to WebAssembly
 
 ## Memory layout
 
-**Nested Array**
+**Nested Array**: Below object's pointer is same to element 1
 ```
 [ child 1 ] [ child 2 ] [ element 1: pointer to child 1 ] [ element 2: pointer to child 2 ]
 ```
