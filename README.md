@@ -10,7 +10,7 @@ Basically, in nested object, child elements are stored in before parent element
 
 **Nested Array**: Below object's pointer value is same to element 1
 ```
-[ child 1 ] [ child 2 ] [ element 1: pointer to child 1 ] [ element 2: pointer to child 2 ]
+[ child 1 ] [ child 2 ] [ element 1: pointer refers to child 1 ] [ element 2: pointer refers to child 2 ]
 ```
 
 ## Article
