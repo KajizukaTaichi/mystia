@@ -221,7 +221,7 @@ impl Node for Stmt {
                         for arg in args {
                             if let Expr::Oper(oper) = arg {
                                 if let Oper::Cast(Expr::Variable(name), typ) = *oper.clone() {
-                                    ctx.variable_type.insert(name.to_string(), typ);
+                                    ctx.argument_type.insert(name.to_string(), typ);
                                 }
                             }
                         }
