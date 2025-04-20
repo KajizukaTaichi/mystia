@@ -29,8 +29,7 @@ export function ffi(instance, type, value) {
         const memoryView = new Int32Array(instance.exports.mem.buffer);
         const pointer = value / 4;
         for (let [name, field] of Object.entries(type.fields)) {
-            const address = pointer + field.offset / 4;
-            console.log(address);
+            const address = pointer + field.offset == 0 ? 0 : field.offset / 4;
             result[name] = ffi(
                 instance,
                 field.type,
