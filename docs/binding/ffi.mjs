@@ -27,9 +27,10 @@ export function ffi(instance, type, value) {
     } else if (type.type == "dict") {
         let result = {};
         const memoryView = new Int32Array(instance.exports.mem.buffer);
+        const pointer = value / 4;
         for (let [name, field] of Object.entries(type.fields)) {
-            const address = Math.floor((value + field.offset) / 4);
-            console.log(name, field, address);
+            const address = pointer + field.offset / 4;
+            console.log(address);
             result[name] = ffi(
                 instance,
                 field.type,
