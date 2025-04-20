@@ -28,7 +28,7 @@ export function ffi(instance, type, value) {
         const [pointer, result] = [value / 4, {}];
         const memoryView = new Int32Array(instance.exports.mem.buffer);
         for (let [name, field] of Object.entries(type.fields)) {
-            const address = pointer + field.offset == 0 ? 0 : field.offset / 4;
+            let address = pointer + (field.offset == 0 ? 0 : field.offset / 4);
             let value = (() => {
                 if (field.type == "num") {
                     return int32PairToFloat64(
