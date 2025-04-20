@@ -21,12 +21,25 @@ impl Node for Type {
             "str" => Some(Self::String),
             "nil" => Some(Self::Void),
             _ => {
-                let source = source.strip_prefix("[")?.strip_suffix("]")?;
-                let (typ, len) = source.rsplit_once(";")?;
-                Some(Type::Array(
-                    Box::new(Type::parse(typ)?),
-                    ok!(len.trim().parse())?,
-                ))
+                if source.contains("(") && source.ends_with(")") {
+                    let source = source.get(..source.len() - 1)?.trim();
+                    let (typ, len) = source.rsplit_once(";")?;
+                    Some(Type::Array(
+                        Box::new(Type::parse(typ)?),
+                        ok!(len.trim().parse())?,
+                    ))
+                } else if source.contains("(") && source.ends_with(")") {
+                    let source = source.get(..source.len() - 1)?.trim();
+                    let mut result = IndexMap::new();
+                    for line in tokenize(source, &[","], false, true)? {
+                        let (name, value) = line.split_once("=")?;
+                        let typ = Type::parse(value)?;
+                        result.insert(name.trim().to_string(), (typ.pointer_length(), typ));
+                    }
+                    Some(Type::Dict(result))
+                } else {
+                    None
+                }
             }
         }
     }
