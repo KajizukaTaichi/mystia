@@ -29,16 +29,17 @@ export function ffi(instance, type, value) {
         const memoryView = new Int32Array(instance.exports.mem.buffer);
         for (let [name, field] of Object.entries(type.fields)) {
             const address = pointer + field.offset == 0 ? 0 : field.offset / 4;
-            result[name] = ffi(
-                instance,
-                field.type,
-                field.type == "num"
-                    ? int32PairToFloat64(
-                          memoryView[address],
-                          memoryView[address + 1],
-                      )
-                    : memoryView[address],
-            );
+            let value = (() => {
+                if (field.type == "num") {
+                    return int32PairToFloat64(
+                        memoryView[address],
+                        memoryView[address + 1],
+                    );
+                } else {
+                    return memoryView[address];
+                }
+            })();
+            result[name] = ffi(instance, field.type, value);
         }
         return result;
     }
