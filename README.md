@@ -6,6 +6,7 @@ A programming language that will be compiled to WebAssembly
 - **ML-like syntax**: The syntax is inspired by ML-family language (e.g. define function using `let` statement)
 
 ## Memory layout
+Basically, in nested object, child elements are stored in before parent element
 
 **Nested Array**: Below object's pointer value is same to element 1
 ```
