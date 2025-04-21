@@ -31,10 +31,12 @@ impl Node for Type {
                 } else if source.starts_with("{") && source.ends_with("}") {
                     let source = source.get(1..source.len() - 1)?.trim();
                     let mut result = IndexMap::new();
+                    let mut index = 0;
                     for line in tokenize(source, &[","], false, true)? {
                         let (name, value) = line.split_once(":")?;
                         let typ = Type::parse(value)?;
-                        result.insert(name.trim().to_string(), (typ.pointer_length(), typ));
+                        result.insert(name.trim().to_string(), (index, typ.clone()));
+                        index += typ.pointer_length();
                     }
                     Some(Type::Dict(result))
                 } else {
