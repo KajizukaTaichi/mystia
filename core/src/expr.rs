@@ -101,6 +101,7 @@ impl Node for Expr {
 
                 if_ptr!(
                     inner_type,
+                    // if inner type is pointer (not primitive)
                     {
                         let mut inner_codes = vec![];
                         for elm in array {
