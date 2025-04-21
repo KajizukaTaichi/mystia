@@ -32,7 +32,7 @@ impl Node for Type {
                     let source = source.get(1..source.len() - 1)?.trim();
                     let mut result = IndexMap::new();
                     for line in tokenize(source, &[","], false, true)? {
-                        let (name, value) = line.split_once("=")?;
+                        let (name, value) = line.split_once(":")?;
                         let typ = Type::parse(value)?;
                         result.insert(name.trim().to_string(), (typ.pointer_length(), typ));
                     }
