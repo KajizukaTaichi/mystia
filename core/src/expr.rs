@@ -39,6 +39,7 @@ impl Node for Expr {
                     if let Some(block) = Block::parse(token) {
                         Expr::Block(block)
                     } else {
+                        // If not a block, parse as dictionary
                         let mut result = IndexMap::new();
                         for line in tokenize(token, &[","], false, true)? {
                             let (name, value) = line.split_once("=")?;
