@@ -21,15 +21,15 @@ impl Node for Type {
             "str" => Some(Self::String),
             "nil" => Some(Self::Void),
             _ => {
-                if source.contains("(") && source.ends_with(")") {
-                    let source = source.get(..source.len() - 1)?.trim();
+                if source.starts_with("[") && source.ends_with("]") {
+                    let source = source.get(1..source.len() - 1)?.trim();
                     let (typ, len) = source.rsplit_once(";")?;
                     Some(Type::Array(
                         Box::new(Type::parse(typ)?),
                         ok!(len.trim().parse())?,
                     ))
-                } else if source.contains("(") && source.ends_with(")") {
-                    let source = source.get(..source.len() - 1)?.trim();
+                } else if source.starts_with("{") && source.ends_with("}") {
+                    let source = source.get(1..source.len() - 1)?.trim();
                     let mut result = IndexMap::new();
                     for line in tokenize(source, &[","], false, true)? {
                         let (name, value) = line.split_once("=")?;
