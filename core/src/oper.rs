@@ -20,10 +20,8 @@ impl Node for Oper {
     fn parse(source: &str) -> Option<Self> {
         let token_list: Vec<String> = tokenize(source, SPACE.as_ref(), true, true)?;
         let operator = token_list.get(token_list.len().checked_sub(2)?)?;
-
         let lhs = &join!(token_list.get(..token_list.len() - 2)?);
         let rhs = token_list.last()?;
-
         Some(match operator.as_str() {
             "+" => Oper::Add(Expr::parse(lhs)?, Expr::parse(rhs)?),
             "-" => Oper::Sub(Expr::parse(lhs)?, Expr::parse(rhs)?),
@@ -82,7 +80,6 @@ impl Node for Oper {
             | Oper::Mod(lhs, rhs) => {
                 type_check!(lhs, rhs, ctx)
             }
-
             Oper::Eql(lhs, rhs)
             | Oper::Neq(lhs, rhs)
             | Oper::Lt(lhs, rhs)
@@ -92,7 +89,6 @@ impl Node for Oper {
                 type_check!(lhs, rhs, ctx)?;
                 Some(Type::Bool)
             }
-
             Oper::Cast(lhs, rhs) => {
                 lhs.type_infer(ctx)?;
                 Some(rhs.clone())
