@@ -41,17 +41,23 @@ fn main() {
             println!(" - {name}:");
             println!("     Locals:");
             for (name, typ) in var {
-                println!("      - {name}: {}", typ.format());
+                println!(
+                    "      - {name}: {}",
+                    typ.decompress_alias(&compiler).format()
+                );
             }
             println!("     Arguments:");
             for (name, typ) in arg {
-                println!("      - {name}: {}", typ.format());
+                println!(
+                    "      - {name}: {}",
+                    typ.decompress_alias(&compiler).format()
+                );
             }
-            println!("     Returns: {}", ret.format());
+            println!("     Returns: {}", ret.decompress_alias(&compiler).format());
         }
         println!("Variables:");
         for (name, typ) in &compiler.variable_type {
-            println!(" - {name}: {}", typ.format());
+            println!(" - {name}: {}", typ.decompress_alias(&compiler).format());
         }
         println!("Aliases:");
         for (name, typ) in &compiler.type_alias {
