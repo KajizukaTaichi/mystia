@@ -91,7 +91,7 @@ impl Node for Oper {
             }
             Oper::Cast(lhs, rhs) => {
                 lhs.type_infer(ctx)?;
-                Some(rhs.clone())
+                Some(rhs.solve_alias(ctx)?.clone())
             }
         }
     }
