@@ -1,2 +1,3 @@
-type point = [int; 3];
-let a = [1, 2, 3]: point
+type point = { x: int, y: int, z: int };
+let foo = [100, 200, 300]: point;
+foo.x + foo.y + foo.z
