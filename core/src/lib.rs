@@ -40,6 +40,8 @@ pub struct Compiler {
     pub static_data: Vec<String>,
     /// Set of function declare code
     pub declare_code: Vec<String>,
+    /// Type alias that's defined by user
+    pub type_alias: IndexMap<String, Type>,
     /// Type inference for unknown
     pub expect_type: Option<Type>,
     /// Type environment for variable
@@ -60,6 +62,7 @@ impl Compiler {
             static_data: vec![],
             declare_code: vec![],
             expect_type: None,
+            type_alias: IndexMap::new(),
             variable_type: IndexMap::new(),
             argument_type: IndexMap::new(),
             function_type: IndexMap::new(),
