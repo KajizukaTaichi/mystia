@@ -12,6 +12,9 @@ Basically, in nested object, child elements are stored in before parent element
 ```
 [ child 1 ] [ child 2 ] [ element 1: pointer refers to child 1 ] [ element 2: pointer refers to child 2 ]
 ```
+## To Do
+- [ ] Enhance error message
+- [ ] Fix bugs of FFI to JS
 
 ## Article
 https://qiita.com/KajizukaTaichi/items/a4989c60415b408fd91d
