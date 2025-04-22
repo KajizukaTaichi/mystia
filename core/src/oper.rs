@@ -53,6 +53,7 @@ impl Node for Oper {
             Oper::LtEq(lhs, rhs) => compile_compare!("le", ctx, lhs, rhs),
             Oper::GtEq(lhs, rhs) => compile_compare!("ge", ctx, lhs, rhs),
             Oper::Cast(lhs, rhs) => {
+                let rhs = rhs.type_infer(ctx)?;
                 if lhs.type_infer(ctx)?.compile(ctx)? == rhs.compile(ctx)? {
                     return lhs.compile(ctx);
                 }
