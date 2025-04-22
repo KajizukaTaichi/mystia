@@ -170,7 +170,7 @@ impl Node for Stmt {
                     let code = format!(
                         "(func ${name} (export \"{name}\") {args} {ret} {locals} {body})",
                         args = join!(iter_map!(&arg_inf, |(name, typ): (&String, &Type)| Some(
-                            format!("(param ${name} {})", typ.compile(ctx)?)
+                            format!("(param ${name} {})", typ.type_infer(ctx)?.compile(ctx)?)
                         ))),
                         ret = config_return!(ret_inf, ctx)?,
                         body = value.compile(ctx)?,
