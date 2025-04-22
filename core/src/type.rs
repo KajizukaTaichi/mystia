@@ -61,19 +61,15 @@ impl Node for Type {
         )
     }
 
-    fn type_infer(&self, _: &mut Compiler) -> Option<Type> {
-        Some(self.clone())
-    }
-}
-
-impl Type {
-    pub fn solve_alias(&self, ctx: &Compiler) -> Option<Type> {
+    fn type_infer(&self, ctx: &mut Compiler) -> Option<Type> {
         match self {
             Type::Alias(name) => ctx.type_alias.get(name).cloned(),
             _ => Some(self.clone()),
         }
     }
+}
 
+impl Type {
     pub fn pointer_length(&self) -> i32 {
         match self {
             Type::Array(_, _) | Type::String | Type::Bool | Type::Dict(_) | Type::Integer => 4,
