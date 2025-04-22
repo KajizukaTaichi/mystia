@@ -91,6 +91,18 @@ impl Type {
         }
     }
 
+    pub fn decompress_alias(&self, ctx: &Compiler) -> Self {
+        if let Some(i) = ctx
+            .type_alias
+            .iter()
+            .find(|(_, v)| v.format() == self.format())
+        {
+            Type::Alias(i.0.clone())
+        } else {
+            self.clone()
+        }
+    }
+
     pub fn format(&self) -> String {
         match self {
             Self::Integer => "int".to_string(),
