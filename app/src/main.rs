@@ -63,7 +63,10 @@ fn main() {
         for (name, typ) in &compiler.type_alias {
             println!(" - {name}: {}", typ.format());
         }
-        println!("Returns: {}", compiler.program_return.format());
+        println!(
+            "Returns: {}",
+            compiler.program_return.decompress_alias(&compiler).format()
+        );
     }
 
     let wat_code = format!(
