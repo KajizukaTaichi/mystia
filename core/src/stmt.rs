@@ -232,8 +232,8 @@ impl Node for Stmt {
                             for arg in args {
                                 if let Expr::Oper(oper) = arg {
                                     if let Oper::Cast(Expr::Variable(name), typ) = *oper.clone() {
-                                        ctx.argument_type
-                                            .insert(name.to_string(), typ.solve_alias(ctx)?);
+                                        let typ = typ.type_infer(ctx)?;
+                                        ctx.argument_type.insert(name.to_string(), typ);
                                     }
                                 }
                             }
@@ -253,7 +253,8 @@ impl Node for Stmt {
                 Type::Void
             }
             Stmt::Type { name, value } => {
-                ctx.type_alias.insert(name.to_string(), value.clone());
+                let value = value.type_infer(ctx)?;
+                ctx.type_alias.insert(name.to_string(), value);
                 Type::Void
             }
             Stmt::MemCpy { from } => {
