@@ -9,6 +9,7 @@ pub enum Type {
     String,
     Array(Box<Type>, usize),
     Dict(Dict),
+    Alias(String),
     Void,
 }
 
@@ -21,6 +22,7 @@ impl Node for Type {
             "str" => Some(Self::String),
             "nil" => Some(Self::Void),
             _ => {
+                let source = source.trim().to_string();
                 if source.starts_with("[") && source.ends_with("]") {
                     let source = source.get(1..source.len() - 1)?.trim();
                     let (typ, len) = source.rsplit_once(";")?;
@@ -40,7 +42,7 @@ impl Node for Type {
                     }
                     Some(Type::Dict(result))
                 } else {
-                    None
+                    Some(Type::Alias(source))
                 }
             }
         }
@@ -53,7 +55,7 @@ impl Node for Type {
                 Type::Integer | Self::Bool | Self::String | Self::Array(_, _) | Self::Dict(_) => {
                     "i32"
                 }
-                Self::Void => return None,
+                _ => return None,
             }
             .to_string(),
         )
@@ -65,11 +67,18 @@ impl Node for Type {
 }
 
 impl Type {
+    pub fn solve_alias(&self, ctx: &Compiler) -> Option<Type> {
+        match self {
+            Type::Alias(name) => ctx.type_alias.get(name).cloned(),
+            _ => Some(self.clone()),
+        }
+    }
+
     pub fn pointer_length(&self) -> i32 {
         match self {
             Type::Array(_, _) | Type::String | Type::Bool | Type::Dict(_) | Type::Integer => 4,
             Type::Number => 8,
-            Type::Void => 0,
+            _ => 0,
         }
     }
 
@@ -77,11 +86,12 @@ impl Type {
         match self {
             Self::Integer => Some(4),
             Self::Number => Some(8),
+            Self::String => Some(4),
             Self::Bool => Some(4),
             Self::Void => Some(0),
             Self::Dict(dict) => Some(dict.len() * 4),
             Self::Array(_, len) => Some(len * 4),
-            Self::String => None,
+            _ => None,
         }
     }
 
@@ -100,6 +110,7 @@ impl Type {
                     .join(", ")
             ),
             Self::Array(typ, len) => format!("[{}; {len}]", typ.format()),
+            Self::Alias(name) => name.to_string(),
         }
     }
 
@@ -124,6 +135,7 @@ impl Type {
                 "{{ type: \"array\", element: {}, length: {len} }}",
                 typ.ffi_json()
             ),
+            Self::Alias(name) => format!("{{ type: \"alias\", name: {name} }}"),
         }
     }
 }
