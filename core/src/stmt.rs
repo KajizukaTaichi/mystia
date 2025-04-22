@@ -15,6 +15,10 @@ pub enum Stmt {
         name: Expr,
         value: Expr,
     },
+    Type {
+        name: String,
+        value: Type,
+    },
     MemCpy {
         from: Expr,
     },
@@ -63,6 +67,12 @@ impl Node for Stmt {
             Some(Stmt::Let {
                 name: Expr::parse(name)?,
                 value: Expr::parse(value)?,
+            })
+        } else if let Some(source) = source.strip_prefix("type ") {
+            let (name, value) = source.split_once("=")?;
+            Some(Stmt::Type {
+                name: name.trim().to_string(),
+                value: Type::parse(value)?,
             })
         } else if let Some(source) = source.strip_prefix("return ") {
             Some(Stmt::Return(Some(Expr::parse(source)?)))
@@ -185,6 +195,7 @@ impl Node for Stmt {
             Stmt::Drop => "(drop)".to_string(),
             Stmt::Return(Some(expr)) => format!("(return {})", expr.compile(ctx)?),
             Stmt::Return(_) => "(return)".to_string(),
+            Stmt::Type { name: _, value: _ } => String::new(),
         })
     }
 
@@ -238,6 +249,10 @@ impl Node for Stmt {
                         value.type_infer(ctx);
                     }
                 }
+                Type::Void
+            }
+            Stmt::Type { name, value } => {
+                ctx.type_alias.insert(name.to_string(), value.clone());
                 Type::Void
             }
             Stmt::MemCpy { from } => {
