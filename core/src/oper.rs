@@ -11,6 +11,8 @@ pub enum Oper {
     Neq(Expr, Expr),
     Lt(Expr, Expr),
     Gt(Expr, Expr),
+    And(Expr, Expr),
+    Or(Expr, Expr),
     LtEq(Expr, Expr),
     GtEq(Expr, Expr),
     Cast(Expr, Type),
@@ -34,6 +36,8 @@ impl Node for Oper {
             ">" => Oper::Gt(Expr::parse(lhs)?, Expr::parse(rhs)?),
             ">=" => Oper::GtEq(Expr::parse(lhs)?, Expr::parse(rhs)?),
             "<=" => Oper::LtEq(Expr::parse(lhs)?, Expr::parse(rhs)?),
+            "&&" => Oper::And(Expr::parse(lhs)?, Expr::parse(rhs)?),
+            "||" => Oper::Or(Expr::parse(lhs)?, Expr::parse(rhs)?),
             ":" => Oper::Cast(Expr::parse(lhs)?, Type::parse(rhs)?),
             _ => return None,
         })
@@ -52,6 +56,8 @@ impl Node for Oper {
             Oper::Gt(lhs, rhs) => compile_compare!("gt", ctx, lhs, rhs),
             Oper::LtEq(lhs, rhs) => compile_compare!("le", ctx, lhs, rhs),
             Oper::GtEq(lhs, rhs) => compile_compare!("ge", ctx, lhs, rhs),
+            Oper::And(lhs, rhs) => compile_compare!("and", ctx, lhs, rhs),
+            Oper::Or(lhs, rhs) => compile_compare!("or", ctx, lhs, rhs),
             Oper::Cast(lhs, rhs) => {
                 let rhs = rhs.type_infer(ctx)?;
                 if lhs.type_infer(ctx)?.compile(ctx)? == rhs.compile(ctx)? {
@@ -88,6 +94,11 @@ impl Node for Oper {
             | Oper::LtEq(lhs, rhs)
             | Oper::GtEq(lhs, rhs) => {
                 type_check!(lhs, rhs, ctx)?;
+                Some(Type::Bool)
+            }
+            Oper::And(lhs, rhs) | Oper::Or(lhs, rhs) => {
+                type_check!(lhs, Type::Bool, ctx)?;
+                type_check!(rhs, Type::Bool, ctx)?;
                 Some(Type::Bool)
             }
             Oper::Cast(lhs, rhs) => {
