@@ -1,8 +1,8 @@
 use crate::*;
 
 pub const SPACE: [&str; 5] = [" ", "　", "\n", "\t", "\r"];
-pub const OPERATOR: [&str; 13] = [
-    "+", "-", "*", "/", "%", "^", "==", "!=", "<=", ">=", "<", ">", ":",
+pub const OPERATOR: [&str; 15] = [
+    "+", "-", "*", "/", "%", "^", "==", "!=", "<=", ">=", "<", ">", "&&", "||", ":",
 ];
 pub const RESERVED: [&str; 9] = [
     "let", "if", "then", "else", "while", "loop", "break", "next", "return",
