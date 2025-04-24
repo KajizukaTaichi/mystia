@@ -15,7 +15,7 @@ use {
     oper::Oper,
     stmt::Stmt,
     r#type::{Dict, Type},
-    utils::{OPERATOR, RESERVED, SPACE, WEBAPI, expand_local, include_letter},
+    utils::{OPERATOR, RESERVED, SPACE, expand_local, include_letter},
     value::Value,
 };
 
@@ -36,8 +36,8 @@ pub struct Compiler {
     pub alloc_index: i32,
     /// The code will copies memory?
     pub is_memory_copied: bool,
-    /// The code will use WebAPI?
-    pub is_using_webapi: bool,
+    /// Code that imports external module
+    pub import_code: Vec<String>,
     /// Static string data
     pub static_data: Vec<String>,
     /// Set of function declare code
@@ -61,7 +61,7 @@ impl Compiler {
         Compiler {
             alloc_index: 0,
             is_memory_copied: false,
-            is_using_webapi: false,
+            import_code: vec![],
             static_data: vec![],
             declare_code: vec![],
             expect_type: None,
@@ -80,6 +80,7 @@ impl Compiler {
             "(module {import} (memory $mem (export \"mem\") 1) {memcpy} {strings} {declare} (func (export \"_start\") {ret} {locals} {code}))",
             code = ast.compile(self)?,
             ret = config_return!(self.program_return.clone(), self)?,
+            import = join!(self.import_code),
             strings = join!(self.static_data),
             declare = join!(self.declare_code),
             memcpy = if self.is_memory_copied {
@@ -87,14 +88,6 @@ impl Compiler {
                     "(global $alloc_index (export \"alloc_index\") (mut i32) (i32.const {}))",
                     self.alloc_index
                 )
-            } else {
-                String::new()
-            },
-            import = if self.is_using_webapi {
-                join!([
-                    "(import \"web\" \"alert\" (func $alert (param i32)))",
-                    "(import \"web\" \"confirm\" (func $confirm (param i32) (result i32)))",
-                ])
             } else {
                 String::new()
             },
