@@ -7,6 +7,8 @@ pub enum Oper {
     Mul(Expr, Expr),
     Div(Expr, Expr),
     Mod(Expr, Expr),
+    Shr(Expr, Expr),
+    Shl(Expr, Expr),
     Eql(Expr, Expr),
     Neq(Expr, Expr),
     Lt(Expr, Expr),
@@ -31,6 +33,8 @@ impl Node for Oper {
             "*" => Oper::Mul(Expr::parse(lhs)?, Expr::parse(rhs)?),
             "/" => Oper::Div(Expr::parse(lhs)?, Expr::parse(rhs)?),
             "%" => Oper::Mod(Expr::parse(lhs)?, Expr::parse(rhs)?),
+            ">>" => Oper::Shr(Expr::parse(lhs)?, Expr::parse(rhs)?),
+            "<<" => Oper::Shl(Expr::parse(lhs)?, Expr::parse(rhs)?), 
             "==" => Oper::Eql(Expr::parse(lhs)?, Expr::parse(rhs)?),
             "!=" => Oper::Neq(Expr::parse(lhs)?, Expr::parse(rhs)?),
             "<" => Oper::Lt(Expr::parse(lhs)?, Expr::parse(rhs)?),
@@ -51,6 +55,8 @@ impl Node for Oper {
             Oper::Mul(lhs, rhs) => compile_arithmetic!("mul", self, ctx, lhs, rhs),
             Oper::Div(lhs, rhs) => compile_compare!("div", ctx, lhs, rhs),
             Oper::Mod(lhs, rhs) => compile_compare!("rem", ctx, lhs, rhs),
+            Oper::Shr(lhs, rhs) => compile_compare!("shr", ctx, lhs, rhs),
+            Oper::Shl(lhs, rhs) => compile_compare!("shl", ctx, lhs, rhs),
             Oper::Eql(lhs, rhs) => compile_arithmetic!("eq", self, ctx, lhs, rhs),
             Oper::Neq(lhs, rhs) => compile_arithmetic!("ne", self, ctx, lhs, rhs),
             Oper::Lt(lhs, rhs) => compile_compare!("lt", ctx, lhs, rhs),
@@ -85,7 +91,9 @@ impl Node for Oper {
             | Oper::Sub(lhs, rhs)
             | Oper::Mul(lhs, rhs)
             | Oper::Div(lhs, rhs)
-            | Oper::Mod(lhs, rhs) => {
+            | Oper::Mod(lhs, rhs)
+            | Oper::Shr(lhs, rhs)
+            | Oper::Shl(lhs, rhs) => {
                 type_check!(lhs, rhs, ctx)
             }
             Oper::Eql(lhs, rhs)
