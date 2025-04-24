@@ -91,11 +91,10 @@ impl Compiler {
                 String::new()
             },
             import = if self.is_using_webapi {
-                [
+                join!([
                     "(import \"web\" \"alert\" (func $alert (param i32)))",
                     "(import \"web\" \"confirm\" (func $confirm (param i32) (result i32)))",
-                ]
-                .concat()
+                ])
             } else {
                 String::new()
             },
