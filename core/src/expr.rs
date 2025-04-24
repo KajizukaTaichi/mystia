@@ -237,14 +237,6 @@ impl Node for Expr {
                 Type::Dict(result)
             }
             Expr::Literal(literal) => literal.type_infer(ctx)?,
-            Expr::Call(name, _) if WEBAPI.contains(&name.as_str()) => {
-                ctx.is_using_webapi = true;
-                match name.as_str() {
-                    "alert" => Type::Void,
-                    "confirm" => Type::Bool,
-                    _ => return None,
-                }
-            }
             Expr::Call(name, args) => {
                 let (_, args_type, ret_type) = ctx.function_type.get(name)?.clone();
                 let _ = iter_map!(args.iter().zip(args_type.values()), |(arg, typ): (
