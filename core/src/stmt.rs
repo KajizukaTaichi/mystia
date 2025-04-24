@@ -211,7 +211,7 @@ impl Node for Stmt {
                     };
                     args_typ.push(arg_typ.compile(ctx)?);
                 }
-                format!(
+                let code = format!(
                     "(import \"env\" \"{name}\" (func ${name} {} (result {})))",
                     join!(
                         args_typ
@@ -220,7 +220,9 @@ impl Node for Stmt {
                             .collect::<Vec<_>>()
                     ),
                     ret_typ.compile(ctx)?
-                )
+                );
+                ctx.import_code.push(code);
+                String::new()
             }
             Stmt::Drop => "(drop)".to_string(),
             Stmt::Return(Some(expr)) => format!("(return {})", expr.compile(ctx)?),
