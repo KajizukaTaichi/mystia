@@ -66,11 +66,22 @@ impl Node for Stmt {
                 body: Expr::parse(&body_sec)?,
             })
         } else if let Some(source) = source.strip_prefix("let ") {
-            let (name, value) = source.split_once("=")?;
-            Some(Stmt::Let {
-                name: Expr::parse(name)?,
-                value: Expr::parse(value)?,
-            })
+            if let Some((name, value)) = source.split_once("=") {
+                Some(Stmt::Let {
+                    name: Expr::parse(name)?,
+                    value: Expr::parse(value)?,
+                })
+            } else {
+                let source = Oper::parse(source)?;
+                if let Oper::Add(name, value) = source {
+                    Some(Stmt::Let {
+                        name: name.clone(),
+                        value: Expr::Oper(Box::new(Oper::Add(name, value))),
+                    })
+                } else {
+                    None
+                }
+            }
         } else if let Some(source) = source.strip_prefix("type ") {
             let (name, value) = source.split_once("=")?;
             Some(Stmt::Type {
