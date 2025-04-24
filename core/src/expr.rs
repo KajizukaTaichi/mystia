@@ -11,7 +11,6 @@ pub enum Expr {
     Property(Box<Expr>, String),
     Access(Box<Expr>, Box<Expr>),
     Block(Block),
-    Kind(Type),
 }
 
 impl Node for Expr {
