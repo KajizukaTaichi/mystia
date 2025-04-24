@@ -22,6 +22,9 @@ pub enum Stmt {
     MemCpy {
         from: Expr,
     },
+    Import {
+        func: Oper,
+    },
     Expr(Expr),
     Next,
     Break,
@@ -190,6 +193,29 @@ impl Node for Stmt {
                     "(global.get $alloc_index) (memory.copy (global.get $alloc_index) {} {size}) (global.set $alloc_index (i32.add (global.get $alloc_index) {size}))",
                     from.compile(ctx)?,
                     size = size.compile(ctx)?
+                )
+            }
+            Stmt::Import { func } => {
+                let Oper::Cast(Expr::Call(name, args), ret_typ) = func else {
+                    return None;
+                };
+                let mut args_typ = vec![];
+                for arg in args {
+                    let Expr::Oper(arg) = arg else { return None };
+                    let Oper::Cast(_, arg_typ) = *arg.clone() else {
+                        return None;
+                    };
+                    args_typ.push(arg_typ.compile(ctx)?);
+                }
+                format!(
+                    "(import \"env\" \"{name}\" (func ${name} {} (result {})))",
+                    join!(
+                        args_typ
+                            .iter()
+                            .map(|x| format!("(param {x})",))
+                            .collect::<Vec<_>>()
+                    ),
+                    ret_typ.compile(ctx)?
                 )
             }
             Stmt::Drop => "(drop)".to_string(),
