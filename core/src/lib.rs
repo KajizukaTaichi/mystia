@@ -77,7 +77,7 @@ impl Compiler {
         let ast = Block::parse(source)?;
         self.program_return = ast.type_infer(self)?;
         Some(format!(
-            "(module (import \"web\" \"alert\" (func $alert (param i32))) (memory $mem (export \"mem\") 1) {memcpy} {strings} {declare} (func (export \"_start\") {ret} {locals} {code}))",
+            "(module {import} (memory $mem (export \"mem\") 1) {memcpy} {strings} {declare} (func (export \"_start\") {ret} {locals} {code}))",
             code = ast.compile(self)?,
             ret = config_return!(self.program_return.clone(), self)?,
             strings = join!(self.static_data),
@@ -87,6 +87,11 @@ impl Compiler {
                     "(global $alloc_index (mut i32) (i32.const {}))",
                     self.alloc_index
                 )
+            } else {
+                String::new()
+            },
+            import = if self.is_using_webapi {
+                "(import \"web\" \"alert\" (func $alert (param i32)))".to_string()
             } else {
                 String::new()
             },
