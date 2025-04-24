@@ -87,13 +87,8 @@
             });
 
             codeEditor.value = runBtn.addEventListener("click", async (e) => {
-                try {
-                    let result = await mystia(codeEditor.value);
-                    resultArea.innerHTML = result;
-                } catch (e) {
-                    resultArea.innerHTML =
-                        "<span style='color: orange;'>Error occurred during compilation. Check out if the program is correct</span>";
-                }
+                let result = await mystia(codeEditor.value);
+                resultArea.innerHTML = result;
             });
         </script>
     </body>
