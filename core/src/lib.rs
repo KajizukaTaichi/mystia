@@ -84,7 +84,7 @@ impl Compiler {
             declare = join!(self.declare_code),
             memcpy = if self.is_memory_copied {
                 format!(
-                    "(global $alloc_index (mut i32) (i32.const {}))",
+                    "(global $alloc_index (export \"alloc_index\") (mut i32) (i32.const {}))",
                     self.alloc_index
                 )
             } else {
