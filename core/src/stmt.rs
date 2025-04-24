@@ -78,6 +78,21 @@ impl Node for Stmt {
                         name: name.clone(),
                         value: Expr::Oper(Box::new(Oper::Add(name, value))),
                     })
+                } else if let Oper::Sub(name, value) = source {
+                    Some(Stmt::Let {
+                        name: name.clone(),
+                        value: Expr::Oper(Box::new(Oper::Sub(name, value))),
+                    })
+                } else if let Oper::Mul(name, value) = source {
+                    Some(Stmt::Let {
+                        name: name.clone(),
+                        value: Expr::Oper(Box::new(Oper::Mul(name, value))),
+                    })
+                } else if let Oper::Div(name, value) = source {
+                    Some(Stmt::Let {
+                        name: name.clone(),
+                        value: Expr::Oper(Box::new(Oper::Div(name, value))),
+                    })
                 } else {
                     None
                 }
