@@ -18,7 +18,6 @@ export async function mystia(code) {
             prompt: (ptr) => mystiaPrompt(ptr),
         },
     });
-    Object.preventExtensions(instance);
     mystiaAlert = (ptr) => window.alert(ffi(instance, "str", ptr));
     mystiaConfirm = (ptr) => window.confirm(ffi(instance, "str", ptr));
     mystiaPrompt = (ptr) => {
