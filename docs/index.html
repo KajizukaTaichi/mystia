@@ -64,6 +64,7 @@
                 <br />
                 <div class="field">
                     <label class="label" for="result">Result: </label>
+                    <label id="timer"></label>
                     <p id="result" class="alert"></p>
                 </div>
             </div>
@@ -71,11 +72,13 @@
 
         <script type="module">
             import { mystia } from "./binding/web.mjs";
+            let timer;
 
             const codeEditor = document.getElementById("code");
             const resultArea = document.getElementById("result");
             const runBtn = document.getElementById("run");
 
+            const timerLabel = document.getElementById("timer");
             const exampleFieldInput = document.getElementById("example-field");
             const exampleSelectBtn = document.getElementById("example-select");
 
@@ -91,8 +94,18 @@
             });
 
             codeEditor.value = runBtn.addEventListener("click", async (e) => {
-                const result = await mystia(codeEditor.value);
-                resultArea.innerHTML = JSON.stringify(result);
+                try {
+                    const startTime = Date.now();
+                    timer = setInterval(() => {
+                        timerLabel.textContent = `Time: ${Date.now() - startTime}ms`;
+                    }, 100);
+                    const result = await mystia(codeEditor.value);
+                    resultArea.innerHTML = JSON.stringify(result);
+                } catch (error) {
+                    resultArea.innerHTML = JSON.stringify(error);
+                } finally {
+                    clearInterval(timer);
+                }
             });
         </script>
     </body>
