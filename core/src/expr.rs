@@ -239,7 +239,11 @@ impl Node for Expr {
             Expr::Literal(literal) => literal.type_infer(ctx)?,
             Expr::Call(name, _) if WEBAPI.contains(&name.as_str()) => {
                 ctx.is_using_webapi = true;
-                Type::Void
+                match name.as_str() {
+                    "alert" => Type::Void,
+                    "confirm" => Type::Bool,
+                    _ => return None,
+                }
             }
             Expr::Call(name, args) => {
                 let (_, args_type, ret_type) = ctx.function_type.get(name)?.clone();
