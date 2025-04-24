@@ -132,7 +132,7 @@ impl Node for Oper {
                 lhs.type_infer(ctx)?;
                 Some(rhs.type_infer(ctx)?)
             }
-            Oper::Not(lhs) => Some(lhs.type_infer(ctx)?),
+            Oper::LNot(lhs) | Oper::BNot(lhs) => Some(lhs.type_infer(ctx)?),
         }
     }
 }
