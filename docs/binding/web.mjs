@@ -2,7 +2,7 @@ import init, { mystia as compile } from "../web/mystia_wasm.js";
 import { ffi } from "./ffi.mjs";
 
 await init();
-export async function mystia(code) {
+export async function mystia(code, env = {}) {
     const result = compile(code);
     const type = eval(`(${result.get_return_type()})`);
     if (type == null) return null;
@@ -12,23 +12,24 @@ export async function mystia(code) {
     let mystiaConfirm = () => window.confirm("[uninitialized]");
     let mystiaPrompt = () => window.prompt("[uninitialized]");
     const { instance } = await WebAssembly.instantiate(bytecodes, {
-        web: {
-            alert: (ptr) => mystiaAlert(ptr),
-            confirm: (ptr) => mystiaConfirm(ptr),
-            prompt: (ptr) => mystiaPrompt(ptr),
-        },
+        env:
+            {
+                alert: (ptr) => mystiaAlert(ptr),
+                confirm: (ptr) => mystiaConfirm(ptr),
+                prompt: (ptr) => mystiaPrompt(ptr),
+            } + env,
     });
     mystiaAlert = (ptr) => window.alert(ffi(instance, "str", ptr));
     mystiaConfirm = (ptr) => window.confirm(ffi(instance, "str", ptr));
     mystiaPrompt = (ptr) => {
         const answer = window.prompt(ffi(instance, "str", ptr));
         const encoder = new TextEncoder();
-        const utf8 = encoder.encode(answer + "\0"); // null終端を明示的に
-        const ptr = instance.exports.alloc_index;
+        const utf8 = encoder.encode(answer + "\0");
+        const str = instance.exports.alloc_index;
         const memory = new Uint8Array(instance.exports.mem.buffer);
         instance.exports.alloc_index += answer.length + 1;
-        memory.set(utf8, ptr);
-        return ptr;
+        memory.set(utf8, str);
+        return str;
     };
 
     const value = instance.exports._start();
