@@ -42,15 +42,19 @@
                     Let's try out Mystia, a programming language that will be
                     compiled to WebAssembly on your browser
                 </p>
-                <a href="https://github.com/KajizukaTaichi/mystia"
-                    >Repository</a
-                >
+                <a href="https://github.com/KajizukaTaichi/mystia">
+                    Repository
+                </a>
                 <p>&COPY; 2025 梶塚太智. All rights reserved</p>
                 <hr />
 
                 <div class="inline-elements">
                     <button id="run" type="button" class="button">Run</button>
-                    <p id="example-guide">Example code:</p>
+                    <div class="field-label is-normal">
+                        <label id="example-guide" class="label">
+                            Example code:
+                        </label>
+                    </div>
                     <input id="example-field" class="input" value="prime" />
                     <button id="example-select" type="button" class="button">
                         Select
@@ -87,8 +91,8 @@
             });
 
             codeEditor.value = runBtn.addEventListener("click", async (e) => {
-                let result = await mystia(codeEditor.value);
-                resultArea.innerHTML = result;
+                const result = await mystia(codeEditor.value);
+                resultArea.innerHTML = JSON.stringify(result);
             });
         </script>
     </body>
