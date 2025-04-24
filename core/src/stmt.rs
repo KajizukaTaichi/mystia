@@ -79,6 +79,10 @@ impl Node for Stmt {
             })
         } else if let Some(source) = source.strip_prefix("return ") {
             Some(Stmt::Return(Some(Expr::parse(source)?)))
+        } else if let Some(source) = source.strip_prefix("load ") {
+            Some(Stmt::Import {
+                func: Oper::parse(source)?,
+            })
         } else if let Some(source) = source.strip_prefix("memcpy ") {
             Some(Stmt::MemCpy {
                 from: Expr::parse(source)?,
