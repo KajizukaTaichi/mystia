@@ -16,10 +16,11 @@ pub enum Oper {
     BAnd(Expr, Expr),
     BOr(Expr, Expr),
     XOr(Expr, Expr),
-    Not(Expr), //expr.rs
+    BNot(Expr), // one term operator's parser is in expr.rs
     LAnd(Expr, Expr),
     LOr(Expr, Expr),
     LtEq(Expr, Expr),
+    LNot(Expr),
     GtEq(Expr, Expr),
     Cast(Expr, Type),
 }
@@ -38,7 +39,7 @@ impl Node for Oper {
             "/" => Oper::Div(Expr::parse(lhs)?, Expr::parse(rhs)?),
             "%" => Oper::Mod(Expr::parse(lhs)?, Expr::parse(rhs)?),
             ">>" => Oper::Shr(Expr::parse(lhs)?, Expr::parse(rhs)?),
-            "<<" => Oper::Shl(Expr::parse(lhs)?, Expr::parse(rhs)?), 
+            "<<" => Oper::Shl(Expr::parse(lhs)?, Expr::parse(rhs)?),
             "==" => Oper::Eql(Expr::parse(lhs)?, Expr::parse(rhs)?),
             "!=" => Oper::Neq(Expr::parse(lhs)?, Expr::parse(rhs)?),
             "<" => Oper::Lt(Expr::parse(lhs)?, Expr::parse(rhs)?),
@@ -67,7 +68,7 @@ impl Node for Oper {
             Oper::BAnd(lhs, rhs) => compile_arithmetic!("and", self, ctx, lhs, rhs),
             Oper::BOr(lhs, rhs) => compile_arithmetic!("or", self, ctx, lhs, rhs),
             Oper::XOr(lhs, rhs) => compile_arithmetic!("xor", self, ctx, lhs, rhs),
-            Oper::Not(lhs) => compile_arithmetic!("xor", self, ctx, lhs, Expr::Literal(Value::Integer(-1))),
+            Oper::LNot(lhs) => compile_compare!("not", ctx, lhs),
             Oper::Eql(lhs, rhs) => compile_arithmetic!("eq", self, ctx, lhs, rhs),
             Oper::Neq(lhs, rhs) => compile_arithmetic!("ne", self, ctx, lhs, rhs),
             Oper::Lt(lhs, rhs) => compile_compare!("lt", ctx, lhs, rhs),
@@ -76,12 +77,15 @@ impl Node for Oper {
             Oper::GtEq(lhs, rhs) => compile_compare!("ge", ctx, lhs, rhs),
             Oper::LAnd(lhs, rhs) => compile_arithmetic!("and", self, ctx, lhs, rhs),
             Oper::LOr(lhs, rhs) => compile_arithmetic!("or", self, ctx, lhs, rhs),
+            Oper::BNot(lhs) => {
+                let minus_one = Expr::Literal(Value::Integer(-1));
+                compile_arithmetic!("xor", self, ctx, lhs, minus_one)
+            }
             Oper::Cast(lhs, rhs) => {
                 let rhs = rhs.type_infer(ctx)?;
                 if lhs.type_infer(ctx)?.compile(ctx)? == rhs.compile(ctx)? {
                     return lhs.compile(ctx);
                 }
-
                 format!(
                     "({}.{} {})",
                     rhs.compile(ctx)?,
@@ -128,9 +132,7 @@ impl Node for Oper {
                 lhs.type_infer(ctx)?;
                 Some(rhs.type_infer(ctx)?)
             }
-            Oper::Not(lhs) => {
-                Some(lhs.type_infer(ctx)?)
-            }
+            Oper::Not(lhs) => Some(lhs.type_infer(ctx)?),
         }
     }
 }
