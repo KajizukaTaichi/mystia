@@ -11,6 +11,7 @@ pub enum Expr {
     Property(Box<Expr>, String),
     Access(Box<Expr>, Box<Expr>),
     Block(Block),
+    Kind(Type),
 }
 
 impl Node for Expr {
@@ -25,7 +26,11 @@ impl Node for Expr {
                 // Bit NOT operation
                 if token.starts_with("~") {
                     let token = token.get(1..)?.trim();
-                    Expr::Oper(Box::new(Oper::Not(Expr::parse(token)?)))
+                    Expr::Oper(Box::new(Oper::BNot(Expr::parse(token)?)))
+                    // Bit NOT operation
+                } else if token.starts_with("!") {
+                    let token = token.get(1..)?.trim();
+                    Expr::Oper(Box::new(Oper::LNot(Expr::parse(token)?)))
                 // Literal value
                 } else if let Some(literal) = Value::parse(&token) {
                     Expr::Literal(literal)
