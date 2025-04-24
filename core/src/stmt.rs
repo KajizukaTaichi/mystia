@@ -172,14 +172,14 @@ impl Node for Stmt {
                     )
                 }
                 Expr::Call(name, _) => {
-                    let (var_inf, arg_inf, ret_inf) = ctx.function_type.get(name)?.clone();
-                    (ctx.variable_type, ctx.argument_type) = (var_inf, arg_inf.clone());
+                    let (var_typ, arg_typ, ret_typ) = ctx.function_type.get(name)?.clone();
+                    (ctx.variable_type, ctx.argument_type) = (var_typ, arg_typ.clone());
                     let code = format!(
                         "(func ${name} (export \"{name}\") {args} {ret} {locals} {body})",
-                        args = join!(iter_map!(&arg_inf, |(name, typ): (&String, &Type)| Some(
+                        args = join!(iter_map!(&arg_typ, |(name, typ): (&String, &Type)| Some(
                             format!("(param ${name} {})", typ.type_infer(ctx)?.compile(ctx)?)
                         ))),
-                        ret = config_return!(ret_inf, ctx)?,
+                        ret = config_return!(ret_typ, ctx)?,
                         body = value.compile(ctx)?,
                         locals = expand_local(ctx)?
                     );
@@ -212,14 +212,14 @@ impl Node for Stmt {
                     args_typ.push(arg_typ.compile(ctx)?);
                 }
                 let code = format!(
-                    "(import \"env\" \"{name}\" (func ${name} {} (result {})))",
+                    "(import \"env\" \"{name}\" (func ${name} {} {}))",
                     join!(
                         args_typ
                             .iter()
                             .map(|x| format!("(param {x})",))
                             .collect::<Vec<_>>()
                     ),
-                    ret_typ.compile(ctx)?
+                    config_return!(ret_typ, ctx)?,
                 );
                 ctx.import_code.push(code);
                 String::new()
