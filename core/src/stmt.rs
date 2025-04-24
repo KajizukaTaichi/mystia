@@ -287,6 +287,7 @@ impl Node for Stmt {
                 ctx.is_memory_copied = true;
                 from.type_infer(ctx)?
             }
+            Stmt::Import { func: _ } => Type::Void,
             Stmt::Drop => Type::Void,
             Stmt::Return(_) => Type::Void,
         })
