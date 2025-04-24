@@ -291,7 +291,28 @@ impl Node for Stmt {
                 ctx.is_memory_copied = true;
                 from.type_infer(ctx)?
             }
-            Stmt::Import { func: _ } => Type::Void,
+            Stmt::Import { func } => {
+                let Oper::Cast(Expr::Call(name, args), ret_typ) = func else {
+                    return None;
+                };
+                let mut args_typ = vec![];
+                for arg in args {
+                    let Expr::Oper(arg) = arg else { return None };
+                    let Oper::Cast(_, arg_typ) = *arg.clone() else {
+                        return None;
+                    };
+                    args_typ.push(arg_typ.compile(ctx)?);
+                }
+                ctx.function_type.insert(
+                    name.to_owned(),
+                    (
+                        ctx.variable_type.clone(),
+                        ctx.argument_type.clone(),
+                        ret_typ.clone(),
+                    ),
+                );
+                Type::Void
+            }
             Stmt::Drop => Type::Void,
             Stmt::Return(_) => Type::Void,
         })
