@@ -8,7 +8,7 @@ let is_prime(n) = {
             if n % i == 0 then {
                 return false
             };
-            let i = i + 6
+            let i + 6
         };
         true
     }
