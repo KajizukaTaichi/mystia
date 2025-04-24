@@ -10,14 +10,26 @@ export async function mystia(code) {
 
     let mystiaAlert = () => window.alert("[uninitialized]");
     let mystiaConfirm = () => window.confirm("[uninitialized]");
+    let mystiaPrompt = () => window.prompt("[uninitialized]");
     const { instance } = await WebAssembly.instantiate(bytecodes, {
         web: {
             alert: (ptr) => mystiaAlert(ptr),
             confirm: (ptr) => mystiaConfirm(ptr),
+            prompt: (ptr) => mystiaPrompt(ptr),
         },
     });
     mystiaAlert = (ptr) => window.alert(ffi(instance, "str", ptr));
     mystiaConfirm = (ptr) => window.confirm(ffi(instance, "str", ptr));
+    mystiaPrompt = (ptr) => {
+        const answer = window.prompt(ffi(instance, "str", ptr));
+        const encoder = new TextEncoder();
+        const utf8 = encoder.encode(answer + "\0"); // null終端を明示的に
+        const ptr = instance.exports.alloc_index;
+        const memory = new Uint8Array(instance.exports.mem.buffer);
+        instance.exports.alloc_index += answer.length + 1;
+        memory.set(utf8, ptr);
+        return ptr;
+    };
 
     const value = instance.exports._start();
     return ffi(instance, type, value);
