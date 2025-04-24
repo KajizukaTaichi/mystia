@@ -30,6 +30,7 @@
                 resize: none;
             }
             #result {
+                font-size: larger;
                 font-family: monospace;
             }
         </style>
@@ -64,8 +65,8 @@
                 <br />
                 <div class="field">
                     <label class="label" for="result">Result: </label>
-                    <label id="timer"></label>
                     <p id="result" class="alert"></p>
+                    <label id="timer"></label>
                 </div>
             </div>
         </section>
@@ -100,7 +101,7 @@
                         timerLabel.textContent = `Time: ${Date.now() - startTime}ms`;
                     }, 1);
                     const result = await mystia(codeEditor.value);
-                    resultArea.innerHTML = JSON.stringify(result);
+                    resultArea.innerHTML = JSON.stringify(result, null, 2);
                 } catch (error) {
                     resultArea.innerHTML = JSON.stringify(error);
                 } finally {
