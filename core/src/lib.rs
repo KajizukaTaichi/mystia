@@ -15,7 +15,7 @@ use {
     oper::Oper,
     stmt::Stmt,
     r#type::{Dict, Type},
-    utils::{OPERATOR, RESERVED, SPACE, expand_local, include_letter},
+    utils::{OPERATOR, RESERVED, SPACE, WEBAPI, expand_local, include_letter},
     value::Value,
 };
 
@@ -36,6 +36,8 @@ pub struct Compiler {
     pub alloc_index: i32,
     /// The code will copies memory?
     pub is_memory_copied: bool,
+    /// The code will use WebAPI?
+    pub is_using_webapi: bool,
     /// Static string data
     pub static_data: Vec<String>,
     /// Set of function declare code
@@ -59,6 +61,7 @@ impl Compiler {
         Compiler {
             alloc_index: 0,
             is_memory_copied: false,
+            is_using_webapi: false,
             static_data: vec![],
             declare_code: vec![],
             expect_type: None,
@@ -74,7 +77,7 @@ impl Compiler {
         let ast = Block::parse(source)?;
         self.program_return = ast.type_infer(self)?;
         Some(format!(
-            "(module (memory $mem (export \"mem\") 1) {memcpy} {strings} {declare} (func (export \"_start\") {ret} {locals} {code}))",
+            "(module (import \"web\" \"alert\" (func $alert (param i32))) (memory $mem (export \"mem\") 1) {memcpy} {strings} {declare} (func (export \"_start\") {ret} {locals} {code}))",
             code = ast.compile(self)?,
             ret = config_return!(self.program_return.clone(), self)?,
             strings = join!(self.static_data),
