@@ -1,8 +1,8 @@
 use crate::*;
 
 pub const SPACE: [&str; 5] = [" ", "　", "\n", "\t", "\r"];
-pub const OPERATOR: [&str; 17] = [
-    "+", "-", "*", "/", "%", "^", "==", "!=", "<<", ">>", "<=", ">=", "<", ">", "&&", "||", ":",
+pub const OPERATOR: [&str; 19] = [
+    "+", "-", "*", "/", "%", "==", "!=", "<<", ">>", "<=", ">=", "<", ">", "&&", "||", "&", "|", "^", ":",
 ];
 pub const RESERVED: [&str; 9] = [
     "let", "if", "then", "else", "while", "loop", "break", "next", "return",
@@ -89,6 +89,15 @@ macro_rules! compile_compare {
             if ret == "i32" { "_s" } else { "" },
             $lhs.compile($ctx)?,
             $rhs.compile($ctx)?
+        )
+    }};
+    ($oper: expr, $ctx: expr, $lhs: expr) => {{
+        let ret = $lhs.type_infer($ctx)?.compile($ctx)?;
+        format!(
+            "({}.{} {})",
+            ret,
+            $oper,
+            $lhs.compile($ctx)?
         )
     }};
 }
