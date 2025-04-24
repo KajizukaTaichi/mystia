@@ -20,6 +20,7 @@ pub enum Oper {
 
 impl Node for Oper {
     fn parse(source: &str) -> Option<Self> {
+        // Parsing is from right to left because operator is left-associative
         let token_list: Vec<String> = tokenize(source, SPACE.as_ref(), true, true)?;
         let operator = token_list.get(token_list.len().checked_sub(2)?)?;
         let lhs = &join!(token_list.get(..token_list.len() - 2)?);
