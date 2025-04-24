@@ -7,7 +7,7 @@ pub const OPERATOR: [&str; 15] = [
 pub const RESERVED: [&str; 9] = [
     "let", "if", "then", "else", "while", "loop", "break", "next", "return",
 ];
-pub const WEBAPI: [&str; 1] = ["alert"];
+pub const WEBAPI: [&str; 2] = ["alert", "confirm"];
 
 pub fn include_letter(query: &str, chars: &Vec<String>, idx: usize) -> bool {
     chars
