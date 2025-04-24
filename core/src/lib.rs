@@ -91,7 +91,7 @@ impl Compiler {
                 String::new()
             },
             import = if self.is_using_webapi {
-                "(import \"web\" \"alert\" (func $alert (param i32)))".to_string()
+                "(import \"web\" \"alert\" (func $alert (param i32))) (import \"web\" \"confirm\" (func $confirm (param i32) (result i32)))".to_string()
             } else {
                 String::new()
             },
