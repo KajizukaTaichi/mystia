@@ -2,7 +2,7 @@ import init, { mystia as compile } from "../web/mystia_wasm.js";
 import { ffi } from "./ffi.mjs";
 
 await init();
-export async function mystia(code, env = {}) {
+export async function mystia(code) {
     const result = compile(code);
     const type = eval(`(${result.get_return_type()})`);
     if (type == null) return null;
@@ -12,13 +12,13 @@ export async function mystia(code, env = {}) {
     let mystiaConfirm = () => window.confirm("[uninitialized]");
     let mystiaPrompt = () => window.prompt("[uninitialized]");
     const { instance } = await WebAssembly.instantiate(bytecodes, {
-        env:
-            {
-                alert: (ptr) => mystiaAlert(ptr),
-                confirm: (ptr) => mystiaConfirm(ptr),
-                prompt: (ptr) => mystiaPrompt(ptr),
-            } + env,
+        env: {
+            alert: (ptr) => mystiaAlert(ptr),
+            confirm: (ptr) => mystiaConfirm(ptr),
+            prompt: (ptr) => mystiaPrompt(ptr),
+        },
     });
+    Object.preventExtensions(instance);
     mystiaAlert = (ptr) => window.alert(ffi(instance, "str", ptr));
     mystiaConfirm = (ptr) => window.confirm(ffi(instance, "str", ptr));
     mystiaPrompt = (ptr) => {
