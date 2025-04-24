@@ -7,7 +7,13 @@ export async function mystia(code) {
     const type = eval(`(${result.get_return_type()})`);
     if (type == null) return null;
     const bytecodes = result.get_bytecode().buffer;
-    const { instance } = await WebAssembly.instantiate(bytecodes);
+    let mystiaAlert = () => alert("[uninitialized]");
+    const { instance } = await WebAssembly.instantiate(bytecodes, {
+        web: {
+            alert: (ptr) => mystiaAlert(ptr),
+        },
+    });
+    mystiaAlert = (ptr) => window.alert(ffi(instance, "str", ptr));
     const value = instance.exports._start();
     return ffi(instance, type, value);
 }
