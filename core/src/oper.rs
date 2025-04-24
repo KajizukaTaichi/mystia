@@ -13,8 +13,12 @@ pub enum Oper {
     Neq(Expr, Expr),
     Lt(Expr, Expr),
     Gt(Expr, Expr),
-    And(Expr, Expr),
-    Or(Expr, Expr),
+    BAnd(Expr, Expr),
+    BOr(Expr, Expr),
+    XOr(Expr, Expr),
+    Not(Expr), //expr.rs
+    LAnd(Expr, Expr),
+    LOr(Expr, Expr),
     LtEq(Expr, Expr),
     GtEq(Expr, Expr),
     Cast(Expr, Type),
@@ -41,8 +45,11 @@ impl Node for Oper {
             ">" => Oper::Gt(Expr::parse(lhs)?, Expr::parse(rhs)?),
             ">=" => Oper::GtEq(Expr::parse(lhs)?, Expr::parse(rhs)?),
             "<=" => Oper::LtEq(Expr::parse(lhs)?, Expr::parse(rhs)?),
-            "&&" => Oper::And(Expr::parse(lhs)?, Expr::parse(rhs)?),
-            "||" => Oper::Or(Expr::parse(lhs)?, Expr::parse(rhs)?),
+            "&" => Oper::BAnd(Expr::parse(lhs)?, Expr::parse(rhs)?),
+            "|" => Oper::BOr(Expr::parse(lhs)?, Expr::parse(rhs)?),
+            "^" => Oper::XOr(Expr::parse(lhs)?, Expr::parse(rhs)?),
+            "&&" => Oper::LAnd(Expr::parse(lhs)?, Expr::parse(rhs)?),
+            "||" => Oper::LOr(Expr::parse(lhs)?, Expr::parse(rhs)?),
             ":" => Oper::Cast(Expr::parse(lhs)?, Type::parse(rhs)?),
             _ => return None,
         })
@@ -56,15 +63,19 @@ impl Node for Oper {
             Oper::Div(lhs, rhs) => compile_compare!("div", ctx, lhs, rhs),
             Oper::Mod(lhs, rhs) => compile_compare!("rem", ctx, lhs, rhs),
             Oper::Shr(lhs, rhs) => compile_compare!("shr", ctx, lhs, rhs),
-            Oper::Shl(lhs, rhs) => compile_compare!("shl", ctx, lhs, rhs),
+            Oper::Shl(lhs, rhs) => compile_arithmetic!("shl", self, ctx, lhs, rhs),
+            Oper::BAnd(lhs, rhs) => compile_arithmetic!("and", self, ctx, lhs, rhs),
+            Oper::BOr(lhs, rhs) => compile_arithmetic!("or", self, ctx, lhs, rhs),
+            Oper::XOr(lhs, rhs) => compile_arithmetic!("xor", self, ctx, lhs, rhs),
+            Oper::Not(lhs) => compile_arithmetic!("xor", self, ctx, lhs, Expr::Literal(Value::Integer(-1))),
             Oper::Eql(lhs, rhs) => compile_arithmetic!("eq", self, ctx, lhs, rhs),
             Oper::Neq(lhs, rhs) => compile_arithmetic!("ne", self, ctx, lhs, rhs),
             Oper::Lt(lhs, rhs) => compile_compare!("lt", ctx, lhs, rhs),
             Oper::Gt(lhs, rhs) => compile_compare!("gt", ctx, lhs, rhs),
             Oper::LtEq(lhs, rhs) => compile_compare!("le", ctx, lhs, rhs),
             Oper::GtEq(lhs, rhs) => compile_compare!("ge", ctx, lhs, rhs),
-            Oper::And(lhs, rhs) => compile_arithmetic!("and", self, ctx, lhs, rhs),
-            Oper::Or(lhs, rhs) => compile_arithmetic!("or", self, ctx, lhs, rhs),
+            Oper::LAnd(lhs, rhs) => compile_arithmetic!("and", self, ctx, lhs, rhs),
+            Oper::LOr(lhs, rhs) => compile_arithmetic!("or", self, ctx, lhs, rhs),
             Oper::Cast(lhs, rhs) => {
                 let rhs = rhs.type_infer(ctx)?;
                 if lhs.type_infer(ctx)?.compile(ctx)? == rhs.compile(ctx)? {
@@ -93,7 +104,10 @@ impl Node for Oper {
             | Oper::Div(lhs, rhs)
             | Oper::Mod(lhs, rhs)
             | Oper::Shr(lhs, rhs)
-            | Oper::Shl(lhs, rhs) => {
+            | Oper::Shl(lhs, rhs)
+            | Oper::BAnd(lhs, rhs)
+            | Oper::BOr(lhs, rhs)
+            | Oper::XOr(lhs, rhs) => {
                 type_check!(lhs, rhs, ctx)
             }
             Oper::Eql(lhs, rhs)
@@ -105,7 +119,7 @@ impl Node for Oper {
                 type_check!(lhs, rhs, ctx)?;
                 Some(Type::Bool)
             }
-            Oper::And(lhs, rhs) | Oper::Or(lhs, rhs) => {
+            Oper::LAnd(lhs, rhs) | Oper::LOr(lhs, rhs) => {
                 type_check!(lhs, Type::Bool, ctx)?;
                 type_check!(rhs, Type::Bool, ctx)?;
                 Some(Type::Bool)
@@ -113,6 +127,9 @@ impl Node for Oper {
             Oper::Cast(lhs, rhs) => {
                 lhs.type_infer(ctx)?;
                 Some(rhs.type_infer(ctx)?)
+            }
+            Oper::Not(lhs) => {
+                Some(lhs.type_infer(ctx)?)
             }
         }
     }

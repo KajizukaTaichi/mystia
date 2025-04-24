@@ -22,8 +22,12 @@ impl Node for Expr {
         } else {
             let token = token_list.last()?.trim().to_string();
             Some(
+                // Bit NOT operation
+                if token.starts_with("~") {
+                    let token = token.get(1..)?.trim();
+                    Expr::Oper(Box::new(Oper::Not(Expr::parse(token)?)))
                 // Literal value
-                if let Some(literal) = Value::parse(&token) {
+                } else if let Some(literal) = Value::parse(&token) {
                     Expr::Literal(literal)
                 // Array `[expr, ...]`
                 } else if token.starts_with("[") && token.ends_with("]") {
