@@ -98,7 +98,7 @@
                     const startTime = Date.now();
                     timer = setInterval(() => {
                         timerLabel.textContent = `Time: ${Date.now() - startTime}ms`;
-                    }, 100);
+                    }, 1);
                     const result = await mystia(codeEditor.value);
                     resultArea.innerHTML = JSON.stringify(result);
                 } catch (error) {
