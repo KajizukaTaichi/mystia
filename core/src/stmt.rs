@@ -239,12 +239,11 @@ impl Node for Stmt {
                 }
                 let code = format!(
                     "(import \"env\" \"{name}\" (func ${name} {} {}))",
-                    join!(
-                        args_typ
-                            .iter()
-                            .map(|x| format!("(param {x})",))
-                            .collect::<Vec<_>>()
-                    ),
+                    if args_typ.is_empty() {
+                        String::new()
+                    } else {
+                        format!("(param {})", join!(args_typ))
+                    },
                     config_return!(ret_typ, ctx)?,
                 );
                 ctx.import_code.push(code);
