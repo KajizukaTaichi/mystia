@@ -1,2 +1,2 @@
-type abc = ( A | B | C );
-abc::A
+type Sex = ( Male | Female );
+Sex::Male
