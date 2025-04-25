@@ -22,7 +22,7 @@ impl Node for Type {
             "num" => Some(Type::Number),
             "bool" => Some(Type::Bool),
             "str" => Some(Type::String),
-            "nil" => Some(Type::Void),
+            "void" => Some(Type::Void),
             _ => {
                 let source = source.trim().to_string();
                 if source.starts_with("[") && source.ends_with("]") {
@@ -130,7 +130,7 @@ impl Type {
             Type::Number => "num".to_string(),
             Type::Bool => "bool".to_string(),
             Type::String => "str".to_string(),
-            Type::Void => "nil".to_string(),
+            Type::Void => "void".to_string(),
             Type::Dict(dict) => format!(
                 "{{ {} }}",
                 dict.iter()
