@@ -1,2 +1,2 @@
-type enum = (A|B|C);
-enum.C
+type abc = ( A | B | C );
+abc::A
