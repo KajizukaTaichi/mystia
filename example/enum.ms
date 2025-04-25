@@ -1,2 +1,2 @@
 type Sex = ( Male | Female );
-Sex::Male
+[Sex::Male]
