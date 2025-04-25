@@ -9,18 +9,19 @@ pub enum Type {
     String,
     Array(Box<Type>, usize),
     Dict(Dict),
+    Enum(Vec<String>),
     Alias(String),
     Void,
 }
 
 impl Node for Type {
-    fn parse(source: &str) -> Option<Self> {
+    fn parse(source: &str) -> Option<Type> {
         match source.trim() {
-            "int" => Some(Self::Integer),
-            "num" => Some(Self::Number),
-            "bool" => Some(Self::Bool),
-            "str" => Some(Self::String),
-            "nil" => Some(Self::Void),
+            "int" => Some(Type::Integer),
+            "num" => Some(Type::Number),
+            "bool" => Some(Type::Bool),
+            "str" => Some(Type::String),
+            "nil" => Some(Type::Void),
             _ => {
                 let source = source.trim().to_string();
                 if source.starts_with("[") && source.ends_with("]") {
@@ -51,10 +52,13 @@ impl Node for Type {
     fn compile(&self, _: &mut Compiler) -> Option<String> {
         Some(
             match self {
-                Self::Number => "f64",
-                Type::Integer | Self::Bool | Self::String | Self::Array(_, _) | Self::Dict(_) => {
-                    "i32"
-                }
+                Type::Number => "f64",
+                Type::Integer
+                | Type::Bool
+                | Type::String
+                | Type::Array(_, _)
+                | Type::Dict(_)
+                | Type::Enum(_) => "i32",
                 _ => return None,
             }
             .to_string(),
@@ -72,7 +76,12 @@ impl Node for Type {
 impl Type {
     pub fn pointer_length(&self) -> i32 {
         match self {
-            Type::Array(_, _) | Type::String | Type::Bool | Type::Dict(_) | Type::Integer => 4,
+            Type::Array(_, _)
+            | Type::String
+            | Type::Bool
+            | Type::Dict(_)
+            | Type::Integer
+            | Type::Enum(_) => 4,
             Type::Number => 8,
             _ => 0,
         }
@@ -80,18 +89,16 @@ impl Type {
 
     pub fn bytes_length(&self) -> Option<usize> {
         match self {
-            Self::Integer => Some(4),
-            Self::Number => Some(8),
-            Self::String => Some(4),
-            Self::Bool => Some(4),
-            Self::Void => Some(0),
-            Self::Dict(dict) => Some(dict.len() * 4),
-            Self::Array(_, len) => Some(len * 4),
+            Type::Integer | Type::Bool | Type::String | Type::Enum(_) => Some(4),
+            Type::Number => Some(8),
+            Type::Void => Some(0),
+            Type::Dict(dict) => Some(dict.len() * 4),
+            Type::Array(_, len) => Some(len * 4),
             _ => None,
         }
     }
 
-    pub fn decompress_alias(&self, ctx: &Compiler) -> Self {
+    pub fn decompress_alias(&self, ctx: &Compiler) -> Type {
         if let Some(i) = ctx
             .type_alias
             .iter()
@@ -105,31 +112,32 @@ impl Type {
 
     pub fn format(&self) -> String {
         match self {
-            Self::Integer => "int".to_string(),
-            Self::Number => "num".to_string(),
-            Self::Bool => "bool".to_string(),
-            Self::String => "str".to_string(),
-            Self::Void => "nil".to_string(),
-            Self::Dict(dict) => format!(
+            Type::Integer => "int".to_string(),
+            Type::Number => "num".to_string(),
+            Type::Bool => "bool".to_string(),
+            Type::String => "str".to_string(),
+            Type::Void => "nil".to_string(),
+            Type::Dict(dict) => format!(
                 "{{ {} }}",
                 dict.iter()
                     .map(|(k, t)| format!("{k}: {}", t.1.format()))
                     .collect::<Vec<_>>()
                     .join(", ")
             ),
-            Self::Array(typ, len) => format!("[{}; {len}]", typ.format()),
-            Self::Alias(name) => name.to_string(),
+            Type::Enum(e) => format!("{}", e.join("|")),
+            Type::Array(typ, len) => format!("[{}; {len}]", typ.format()),
+            Type::Alias(name) => name.to_string(),
         }
     }
 
     pub fn ffi_json(&self) -> String {
         match self {
-            Self::Integer => "\"int\"".to_string(),
-            Self::Number => "\"num\"".to_string(),
-            Self::Bool => "\"bool\"".to_string(),
-            Self::String => "\"str\"".to_string(),
-            Self::Void => "null".to_string(),
-            Self::Dict(dict) => format!(
+            Type::Integer => "\"int\"".to_string(),
+            Type::Number => "\"num\"".to_string(),
+            Type::Bool => "\"bool\"".to_string(),
+            Type::String => "\"str\"".to_string(),
+            Type::Void => "null".to_string(),
+            Type::Dict(dict) => format!(
                 "{{ type: \"dict\", fields: {{ {} }} }}",
                 dict.iter()
                     .map(|(k, (offset, typ))| format!(
@@ -139,11 +147,18 @@ impl Type {
                     .collect::<Vec<_>>()
                     .join(", ")
             ),
-            Self::Array(typ, len) => format!(
+            Type::Array(typ, len) => format!(
                 "{{ type: \"array\", element: {}, length: {len} }}",
                 typ.ffi_json()
             ),
-            Self::Alias(name) => format!("{{ type: \"alias\", name: {name} }}"),
+            Type::Enum(e) => format!(
+                "{{ type: \"enum\", enum: [{}] }}",
+                e.iter()
+                    .map(|x| format!("\"{x}\""))
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            ),
+            Type::Alias(name) => format!("{{ type: \"alias\", name: {name} }}"),
         }
     }
 }
