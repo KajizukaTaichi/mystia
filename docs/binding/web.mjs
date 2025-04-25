@@ -8,14 +8,13 @@ export async function mystia(code) {
     if (type == null) return null;
     const bytecodes = result.get_bytecode().buffer;
 
-    let mystiaAlert = () => window.alert("[uninitialized]");
-    let mystiaConfirm = () => window.confirm("[uninitialized]");
-    let mystiaPrompt = () => window.prompt("[uninitialized]");
+    let mystiaAlert, mystiaConfirm, mystiaPrompt, mystiaDraw;
     const { instance } = await WebAssembly.instantiate(bytecodes, {
         env: {
-            alert: (ptr) => mystiaAlert(ptr),
-            confirm: (ptr) => mystiaConfirm(ptr),
-            prompt: (ptr) => mystiaPrompt(ptr),
+            alert: mystiaAlert,
+            confirm: mystiaConfirm,
+            prompt: mystiaPrompt,
+            draw: mystiaDraw,
         },
     });
     mystiaAlert = (ptr) => window.alert(ffi(instance, "str", ptr));
@@ -27,6 +26,11 @@ export async function mystia(code) {
         const memory = new Uint8Array(instance.exports.mem.buffer);
         memory.set(utf8, str);
         return str;
+    };
+    mystiaDraw = (x, y, color) => {
+        const ctx = document.getElementById("mystia-canvas").getContext("2d");
+        ctx.fillStyle = ffi(instance, "str", color);
+        ctx.fillRect(x * 100, y * 100, 100, 100);
     };
 
     const value = instance.exports._start();
