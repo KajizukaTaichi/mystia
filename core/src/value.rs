@@ -27,14 +27,6 @@ impl Node for Value {
             } else if source.starts_with("\"") && source.ends_with("\"") {
                 let source = source.get(1..source.len() - 1)?.trim();
                 Value::String(str_escape(source))
-            // String literal
-            } else if source.contains(".") {
-                let (enum_type, key) = source.rsplit_once(".")?;
-                let Type::Enum(enum_type) = Type::parse(enum_type)? else {
-                    return None;
-                };
-                let value = enum_type.iter().position(|item| item == key)?;
-                Value::Enum(value as i32, enum_type)
             } else {
                 return None;
             },
