@@ -7,6 +7,7 @@ pub enum Value {
     Bool(bool),
     Array(i32, usize, Type),
     Dict(i32, Dict),
+    Enum(usize, Enum),
     String(String),
 }
 
@@ -22,10 +23,18 @@ impl Node for Value {
             // Boolean literal
             } else if let Ok(n) = source.parse::<bool>() {
                 Value::Bool(n)
-            // String litera;
+            // String literal
             } else if source.starts_with("\"") && source.ends_with("\"") {
                 let source = source.get(1..source.len() - 1)?.trim();
                 Value::String(str_escape(source))
+            // String literal
+            } else if source.contains(".") {
+                let (enum_type, key) = source.rsplit_once(".")?;
+                let Type::Enum(enum_type) = Type::parse(enum_type)? else {
+                    return None;
+                };
+                let value = enum_type.iter().position(|item| item == key)?;
+                Value::Enum(value, enum_type)
             } else {
                 return None;
             },
