@@ -5,7 +5,7 @@ pub enum Expr {
     Literal(Value),
     Array(Vec<Expr>),
     Dict(IndexMap<String, Expr>),
-    Enum(Enum, String),
+    Enum(Type, String),
     Variable(String),
     Oper(Box<Oper>),
     Call(String, Vec<Expr>),
@@ -90,10 +90,7 @@ impl Node for Expr {
                         Expr::Property(Box::new(expr), key.to_string())
                     } else {
                         // Enum access `enum.key`
-                        let Type::Enum(enum_type) = Type::parse(name)? else {
-                            return None;
-                        };
-                        Expr::Enum(enum_type, key.to_string())
+                        Expr::Enum(Type::parse(name)?, key.to_string())
                     }
                 // Variable reference
                 } else if !RESERVED.contains(&token.as_str()) && token.is_ascii() {
@@ -223,6 +220,9 @@ impl Node for Expr {
                 format!("({}.load {})", typ.compile(ctx)?, addr.compile(ctx)?)
             }
             Expr::Enum(enum_type, key) => {
+                let Type::Enum(enum_type) = enum_type.type_infer(ctx)? else {
+                    return None;
+                };
                 let value = enum_type.iter().position(|item| item == key)?;
                 Value::Enum(value as i32, enum_type.clone()).compile(ctx)?
             }
@@ -281,7 +281,7 @@ impl Node for Expr {
                 };
                 dict.get(key)?.1.clone()
             }
-            Expr::Enum(typ, _) => Type::Enum(typ.clone()),
+            Expr::Enum(typ, _) => typ.clone(),
         })
     }
 }
