@@ -130,7 +130,7 @@ impl Type {
                     .collect::<Vec<_>>()
                     .join(", ")
             ),
-            Type::Enum(e) => format!("{}", e.join("|")),
+            Type::Enum(e) => format!("( {} )", e.join(" | ")),
             Type::Array(typ, len) => format!("[{}; {len}]", typ.format()),
             Type::Alias(name) => name.to_string(),
         }
