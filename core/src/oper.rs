@@ -23,6 +23,7 @@ pub enum Oper {
     LNot(Expr),
     GtEq(Expr, Expr),
     Cast(Expr, Type),
+    Enum(Type, String),
 }
 
 impl Node for Oper {
@@ -52,6 +53,7 @@ impl Node for Oper {
             "&&" => Oper::LAnd(Expr::parse(lhs)?, Expr::parse(rhs)?),
             "||" => Oper::LOr(Expr::parse(lhs)?, Expr::parse(rhs)?),
             ":" => Oper::Cast(Expr::parse(lhs)?, Type::parse(rhs)?),
+            "::" => Oper::Enum(Type::parse(lhs)?, rhs.trim().to_string()),
             _ => return None,
         })
     }
@@ -97,6 +99,13 @@ impl Node for Oper {
                     lhs.compile(ctx)?,
                 )
             }
+            Oper::Enum(enum_type, key) => {
+                let Type::Enum(enum_type) = enum_type.type_infer(ctx)? else {
+                    return None;
+                };
+                let value = enum_type.iter().position(|item| item == key)?;
+                Value::Enum(value as i32, enum_type.clone()).compile(ctx)?
+            }
         })
     }
 
@@ -133,6 +142,7 @@ impl Node for Oper {
                 Some(rhs.type_infer(ctx)?)
             }
             Oper::LNot(lhs) | Oper::BNot(lhs) => Some(lhs.type_infer(ctx)?),
+            Oper::Enum(typ, _) => Some(typ.clone()),
         }
     }
 }
