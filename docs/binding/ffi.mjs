@@ -1,4 +1,5 @@
 export function ffi(instance, type, value) {
+    if (type == null) return null;
     if (type == "int" || type == "num") {
         return value;
     } else if (type == "bool") {
