@@ -86,12 +86,7 @@ impl Node for Expr {
                 // Dictionary access `dict.key`
                 } else if token.contains(".") {
                     let (name, key) = token.rsplit_once(".")?;
-                    if let Some(expr) = Expr::parse(name) {
-                        Expr::Property(Box::new(expr), key.to_string())
-                    } else {
-                        // Enum access `enum.key`
-                        Expr::Enum(Type::parse(name)?, key.to_string())
-                    }
+                    Expr::Property(Box::new(Expr::parse(name)?), key.to_string())
                 // Variable reference
                 } else if !RESERVED.contains(&token.as_str()) && token.is_ascii() {
                     Expr::Variable(token)
