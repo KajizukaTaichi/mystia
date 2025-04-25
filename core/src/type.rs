@@ -42,6 +42,10 @@ impl Node for Type {
                         index += typ.pointer_length();
                     }
                     Some(Type::Dict(result))
+                } else if source.contains("|") {
+                    let source = source.get(1..source.len() - 1)?.trim();
+                    let result = tokenize(source, &["|"], false, true)?;
+                    Some(Type::Enum(result))
                 } else {
                     Some(Type::Alias(source))
                 }
