@@ -222,6 +222,10 @@ impl Node for Expr {
                 );
                 format!("({}.load {})", typ.compile(ctx)?, addr.compile(ctx)?)
             }
+            Expr::Enum(enum_type, key) => {
+                let value = enum_type.iter().position(|item| item == key)?;
+                Value::Enum(value as i32, enum_type.clone()).compile(ctx)?
+            }
             Expr::Block(block) => block.compile(ctx)?,
         })
     }
@@ -277,6 +281,7 @@ impl Node for Expr {
                 };
                 dict.get(key)?.1.clone()
             }
+            Expr::Enum(typ, _) => Type::Enum(typ.clone()),
         })
     }
 }
