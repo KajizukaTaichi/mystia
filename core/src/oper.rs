@@ -142,7 +142,7 @@ impl Node for Oper {
                 Some(rhs.type_infer(ctx)?)
             }
             Oper::LNot(lhs) | Oper::BNot(lhs) => Some(lhs.type_infer(ctx)?),
-            Oper::Enum(typ, _) => Some(typ.clone()),
+            Oper::Enum(typ, _) => Some(typ.type_infer(ctx)?),
         }
     }
 }
