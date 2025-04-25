@@ -69,6 +69,7 @@
                     <label id="timer"></label>
                 </div>
             </div>
+            <canvas id="mystia-anvas" width="500" height="500"></canvas>
         </section>
 
         <script type="module">
@@ -95,18 +96,13 @@
             });
 
             codeEditor.value = runBtn.addEventListener("click", async (e) => {
-                try {
-                    const startTime = Date.now();
-                    timer = setInterval(() => {
-                        timerLabel.textContent = `Time: ${Date.now() - startTime}ms`;
-                    }, 1);
-                    const result = await mystia(codeEditor.value);
-                    resultArea.innerHTML = JSON.stringify(result, null, 2);
-                } catch (error) {
-                    resultArea.innerHTML = JSON.stringify(error);
-                } finally {
-                    clearInterval(timer);
-                }
+                const startTime = Date.now();
+                timer = setInterval(() => {
+                    timerLabel.textContent = `Time: ${Date.now() - startTime}ms`;
+                }, 1);
+                const result = await mystia(codeEditor.value);
+                resultArea.innerHTML = JSON.stringify(result, null, 2);
+                clearInterval(timer);
             });
         </script>
     </body>
