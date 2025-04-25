@@ -42,6 +42,8 @@ export function ffi(instance, type, value) {
             result[name] = ffi(instance, field.type, value);
         }
         return result;
+    } else if (type.type == "enum") {
+        return Symbol(type.enum[value]);
     } else {
         return type;
     }
