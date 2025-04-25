@@ -112,7 +112,15 @@ impl Type {
         {
             Type::Alias(i.0.clone())
         } else {
-            self.clone()
+            match self {
+                Type::Array(typ, len) => Type::Array(Box::new(typ.decompress_alias(ctx)), *len),
+                Type::Dict(dict) => Type::Dict(
+                    dict.iter()
+                        .map(|(k, (o, t))| (k.clone(), (o.clone(), t.decompress_alias(ctx))))
+                        .collect(),
+                ),
+                _ => self.clone(),
+            }
         }
     }
 
