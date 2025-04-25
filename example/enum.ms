@@ -1,2 +1,3 @@
 type Sex = ( Male | Female );
-[Sex::Male]
+let foo = [Sex::Male, Sex::Female];
+foo[1]
