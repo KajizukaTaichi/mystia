@@ -5,6 +5,7 @@ pub enum Expr {
     Literal(Value),
     Array(Vec<Expr>),
     Dict(IndexMap<String, Expr>),
+    Enum(Enum, String),
     Variable(String),
     Oper(Box<Oper>),
     Call(String, Vec<Expr>),
@@ -85,7 +86,15 @@ impl Node for Expr {
                 // Dictionary access `dict.key`
                 } else if token.contains(".") {
                     let (name, key) = token.rsplit_once(".")?;
-                    Expr::Property(Box::new(Expr::parse(name)?), key.to_string())
+                    if let Some(expr) = Expr::parse(name) {
+                        Expr::Property(Box::new(expr), key.to_string())
+                    } else {
+                        // Enum access `enum.key`
+                        let Type::Enum(enum_type) = Type::parse(name)? else {
+                            return None;
+                        };
+                        Expr::Enum(enum_type, key.to_string())
+                    }
                 // Variable reference
                 } else if !RESERVED.contains(&token.as_str()) && token.is_ascii() {
                     Expr::Variable(token)
