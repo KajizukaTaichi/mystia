@@ -7,7 +7,7 @@ pub enum Value {
     Bool(bool),
     Array(i32, usize, Type),
     Dict(i32, Dict),
-    Enum(usize, Enum),
+    Enum(i32, Enum),
     String(String),
 }
 
@@ -34,7 +34,7 @@ impl Node for Value {
                     return None;
                 };
                 let value = enum_type.iter().position(|item| item == key)?;
-                Value::Enum(value, enum_type)
+                Value::Enum(value as i32, enum_type)
             } else {
                 return None;
             },
@@ -44,7 +44,7 @@ impl Node for Value {
     fn compile(&self, ctx: &mut Compiler) -> Option<String> {
         Some(match self {
             Value::Number(n) => format!("(f64.const {n})"),
-            Value::Integer(n) | Value::Array(n, _, _) | Value::Dict(n, _) => {
+            Value::Integer(n) | Value::Array(n, _, _) | Value::Dict(n, _) | Value::Enum(n, _) => {
                 format!("(i32.const {n})")
             }
             Value::Bool(n) => Value::Integer(if *n { 1 } else { 0 }).compile(ctx)?,
@@ -67,6 +67,7 @@ impl Node for Value {
             Value::String(_) => Type::String,
             Value::Array(_, len, typ) => Type::Array(Box::new(typ.clone()), *len),
             Value::Dict(_, typ) => Type::Dict(typ.clone()),
+            Value::Enum(_, typ) => Type::Enum(typ.clone()),
         })
     }
 }
