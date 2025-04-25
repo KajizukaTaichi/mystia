@@ -1,8 +1,9 @@
 use crate::*;
 
 pub const SPACE: [&str; 5] = [" ", "　", "\n", "\t", "\r"];
-pub const OPERATOR: [&str; 19] = [
-    "+", "-", "*", "/", "%", "==", "!=", "<<", ">>", "<=", ">=", "<", ">", "&&", "||", "&", "|", "^", ":",
+pub const OPERATOR: [&str; 20] = [
+    "+", "-", "*", "/", "%", "==", "!=", "<<", ">>", "<=", ">=", "<", ">", "&&", "||", "&", "|",
+    "^", "::", ":",
 ];
 pub const RESERVED: [&str; 11] = [
     "let", "if", "then", "else", "while", "loop", "break", "next", "return", "load", "type",
@@ -93,12 +94,7 @@ macro_rules! compile_compare {
     }};
     ($oper: expr, $ctx: expr, $lhs: expr) => {{
         let ret = $lhs.type_infer($ctx)?.compile($ctx)?;
-        format!(
-            "({}.{} {})",
-            ret,
-            $oper,
-            $lhs.compile($ctx)?
-        )
+        format!("({}.{} {})", ret, $oper, $lhs.compile($ctx)?)
     }};
 }
 
