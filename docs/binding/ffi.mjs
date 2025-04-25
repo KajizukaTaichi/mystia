@@ -43,7 +43,7 @@ export function ffi(instance, type, value) {
         }
         return result;
     } else if (type.type == "enum") {
-        return Symbol(type.enum[value]);
+        return type.enum[value];
     } else {
         return type;
     }
