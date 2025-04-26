@@ -8,7 +8,6 @@ mod utils;
 mod value;
 
 use indexmap::IndexMap;
-use std::fmt::Write;
 use {
     block::Block,
     expr::Expr,
@@ -97,53 +96,5 @@ impl Compiler {
             },
             locals = expand_local(self)?,
         ))
-    }
-
-    pub fn summary(&self) -> String {
-        let result = &mut String::new();
-        let _ = writeln!(result, "# Type Inference Summary");
-        let _ = writeln!(result, "Functions:");
-        for (name, (var, arg, ret)) in &self.function_type {
-            let _ = writeln!(result, " - {name}:");
-            let _ = writeln!(result, "     Locals:");
-            for (name, typ) in var {
-                let _ = writeln!(
-                    result,
-                    "      - {name}: {}",
-                    typ.decompress_alias(&self).format()
-                );
-            }
-            let _ = writeln!(result, "     Arguments:");
-            for (name, typ) in arg {
-                let _ = writeln!(
-                    result,
-                    "      - {name}: {}",
-                    typ.decompress_alias(&self).format()
-                );
-            }
-            let _ = writeln!(
-                result,
-                "     Returns: {}",
-                ret.decompress_alias(&self).format()
-            );
-        }
-        let _ = writeln!(result, "Variables:");
-        for (name, typ) in &self.variable_type {
-            let _ = writeln!(
-                result,
-                " - {name}: {}",
-                typ.decompress_alias(&self).format()
-            );
-        }
-        let _ = writeln!(result, "Aliases:");
-        for (name, typ) in &self.type_alias {
-            let _ = writeln!(result, " - {name}: {}", typ.format());
-        }
-        let _ = write!(
-            result,
-            "Returns: {}",
-            self.program_return.decompress_alias(&self).format()
-        );
-        result.clone()
     }
 }
