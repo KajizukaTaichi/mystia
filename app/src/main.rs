@@ -38,38 +38,7 @@ fn main() {
         return;
     };
     if cli.summary {
-        println!("# Type Inference Summary");
-        println!("Functions:");
-        for (name, (var, arg, ret)) in &compiler.function_type {
-            println!(" - {name}:");
-            println!("     Locals:");
-            for (name, typ) in var {
-                println!(
-                    "      - {name}: {}",
-                    typ.decompress_alias(&compiler).format()
-                );
-            }
-            println!("     Arguments:");
-            for (name, typ) in arg {
-                println!(
-                    "      - {name}: {}",
-                    typ.decompress_alias(&compiler).format()
-                );
-            }
-            println!("     Returns: {}", ret.decompress_alias(&compiler).format());
-        }
-        println!("Variables:");
-        for (name, typ) in &compiler.variable_type {
-            println!(" - {name}: {}", typ.decompress_alias(&compiler).format());
-        }
-        println!("Aliases:");
-        for (name, typ) in &compiler.type_alias {
-            println!(" - {name}: {}", typ.format());
-        }
-        println!(
-            "Returns: {}",
-            compiler.program_return.decompress_alias(&compiler).format()
-        );
+        println!("{}", compiler.summary());
     }
 
     let wat_code = format!(
