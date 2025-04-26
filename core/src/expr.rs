@@ -8,7 +8,7 @@ pub enum Expr {
     Variable(String),
     Oper(Box<Oper>),
     Call(String, Vec<Expr>),
-    Property(Box<Expr>, String),
+    Field(Box<Expr>, String),
     Access(Box<Expr>, Box<Expr>),
     Block(Block),
 }
@@ -85,7 +85,7 @@ impl Node for Expr {
                 // Dictionary access `dict.key`
                 } else if token.contains(".") {
                     let (name, key) = token.rsplit_once(".")?;
-                    Expr::Property(Box::new(Expr::parse(name)?), key.to_string())
+                    Expr::Field(Box::new(Expr::parse(name)?), key.to_string())
                 // Variable reference
                 } else if !RESERVED.contains(&token.as_str()) && token.is_ascii() {
                     Expr::Variable(token)
@@ -202,14 +202,14 @@ impl Node for Expr {
                 );
                 format!("({}.load {})", typ.compile(ctx)?, addr.compile(ctx)?)
             }
-            Expr::Property(expr, key) => {
+            Expr::Field(expr, key) => {
                 let Type::Dict(dict) = expr.type_infer(ctx)? else {
                     return None;
                 };
                 let (offset, typ) = dict.get(key)?.clone();
                 let addr = Oper::Add(
                     Expr::Oper(Box::new(Oper::Cast(*expr.clone(), Type::Integer))),
-                    Expr::Literal(Value::Integer(offset)),
+                    Expr::Literal(Value::Integer(offset.clone())),
                 );
                 format!("({}.load {})", typ.compile(ctx)?, addr.compile(ctx)?)
             }
@@ -262,11 +262,18 @@ impl Node for Expr {
                 };
                 *typ
             }
-            Expr::Property(dict, key) => {
-                let Type::Dict(dict) = dict.type_infer(ctx)? else {
+            Expr::Field(dict, key) => {
+                let infered = dict.type_infer(ctx)?;
+                let Type::Dict(dict) = infered else {
+                    ctx.occurred_error =
+                        Some(format!("can't field access to {}", infered.format()));
                     return None;
                 };
-                dict.get(key)?.1.clone()
+                let Some((_offset, typ)) = dict.get(key) else {
+                    ctx.occurred_error = Some(format!("unknown property: {key}"));
+                    return None;
+                };
+                typ.clone()
             }
         })
     }
