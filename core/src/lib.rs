@@ -101,43 +101,43 @@ impl Compiler {
 
     pub fn summary(&self) -> String {
         let result = &mut String::new();
-        let _ = write!(result, "# Type Inference Summary");
-        let _ = write!(result, "Functions:");
+        let _ = writeln!(result, "# Type Inference Summary");
+        let _ = writeln!(result, "Functions:");
         for (name, (var, arg, ret)) in &self.function_type {
-            let _ = write!(result, " - {name}:");
-            let _ = write!(result, "     Locals:");
+            let _ = writeln!(result, " - {name}:");
+            let _ = writeln!(result, "     Locals:");
             for (name, typ) in var {
-                let _ = write!(
+                let _ = writeln!(
                     result,
                     "      - {name}: {}",
                     typ.decompress_alias(&self).format()
                 );
             }
-            let _ = write!(result, "     Arguments:");
+            let _ = writeln!(result, "     Arguments:");
             for (name, typ) in arg {
-                let _ = write!(
+                let _ = writeln!(
                     result,
                     "      - {name}: {}",
                     typ.decompress_alias(&self).format()
                 );
             }
-            let _ = write!(
+            let _ = writeln!(
                 result,
                 "     Returns: {}",
                 ret.decompress_alias(&self).format()
             );
         }
-        let _ = write!(result, "Variables:");
+        let _ = writeln!(result, "Variables:");
         for (name, typ) in &self.variable_type {
-            let _ = write!(
+            let _ = writeln!(
                 result,
                 " - {name}: {}",
                 typ.decompress_alias(&self).format()
             );
         }
-        let _ = write!(result, "Aliases:");
+        let _ = writeln!(result, "Aliases:");
         for (name, typ) in &self.type_alias {
-            let _ = write!(result, " - {name}: {}", typ.format());
+            let _ = writeln!(result, " - {name}: {}", typ.format());
         }
         let _ = write!(
             result,
