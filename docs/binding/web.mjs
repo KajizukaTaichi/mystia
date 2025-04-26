@@ -57,7 +57,6 @@ export async function mystia(code) {
         ctx.fillRect(x * 10, y * 10, 10, 10);
     };
 
-    console.log(instance.exports.draw);
     const value = instance.exports._start();
     return ffi(instance, type, value);
 }
