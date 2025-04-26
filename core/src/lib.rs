@@ -32,8 +32,6 @@ type Function = (IndexMap<String, Type>, IndexMap<String, Type>, Type);
 /// Context in compiling
 #[derive(Debug, Clone)]
 pub struct Compiler {
-    /// Errors that occurred during compilation
-    pub errors: Vec<String>,
     /// Address for memory allocation
     pub alloc_index: i32,
     /// The code will copies memory?
@@ -48,6 +46,8 @@ pub struct Compiler {
     pub type_alias: IndexMap<String, Type>,
     /// Type inference, hypothesis for unknown
     pub expect_type: Option<Type>,
+    /// Errors that occurred during compilation
+    pub occurred_error: Option<String>,
     /// Type environment for variable
     pub variable_type: IndexMap<String, Type>,
     /// Type environment for argument
@@ -61,13 +61,13 @@ pub struct Compiler {
 impl Compiler {
     pub fn new() -> Self {
         Compiler {
-            errors: vec![],
             alloc_index: 0,
             is_memory_copied: false,
             import_code: vec![],
             static_data: vec![],
             declare_code: vec![],
             expect_type: None,
+            occurred_error: None,
             type_alias: IndexMap::new(),
             variable_type: IndexMap::new(),
             argument_type: IndexMap::new(),
