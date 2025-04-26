@@ -30,7 +30,7 @@ export async function mystia(code) {
     };
     mystiaInit_canvas = () => {
         const canvas = document.createElement("canvas");
-        [canvas.width, canvas.height] = [100, 100];
+        [canvas.width, canvas.height] = [1000, 1000];
         canvas.id = "mystia-canvas";
         document.body.appendChild(canvas);
     };
@@ -38,7 +38,20 @@ export async function mystia(code) {
         const ctx = document.getElementById("mystia-canvas").getContext("2d");
         ctx.fillStyle = ffi(
             instance,
-            { type: "enum", enum: ["blue", "green", "red", "yellow"] },
+            {
+                type: "enum",
+                enum: [
+                    "white",
+                    "black",
+                    "grey",
+                    "blue",
+                    "violet",
+                    "green",
+                    "red",
+                    "pink",
+                    "yellow",
+                ],
+            },
             color,
         );
         ctx.fillRect(x * 10, y * 10, 10, 10);
