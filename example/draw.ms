@@ -5,8 +5,8 @@ load draw(x: int, y: int, color: Color): void;
 
 init_canvas();
 
-let height = 10;
-let width = 15;
+let height = 200;
+let width = 300;
 
 let y_index = 0;
 while y_index < height loop {
