@@ -25,4 +25,4 @@ while y_index < height loop {
     };
     let y_index + 1
 };
-0
+"France flag"
