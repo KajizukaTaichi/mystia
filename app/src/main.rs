@@ -31,10 +31,8 @@ fn main() {
         return;
     };
     let Some(wat_code) = compiler.build(&source) else {
-        eprintln!(
-            "Error: {}",
-            compiler.occurred_error.unwrap_or(String::new())
-        );
+        let err = compiler.occurred_error.unwrap_or(String::new());
+        eprintln!("Error: {err}");
         return;
     };
     if cli.summary {
