@@ -11,10 +11,10 @@ export async function mystia(code) {
     let mystiaAlert, mystiaConfirm, mystiaPrompt, mystiaDraw;
     const { instance } = await WebAssembly.instantiate(bytecodes, {
         env: {
-            alert: mystiaAlert,
-            confirm: mystiaConfirm,
-            prompt: mystiaPrompt,
-            draw: mystiaDraw,
+            alert: (ptr) => mystiaAlert(ptr),
+            confirm: (ptr) => mystiaConfirm(ptr),
+            prompt: (ptr) => mystiaPrompt(ptr),
+            draw: (x, y, color) => mystiaDraw(x, y, color),
         },
     });
     mystiaAlert = (ptr) => window.alert(ffi(instance, "str", ptr));
@@ -30,7 +30,7 @@ export async function mystia(code) {
     mystiaDraw = (x, y, color) => {
         const ctx = document.getElementById("mystia-canvas").getContext("2d");
         ctx.fillStyle = ffi(instance, "str", color);
-        ctx.fillRect(x * 100, y * 100, 100, 100);
+        ctx.fillRect(x * 10, y * 10, 10, 10);
     };
 
     console.log(instance.exports.draw);
