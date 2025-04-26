@@ -31,7 +31,10 @@ fn main() {
         return;
     };
     let Some(wat_code) = compiler.build(&source) else {
-        eprintln!("Failed to compile Mystia code");
+        eprintln!(
+            "Error: {}",
+            compiler.occurred_error.unwrap_or(String::new())
+        );
         return;
     };
     if cli.summary {
