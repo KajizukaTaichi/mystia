@@ -30,7 +30,7 @@ export async function mystia(code) {
     };
     mystiaInit_canvas = () => {
         const canvas = document.createElement("canvas");
-        [canvas.width, canvas.height] = [1000, 1000];
+        [canvas.width, canvas.height] = [500, 500];
         canvas.id = "mystia-canvas";
         document.body.appendChild(canvas);
     };
