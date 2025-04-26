@@ -4,8 +4,6 @@ use wasm_bindgen::prelude::wasm_bindgen;
 #[wasm_bindgen]
 pub struct Result {
     bytecode: Vec<u8>,
-    wat_code: String,
-    type_summary: String,
     return_type: String,
 }
 
@@ -14,16 +12,6 @@ impl Result {
     #[wasm_bindgen]
     pub fn get_bytecode(&self) -> Vec<u8> {
         self.bytecode.clone()
-    }
-
-    #[wasm_bindgen]
-    pub fn get_wat_code(&self) -> String {
-        self.wat_code.clone()
-    }
-
-    #[wasm_bindgen]
-    pub fn get_type_summary(&self) -> String {
-        self.type_summary.clone()
     }
 
     #[wasm_bindgen]
@@ -39,8 +27,6 @@ pub fn mystia(source: &str) -> Option<Result> {
         if let Ok(bytes) = wat::parse_str(wat_code.clone()) {
             Some(Result {
                 bytecode: bytes,
-                wat_code: wat_code.to_string(),
-                type_summary: compiler.summary(),
                 return_type: compiler.program_return.ffi_json(),
             })
         } else {
