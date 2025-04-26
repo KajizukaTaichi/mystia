@@ -29,8 +29,9 @@ export async function mystia(code) {
         return str;
     };
     mystiaInit_canvas = () => {
-        const canvas = document.getElementById("mystia-canvas");
+        const canvas = document.createElement("canvas");
         [canvas.width, canvas.height] = [100, 100];
+        canvas.id = "mystia-canvas";
         document.body.appendChild(canvas);
     };
     mystiaDraw = (x, y, color) => {
