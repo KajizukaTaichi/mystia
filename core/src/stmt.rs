@@ -226,23 +226,19 @@ impl Node for Stmt {
                 )
             }
             Stmt::Import { func } => {
-                let Oper::Cast(Expr::Call(name, args), ret_typ) = func else {
+                let Oper::Cast(Expr::Call(name, _), _) = func else {
                     return None;
                 };
-                let mut args_typ = vec![];
-                for arg in args {
-                    let Expr::Oper(arg) = arg else { return None };
-                    let Oper::Cast(_, arg_typ) = *arg.clone() else {
-                        return None;
-                    };
-                    args_typ.push(arg_typ.type_infer(ctx)?.compile(ctx)?);
-                }
+                let (_, arg_typ, ret_typ) = ctx.function_type.get(name)?.clone();
                 let code = format!(
                     "(import \"env\" \"{name}\" (func ${name} {} {}))",
-                    if args_typ.is_empty() {
+                    if arg_typ.is_empty() {
                         String::new()
                     } else {
-                        format!("(param {})", join!(args_typ))
+                        format!(
+                            "(param {})",
+                            join!(iter_map!(arg_typ, |(_, typ): (_, Type)| typ.compile(ctx)))
+                        )
                     },
                     config_return!(ret_typ, ctx)?,
                 );
