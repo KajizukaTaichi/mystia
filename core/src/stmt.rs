@@ -180,7 +180,7 @@ impl Node for Stmt {
                         value.compile(ctx)?
                     )
                 }
-                Expr::Property(expr, key) => {
+                Expr::Field(expr, key) => {
                     let Type::Dict(dict) = expr.type_infer(ctx)? else {
                         return None;
                     };
