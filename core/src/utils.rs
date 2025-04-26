@@ -62,6 +62,11 @@ macro_rules! type_check {
             if lhs.format() == rhs.format() {
                 Some(lhs.clone())
             } else {
+                $ctx.occurred_error = Some(format!(
+                    "Type mismatch between {} and {}",
+                    lhs.format(),
+                    rhs.format()
+                ));
                 None
             }
         } else if let (Some(typ), _) | (_, Some(typ)) = (lhs, rhs) {
@@ -71,6 +76,11 @@ macro_rules! type_check {
             if lhs.format() == rhs.format() {
                 Some(lhs.clone())
             } else {
+                $ctx.occurred_error = Some(format!(
+                    "Type mismatch between {} and {}",
+                    lhs.format(),
+                    rhs.format()
+                ));
                 None
             }
         } else {
