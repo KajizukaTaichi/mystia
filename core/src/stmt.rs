@@ -235,7 +235,7 @@ impl Node for Stmt {
                     let Oper::Cast(_, arg_typ) = *arg.clone() else {
                         return None;
                     };
-                    args_typ.push(arg_typ.compile(ctx)?);
+                    args_typ.push(arg_typ.type_infer(ctx)?.compile(ctx)?);
                 }
                 let code = format!(
                     "(import \"env\" \"{name}\" (func ${name} {} {}))",
@@ -322,21 +322,17 @@ impl Node for Stmt {
                 let Oper::Cast(Expr::Call(name, args), ret_typ) = func else {
                     return None;
                 };
-                let mut args_typ = vec![];
+                let mut args_typ = IndexMap::new();
                 for arg in args {
                     let Expr::Oper(arg) = arg else { return None };
-                    let Oper::Cast(_, arg_typ) = *arg.clone() else {
+                    let Oper::Cast(Expr::Variable(name), arg_typ) = *arg.clone() else {
                         return None;
                     };
-                    args_typ.push(arg_typ.compile(ctx)?);
+                    args_typ.insert(name, arg_typ.type_infer(ctx)?);
                 }
                 ctx.function_type.insert(
                     name.to_owned(),
-                    (
-                        ctx.variable_type.clone(),
-                        ctx.argument_type.clone(),
-                        ret_typ.clone(),
-                    ),
+                    (IndexMap::new(), args_typ.clone(), ret_typ.clone()),
                 );
                 Type::Void
             }
