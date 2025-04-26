@@ -5,25 +5,24 @@ load draw(x: int, y: int, color: Color): void;
 
 init_canvas();
 
-let top = 100;
-let left = 100;
 let height = 10;
 let width = 15;
 
-let index = top;
-while index < (height + top) loop {
-    let jndex = left;
-    while jndex < (width + left) loop {
+let y_index = 0;
+while y_index < height loop {
+    let x_index = 0;
+    while x_index < width loop {
+        let one_third = width / 3;
         let color = {
-            if jndex < (width / 3)
+            if  one_third > x_index
                 then Color::blue
-            else if jndex < (width / 3 * 2)
+            else if one_third * 2 > x_index
                 then Color::white
                 else Color::red
         };
-        draw(jndex, index, color);
-        let jndex + 1
+        draw(x_index, y_index, color);
+        let x_index + 1
     };
-    let index + 1
+    let y_index + 1
 };
 0
