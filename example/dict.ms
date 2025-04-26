@@ -9,7 +9,7 @@ let alice = {
     result = false
 };
 
-let exam = alice.scorse;
+let exam = alice.score;
 let alice.total = exam.math
     + exam.english
     + exam.science;
