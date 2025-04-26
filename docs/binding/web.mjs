@@ -29,10 +29,14 @@ export async function mystia(code) {
         return str;
     };
     mystiaInit_canvas = () => {
-        const canvas = document.createElement("canvas");
-        [canvas.width, canvas.height] = [500, 500];
-        canvas.id = "mystia-canvas";
-        document.body.appendChild(canvas);
+        let canvas = document.getElementById("mystia-canvas");
+        if (canvas == null) {
+            canvas = document.createElement("canvas");
+            [canvas.width, canvas.height] = [500, 500];
+            canvas.id = "mystia-canvas";
+            document.body.appendChild(canvas);
+        }
+        canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
     };
     mystiaDraw = (x, y, color) => {
         const ctx = document.getElementById("mystia-canvas").getContext("2d");
@@ -54,7 +58,7 @@ export async function mystia(code) {
             },
             color,
         );
-        ctx.fillRect(x * 10, y * 10, 10, 10);
+        ctx.fillRect(x, y, 1, 1);
     };
 
     const value = instance.exports._start();
