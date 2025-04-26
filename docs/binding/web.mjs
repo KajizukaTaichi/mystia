@@ -36,7 +36,11 @@ export async function mystia(code) {
     };
     mystiaDraw = (x, y, color) => {
         const ctx = document.getElementById("mystia-canvas").getContext("2d");
-        ctx.fillStyle = ffi(instance, "str", color);
+        ctx.fillStyle = ffi(
+            instance,
+            { type: "enum", enum: ["blue", "green", "red", "yellow"] },
+            color,
+        );
         ctx.fillRect(x * 10, y * 10, 10, 10);
     };
 
