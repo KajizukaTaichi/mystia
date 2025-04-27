@@ -8,8 +8,9 @@ type Weekday = (
     Saturday
 );
 
-let weekend = [
-    Weekday::Sunday,
-    Weekday::Saturday
-];
-weekend[0] != weekend[1]
+let is_weekend(the_day: Weekday) =
+    the_day == Weekday::Sunday ||
+    the_day == Weekday::Saturday;
+
+let today = Weekday::Sunday;
+is_weekend(today)
