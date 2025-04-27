@@ -1,3 +1,3 @@
-type Sex = ( Male | Female );
-let foo = [Sex::Male, Sex::Female];
-foo[0] != foo[1]
+type Weekday = ( Sunday | Monday | Tuesday | Wednesday | Thursday | Friday | Saturday );
+let weekend = [Weekday::Sunday, Weekday::Saturday];
+weekend[0] != weekend[1]
