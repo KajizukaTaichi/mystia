@@ -220,7 +220,7 @@ impl Node for Stmt {
                 let size = from.type_infer(ctx)?.bytes_length()?;
                 let size = Value::Integer(size as i32);
                 format!(
-                    "(global.get $alloc_index) (memory.copy (global.get $alloc_index) {} {size}) (global.set $alloc_index (i32.add (global.get $alloc_index) {size}))",
+                    "(global.get $allocator) (memory.copy (global.get $allocator) {} {size}) (global.set $allocator (i32.add (global.get $allocator) {size}))",
                     from.compile(ctx)?,
                     size = size.compile(ctx)?
                 )
