@@ -8,7 +8,7 @@ mod utils;
 mod value;
 
 use indexmap::IndexMap;
-use {
+pub use {
     block::Block,
     expr::Expr,
     lexer::{str_escape, tokenize},
