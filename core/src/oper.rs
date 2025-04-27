@@ -99,11 +99,18 @@ impl Node for Oper {
                     lhs.compile(ctx)?,
                 )
             }
-            Oper::Enum(enum_type, key) => {
-                let Type::Enum(enum_type) = enum_type.type_infer(ctx)? else {
+            Oper::Enum(typ, key) => {
+                let typ = typ.type_infer(ctx)?;
+                let Type::Enum(enum_type) = typ.clone() else {
+                    let error_message = format!("can't access enumerator to {}", typ.format());
+                    ctx.occurred_error = Some(error_message);
                     return None;
                 };
-                let value = enum_type.iter().position(|item| item == key)?;
+                let Some(value) = enum_type.iter().position(|item| item == key) else {
+                    let error_message = format!("{key} is invalid variant of {}", typ.format());
+                    ctx.occurred_error = Some(error_message);
+                    return None;
+                };
                 Value::Enum(value as i32, enum_type.clone()).compile(ctx)?
             }
         })
