@@ -117,28 +117,28 @@ impl Node for Expr {
                             type_check!(inner_type, elm.type_infer(ctx)?, ctx)?;
                             inner_codes.push(elm.compile(ctx)?)
                         }
-                        pointer = ctx.alloc_index;
+                        pointer = ctx.allocator;
                         for code in inner_codes {
                             result.push(format!(
                                 "({type}.store {address} {code})",
                                 r#type = &inner_type.compile(ctx)?,
-                                address = Value::Array(ctx.alloc_index, len, inner_type.clone())
+                                address = Value::Array(ctx.allocator, len, inner_type.clone())
                                     .compile(ctx)?,
                             ));
-                            ctx.alloc_index += inner_type.pointer_length();
+                            ctx.allocator += inner_type.pointer_length();
                         }
                     } else {
-                        pointer = ctx.alloc_index;
+                        pointer = ctx.allocator;
                         for elm in array {
                             type_check!(inner_type, elm.type_infer(ctx)?, ctx)?;
                             result.push(format!(
                                 "({type}.store {address} {value})",
                                 r#type = &inner_type.compile(ctx)?,
-                                address = Value::Array(ctx.alloc_index, len, inner_type.clone())
+                                address = Value::Array(ctx.allocator, len, inner_type.clone())
                                     .compile(ctx)?,
                                 value = elm.compile(ctx)?
                             ));
-                            ctx.alloc_index += inner_type.pointer_length();
+                            ctx.allocator += inner_type.pointer_length();
                         }
                     }
                 );
@@ -160,20 +160,20 @@ impl Node for Expr {
                     if_ptr!(typ, { prestore.insert(name, elm.compile(ctx)?) });
                 }
 
-                let pointer = ctx.alloc_index;
+                let pointer = ctx.allocator;
                 for (name, elm) in dict {
                     let typ = elm.type_infer(ctx)?;
                     result.push(format!(
                         "({type}.store {address} {value})",
                         r#type = typ.clone().compile(ctx)?,
-                        address = Value::Dict(ctx.alloc_index, infered.clone()).compile(ctx)?,
+                        address = Value::Dict(ctx.allocator, infered.clone()).compile(ctx)?,
                         value = if let Some(precode) = prestore.get(name) {
                             precode.clone()
                         } else {
                             elm.compile(ctx)?
                         }
                     ));
-                    ctx.alloc_index += typ.pointer_length();
+                    ctx.allocator += typ.pointer_length();
                 }
 
                 format!(
