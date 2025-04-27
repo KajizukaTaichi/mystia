@@ -30,7 +30,7 @@ export async function mystia(code) {
     mystiaFunctions.prompt = (ptr) => {
         const answer = window.prompt(ffi(instance, "str", ptr));
         const utf8 = new TextEncoder().encode(answer + "\0");
-        const str = instance.exports.alloc_index;
+        const str = instance.exports.allocator;
         const memory = new Uint8Array(instance.exports.mem.buffer);
         memory.set(utf8, str);
         return str;
