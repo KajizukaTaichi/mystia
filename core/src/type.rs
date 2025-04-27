@@ -143,36 +143,4 @@ impl Type {
             Type::Alias(name) => name.to_string(),
         }
     }
-
-    pub fn ffi_json(&self) -> String {
-        match self {
-            Type::Integer => "\"int\"".to_string(),
-            Type::Number => "\"num\"".to_string(),
-            Type::Bool => "\"bool\"".to_string(),
-            Type::String => "\"str\"".to_string(),
-            Type::Void => "null".to_string(),
-            Type::Dict(dict) => format!(
-                "{{ type: \"dict\", fields: {{ {} }} }}",
-                dict.iter()
-                    .map(|(k, (offset, typ))| format!(
-                        "{k}: {{ type: {}, offset: {offset} }}",
-                        typ.ffi_json()
-                    ))
-                    .collect::<Vec<_>>()
-                    .join(", ")
-            ),
-            Type::Array(typ, len) => format!(
-                "{{ type: \"array\", element: {}, length: {len} }}",
-                typ.ffi_json()
-            ),
-            Type::Enum(e) => format!(
-                "{{ type: \"enum\", enum: [{}] }}",
-                e.iter()
-                    .map(|x| format!("\"{x}\""))
-                    .collect::<Vec<_>>()
-                    .join(", ")
-            ),
-            Type::Alias(name) => format!("{{ type: \"alias\", name: {name} }}"),
-        }
-    }
 }
