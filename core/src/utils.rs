@@ -6,7 +6,7 @@ pub const OPERATOR: [&str; 20] = [
     "^", "::", ":",
 ];
 pub const RESERVED: [&str; 11] = [
-    "let", "if", "then", "else", "while", "loop", "break", "next", "return", "load", "type",
+    "let", "type", "if", "then", "else", "while", "loop", "break", "next", "return", "load",
 ];
 
 pub fn include_letter(query: &str, chars: &Vec<String>, idx: usize) -> bool {
