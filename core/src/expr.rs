@@ -265,8 +265,8 @@ impl Node for Expr {
             Expr::Field(dict, key) => {
                 let infered = dict.type_infer(ctx)?;
                 let Type::Dict(dict) = infered else {
-                    ctx.occurred_error =
-                        Some(format!("can't field access to {}", infered.format()));
+                    let error_message = format!("can't field access to {}", infered.format());
+                    ctx.occurred_error = Some(error_message);
                     return None;
                 };
                 let Some((_offset, typ)) = dict.get(key) else {
