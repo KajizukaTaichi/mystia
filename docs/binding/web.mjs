@@ -14,7 +14,6 @@ export async function mystia(code) {
         prompt: null,
         init_canvas: null,
         draw: null,
-        sleep: null,
     };
     const { instance } = await WebAssembly.instantiate(bytecodes, {
         env: {
@@ -23,7 +22,6 @@ export async function mystia(code) {
             prompt: (ptr) => mystiaFunctions.prompt(ptr),
             init_canvas: () => mystiaFunctions.init_canvas(),
             draw: (x, y, color) => mystiaFunctions.draw(x, y, color),
-            sleep: (ms) => mystiaFunctions.sleep(ms),
         },
     });
     mystiaFunctions.alert = (ptr) => window.alert(ffi(instance, "str", ptr));
@@ -68,12 +66,6 @@ export async function mystia(code) {
             color,
         );
         ctx.fillRect(x, y, 1, 1);
-    };
-    mystiaFunctions.sleep = (ms) => {
-        const end = Date.now() + ms;
-        while (Date.now() < end) {
-            // sleep in
-        }
     };
 
     const value = instance.exports._start();
