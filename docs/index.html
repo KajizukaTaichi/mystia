@@ -12,7 +12,13 @@
         />
         <style>
             body {
-                font-size: large;
+                height: 100vh;
+                overflow: hidden;
+            }
+            input,
+            textarea,
+            button {
+                background-color: transparent !important;
             }
             .inline-elements {
                 gap: 10px;
@@ -32,6 +38,14 @@
             #result {
                 font-size: larger;
                 font-family: monospace;
+            }
+            #mystia-canvas {
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                position: absolute;
+                z-index: -1;
             }
         </style>
     </head>
