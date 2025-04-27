@@ -42,10 +42,10 @@ impl Node for Value {
             Value::Bool(n) => Value::Integer(if *n { 1 } else { 0 }).compile(ctx)?,
             Value::String(str) => {
                 let len = str.len() + 1;
-                let result = Value::Array(ctx.alloc_index, len, Type::String).compile(ctx)?;
+                let result = Value::Array(ctx.allocator, len, Type::String).compile(ctx)?;
                 ctx.static_data
                     .push(format!(r#"(data {} "{str}\00")"#, result));
-                ctx.alloc_index += len as i32;
+                ctx.allocator += len as i32;
                 result
             }
         })
