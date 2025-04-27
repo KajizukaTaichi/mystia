@@ -33,7 +33,7 @@ type Function = (IndexMap<String, Type>, IndexMap<String, Type>, Type);
 #[derive(Debug, Clone)]
 pub struct Compiler {
     /// Address for memory allocation
-    pub alloc_index: i32,
+    pub allocator: i32,
     /// The code will copies memory?
     pub is_memory_copied: bool,
     /// Code that imports external module
@@ -61,7 +61,7 @@ pub struct Compiler {
 impl Compiler {
     pub fn new() -> Self {
         Compiler {
-            alloc_index: 0,
+            allocator: 0,
             is_memory_copied: false,
             import_code: vec![],
             static_data: vec![],
@@ -88,8 +88,8 @@ impl Compiler {
             declare = join!(self.declare_code),
             memcpy = if self.is_memory_copied {
                 format!(
-                    "(global $alloc_index (export \"alloc_index\") (mut i32) (i32.const {}))",
-                    self.alloc_index
+                    "(global $allocator (export \"allocator\") (mut i32) (i32.const {}))",
+                    self.allocator
                 )
             } else {
                 String::new()
