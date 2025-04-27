@@ -39,7 +39,8 @@ export async function mystia(code) {
         let canvas = document.getElementById("mystia-canvas");
         if (canvas == null) {
             canvas = document.createElement("canvas");
-            [canvas.width, canvas.height] = [500, 500];
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
             canvas.id = "mystia-canvas";
             document.body.appendChild(canvas);
         }
