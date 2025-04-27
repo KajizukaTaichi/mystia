@@ -49,14 +49,14 @@ pub fn type_to_json(typ: &Type) -> String {
             dict.iter()
                 .map(|(k, (offset, typ))| format!(
                     "{k}: {{ type: {}, offset: {offset} }}",
-                    typ.ffi_json()
+                    type_to_json(typ)
                 ))
                 .collect::<Vec<_>>()
                 .join(", ")
         ),
         Type::Array(typ, len) => format!(
             "{{ type: \"array\", element: {}, length: {len} }}",
-            typ.ffi_json()
+            type_to_json(typ)
         ),
         Type::Enum(e) => format!(
             "{{ type: \"enum\", enum: [{}] }}",
