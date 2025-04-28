@@ -273,7 +273,7 @@ impl Node for Expr {
                     return None;
                 };
                 let Some((_offset, typ)) = dict.get(key) else {
-                    let error_message = format!("{} haven't property {key}", infered.format());
+                    let error_message = format!("{} haven't property \"{key}\"", infered.format());
                     ctx.occurred_error = Some(error_message);
                     return None;
                 };
