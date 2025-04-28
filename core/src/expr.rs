@@ -257,7 +257,10 @@ impl Node for Expr {
             }
             Expr::Block(block) => block.type_infer(ctx)?,
             Expr::Access(arr, _) => {
-                let Some(Type::Array(typ, _)) = arr.type_infer(ctx) else {
+                let infered = arr.type_infer(ctx)?;
+                let Some(Type::Array(typ, _)) = infered.type_infer(ctx) else {
+                    let error_message = format!("can't index access to {}", infered.format());
+                    ctx.occurred_error = Some(error_message);
                     return None;
                 };
                 *typ
