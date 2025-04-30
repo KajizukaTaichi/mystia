@@ -31,7 +31,6 @@ export function ffi(instance, type, value) {
         for (let [name, field] of Object.entries(type.fields)) {
             const address = pointer + field.offset;
             const value = (() => {
-                int32PairToFloat64;
                 if (field.type == "num") {
                     const sliced = memoryView.slice(address, address + 8);
                     return concatBytes(sliced, true);
