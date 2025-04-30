@@ -90,7 +90,7 @@ impl Compiler {
                 format!(
                     "(global $allocator (export \"allocator\") (mut i32) (i32.const {}))",
                     self.allocator
-                )
+                ) + "(func (export \"malloc\") (param $size i32) (global.set $allocator (i32.add (global.get $allocator) (local.get $size))))"
             } else {
                 String::new()
             },
