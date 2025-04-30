@@ -30,7 +30,8 @@ pub fn mystia(source: &str) -> Result<Mystia, String> {
             return_type: type_to_json(&compiler.program_return),
         })
     } else {
-        Err(compiler.occurred_error.unwrap())
+        let general_error_message = "Failed to compile or check type consistency".to_string();
+        Err(compiler.occurred_error.unwrap_or(general_error_message))
     }
 }
 
