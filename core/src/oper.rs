@@ -13,15 +13,15 @@ pub enum Oper {
     Neq(Expr, Expr),
     Lt(Expr, Expr),
     Gt(Expr, Expr),
+    LtEq(Expr, Expr),
+    GtEq(Expr, Expr),
     BAnd(Expr, Expr),
     BOr(Expr, Expr),
-    XOr(Expr, Expr),
     BNot(Expr), // one term operator's parser is in expr.rs
+    XOr(Expr, Expr),
     LAnd(Expr, Expr),
     LOr(Expr, Expr),
-    LtEq(Expr, Expr),
     LNot(Expr),
-    GtEq(Expr, Expr),
     Cast(Expr, Type),
     Enum(Type, String),
 }
