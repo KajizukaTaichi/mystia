@@ -32,7 +32,7 @@ type Function = (IndexMap<String, Type>, IndexMap<String, Type>, Type);
 /// Context in compiling
 #[derive(Debug, Clone)]
 pub struct Compiler {
-    /// Address for memory allocation
+    /// Address tracker for memory allocation
     pub allocator: i32,
     /// The code will copies memory?
     pub is_memory_copied: bool,
