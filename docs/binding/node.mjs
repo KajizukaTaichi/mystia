@@ -14,8 +14,7 @@ export async function mystia(code) {
             print: (ptr) => mystiaFunctions.print(ptr),
         },
     });
-    mystiaFunctions.print = (ptr) =>
-        process.stdout.write(ffi(instance, "str", ptr));
+    mystiaFunctions.print = (ptr) => console.log(ffi(instance, "str", ptr));
 
     const value = instance.exports._start();
     return ffi(instance, type, value);
