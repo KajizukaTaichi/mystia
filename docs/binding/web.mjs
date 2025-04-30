@@ -48,21 +48,14 @@ export async function mystia(code) {
     };
     mystiaFunctions.draw = (x, y, color) => {
         const ctx = document.getElementById("mystia-canvas").getContext("2d");
+
         ctx.fillStyle = ffi(
             instance,
             {
                 type: "enum",
-                enum: [
-                    "white",
-                    "black",
-                    "grey",
-                    "blue",
-                    "violet",
-                    "green",
-                    "red",
-                    "pink",
-                    "yellow",
-                ],
+                enum:
+                    ["white", "black", "grey", "blue"] +
+                    ["violet", "green", "red", "pink", "yellow"],
             },
             color,
         );
