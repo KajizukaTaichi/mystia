@@ -32,6 +32,7 @@ export async function mystia(code) {
         const utf8 = new TextEncoder().encode(answer + "\0");
         const str = instance.exports.allocator;
         const memory = new Uint8Array(instance.exports.mem.buffer);
+        instance.exports.malloc(utf8.length);
         memory.set(utf8, str);
         return str;
     };
