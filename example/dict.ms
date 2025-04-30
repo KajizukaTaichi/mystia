@@ -1,4 +1,5 @@
 let alice = {
+    name = "Alice",
     age = 13.2,
     score = {
         math = 10,
