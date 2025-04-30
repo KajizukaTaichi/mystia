@@ -28,20 +28,19 @@ export function ffi(instance, type, value) {
         return result;
     } else if (type.type == "dict") {
         const [pointer, result] = [value, {}];
-        const memoryView = new Int8Array(instance.exports.mem.buffer);
+        const memoryView = new Uint8Array(instance.exports.mem.buffer);
         for (let [name, field] of Object.entries(type.fields)) {
             const address = pointer + field.offset;
             const value = (() => {
                 int32PairToFloat64;
                 if (field.type == "num") {
-                    const sliced = memoryView.slice(address, address + 7);
-                    return int32PairToFloat64(sliced);
+                    const sliced = memoryView.slice(address, address + 8);
+                    return int32PairToFloat64(sliced, true);
                 } else {
-                    const sliced = memoryView.slice(address, address + 3);
+                    const sliced = memoryView.slice(address, address + 4);
                     return int32PairToFloat64(sliced);
                 }
             })();
-            console.log(value);
             result[name] = ffi(instance, field.type, value);
         }
         return result;
@@ -56,8 +55,9 @@ function int32PairToFloat64(bytes, is_64bit = false) {
     const buffer = new ArrayBuffer(8);
     const view = new DataView(buffer);
     let index = 0;
+    console.log(bytes);
     for (let byte of bytes) {
-        view.setInt8(index, byte, true);
+        view.setUint8(index, byte);
         index += 1;
     }
     return is_64bit ? view.getFloat64(0, true) : view.getInt32(0, true);
