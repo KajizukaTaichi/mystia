@@ -34,8 +34,6 @@ type Function = (IndexMap<String, Type>, IndexMap<String, Type>, Type);
 pub struct Compiler {
     /// Address tracker
     pub allocator: i32,
-    /// The code will copies memory?
-    pub is_memory_copied: bool,
     /// Code that imports external module
     pub import_code: Vec<String>,
     /// Static string data
@@ -62,7 +60,6 @@ impl Compiler {
     pub fn new() -> Self {
         Compiler {
             allocator: 0,
-            is_memory_copied: false,
             import_code: vec![],
             static_data: vec![],
             declare_code: vec![],
@@ -80,23 +77,18 @@ impl Compiler {
         let ast = Block::parse(source)?;
         self.program_return = ast.type_infer(self)?;
         Some(format!(
-            "(module {import} (memory $mem (export \"mem\") 1) {memcpy} {strings} {declare} (func (export \"_start\") {ret} {locals} {code}))",
+            "(module {import} {memory} {memcpy} {strings} {declare} (func (export \"_start\") {ret} {locals} {code}))",
             code = ast.compile(self)?,
             ret = config_return!(self.program_return.clone(), self)?,
             import = join!(self.import_code),
             strings = join!(self.static_data),
             declare = join!(self.declare_code),
-            memcpy = if self.is_memory_copied {
-                join!([
-                    &format!(
-                        "(global $allocator (export \"allocator\") (mut i32) (i32.const {}))",
-                        self.allocator
-                    ),
-                    "(func (export \"malloc\") (param $size i32) (global.set $allocator (i32.add (global.get $allocator) (local.get $size))))"
-                ])
-            } else {
-                String::new()
-            },
+            memory = "(memory $mem (export \"mem\") 1)",
+            memcpy = &format!(
+                "(global $allocator (export \"allocator\") (mut i32) (i32.const {allocator})) {}",
+                "(func (export \"malloc\") (param $size i32) (global.set $allocator (i32.add (global.get $allocator) (local.get $size))))",
+                allocator = self.allocator
+            ),
             locals = expand_local(self)?,
         ))
     }
