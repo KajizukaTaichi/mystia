@@ -48,7 +48,6 @@ export async function mystia(code) {
     };
     mystiaFunctions.draw = (x, y, color) => {
         const ctx = document.getElementById("mystia-canvas").getContext("2d");
-
         ctx.fillStyle = ffi(
             instance,
             {
