@@ -153,8 +153,8 @@ impl Node for Oper {
                 Some(rhs.type_infer(ctx)?)
             }
             Oper::BNot(lhs) => {
-                type_check!(lhs, Type::Int, ctx)?;
-                Some(Type::Int)
+                type_check!(lhs, Type::Integer, ctx)?;
+                Some(Type::Integer)
             }
             Oper::Enum(typ, _) => Some(typ.type_infer(ctx)?),
         }
