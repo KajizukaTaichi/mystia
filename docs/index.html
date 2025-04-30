@@ -112,8 +112,12 @@
                 timer = setInterval(() => {
                     timerLabel.textContent = `Time: ${Date.now() - startTime}ms`;
                 }, 1);
-                const result = await mystia(codeEditor.value);
-                resultArea.innerHTML = JSON.stringify(result, null, 2);
+                try {
+                    const result = await mystia(codeEditor.value);
+                    resultArea.innerHTML = JSON.stringify(result, null, 2);
+                } catch (error) {
+                    resultArea.innerHTML = error;
+                }
                 clearInterval(timer);
             });
         </script>
