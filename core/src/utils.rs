@@ -5,6 +5,7 @@ pub const OPERATOR: [&str; 20] = [
     "+", "-", "*", "/", "%", "==", "!=", "<<", ">>", "<=", ">=", "<", ">", "&&", "||", "&", "|",
     "^", "::", ":",
 ];
+pub const MONADIC: [&str; 2] = ["!", "~"];
 pub const RESERVED: [&str; 11] = [
     "let", "type", "if", "then", "else", "while", "loop", "break", "next", "return", "load",
 ];
