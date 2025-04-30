@@ -6,8 +6,9 @@ export function ffi(instance, type, value) {
         return value != 0;
     } else if (type == "str") {
         const memoryView = new Uint8Array(instance.exports.mem.buffer);
+        console.log(memoryView);
         let stringLength = value;
-        while (memoryView[stringLength] !== 0) {
+        while ([null, undefined, 0].includes(memoryView[stringLength])) {
             stringLength++;
         }
         const stringBytes = memoryView.slice(value, stringLength);
@@ -26,20 +27,21 @@ export function ffi(instance, type, value) {
         }
         return result;
     } else if (type.type == "dict") {
-        const [pointer, result] = [value / 4, {}];
-        const memoryView = new Int32Array(instance.exports.mem.buffer);
+        const [pointer, result] = [value, {}];
+        const memoryView = new Int8Array(instance.exports.mem.buffer);
         for (let [name, field] of Object.entries(type.fields)) {
-            let address = pointer + (field.offset == 0 ? 0 : field.offset / 4);
-            let value = (() => {
+            const address = pointer + field.offset;
+            const value = (() => {
+                int32PairToFloat64;
                 if (field.type == "num") {
-                    return int32PairToFloat64(
-                        memoryView[address],
-                        memoryView[address + 1],
-                    );
+                    const sliced = memoryView.slice(address, address + 7);
+                    return int32PairToFloat64(sliced);
                 } else {
-                    return memoryView[address];
+                    const sliced = memoryView.slice(address, address + 3);
+                    return int32PairToFloat64(sliced);
                 }
             })();
+            console.log(value);
             result[name] = ffi(instance, field.type, value);
         }
         return result;
@@ -50,10 +52,13 @@ export function ffi(instance, type, value) {
     }
 }
 
-function int32PairToFloat64(a, b) {
+function int32PairToFloat64(bytes, is_64bit = false) {
     const buffer = new ArrayBuffer(8);
     const view = new DataView(buffer);
-    view.setInt32(0, a, true);
-    view.setInt32(4, b, true);
-    return view.getFloat64(0, true);
+    let index = 0;
+    for (let byte of bytes) {
+        view.setInt8(index, byte, true);
+        index += 1;
+    }
+    return is_64bit ? view.getFloat64(0, true) : view.getInt32(0, true);
 }
