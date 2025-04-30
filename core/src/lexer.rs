@@ -1,4 +1,4 @@
-use crate::{utils::MONADIC, *};
+use crate::*;
 
 pub fn tokenize(
     input: &str,
@@ -11,7 +11,6 @@ pub fn tokenize(
     let mut in_parentheses: usize = 0;
     let mut in_quote = false;
     let mut is_escape = false;
-    let mut is_monadic = false;
 
     let chars: Vec<String> = input.chars().map(String::from).collect();
     let mut index = 0;
@@ -50,35 +49,24 @@ pub fn tokenize(
         } else {
             let mut is_opr = false;
             if is_expr {
-                for op in MONADIC {
+                for op in OPERATOR {
                     if include_letter(op, &chars, index) && in_parentheses == 0 && !in_quote {
-                        current_token.push_str(op);
-                        index += op.chars().count();
-                        is_monadic = true;
+                        if current_token.is_empty() {
+                            index += op.chars().count();
+                            tokens.push(op.to_string());
+                        } else {
+                            tokens.push(current_token.to_string());
+                            index += op.chars().count();
+                            tokens.push(op.to_string());
+                            current_token.clear();
+                        }
                         is_opr = true;
                         break;
                     }
                 }
-                if !is_monadic {
-                    for op in OPERATOR {
-                        if include_letter(op, &chars, index) && in_parentheses == 0 && !in_quote {
-                            if current_token.is_empty() {
-                                index += op.chars().count();
-                                tokens.push(op.to_string());
-                            } else {
-                                tokens.push(current_token.to_string());
-                                index += op.chars().count();
-                                tokens.push(op.to_string());
-                                current_token.clear();
-                            }
-                            is_opr = true;
-                            break;
-                        }
-                    }
-                }
             }
-            if !is_opr && !is_monadic {
-                let mut is_delimit = false;
+            let mut is_delimit = false;
+            if !is_opr {
                 for delimit in delimiter {
                     if include_letter(delimit, &chars, index) && in_parentheses == 0 && !in_quote {
                         if current_token.is_empty() {
@@ -94,7 +82,6 @@ pub fn tokenize(
                 }
                 if !is_delimit {
                     current_token.push_str(c.as_str());
-                    is_monadic = false;
                     index += 1;
                 }
             }
