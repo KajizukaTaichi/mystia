@@ -6,7 +6,6 @@ export function ffi(instance, type, value) {
         return value != 0;
     } else if (type == "str") {
         const memoryView = new Uint8Array(instance.exports.mem.buffer);
-        console.log(memoryView);
         let stringLength = value;
         while (memoryView[stringLength] != 0) {
             stringLength++;
@@ -55,7 +54,6 @@ function int32PairToFloat64(bytes, is_64bit = false) {
     const buffer = new ArrayBuffer(8);
     const view = new DataView(buffer);
     let index = 0;
-    console.log(bytes);
     for (let byte of bytes) {
         view.setUint8(index, byte);
         index += 1;
