@@ -3,14 +3,15 @@ use crate::*;
 #[derive(Debug, Clone)]
 pub enum Expr {
     Literal(Value),
-    Array(Vec<Expr>),
-    Dict(IndexMap<String, Expr>),
     Variable(String),
     Oper(Box<Oper>),
     Call(String, Vec<Expr>),
+    Array(Vec<Expr>),
+    Dict(IndexMap<String, Expr>),
     Field(Box<Expr>, String),
     Access(Box<Expr>, Box<Expr>),
     Block(Block),
+    MemCpy(Box<Expr>),
 }
 
 impl Node for Expr {
@@ -68,9 +69,7 @@ impl Node for Expr {
                 // syntax sugar of memcpy statement
                 } else if token.starts_with("memcpy(") && token.ends_with(")") {
                     let token = token.get("memcpy(".len()..token.len() - 1)?.trim();
-                    Expr::Block(Block(vec![Stmt::MemCpy {
-                        from: Expr::parse(token)?,
-                    }]))
+                    Expr::MemCpy(Box::new(Expr::parse(token)?))
                 // Index access `array[index]`
                 } else if token.contains("[") && token.ends_with("]") {
                     let token = token.get(..token.len() - 1)?.trim();
@@ -220,6 +219,15 @@ impl Node for Expr {
                 format!("({}.load {})", typ.compile(ctx)?, addr.compile(ctx)?)
             }
             Expr::Block(block) => block.compile(ctx)?,
+            Expr::MemCpy(from) => {
+                let size = from.type_infer(ctx)?.bytes_length()?;
+                let size = Value::Integer(size as i32).compile(ctx)?;
+                format!(
+                    "(global.get $allocator) (memory.copy (global.get $allocator) {object} {size}) {}",
+                    format!("(global.set $allocator (i32.add (global.get $allocator) {size}))"),
+                    object = from.compile(ctx)?,
+                )
+            }
         })
     }
 
@@ -261,7 +269,6 @@ impl Node for Expr {
                 ));
                 ret_type.clone()
             }
-            Expr::Block(block) => block.type_infer(ctx)?,
             Expr::Access(arr, _) => {
                 let infered = arr.type_infer(ctx)?;
                 let Some(Type::Array(typ, _)) = infered.type_infer(ctx) else {
@@ -285,6 +292,8 @@ impl Node for Expr {
                 };
                 typ.clone()
             }
+            Expr::Block(block) => block.type_infer(ctx)?,
+            Expr::MemCpy(from) => from.type_infer(ctx)?,
         })
     }
 }
