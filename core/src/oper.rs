@@ -17,7 +17,7 @@ pub enum Oper {
     GtEq(Expr, Expr),
     BAnd(Expr, Expr),
     BOr(Expr, Expr),
-    BNot(Expr), // one term operator's parser is in expr.rs
+    BNot(Expr),
     XOr(Expr, Expr),
     LAnd(Expr, Expr),
     LOr(Expr, Expr),
