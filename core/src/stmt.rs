@@ -8,9 +8,9 @@ pub enum Stmt {
     Type(String, Type),
     Import(Oper),
     Expr(Expr),
+    Return(Option<Expr>),
     Next,
     Break,
-    Return(Option<Expr>),
     Drop,
 }
 
