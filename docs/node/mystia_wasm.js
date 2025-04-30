@@ -82,47 +82,56 @@ function passStringToWasm0(arg, malloc, realloc) {
     WASM_VECTOR_LEN = offset;
     return ptr;
 }
+
+function takeFromExternrefTable0(idx) {
+    const value = wasm.__wbindgen_export_0.get(idx);
+    wasm.__externref_table_dealloc(idx);
+    return value;
+}
 /**
  * @param {string} source
- * @returns {Result | undefined}
+ * @returns {Mystia}
  */
 module.exports.mystia = function(source) {
     const ptr0 = passStringToWasm0(source, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
     const len0 = WASM_VECTOR_LEN;
     const ret = wasm.mystia(ptr0, len0);
-    return ret === 0 ? undefined : Result.__wrap(ret);
+    if (ret[2]) {
+        throw takeFromExternrefTable0(ret[1]);
+    }
+    return Mystia.__wrap(ret[0]);
 };
 
-const ResultFinalization = (typeof FinalizationRegistry === 'undefined')
+const MystiaFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
-    : new FinalizationRegistry(ptr => wasm.__wbg_result_free(ptr >>> 0, 1));
+    : new FinalizationRegistry(ptr => wasm.__wbg_mystia_free(ptr >>> 0, 1));
 
-class Result {
+class Mystia {
 
     static __wrap(ptr) {
         ptr = ptr >>> 0;
-        const obj = Object.create(Result.prototype);
+        const obj = Object.create(Mystia.prototype);
         obj.__wbg_ptr = ptr;
-        ResultFinalization.register(obj, obj.__wbg_ptr, obj);
+        MystiaFinalization.register(obj, obj.__wbg_ptr, obj);
         return obj;
     }
 
     __destroy_into_raw() {
         const ptr = this.__wbg_ptr;
         this.__wbg_ptr = 0;
-        ResultFinalization.unregister(this);
+        MystiaFinalization.unregister(this);
         return ptr;
     }
 
     free() {
         const ptr = this.__destroy_into_raw();
-        wasm.__wbg_result_free(ptr, 0);
+        wasm.__wbg_mystia_free(ptr, 0);
     }
     /**
      * @returns {Uint8Array}
      */
     get_bytecode() {
-        const ret = wasm.result_get_bytecode(this.__wbg_ptr);
+        const ret = wasm.mystia_get_bytecode(this.__wbg_ptr);
         var v1 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
         wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
         return v1;
@@ -134,7 +143,7 @@ class Result {
         let deferred1_0;
         let deferred1_1;
         try {
-            const ret = wasm.result_get_return_type(this.__wbg_ptr);
+            const ret = wasm.mystia_get_return_type(this.__wbg_ptr);
             deferred1_0 = ret[0];
             deferred1_1 = ret[1];
             return getStringFromWasm0(ret[0], ret[1]);
@@ -143,7 +152,7 @@ class Result {
         }
     }
 }
-module.exports.Result = Result;
+module.exports.Mystia = Mystia;
 
 module.exports.__wbindgen_init_externref_table = function() {
     const table = wasm.__wbindgen_export_0;
@@ -154,6 +163,11 @@ module.exports.__wbindgen_init_externref_table = function() {
     table.set(offset + 2, true);
     table.set(offset + 3, false);
     ;
+};
+
+module.exports.__wbindgen_string_new = function(arg0, arg1) {
+    const ret = getStringFromWasm0(arg0, arg1);
+    return ret;
 };
 
 module.exports.__wbindgen_throw = function(arg0, arg1) {
