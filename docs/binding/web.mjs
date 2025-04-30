@@ -52,9 +52,10 @@ export async function mystia(code) {
             instance,
             {
                 type: "enum",
-                enum:
-                    ["white", "black", "grey", "blue"] +
-                    ["violet", "green", "red", "pink", "yellow"],
+                enum: [
+                    ["white", "black", "grey", "blue", "violet"],
+                    ["green", "red", "pink", "yellow"],
+                ].flat(),
             },
             color,
         );
