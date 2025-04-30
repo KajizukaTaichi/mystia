@@ -17,21 +17,27 @@ impl Node for Expr {
     fn parse(source: &str) -> Option<Expr> {
         let source = source.trim();
         let token_list: Vec<String> = tokenize(source, SPACE.as_ref(), true, true)?;
-        if token_list.len() >= 2 {
+        if token_list.len() >= 3 {
             Some(Expr::Oper(Box::new(Oper::parse(source)?)))
-        } else {
-            let token = token_list.last()?.trim().to_string();
+        } else if token_list.len() == 2 {
+            let oper = token_list.first()?.trim();
+            let token = token_list.last()?.trim();
             Some(
                 // Bit NOT operation
-                if token.starts_with("~") {
-                    let token = token.get(1..)?.trim();
+                if oper == "~" {
                     Expr::Oper(Box::new(Oper::BNot(Expr::parse(token)?)))
                     // Bit NOT operation
-                } else if token.starts_with("!") {
-                    let token = token.get(1..)?.trim();
+                } else if oper == "!" {
                     Expr::Oper(Box::new(Oper::LNot(Expr::parse(token)?)))
+                } else {
+                    return None;
+                },
+            )
+        } else {
+            let token = token_list.last()?.trim();
+            Some(
                 // Literal value
-                } else if let Some(literal) = Value::parse(&token) {
+                if let Some(literal) = Value::parse(&token) {
                     Expr::Literal(literal)
                 // Array `[expr, ...]`
                 } else if token.starts_with("[") && token.ends_with("]") {
@@ -87,8 +93,8 @@ impl Node for Expr {
                     let (name, key) = token.rsplit_once(".")?;
                     Expr::Field(Box::new(Expr::parse(name)?), key.to_string())
                 // Variable reference
-                } else if !RESERVED.contains(&token.as_str()) && token.is_ascii() {
-                    Expr::Variable(token)
+                } else if !RESERVED.contains(&token) && token.is_ascii() {
+                    Expr::Variable(token.to_string())
                 } else {
                     return None;
                 },
