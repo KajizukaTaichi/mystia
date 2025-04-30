@@ -15,14 +15,14 @@ export function ffi(instance, type, value) {
         return textDecoder.decode(stringBytes);
     } else if (type.type == "array") {
         const [innerType, length] = [type.element, type.length];
-        const [arrayClass, byte] =
-            innerType == "num" ? [Float64Array, 8] : [Int32Array, 4];
-        const memoryView = new arrayClass(instance.exports.mem.buffer);
-        const pointer = value / byte;
-        let [result, index] = [[], pointer];
-        while (index < pointer + length) {
-            result.push(ffi(instance, innerType, memoryView[index]));
-            index++;
+        const memoryView = new Uint8Array(instance.exports.mem.buffer);
+        const byte = innerType == "num" ? 8 : 4;
+        let [result, addr] = [[], value];
+        for (let index = 0; index < length; index++) {
+            const sliced = memoryView.slice(addr, addr + byte);
+            const elem = concatBytes(sliced, byte == 8);
+            result.push(ffi(instance, innerType, elem));
+            addr += byte;
         }
         return result;
     } else if (type.type == "dict") {
@@ -34,10 +34,10 @@ export function ffi(instance, type, value) {
                 int32PairToFloat64;
                 if (field.type == "num") {
                     const sliced = memoryView.slice(address, address + 8);
-                    return int32PairToFloat64(sliced, true);
+                    return concatBytes(sliced, true);
                 } else {
                     const sliced = memoryView.slice(address, address + 4);
-                    return int32PairToFloat64(sliced);
+                    return concatBytes(sliced);
                 }
             })();
             result[name] = ffi(instance, field.type, value);
@@ -50,7 +50,7 @@ export function ffi(instance, type, value) {
     }
 }
 
-function int32PairToFloat64(bytes, is_64bit = false) {
+function concatBytes(bytes, is_64bit = false) {
     const buffer = new ArrayBuffer(8);
     const view = new DataView(buffer);
     let index = 0;
