@@ -144,11 +144,18 @@ impl Node for Oper {
                 type_check!(rhs, Type::Bool, ctx)?;
                 Some(Type::Bool)
             }
+            Oper::LNot(lhs) => {
+                type_check!(lhs, Type::Bool, ctx)?;
+                Some(Type::Bool)
+            }
             Oper::Cast(lhs, rhs) => {
                 lhs.type_infer(ctx)?;
                 Some(rhs.type_infer(ctx)?)
             }
-            Oper::LNot(lhs) | Oper::BNot(lhs) => Some(lhs.type_infer(ctx)?),
+            Oper::BNot(lhs) => {
+                type_check!(lhs, Type::Int, ctx)?;
+                Some(Type::Int)
+            }
             Oper::Enum(typ, _) => Some(typ.type_infer(ctx)?),
         }
     }
