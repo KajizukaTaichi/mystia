@@ -218,11 +218,11 @@ impl Node for Stmt {
             },
             Stmt::MemCpy { from } => {
                 let size = from.type_infer(ctx)?.bytes_length()?;
-                let size = Value::Integer(size as i32);
+                let size = Value::Integer(size as i32).compile(ctx)?;
                 format!(
-                    "(global.get $allocator) (memory.copy (global.get $allocator) {} {size}) (global.set $allocator (i32.add (global.get $allocator) {size}))",
-                    from.compile(ctx)?,
-                    size = size.compile(ctx)?
+                    "(global.get $allocator) (memory.copy (global.get $allocator) {object} {size}) {}",
+                    format!("(global.set $allocator (i32.add (global.get $allocator) {size}))"),
+                    object = from.compile(ctx)?,
                 )
             }
             Stmt::Import { func } => {
@@ -310,10 +310,7 @@ impl Node for Stmt {
                 ctx.type_alias.insert(name.to_string(), value);
                 Type::Void
             }
-            Stmt::MemCpy { from } => {
-                ctx.is_memory_copied = true;
-                from.type_infer(ctx)?
-            }
+            Stmt::MemCpy { from } => from.type_infer(ctx)?,
             Stmt::Import { func } => {
                 let Oper::Cast(Expr::Call(name, args), ret_typ) = func else {
                     return None;
