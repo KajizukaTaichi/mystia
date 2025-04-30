@@ -2,26 +2,11 @@ use crate::*;
 
 #[derive(Clone, Debug)]
 pub enum Stmt {
-    If {
-        cond: Expr,
-        then: Expr,
-        r#else: Option<Box<Stmt>>,
-    },
-    While {
-        cond: Expr,
-        body: Expr,
-    },
-    Let {
-        name: Expr,
-        value: Expr,
-    },
-    Type {
-        name: String,
-        value: Type,
-    },
-    Import {
-        func: Oper,
-    },
+    If(Expr, Expr, Option<Box<Stmt>>),
+    While(Expr, Expr),
+    Let(Expr, Expr),
+    Type(String, Type),
+    Import(Oper),
     Expr(Expr),
     Next,
     Break,
@@ -39,73 +24,57 @@ impl Node for Stmt {
                 let cond_sec = join!(code.get(0..then_pos)?);
                 let then_sec = join!(code.get(then_pos + 1..else_pos)?);
                 let else_sec = join!(code.get(else_pos + 1..)?);
-                Some(Stmt::If {
-                    cond: Expr::parse(&cond_sec)?,
-                    then: Expr::parse(&then_sec)?,
-                    r#else: Some(Box::new(Stmt::parse(&else_sec)?)),
-                })
+                Some(Stmt::If(
+                    Expr::parse(&cond_sec)?,
+                    Expr::parse(&then_sec)?,
+                    Some(Box::new(Stmt::parse(&else_sec)?)),
+                ))
             } else {
                 let cond_sec = join!(code.get(0..then_pos)?);
                 let then_sec = join!(code.get(then_pos + 1..)?);
-                Some(Stmt::If {
-                    cond: Expr::parse(&cond_sec)?,
-                    then: Expr::parse(&then_sec)?,
-                    r#else: None,
-                })
+                Some(Stmt::If(
+                    Expr::parse(&cond_sec)?,
+                    Expr::parse(&then_sec)?,
+                    None,
+                ))
             }
         } else if let Some(source) = source.strip_prefix("while ") {
             let code = tokenize(source, SPACE.as_ref(), false, true)?;
             let loop_pos = code.iter().position(|i| i == "loop")?;
             let cond_sec = join!(code.get(0..loop_pos)?);
             let body_sec = join!(code.get(loop_pos + 1..)?);
-            Some(Stmt::While {
-                cond: Expr::parse(&cond_sec)?,
-                body: Expr::parse(&body_sec)?,
-            })
+            Some(Stmt::While(
+                Expr::parse(&cond_sec)?,
+                Expr::parse(&body_sec)?,
+            ))
         } else if let Some(source) = source.strip_prefix("let ") {
             if let Some((name, value)) = source.split_once("=") {
-                Some(Stmt::Let {
-                    name: Expr::parse(name)?,
-                    value: Expr::parse(value)?,
-                })
+                Some(Stmt::Let(Expr::parse(name)?, Expr::parse(value)?))
             } else {
                 let source = Oper::parse(source)?;
                 if let Oper::Add(name, value) = source {
-                    Some(Stmt::Let {
-                        name: name.clone(),
-                        value: Expr::Oper(Box::new(Oper::Add(name, value))),
-                    })
+                    let value = Expr::Oper(Box::new(Oper::Add(name.clone(), value)));
+                    Some(Stmt::Let(name, value))
                 } else if let Oper::Sub(name, value) = source {
-                    Some(Stmt::Let {
-                        name: name.clone(),
-                        value: Expr::Oper(Box::new(Oper::Sub(name, value))),
-                    })
+                    let value = Expr::Oper(Box::new(Oper::Sub(name.clone(), value)));
+                    Some(Stmt::Let(name, value))
                 } else if let Oper::Mul(name, value) = source {
-                    Some(Stmt::Let {
-                        name: name.clone(),
-                        value: Expr::Oper(Box::new(Oper::Mul(name, value))),
-                    })
+                    let value = Expr::Oper(Box::new(Oper::Mul(name.clone(), value)));
+                    Some(Stmt::Let(name, value))
                 } else if let Oper::Div(name, value) = source {
-                    Some(Stmt::Let {
-                        name: name.clone(),
-                        value: Expr::Oper(Box::new(Oper::Div(name, value))),
-                    })
+                    let value = Expr::Oper(Box::new(Oper::Div(name.clone(), value)));
+                    Some(Stmt::Let(name, value))
                 } else {
                     None
                 }
             }
         } else if let Some(source) = source.strip_prefix("type ") {
             let (name, value) = source.split_once("=")?;
-            Some(Stmt::Type {
-                name: name.trim().to_string(),
-                value: Type::parse(value)?,
-            })
+            Some(Stmt::Type(name.trim().to_string(), Type::parse(value)?))
         } else if let Some(source) = source.strip_prefix("return ") {
             Some(Stmt::Return(Some(Expr::parse(source)?)))
         } else if let Some(source) = source.strip_prefix("load ") {
-            Some(Stmt::Import {
-                func: Oper::parse(source)?,
-            })
+            Some(Stmt::Import(Oper::parse(source)?))
         } else if source == "return" {
             Some(Stmt::Return(None))
         } else if source == "next" {
@@ -120,7 +89,7 @@ impl Node for Stmt {
     fn compile(&self, ctx: &mut Compiler) -> Option<String> {
         Some(match self {
             Stmt::Expr(expr) => expr.compile(ctx)?,
-            Stmt::If { cond, then, r#else } => {
+            Stmt::If(cond, then, r#else) => {
                 format!(
                     "(if {} {} (then {}) {})",
                     config_return!(self.type_infer(ctx)?, ctx)?,
@@ -133,7 +102,7 @@ impl Node for Stmt {
                     },
                 )
             }
-            Stmt::While { cond, body } => {
+            Stmt::While(cond, body) => {
                 format!(
                     "(block $outer (loop $while_start (br_if $outer (i32.eqz {})) {} {}))",
                     cond.compile(ctx)?,
@@ -143,7 +112,7 @@ impl Node for Stmt {
             }
             Stmt::Next => "(br $while_start)".to_string(),
             Stmt::Break => "(br $outer)".to_string(),
-            Stmt::Let { name, value } => match name {
+            Stmt::Let(name, value) => match name {
                 Expr::Variable(name) => {
                     let typ = value.type_infer(ctx)?;
                     if !ctx.argument_type.contains_key(name) {
@@ -209,7 +178,7 @@ impl Node for Stmt {
                 }
                 _ => return None,
             },
-            Stmt::Import { func } => {
+            Stmt::Import(func) => {
                 let Oper::Cast(Expr::Call(name, _), _) = func else {
                     return None;
                 };
@@ -232,14 +201,14 @@ impl Node for Stmt {
             Stmt::Drop => "(drop)".to_string(),
             Stmt::Return(Some(expr)) => format!("(return {})", expr.compile(ctx)?),
             Stmt::Return(_) => "(return)".to_string(),
-            Stmt::Type { name: _, value: _ } => String::new(),
+            Stmt::Type(_, _) => String::new(),
         })
     }
 
     fn type_infer(&self, ctx: &mut Compiler) -> Option<Type> {
         Some(match self {
             Stmt::Expr(expr) => expr.type_infer(ctx)?,
-            Stmt::If { cond, then, r#else } => {
+            Stmt::If(cond, then, r#else) => {
                 type_check!(cond, Type::Bool, ctx)?;
                 if let Some(r#else) = r#else {
                     type_check!(then, r#else, ctx)?
@@ -247,14 +216,14 @@ impl Node for Stmt {
                     then.type_infer(ctx)?
                 }
             }
-            Stmt::While { cond, body } => {
+            Stmt::While(cond, body) => {
                 type_check!(cond, Type::Bool, ctx)?;
                 body.type_infer(ctx)?;
                 Type::Void
             }
             Stmt::Break => Type::Void,
             Stmt::Next => Type::Void,
-            Stmt::Let { name, value } => {
+            Stmt::Let(name, value) => {
                 match name {
                     Expr::Variable(name) if !ctx.argument_type.contains_key(name) => {
                         let value_type = value.type_infer(ctx)?;
@@ -289,12 +258,12 @@ impl Node for Stmt {
                 }
                 Type::Void
             }
-            Stmt::Type { name, value } => {
+            Stmt::Type(name, value) => {
                 let value = value.type_infer(ctx)?;
                 ctx.type_alias.insert(name.to_string(), value);
                 Type::Void
             }
-            Stmt::Import { func } => {
+            Stmt::Import(func) => {
                 let Oper::Cast(Expr::Call(name, args), ret_typ) = func else {
                     return None;
                 };
