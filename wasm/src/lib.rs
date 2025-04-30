@@ -2,13 +2,13 @@ use mystia_core::{Compiler, Type};
 use wasm_bindgen::prelude::wasm_bindgen;
 
 #[wasm_bindgen]
-pub struct Result {
+pub struct Mystia {
     bytecode: Vec<u8>,
     return_type: String,
 }
 
 #[wasm_bindgen]
-impl Result {
+impl Mystia {
     #[wasm_bindgen]
     pub fn get_bytecode(&self) -> Vec<u8> {
         self.bytecode.clone()
@@ -21,19 +21,16 @@ impl Result {
 }
 
 #[wasm_bindgen]
-pub fn mystia(source: &str) -> Option<Result> {
+pub fn mystia(source: &str) -> Result<Mystia, String> {
     let mut compiler = Compiler::new();
     if let Some(wat_code) = compiler.build(source) {
-        if let Ok(bytes) = wat::parse_str(wat_code.clone()) {
-            Some(Result {
-                bytecode: bytes,
-                return_type: type_to_json(&compiler.program_return),
-            })
-        } else {
-            None
-        }
+        let bytes = wat::parse_str(wat_code.clone()).unwrap();
+        Ok(Mystia {
+            bytecode: bytes,
+            return_type: type_to_json(&compiler.program_return),
+        })
     } else {
-        None
+        Err(compiler.occurred_error.unwrap())
     }
 }
 
