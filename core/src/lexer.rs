@@ -1,4 +1,4 @@
-use crate::*;
+use crate::{utils::MONADIC, *};
 
 pub fn tokenize(
     input: &str,
@@ -11,6 +11,7 @@ pub fn tokenize(
     let mut in_parentheses: usize = 0;
     let mut in_quote = false;
     let mut is_escape = false;
+    let mut is_monadic = false;
 
     let chars: Vec<String> = input.chars().map(String::from).collect();
     let mut index = 0;
@@ -49,7 +50,15 @@ pub fn tokenize(
         } else {
             let mut is_opr = false;
             if is_expr {
-                'a: for op in OPERATOR {
+                for op in MONADIC {
+                    if include_letter(op, &chars, index) && in_parentheses == 0 && !in_quote {
+                        current_token.push_str(op);
+                        is_monadic = true;
+                        is_opr = true;
+                        break;
+                    }
+                }
+                for op in OPERATOR {
                     if include_letter(op, &chars, index) && in_parentheses == 0 && !in_quote {
                         if current_token.is_empty() {
                             index += op.chars().count();
@@ -61,13 +70,13 @@ pub fn tokenize(
                             current_token.clear();
                         }
                         is_opr = true;
-                        break 'a;
+                        break;
                     }
                 }
             }
-            if !is_opr {
+            if !is_opr && !is_monadic {
                 let mut is_delimit = false;
-                'b: for delimit in delimiter {
+                for delimit in delimiter {
                     if include_letter(delimit, &chars, index) && in_parentheses == 0 && !in_quote {
                         if current_token.is_empty() {
                             index += delimit.chars().count();
@@ -77,11 +86,12 @@ pub fn tokenize(
                             current_token.clear();
                         }
                         is_delimit = true;
-                        break 'b;
+                        break;
                     }
                 }
                 if !is_delimit {
                     current_token.push_str(c.as_str());
+                    is_monadic = true;
                     index += 1;
                 }
             }
