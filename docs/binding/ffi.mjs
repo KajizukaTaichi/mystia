@@ -8,7 +8,7 @@ export function ffi(instance, type, value) {
         const memoryView = new Uint8Array(instance.exports.mem.buffer);
         console.log(memoryView);
         let stringLength = value;
-        while ([null, undefined, 0].includes(memoryView[stringLength])) {
+        while (memoryView[stringLength] != 0) {
             stringLength++;
         }
         const stringBytes = memoryView.slice(value, stringLength);
