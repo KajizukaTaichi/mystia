@@ -19,9 +19,6 @@ pub enum Stmt {
         name: String,
         value: Type,
     },
-    MemCpy {
-        from: Expr,
-    },
     Import {
         func: Oper,
     },
@@ -108,10 +105,6 @@ impl Node for Stmt {
         } else if let Some(source) = source.strip_prefix("load ") {
             Some(Stmt::Import {
                 func: Oper::parse(source)?,
-            })
-        } else if let Some(source) = source.strip_prefix("memcpy ") {
-            Some(Stmt::MemCpy {
-                from: Expr::parse(source)?,
             })
         } else if source == "return" {
             Some(Stmt::Return(None))
@@ -216,15 +209,6 @@ impl Node for Stmt {
                 }
                 _ => return None,
             },
-            Stmt::MemCpy { from } => {
-                let size = from.type_infer(ctx)?.bytes_length()?;
-                let size = Value::Integer(size as i32).compile(ctx)?;
-                format!(
-                    "(global.get $allocator) (memory.copy (global.get $allocator) {object} {size}) {}",
-                    format!("(global.set $allocator (i32.add (global.get $allocator) {size}))"),
-                    object = from.compile(ctx)?,
-                )
-            }
             Stmt::Import { func } => {
                 let Oper::Cast(Expr::Call(name, _), _) = func else {
                     return None;
@@ -310,7 +294,6 @@ impl Node for Stmt {
                 ctx.type_alias.insert(name.to_string(), value);
                 Type::Void
             }
-            Stmt::MemCpy { from } => from.type_infer(ctx)?,
             Stmt::Import { func } => {
                 let Oper::Cast(Expr::Call(name, args), ret_typ) = func else {
                     return None;
