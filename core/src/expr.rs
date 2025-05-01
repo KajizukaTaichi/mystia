@@ -104,7 +104,7 @@ impl Node for Expr {
     fn compile(&self, ctx: &mut Compiler) -> Option<String> {
         Some(match self {
             Expr::Oper(oper) => oper.compile(ctx)?,
-            Expr::Variable(to) => format!("(local.get ${to})"),
+            Expr::Variable(name) => format!("(local.get ${name})"),
             Expr::Literal(literal) => literal.compile(ctx)?,
             Expr::Array(array) => {
                 let len = array.len();
@@ -234,16 +234,17 @@ impl Node for Expr {
     fn type_infer(&self, ctx: &mut Compiler) -> Option<Type> {
         Some(match self {
             Expr::Oper(oper) => oper.type_infer(ctx)?,
-            Expr::Variable(to) => {
-                if let Some(local) = ctx.variable_type.get(to) {
+            Expr::Variable(name) => {
+                if let Some(local) = ctx.variable_type.get(name) {
                     local.clone()
-                } else if let Some(arg) = ctx.argument_type.get(to) {
+                } else if let Some(arg) = ctx.argument_type.get(name) {
                     arg.clone()
                 } else if let Some(expect) = ctx.expect_type.clone() {
                     ctx.expect_type = None;
-                    ctx.argument_type.insert(to.to_owned(), expect.clone());
+                    ctx.argument_type.insert(name.to_owned(), expect.clone());
                     expect.clone()
                 } else {
+                    ctx.occurred_error = Some(format!("undefined variable: {name}"));
                     return None;
                 }
             }
