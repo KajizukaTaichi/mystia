@@ -262,12 +262,8 @@ impl Node for Expr {
             Expr::Literal(literal) => literal.type_infer(ctx)?,
             Expr::Call(name, args) => {
                 let (_, args_type, ret_type) = ctx.function_type.get(name)?.clone();
-                let _ = iter_map!(args.iter().zip(args_type.values()), |(arg, typ): (
-                    &Expr,
-                    &Type
-                )| type_check!(
-                    arg, typ, ctx
-                ));
+                let mut func = |(arg, typ): (&Expr, &Type)| type_check!(arg, typ, ctx);
+                let _ = iter_map!(args.iter().zip(args_type.values()), func);
                 ret_type.clone()
             }
             Expr::Access(arr, _) => {
