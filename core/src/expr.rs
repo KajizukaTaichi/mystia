@@ -19,71 +19,72 @@ impl Node for Expr {
         let source = source.trim();
         let token_list: Vec<String> = tokenize(source, SPACE.as_ref(), true, true)?;
         if token_list.len() >= 2 {
-            Some(Expr::Oper(Box::new(Oper::parse(source)?)))
+            return Some(Expr::Oper(Box::new(Oper::parse(source)?)));
+        };
+        let token = token_list.last()?.trim();
+
+        // Literal value
+        if let Some(literal) = Value::parse(&token) {
+            Some(Expr::Literal(literal))
+        // Array `[expr, ...]`
+        } else if token.starts_with("[") && token.ends_with("]") {
+            let token = token.get(1..token.len() - 1)?.trim();
+            let mut result = vec![];
+            for i in tokenize(token, &[","], false, true)? {
+                result.push(Expr::parse(&i)?);
+            }
+            Some(Expr::Array(result))
+        // Code block `{ stmt; ... }`
+        } else if token.starts_with("{") && token.ends_with("}") {
+            let token = token.get(1..token.len() - 1)?.trim();
+            if let Some(block) = Block::parse(token) {
+                Some(Expr::Block(block))
+            } else {
+                // If not a block, parse as dictionary
+                let mut result = IndexMap::new();
+                for line in tokenize(token, &[","], false, true)? {
+                    let (name, value) = line.split_once("=")?;
+                    result.insert(name.trim().to_string(), Expr::parse(value)?);
+                }
+                Some(Expr::Dict(result))
+            }
+        // Prioritize higher than others
+        } else if token.starts_with("(") && token.ends_with(")") {
+            let token = token.get(1..token.len() - 1)?.trim();
+            Some(Expr::parse(token)?)
+        // syntax sugar of memcpy statement
+        } else if token.starts_with("memcpy(") && token.ends_with(")") {
+            let token = token.get("memcpy(".len()..token.len() - 1)?.trim();
+            Some(Expr::MemCpy(Box::new(Expr::parse(token)?)))
+        // Index access `array[index]`
+        } else if token.contains("[") && token.ends_with("]") {
+            let token = token.get(..token.len() - 1)?.trim();
+            let (array, index) = token.rsplit_once("[")?;
+            Some(Expr::Access(
+                Box::new(Expr::parse(array)?),
+                Box::new(Expr::parse(index)?),
+            ))
+        // Function call `name(args, ...)`
+        } else if token.contains("(") && token.ends_with(")") {
+            let token = token.get(..token.len() - 1)?.trim();
+            let (name, args) = token.split_once("(")?;
+            let args = {
+                let mut result = vec![];
+                for i in tokenize(args, &[","], false, true)? {
+                    result.push(Expr::parse(&i)?)
+                }
+                result
+            };
+            Some(Expr::Call(name.to_string(), args))
+        // Dictionary access `dict.key`
+        } else if token.contains(".") {
+            let (name, key) = token.rsplit_once(".")?;
+            Some(Expr::Field(Box::new(Expr::parse(name)?), key.to_string()))
+        // Variable reference
+        } else if !RESERVED.contains(&token) && token.is_ascii() {
+            Some(Expr::Variable(token.to_string()))
         } else {
-            let token = token_list.last()?.trim();
-            Some(
-                // Literal value
-                if let Some(literal) = Value::parse(&token) {
-                    Expr::Literal(literal)
-                // Array `[expr, ...]`
-                } else if token.starts_with("[") && token.ends_with("]") {
-                    let token = token.get(1..token.len() - 1)?.trim();
-                    let mut result = vec![];
-                    for i in tokenize(token, &[","], false, true)? {
-                        result.push(Expr::parse(&i)?);
-                    }
-                    Expr::Array(result)
-                // Code block `{ stmt; ... }`
-                } else if token.starts_with("{") && token.ends_with("}") {
-                    let token = token.get(1..token.len() - 1)?.trim();
-                    if let Some(block) = Block::parse(token) {
-                        Expr::Block(block)
-                    } else {
-                        // If not a block, parse as dictionary
-                        let mut result = IndexMap::new();
-                        for line in tokenize(token, &[","], false, true)? {
-                            let (name, value) = line.split_once("=")?;
-                            result.insert(name.trim().to_string(), Expr::parse(value)?);
-                        }
-                        Expr::Dict(result)
-                    }
-                // Prioritize higher than others
-                } else if token.starts_with("(") && token.ends_with(")") {
-                    let token = token.get(1..token.len() - 1)?.trim();
-                    Expr::parse(token)?
-                // syntax sugar of memcpy statement
-                } else if token.starts_with("memcpy(") && token.ends_with(")") {
-                    let token = token.get("memcpy(".len()..token.len() - 1)?.trim();
-                    Expr::MemCpy(Box::new(Expr::parse(token)?))
-                // Index access `array[index]`
-                } else if token.contains("[") && token.ends_with("]") {
-                    let token = token.get(..token.len() - 1)?.trim();
-                    let (array, index) = token.rsplit_once("[")?;
-                    Expr::Access(Box::new(Expr::parse(array)?), Box::new(Expr::parse(index)?))
-                // Function call `name(args, ...)`
-                } else if token.contains("(") && token.ends_with(")") {
-                    let token = token.get(..token.len() - 1)?.trim();
-                    let (name, args) = token.split_once("(")?;
-                    let args = {
-                        let mut result = vec![];
-                        for i in tokenize(args, &[","], false, true)? {
-                            result.push(Expr::parse(&i)?)
-                        }
-                        result
-                    };
-                    Expr::Call(name.to_string(), args)
-                // Dictionary access `dict.key`
-                } else if token.contains(".") {
-                    let (name, key) = token.rsplit_once(".")?;
-                    Expr::Field(Box::new(Expr::parse(name)?), key.to_string())
-                // Variable reference
-                } else if !RESERVED.contains(&token) && token.is_ascii() {
-                    Expr::Variable(token.to_string())
-                } else {
-                    return None;
-                },
-            )
+            None
         }
     }
 
