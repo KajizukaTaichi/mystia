@@ -18,22 +18,8 @@ impl Node for Expr {
     fn parse(source: &str) -> Option<Expr> {
         let source = source.trim();
         let token_list: Vec<String> = tokenize(source, SPACE.as_ref(), true, true)?;
-        if token_list.len() >= 3 {
+        if token_list.len() >= 2 {
             Some(Expr::Oper(Box::new(Oper::parse(source)?)))
-        } else if token_list.len() == 2 {
-            let oper = token_list.first()?.trim();
-            let token = token_list.last()?.trim();
-            Some(
-                // Bit NOT operation
-                if oper == "~" {
-                    Expr::Oper(Box::new(Oper::BNot(Expr::parse(token)?)))
-                    // Bit NOT operation
-                } else if oper == "!" {
-                    Expr::Oper(Box::new(Oper::LNot(Expr::parse(token)?)))
-                } else {
-                    return None;
-                },
-            )
         } else {
             let token = token_list.last()?.trim();
             Some(
