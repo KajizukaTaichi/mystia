@@ -220,13 +220,19 @@ impl Node for Expr {
             }
             Expr::Block(block) => block.compile(ctx)?,
             Expr::MemCpy(from) => {
-                let size = from.type_infer(ctx)?.bytes_length()?;
+                let typ = from.type_infer(ctx)?;
+                let size = typ.bytes_length()?;
                 let size = Value::Integer(size as i32).compile(ctx)?;
-                format!(
-                    "(global.get $allocator) (memory.copy (global.get $allocator) {object} {size}) {}",
-                    format!("(global.set $allocator (i32.add (global.get $allocator) {size}))"),
-                    object = from.compile(ctx)?,
-                )
+                if_ptr!(typ, {
+                    return Some(format!(
+                        "(global.get $allocator) (memory.copy (global.get $allocator) {object} {size}) {}",
+                        format!("(global.set $allocator (i32.add (global.get $allocator) {size}))"),
+                        object = from.compile(ctx)?,
+                    ))
+                } else {
+                    ctx.occurred_error = Some("can't memory copy primitive typed value".to_string());
+                    return None
+                });
             }
         })
     }
