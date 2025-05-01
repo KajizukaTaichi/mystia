@@ -28,34 +28,44 @@ pub enum Oper {
 
 impl Node for Oper {
     fn parse(source: &str) -> Option<Self> {
-        // Parsing is from right to left because operator is left-associative
         let token_list: Vec<String> = tokenize(source, SPACE.as_ref(), true, true)?;
-        let operator = token_list.get(token_list.len().checked_sub(2)?)?;
-        let lhs = &join!(token_list.get(..token_list.len() - 2)?);
-        let rhs = token_list.last()?;
-        Some(match operator.as_str() {
-            "+" => Oper::Add(Expr::parse(lhs)?, Expr::parse(rhs)?),
-            "-" => Oper::Sub(Expr::parse(lhs)?, Expr::parse(rhs)?),
-            "*" => Oper::Mul(Expr::parse(lhs)?, Expr::parse(rhs)?),
-            "/" => Oper::Div(Expr::parse(lhs)?, Expr::parse(rhs)?),
-            "%" => Oper::Mod(Expr::parse(lhs)?, Expr::parse(rhs)?),
-            ">>" => Oper::Shr(Expr::parse(lhs)?, Expr::parse(rhs)?),
-            "<<" => Oper::Shl(Expr::parse(lhs)?, Expr::parse(rhs)?),
-            "==" => Oper::Eql(Expr::parse(lhs)?, Expr::parse(rhs)?),
-            "!=" => Oper::Neq(Expr::parse(lhs)?, Expr::parse(rhs)?),
-            "<" => Oper::Lt(Expr::parse(lhs)?, Expr::parse(rhs)?),
-            ">" => Oper::Gt(Expr::parse(lhs)?, Expr::parse(rhs)?),
-            ">=" => Oper::GtEq(Expr::parse(lhs)?, Expr::parse(rhs)?),
-            "<=" => Oper::LtEq(Expr::parse(lhs)?, Expr::parse(rhs)?),
-            "&" => Oper::BAnd(Expr::parse(lhs)?, Expr::parse(rhs)?),
-            "|" => Oper::BOr(Expr::parse(lhs)?, Expr::parse(rhs)?),
-            "^" => Oper::XOr(Expr::parse(lhs)?, Expr::parse(rhs)?),
-            "&&" => Oper::LAnd(Expr::parse(lhs)?, Expr::parse(rhs)?),
-            "||" => Oper::LOr(Expr::parse(lhs)?, Expr::parse(rhs)?),
-            ":" => Oper::Cast(Expr::parse(lhs)?, Type::parse(rhs)?),
-            "::" => Oper::Enum(Type::parse(lhs)?, rhs.trim().to_string()),
-            _ => return None,
-        })
+        if token_list.len() == 2 {
+            let oper = token_list.first()?.trim();
+            let token = token_list.last()?.trim();
+            Some(match oper {
+                "~" => Oper::BNot(Expr::parse(token)?),
+                "!" => Oper::LNot(Expr::parse(token)?),
+                _ => return None,
+            })
+        } else {
+            // Parsing is from right to left because operator is left-associative
+            let operator = token_list.get(token_list.len().checked_sub(2)?)?;
+            let lhs = &join!(token_list.get(..token_list.len() - 2)?);
+            let rhs = token_list.last()?;
+            Some(match operator.as_str() {
+                "+" => Oper::Add(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                "-" => Oper::Sub(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                "*" => Oper::Mul(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                "/" => Oper::Div(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                "%" => Oper::Mod(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                ">>" => Oper::Shr(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                "<<" => Oper::Shl(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                "==" => Oper::Eql(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                "!=" => Oper::Neq(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                "<" => Oper::Lt(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                ">" => Oper::Gt(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                ">=" => Oper::GtEq(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                "<=" => Oper::LtEq(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                "&" => Oper::BAnd(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                "|" => Oper::BOr(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                "^" => Oper::XOr(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                "&&" => Oper::LAnd(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                "||" => Oper::LOr(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                ":" => Oper::Cast(Expr::parse(lhs)?, Type::parse(rhs)?),
+                "::" => Oper::Enum(Type::parse(lhs)?, rhs.trim().to_string()),
+                _ => return None,
+            })
+        }
     }
 
     fn compile(&self, ctx: &mut Compiler) -> Option<String> {
