@@ -22,7 +22,7 @@ rl.on("line", (input) => {
                     console.log(result);
                 }
             })
-            .catch((e) => console.log(e, code))
+            .catch((e) => console.log(e))
             .then(() => rl.prompt());
     } else {
         rl.prompt();
