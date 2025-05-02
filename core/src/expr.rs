@@ -109,8 +109,7 @@ impl Node for Expr {
                             result.push(format!(
                                 "({type}.store {address} {code})",
                                 r#type = &inner_type.compile(ctx)?,
-                                address = Value::Array(ctx.allocator, len, inner_type.clone())
-                                    .compile(ctx)?,
+                                address = Value::Integer(ctx.allocator).compile(ctx)?,
                             ));
                             ctx.allocator += inner_type.pointer_length();
                         }
@@ -121,8 +120,7 @@ impl Node for Expr {
                             result.push(format!(
                                 "({type}.store {address} {value})",
                                 r#type = &inner_type.compile(ctx)?,
-                                address = Value::Array(ctx.allocator, len, inner_type.clone())
-                                    .compile(ctx)?,
+                                address = Value::Integer(ctx.allocator).compile(ctx)?,
                                 value = elm.compile(ctx)?
                             ));
                             ctx.allocator += inner_type.pointer_length();
@@ -153,12 +151,8 @@ impl Node for Expr {
                     result.push(format!(
                         "({type}.store {address} {value})",
                         r#type = typ.clone().compile(ctx)?,
-                        address = Value::Dict(ctx.allocator, infered.clone()).compile(ctx)?,
-                        value = if let Some(precode) = prestore.get(name) {
-                            precode.clone()
-                        } else {
-                            elm.compile(ctx)?
-                        }
+                        address = Value::Integer(ctx.allocator).compile(ctx)?,
+                        value = prestore.get(name).cloned().or_else(|| elm.compile(ctx))?
                     ));
                     ctx.allocator += typ.pointer_length();
                 }
