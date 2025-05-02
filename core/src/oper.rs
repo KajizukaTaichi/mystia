@@ -61,7 +61,7 @@ impl Node for Oper {
                 "^" => Oper::XOr(Expr::parse(lhs)?, Expr::parse(rhs)?),
                 "&&" => Oper::LAnd(Expr::parse(lhs)?, Expr::parse(rhs)?),
                 "||" => Oper::LOr(Expr::parse(lhs)?, Expr::parse(rhs)?),
-                ":" => Oper::Cast(Expr::parse(lhs)?, Type::parse(rhs)?),
+                ":" | "as" => Oper::Cast(Expr::parse(lhs)?, Type::parse(rhs)?),
                 "::" => Oper::Enum(Type::parse(lhs)?, rhs.trim().to_string()),
                 _ => return None,
             })
