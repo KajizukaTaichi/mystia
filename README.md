@@ -8,10 +8,7 @@ A programming language that will be compiled to WebAssembly
 ## Memory layout
 Basically, in nested object (e.g. array end dictionary), child elements are stored in before parent element
 
-**Nested Array**: Below object's pointer value is same to element 1
-```
-[ child 1 ] [ child 2 ] [ element 1: pointer refers to child 1 ] [ element 2: pointer refers to child 2 ]
-```
+![](https://github.com/user-attachments/assets/19ebbabb-5c03-4da9-b56f-dbecb27b6c53)
 
 ## To Do
 - [ ] Enhance error message
