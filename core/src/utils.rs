@@ -63,7 +63,7 @@ macro_rules! type_check {
                 Some(lhs.clone())
             } else {
                 $ctx.occurred_error = Some(format!(
-                    "Type mismatch between {} and {}",
+                    "type mismatch between {} and {}",
                     lhs.format(),
                     rhs.format()
                 ));
@@ -77,7 +77,7 @@ macro_rules! type_check {
                 Some(lhs.clone())
             } else {
                 $ctx.occurred_error = Some(format!(
-                    "Type mismatch between {} and {}",
+                    "type mismatch between {} and {}",
                     lhs.format(),
                     rhs.format()
                 ));
