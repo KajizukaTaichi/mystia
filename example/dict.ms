@@ -19,4 +19,4 @@ if alice.total >= 80 then {
     let alice.result = true
 };
 
-alice.score.math: num * alice.age
+alice.score.math as num * alice.age
