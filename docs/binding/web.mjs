@@ -62,7 +62,7 @@ export async function mystia(code) {
                 ["green", "red", "pink", "yellow"],
             ].flat(),
         };
-        ctx.fillStyle = read(instance, type, color);
+        ctx.fillStyle = mystia_read(instance, type, color);
         ctx.fillRect(x, y, 1, 1);
     };
     mystiaFunctions.int_to_str = (value) => {
@@ -74,9 +74,9 @@ export async function mystia(code) {
         return mystia_write(instance, "str", str1 + str2);
     };
     mystiaFunctions.write = (data) => {
-        window.write(mystia_read(instance, "str", data));
+        document.write(mystia_read(instance, "str", data));
     };
 
     const value = instance.exports._start();
-    return read(instance, type, value);
+    return mystia_read(instance, type, value);
 }
