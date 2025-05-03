@@ -37,29 +37,28 @@ export async function mystia(code) {
         return str;
     };
     mystiaFunctions.init_canvas = () => {
-        let canvas = document.getElementById("mystia-canvas");
+        const canvas = document.getElementById("mystia-canvas");
         if (canvas == null) {
             canvas = document.createElement("canvas");
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             canvas.id = "mystia-canvas";
             document.body.appendChild(canvas);
+        } else {
+            const ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
-        canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
     };
     mystiaFunctions.draw = (x, y, color) => {
         const ctx = document.getElementById("mystia-canvas").getContext("2d");
-        ctx.fillStyle = ffi(
-            instance,
-            {
-                type: "enum",
-                enum: [
-                    ["white", "black", "grey", "blue", "violet"],
-                    ["green", "red", "pink", "yellow"],
-                ].flat(),
-            },
-            color,
-        );
+        const type = {
+            type: "enum",
+            enum: [
+                ["white", "black", "grey", "blue", "violet"],
+                ["green", "red", "pink", "yellow"],
+            ].flat(),
+        };
+        ctx.fillStyle = ffi(instance, type, color);
         ctx.fillRect(x, y, 1, 1);
     };
 
