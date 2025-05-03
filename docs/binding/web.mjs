@@ -24,17 +24,20 @@ export async function mystia(code) {
             draw: (x, y, color) => mystiaFunctions.draw(x, y, color),
         },
     });
-    mystiaFunctions.alert = (ptr) => window.alert(ffi(instance, "str", ptr));
-    mystiaFunctions.confirm = (ptr) =>
-        window.confirm(ffi(instance, "str", ptr));
-    mystiaFunctions.prompt = (ptr) => {
-        const answer = window.prompt(ffi(instance, "str", ptr));
-        const utf8 = new TextEncoder().encode(answer + "\0");
-        const str = instance.exports.allocator;
+    mystiaFunctions.alert = (message) => {
+        window.alert(ffi(instance, "str", message));
+    };
+    mystiaFunctions.confirm = (message) => {
+        window.confirm(ffi(instance, "str", message));
+    };
+    mystiaFunctions.prompt = (message) => {
+        const answer = window.prompt(ffi(instance, "str", message));
+        const binary = new TextEncoder().encode(answer + "\0");
         const memory = new Uint8Array(instance.exports.mem.buffer);
-        instance.exports.malloc(utf8.length);
-        memory.set(utf8, str);
-        return str;
+        const pointer = instance.exports.allocator;
+        instance.exports.malloc(binary.length);
+        memory.set(binary, pointer);
+        return pointer;
     };
     mystiaFunctions.init_canvas = () => {
         const canvas = document.getElementById("mystia-canvas");
