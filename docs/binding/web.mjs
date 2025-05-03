@@ -69,9 +69,9 @@ export async function mystia(code) {
         return mystia_write(instance, "str", value.toString());
     };
     mystiaFunctions.concat = (str1, str2) => {
-        str1 = mystia_read(instance, "str", str1);
-        str2 = mystia_read(instance, "str", str2);
-        return mystia_write(instance, "str", str1 + str2);
+        const strs1 = mystia_read(instance, "str", str1);
+        const strs2 = mystia_read(instance, "str", str2);
+        return mystia_write(instance, "str", strs1 + strs2);
     };
     mystiaFunctions.write = (data) => {
         document.write(mystia_read(instance, "str", data));
