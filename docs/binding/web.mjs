@@ -1,5 +1,5 @@
 import init, { mystia as compile } from "../web/mystia_wasm.js";
-import { write, read } from "./ffi.mjs";
+import { write as mystia_write, read as mystia_read } from "./ffi.mjs";
 
 await init();
 export async function mystia(code) {
@@ -15,6 +15,8 @@ export async function mystia(code) {
         init_canvas: null,
         draw: null,
         int_to_str: null,
+        concat: null,
+        write: null,
     };
     const { instance } = await WebAssembly.instantiate(bytecodes, {
         env: {
@@ -23,17 +25,20 @@ export async function mystia(code) {
             prompt: (ptr) => mystiaFunctions.prompt(ptr),
             init_canvas: () => mystiaFunctions.init_canvas(),
             draw: (x, y, color) => mystiaFunctions.draw(x, y, color),
+            int_to_str: (num) => mystiaFunctions.int_to_str(num),
+            concat: (str1, str2) => mystiaFunctions.concat(str1, str2),
+            write: (data) => mystiaFunctions.write(data),
         },
     });
     mystiaFunctions.alert = (message) => {
-        window.alert(read(instance, "str", message));
+        window.alert(mystia_read(instance, "str", message));
     };
     mystiaFunctions.confirm = (message) => {
-        window.confirm(read(instance, "str", message));
+        window.confirm(mystia_read(instance, "str", message));
     };
     mystiaFunctions.prompt = (message) => {
-        const answer = window.prompt(read(instance, "str", message));
-        return write(instance, "str", answer);
+        const answer = window.prompt(mystia_read(instance, "str", message));
+        return mystia_write(instance, "str", answer);
     };
     mystiaFunctions.init_canvas = () => {
         const canvas = document.getElementById("mystia-canvas");
@@ -59,6 +64,17 @@ export async function mystia(code) {
         };
         ctx.fillStyle = read(instance, type, color);
         ctx.fillRect(x, y, 1, 1);
+    };
+    mystiaFunctions.int_to_str = (value) => {
+        return mystia_write(instance, "str", value.toString());
+    };
+    mystiaFunctions.concat = (str1, str2) => {
+        str1 = mystia_read(instance, "str", str1);
+        str2 = mystia_read(instance, "str", str2);
+        return mystia_write(instance, "str", str1 + str2);
+    };
+    mystiaFunctions.write = (data) => {
+        window.write(mystia_read(instance, "str", data));
     };
 
     const value = instance.exports._start();
