@@ -1,5 +1,5 @@
 import init, { mystia as compile } from "../web/mystia_wasm.js";
-import { ffi } from "./ffi.mjs";
+import { write, read } from "./ffi.mjs";
 
 await init();
 export async function mystia(code) {
@@ -14,6 +14,7 @@ export async function mystia(code) {
         prompt: null,
         init_canvas: null,
         draw: null,
+        int_to_str: null,
     };
     const { instance } = await WebAssembly.instantiate(bytecodes, {
         env: {
@@ -25,19 +26,14 @@ export async function mystia(code) {
         },
     });
     mystiaFunctions.alert = (message) => {
-        window.alert(ffi(instance, "str", message));
+        window.alert(read(instance, "str", message));
     };
     mystiaFunctions.confirm = (message) => {
-        window.confirm(ffi(instance, "str", message));
+        window.confirm(read(instance, "str", message));
     };
     mystiaFunctions.prompt = (message) => {
-        const answer = window.prompt(ffi(instance, "str", message));
-        const binary = new TextEncoder().encode(answer + "\0");
-        const memory = new Uint8Array(instance.exports.mem.buffer);
-        const pointer = instance.exports.allocator;
-        instance.exports.malloc(binary.length);
-        memory.set(binary, pointer);
-        return pointer;
+        const answer = window.prompt(read(instance, "str", message));
+        return write(instance, "str", answer);
     };
     mystiaFunctions.init_canvas = () => {
         const canvas = document.getElementById("mystia-canvas");
@@ -61,10 +57,10 @@ export async function mystia(code) {
                 ["green", "red", "pink", "yellow"],
             ].flat(),
         };
-        ctx.fillStyle = ffi(instance, type, color);
+        ctx.fillStyle = read(instance, type, color);
         ctx.fillRect(x, y, 1, 1);
     };
 
     const value = instance.exports._start();
-    return ffi(instance, type, value);
+    return read(instance, type, value);
 }
