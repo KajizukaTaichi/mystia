@@ -1,5 +1,5 @@
 import { mystia as compile } from "../node/mystia_wasm.js";
-import { ffi } from "./ffi.mjs";
+import { read } from "./ffi.mjs";
 
 export async function mystia(code) {
     const result = compile(code);
@@ -14,8 +14,8 @@ export async function mystia(code) {
             print: (ptr) => mystiaFunctions.print(ptr),
         },
     });
-    mystiaFunctions.print = (ptr) => console.log(ffi(instance, "str", ptr));
+    mystiaFunctions.print = (ptr) => console.log(read(instance, "str", ptr));
 
     const value = instance.exports._start();
-    return ffi(instance, type, value);
+    return read(instance, type, value);
 }
