@@ -1,4 +1,4 @@
-export function ffi(instance, type, value) {
+export function read(instance, type, value) {
     if (type == null) return null;
     if (type == "int" || type == "num") {
         return value;
@@ -21,7 +21,7 @@ export function ffi(instance, type, value) {
         for (let index = 0; index < length; index++) {
             const sliced = memoryView.slice(addr, addr + byte);
             const elem = concatBytes(sliced, byte == 8);
-            result.push(ffi(instance, innerType, elem));
+            result.push(read(instance, innerType, elem));
             addr += byte;
         }
         return result;
@@ -39,13 +39,24 @@ export function ffi(instance, type, value) {
                     return concatBytes(sliced);
                 }
             })();
-            result[name] = ffi(instance, field.type, value);
+            result[name] = read(instance, field.type, value);
         }
         return result;
     } else if (type.type == "enum") {
         return type.enum[value];
     } else {
         return type;
+    }
+}
+
+export function write(instance, type, value) {
+    if (type == "str") {
+        const binary = new TextEncoder().encode(value + "\0");
+        const memory = new Uint8Array(instance.exports.mem.buffer);
+        const pointer = instance.exports.allocator;
+        instance.exports.malloc(binary.length);
+        memory.set(binary, pointer);
+        return pointer;
     }
 }
 
