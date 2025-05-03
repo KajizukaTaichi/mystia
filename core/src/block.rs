@@ -5,15 +5,14 @@ pub struct Block(pub Vec<Stmt>);
 
 impl Node for Block {
     fn parse(source: &str) -> Option<Block> {
-        let mut result = vec![];
-        for line in tokenize(source, &[";"], false, false)? {
-            result.push(if line.trim().is_empty() {
-                Stmt::Drop
+        Some(Block(iter_map!(
+            tokenize(source, &[";"], false, false)?,
+            |line: String| if line.trim().is_empty() {
+                Some(Stmt::Drop)
             } else {
-                Stmt::parse(&line)?
-            })
-        }
-        Some(Block(result))
+                Stmt::parse(&line)
+            }
+        )))
     }
 
     fn compile(&self, ctx: &mut Compiler) -> Option<String> {
