@@ -91,7 +91,11 @@ impl Node for Oper {
             Oper::Mod(lhs, rhs) => {
                 let typ = lhs.type_infer(ctx)?.compile(ctx)?;
                 let (lhs, rhs) = (lhs.compile(ctx)?, rhs.compile(ctx)?);
-                format!("({typ}.rem_s (i32.add ({typ}.rem_s {lhs} {rhs}) {rhs}) {rhs})")
+                if typ == "i32" {
+                    format!("(i32.rem_s (i32.add (i32.rem_s {lhs} {rhs}) {rhs}) {rhs})")
+                } else {
+                    format!("(f64.sub {lhs} (f64.mul (f64.floor (f64.div {lhs} {rhs})) {rhs}))")
+                }
             }
             Oper::BNot(lhs) => {
                 let minus_one = Expr::Literal(Value::Integer(-1));
