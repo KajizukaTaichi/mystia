@@ -74,7 +74,6 @@ impl Node for Oper {
             Oper::Sub(lhs, rhs) => compile_arithmetic!("sub", self, ctx, lhs, rhs),
             Oper::Mul(lhs, rhs) => compile_arithmetic!("mul", self, ctx, lhs, rhs),
             Oper::Div(lhs, rhs) => compile_compare!("div", ctx, lhs, rhs),
-            Oper::Mod(lhs, rhs) => compile_compare!("rem", ctx, lhs, rhs),
             Oper::Shr(lhs, rhs) => compile_compare!("shr", ctx, lhs, rhs),
             Oper::Shl(lhs, rhs) => compile_arithmetic!("shl", self, ctx, lhs, rhs),
             Oper::BAnd(lhs, rhs) => compile_arithmetic!("and", self, ctx, lhs, rhs),
@@ -90,11 +89,9 @@ impl Node for Oper {
             Oper::LAnd(lhs, rhs) => compile_arithmetic!("and", self, ctx, lhs, rhs),
             Oper::LOr(lhs, rhs) => compile_arithmetic!("or", self, ctx, lhs, rhs),
             Oper::Mod(lhs, rhs) => {
-                let lhs = lhs.compile(ctx)?;
-                let rhs = lhs.compile(ctx)?;
-                format!(
-                    "(i32.rem_s (i32.add (i32.rem_s (local.get $x) (local.get $y)) (local.get $y)) (local.get $y))"
-                )
+                let typ = lhs.type_infer(ctx)?.compile(ctx)?;
+                let (lhs, rhs) = (lhs.compile(ctx)?, rhs.compile(ctx)?);
+                format!("({typ}.rem_s (i32.add ({typ}.rem_s {lhs} {rhs}) {rhs}) {rhs})")
             }
             Oper::BNot(lhs) => {
                 let minus_one = Expr::Literal(Value::Integer(-1));
