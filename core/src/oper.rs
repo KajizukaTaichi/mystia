@@ -89,6 +89,13 @@ impl Node for Oper {
             Oper::GtEq(lhs, rhs) => compile_compare!("ge", ctx, lhs, rhs),
             Oper::LAnd(lhs, rhs) => compile_arithmetic!("and", self, ctx, lhs, rhs),
             Oper::LOr(lhs, rhs) => compile_arithmetic!("or", self, ctx, lhs, rhs),
+            Oper::Mod(lhs, rhs) => {
+                let lhs = lhs.compile(ctx)?;
+                let rhs = lhs.compile(ctx)?;
+                format!(
+                    "(i32.rem_s (i32.add (i32.rem_s (local.get $x) (local.get $y)) (local.get $y)) (local.get $y))"
+                )
+            }
             Oper::BNot(lhs) => {
                 let minus_one = Expr::Literal(Value::Integer(-1));
                 compile_arithmetic!("xor", self, ctx, lhs, minus_one)
