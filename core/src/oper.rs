@@ -35,6 +35,7 @@ impl Node for Oper {
             Some(match oper {
                 "~" => Oper::BNot(Expr::parse(token)?),
                 "!" => Oper::LNot(Expr::parse(token)?),
+                "-" => Oper::Sub(Expr::Literal(Value::Integer(0)), Expr::parse(token)?),
                 _ => return None,
             })
         } else {
