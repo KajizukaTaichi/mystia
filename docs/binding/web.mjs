@@ -41,7 +41,7 @@ export async function mystia(code) {
         return mystia_write(instance, "str", answer);
     };
     mystiaFunctions.init_canvas = () => {
-        const canvas = document.getElementById("mystia-canvas");
+        let canvas = document.getElementById("mystia-canvas");
         if (canvas == null) {
             canvas = document.createElement("canvas");
             canvas.width = window.innerWidth;
