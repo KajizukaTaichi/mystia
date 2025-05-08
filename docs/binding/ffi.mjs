@@ -50,29 +50,29 @@ export function read(instance, type, value) {
 }
 
 export function write(instance, type, value) {
+    const memory = new Uint8Array(instance.exports.mem.buffer);
     if (type == null) return null;
     if (type == "int" || type == "num") {
         return value;
     } else if (type == "str") {
         const binary = new TextEncoder().encode(value + "\0");
-        const memory = new Uint8Array(instance.exports.mem.buffer);
         const pointer = instance.exports.allocator;
         instance.exports.malloc(binary.length);
         memory.set(binary, pointer);
         return pointer;
     } else if (type.type == "array") {
-        const memory = new Uint8Array(instance.exports.mem.buffer);
         let array = [];
-        for (elm of value) {
+        for (let elm of value) {
             array.push(write(instance, type.element, elm));
         }
+        const bytes = type.element == "num" ? 8 : 4;
         const pointer = instance.exports.allocator;
-        for (elm of array) {
-            const pointer = instance.exports.allocator;
-            instance.exports.malloc(type.element == "num" ? 8 : 4);
-            memory.set(elm, pointer);
+        for (let elm of array) {
+            let addr = instance.exports.allocator;
+            instance.exports.malloc(bytes);
+            memory.set([elm], addr);
         }
-        return pointer;
+        return pointer - type.length * bytes;
     }
 }
 
