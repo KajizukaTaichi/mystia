@@ -73,6 +73,19 @@ export function write(instance, type, value) {
             memory.set([elm], addr);
         }
         return pointer - type.length * bytes;
+    } else if (type.type == "dict") {
+        let array = [];
+        for (let [_name, field] of Object.entries(type.fields)) {
+            array.push(write(instance, field.type, field));
+        }
+        const bytes = type.element == "num" ? 8 : 4;
+        const pointer = instance.exports.allocator;
+        for (let [_name, field] of Object.entries(type.fields)) {
+            let addr = instance.exports.allocator;
+            instance.exports.malloc(bytes);
+            memory.set([field], addr);
+        }
+        return pointer - type.length * bytes;
     }
 }
 
