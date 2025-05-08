@@ -245,9 +245,6 @@ impl Node for Expr {
             Expr::Call(name, args) => {
                 let (_, args_type, ret_type) = ctx.function_type.get(name)?.clone();
                 let mut func = |(arg, typ): (&Expr, &Type)| type_check!(arg, typ, ctx);
-                if args_type.len() != args_type.len() {
-                    return None;
-                }
                 let _ = iter_map!(args.iter().zip(args_type.values()), func);
                 ret_type.clone()
             }
