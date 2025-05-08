@@ -17,6 +17,7 @@ export async function mystia(code) {
         int_to_str: null,
         concat: null,
         write: null,
+        rand: null,
     };
     const { instance } = await WebAssembly.instantiate(bytecodes, {
         env: {
@@ -28,6 +29,7 @@ export async function mystia(code) {
             int_to_str: (num) => mystiaFunctions.int_to_str(num),
             concat: (str1, str2) => mystiaFunctions.concat(str1, str2),
             write: (data) => mystiaFunctions.write(data),
+            rand: () => mystiaFunctions.rand(),
         },
     });
     mystiaFunctions.alert = (message) => {
@@ -75,6 +77,9 @@ export async function mystia(code) {
     };
     mystiaFunctions.write = (data) => {
         document.write(mystia_read(instance, "str", data));
+    };
+    mystiaFunctions.rand = () => {
+        return Math.random();
     };
 
     const value = instance.exports._start();
