@@ -163,6 +163,7 @@ impl Node for Stmt {
                     let function = ctx.function_type.get(name)?.clone();
                     ctx.variable_type = function.variables.clone();
                     ctx.argument_type = function.arguments.clone();
+                    let ptr = "(type $fn_type (func (param i32) (result i32)))";
                     let code = format!(
                         "(func ${name} (export \"{name}\") {args} {ret} {locals} {body})",
                         args =
@@ -188,19 +189,15 @@ impl Node for Stmt {
                 let Oper::Cast(Expr::Call(name, _), _) = func else {
                     return None;
                 };
-                let function = ctx.function_type.get(name)?.clone();
+                let func = ctx.function_type.get(name)?.clone();
                 let code = format!(
                     "(import \"env\" \"{name}\" (func ${name} {} {}))",
-                    if function.arguments.is_empty() {
+                    if func.arguments.is_empty() {
                         String::new()
                     } else {
-                        format!(
-                            "(param {})",
-                            join!(iter_map!(function.arguments, |(_, typ): (_, Type)| typ
-                                .compile(ctx)))
-                        )
+                        config_args!(func)
                     },
-                    config_return!(function.returns, ctx)?,
+                    config_return!(func.returns, ctx)?,
                 );
                 ctx.import_code.push(code);
                 String::new()
