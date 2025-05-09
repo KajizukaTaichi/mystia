@@ -135,15 +135,20 @@ impl Node for Oper {
                 Value::Enum(value as i32, enum_type.clone()).compile(ctx)?
             }
             Oper::Field(expr, key) => {
-                let Type::Dict(dict) = expr.type_infer(ctx)? else {
+                let typ = expr.type_infer(ctx)?;
+                if let Type::Dict(dict) = typ {
+                    let (offset, typ) = dict.get(key)?.clone();
+                    let addr = Oper::Add(
+                        Expr::Oper(Box::new(Oper::Cast(expr.clone(), Type::Integer))),
+                        Expr::Literal(Value::Integer(offset.clone())),
+                    );
+                    format!("({}.load {})", typ.compile(ctx)?, addr.compile(ctx)?)
+                } else if let (Expr::Literal(Value::Integer(d)), Ok(n)) = (expr, key.parse::<i32>())
+                {
+                    Value::Number(ok!(format!("{d}.{n}").parse::<f64>())?).compile(ctx)?
+                } else {
                     return None;
-                };
-                let (offset, typ) = dict.get(key)?.clone();
-                let addr = Oper::Add(
-                    Expr::Oper(Box::new(Oper::Cast(expr.clone(), Type::Integer))),
-                    Expr::Literal(Value::Integer(offset.clone())),
-                );
-                format!("({}.load {})", typ.compile(ctx)?, addr.compile(ctx)?)
+                }
             }
         })
     }
@@ -191,17 +196,22 @@ impl Node for Oper {
             Oper::Enum(typ, _) => Some(typ.type_infer(ctx)?),
             Oper::Field(dict, key) => {
                 let infered = dict.type_infer(ctx)?;
-                let Type::Dict(dict) = infered.clone() else {
+                if let Type::Dict(dict) = infered.clone() {
+                    let Some((_offset, typ)) = dict.get(key) else {
+                        let error_message =
+                            format!("{} haven't property \"{key}\"", infered.format());
+                        ctx.occurred_error = Some(error_message);
+                        return None;
+                    };
+                    Some(typ.clone())
+                } else if let (Expr::Literal(Value::Integer(_)), Ok(_)) = (dict, key.parse::<i32>())
+                {
+                    Some(Type::Number)
+                } else {
                     let error_message = format!("can't field access to {}", infered.format());
                     ctx.occurred_error = Some(error_message);
-                    return None;
-                };
-                let Some((_offset, typ)) = dict.get(key) else {
-                    let error_message = format!("{} haven't property \"{key}\"", infered.format());
-                    ctx.occurred_error = Some(error_message);
-                    return None;
-                };
-                Some(typ.clone())
+                    None
+                }
             }
         }
     }
