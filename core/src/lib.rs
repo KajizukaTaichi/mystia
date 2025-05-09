@@ -42,8 +42,6 @@ pub struct Compiler {
     pub declare_code: Vec<String>,
     /// Type alias that's defined by user
     pub type_alias: IndexMap<String, Type>,
-    /// Type inference, hypothesis for unknown
-    pub expect_type: Option<Type>,
     /// Errors that occurred during compilation
     pub occurred_error: Option<String>,
     /// Type environment for variable
@@ -63,7 +61,6 @@ impl Compiler {
             import_code: vec![],
             static_data: vec![],
             declare_code: vec![],
-            expect_type: None,
             occurred_error: None,
             type_alias: IndexMap::new(),
             variable_type: IndexMap::new(),
