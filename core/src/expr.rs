@@ -53,9 +53,11 @@ impl Node for Expr {
             let args = args.iter().map(|i| Expr::parse(&i));
             let args = args.collect::<Option<Vec<_>>>()?;
             Some(Expr::Call(name.to_string(), args))
+        // Dictionary access `dict.field`
         } else if token.contains(".") {
             let (dict, field) = token.rsplit_once(".")?;
             Some(Expr::Field(Box::new(Expr::parse(dict)?), field.to_owned()))
+        // Enumerate access `( a | b )#a`
         } else if token.contains("#") {
             let (dict, enuma) = token.rsplit_once("#")?;
             Some(Expr::Enum(Type::parse(dict)?, enuma.to_owned()))
