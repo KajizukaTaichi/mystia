@@ -13,29 +13,37 @@ pub enum Value {
 
 impl Node for Value {
     fn parse(source: &str) -> Option<Self> {
-        Some(
-            // Integer literal
-            if let Ok(n) = source.parse::<i32>() {
-                Value::Integer(n)
-            // Number literal
-            } else if let Ok(n) = source.parse::<f64>() {
-                Value::Number(n)
-            // Boolean literal
-            } else if let Ok(n) = source.parse::<bool>() {
-                Value::Bool(n)
-            // String literal
-            } else if source.starts_with("\"") && source.ends_with("\"") {
-                let source = source.get(1..source.len() - 1)?.trim();
-                Value::String(str_escape(source))
-            } else if source.starts_with("[") && source.ends_with("]") {
-                let source = source.get(1..source.len() - 1)?.trim();
-                let elms = tokenize(source, &[","], false, true)?;
-                let elms = elms.iter().map(|i| Expr::parse(&i));
-                Value::Array(elms.collect())
-            } else {
-                return None;
-            },
-        )
+        // Integer literal
+        if let Ok(n) = source.parse::<i32>() {
+            Some(Value::Integer(n))
+        // Number literal
+        } else if let Ok(n) = source.parse::<f64>() {
+            Some(Value::Number(n))
+        // Boolean literal
+        } else if let Ok(n) = source.parse::<bool>() {
+            Some(Value::Bool(n))
+        // String literal
+        } else if source.starts_with("\"") && source.ends_with("\"") {
+            let source = source.get(1..source.len() - 1)?.trim();
+            Some(Value::String(str_escape(source)))
+        // Array `[expr, ...]`
+        } else if source.starts_with("[") && source.ends_with("]") {
+            let source = source.get(1..source.len() - 1)?.trim();
+            let elms = tokenize(source, &[","], false, true)?;
+            let elms = elms.iter().map(|i| Expr::parse(&i));
+            Some(Value::Array(elms.collect::<Option<Vec<_>>>()?))
+        // Dict `{ field = value, ... }`
+        } else if source.starts_with("{") && source.ends_with("}") {
+            let token = source.get(1..source.len() - 1)?.trim();
+            let mut result = IndexMap::new();
+            for line in tokenize(token, &[","], false, true)? {
+                let (name, value) = line.split_once("=")?;
+                result.insert(name.trim().to_string(), Expr::parse(value)?);
+            }
+            Some(Value::Dict(result))
+        } else {
+            None
+        }
     }
 
     fn compile(&self, ctx: &mut Compiler) -> Option<String> {
