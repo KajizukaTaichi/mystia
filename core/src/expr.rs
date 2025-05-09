@@ -25,28 +25,10 @@ impl Node for Expr {
         // Literal value
         if let Some(literal) = Value::parse(&token) {
             Some(Expr::Literal(literal))
-        // Array `[expr, ...]`
-        } else if token.starts_with("[") && token.ends_with("]") {
-            let token = token.get(1..token.len() - 1)?.trim();
-            let mut result = vec![];
-            for i in tokenize(token, &[","], false, true)? {
-                result.push(Expr::parse(&i)?);
-            }
-            Some(Expr::Literal(Value::Array(result)))
         // Code block `{ stmt; ... }`
         } else if token.starts_with("{") && token.ends_with("}") {
             let token = token.get(1..token.len() - 1)?.trim();
-            if let Some(block) = Block::parse(token) {
-                Some(Expr::Block(block))
-            } else {
-                // If not a block, parse as dictionary
-                let mut result = IndexMap::new();
-                for line in tokenize(token, &[","], false, true)? {
-                    let (name, value) = line.split_once("=")?;
-                    result.insert(name.trim().to_string(), Expr::parse(value)?);
-                }
-                Some(Expr::Literal(Value::Dict(result)))
-            }
+            Some(Expr::Block(Block::parse(token)?))
         // Prioritize higher than others
         } else if token.starts_with("(") && token.ends_with(")") {
             let token = token.get(1..token.len() - 1)?.trim();
