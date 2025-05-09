@@ -1,13 +1,13 @@
 let alice = {
-    name = "Alice",
-    age = 13.2,
-    score = {
-        math = 10,
-        english = 49,
-        science = 87
+    name "Alice",
+    age 13.2,
+    score {
+        math 10,
+        english 49,
+        science 87
     },
-    total = 0,
-    result = false
+    total 0,
+    result false
 };
 
 let exam = alice.score;
