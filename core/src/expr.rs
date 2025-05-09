@@ -6,7 +6,9 @@ pub enum Expr {
     Variable(String),
     Oper(Box<Oper>),
     Call(String, Vec<Expr>),
-    Access(Box<Expr>, Box<Expr>),
+    Index(Box<Expr>, Box<Expr>),
+    Field(Box<Expr>, String),
+    Enum(Type, String),
     Block(Block),
     MemCpy(Box<Expr>),
 }
@@ -57,7 +59,7 @@ impl Node for Expr {
         } else if token.contains("[") && token.ends_with("]") {
             let token = token.get(..token.len() - 1)?.trim();
             let (array, index) = token.rsplit_once("[")?;
-            Some(Expr::Access(
+            Some(Expr::Index(
                 Box::new(Expr::parse(array)?),
                 Box::new(Expr::parse(index)?),
             ))
@@ -69,6 +71,12 @@ impl Node for Expr {
             let args = args.iter().map(|i| Expr::parse(&i));
             let args = args.collect::<Option<Vec<_>>>()?;
             Some(Expr::Call(name.to_string(), args))
+        } else if token.contains(".") {
+            let (dict, field) = token.rsplit_once(".")?;
+            Some(Expr::Field(Box::new(Expr::parse(dict)?), field.to_owned()))
+        } else if token.contains("#") {
+            let (dict, enuma) = token.rsplit_once("#")?;
+            Some(Expr::Enum(Type::parse(dict)?, enuma.to_owned()))
         // Variable reference
         } else if !RESERVED.contains(&token) && token.is_ascii() {
             Some(Expr::Variable(token.to_string()))
@@ -90,7 +98,7 @@ impl Node for Expr {
                         .collect::<Option<Vec<_>>>()?
                 )
             ),
-            Expr::Access(array, index) => {
+            Expr::Index(array, index) => {
                 let Type::Array(typ, len) = array.type_infer(ctx)? else {
                     return None;
                 };
@@ -105,6 +113,37 @@ impl Node for Expr {
                     ))),
                 );
                 format!("({}.load {})", typ.compile(ctx)?, addr.compile(ctx)?)
+            }
+            Expr::Field(expr, key) => {
+                let typ = expr.type_infer(ctx)?;
+                if let Type::Dict(dict) = typ {
+                    let (offset, typ) = dict.get(key)?.clone();
+                    let addr = Oper::Add(
+                        Expr::Oper(Box::new(Oper::Cast(*expr.clone(), Type::Integer))),
+                        Expr::Literal(Value::Integer(offset.clone())),
+                    );
+                    format!("({}.load {})", typ.compile(ctx)?, addr.compile(ctx)?)
+                } else if let (Expr::Literal(Value::Integer(d)), Ok(n)) =
+                    (*expr.clone(), key.parse::<i32>())
+                {
+                    Value::Number(ok!(format!("{d}.{n}").parse::<f64>())?).compile(ctx)?
+                } else {
+                    return None;
+                }
+            }
+            Expr::Enum(typ, key) => {
+                let typ = typ.type_infer(ctx)?;
+                let Type::Enum(enum_type) = typ.clone() else {
+                    let error_message = format!("can't access enumerator to {}", typ.format());
+                    ctx.occurred_error = Some(error_message);
+                    return None;
+                };
+                let Some(value) = enum_type.iter().position(|item| item == key) else {
+                    let error_message = format!("{key} is invalid variant of {}", typ.format());
+                    ctx.occurred_error = Some(error_message);
+                    return None;
+                };
+                Value::Enum(value as i32, enum_type.clone()).compile(ctx)?
             }
             Expr::Block(block) => block.compile(ctx)?,
             Expr::MemCpy(from) => {
@@ -155,7 +194,7 @@ impl Node for Expr {
                 ziped.map(func).collect::<Option<Vec<_>>>()?;
                 function.returns.clone()
             }
-            Expr::Access(arr, _) => {
+            Expr::Index(arr, _) => {
                 let infered = arr.type_infer(ctx)?;
                 let Some(Type::Array(typ, _)) = infered.type_infer(ctx) else {
                     let error_message = format!("can't index access to {}", infered.format());
@@ -164,6 +203,22 @@ impl Node for Expr {
                 };
                 *typ
             }
+            Expr::Field(dict, key) => {
+                let infered = dict.type_infer(ctx)?;
+                if let Type::Dict(dict) = infered.clone() {
+                    let Some((_offset, typ)) = dict.get(key) else {
+                        let error_message = format!("{} haven't field `{key}`", infered.format());
+                        ctx.occurred_error = Some(error_message);
+                        return None;
+                    };
+                    typ.clone()
+                } else {
+                    let error_message = format!("can't field access to {}", infered.format());
+                    ctx.occurred_error = Some(error_message);
+                    return None;
+                }
+            }
+            Expr::Enum(typ, _) => typ.type_infer(ctx)?,
             Expr::Block(block) => block.type_infer(ctx)?,
             Expr::MemCpy(from) => from.type_infer(ctx)?,
         })
