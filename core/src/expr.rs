@@ -123,7 +123,7 @@ impl Node for Expr {
                     return None;
                 };
                 let Some(value) = enum_type.iter().position(|item| item == key) else {
-                    let error_message = format!("{key} is invalid variant of {}", typ.format());
+                    let error_message = format!("`{key}` is invalid variant of {}", typ.format());
                     ctx.occurred_error = Some(error_message);
                     return None;
                 };
