@@ -1,6 +1,8 @@
 # Mystia
 A programming language that will be compiled to WebAssembly
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/KajizukaTaichi/mystia)
+
 ## Features
 - **Type inference**: You can use variable without having declare and annotation
 - **ML-like syntax**: The syntax is inspired by ML-family language (e.g. define function using `let` statement)
