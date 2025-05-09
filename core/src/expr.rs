@@ -230,7 +230,7 @@ impl Node for Expr {
             Expr::Call(name, args) => {
                 let function = ctx.function_type.get(name)?.clone();
                 let func = |(arg, typ): (&Expr, &Type)| type_check!(arg, typ, ctx);
-                if args.len() == function.arguments.len() {
+                if args.len() != function.arguments.len() {
                     let errmsg = format!(
                         "arguments of function `{name}` length should be {}, but passed {} values",
                         function.arguments.len(),
