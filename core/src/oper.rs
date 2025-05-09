@@ -143,6 +143,9 @@ impl Node for Oper {
                         Expr::Literal(Value::Integer(offset.clone())),
                     );
                     format!("({}.load {})", typ.compile(ctx)?, addr.compile(ctx)?)
+                } else if let (Expr::Literal(Value::Integer(d)), Ok(n)) = (expr, key.parse::<i32>())
+                {
+                    Value::Number(ok!(format!("{d}.{n}").parse::<f64>())?).compile(ctx)?
                 } else {
                     return None;
                 }
@@ -200,6 +203,9 @@ impl Node for Oper {
                         return None;
                     };
                     Some(typ.clone())
+                } else if let (Expr::Literal(Value::Integer(_)), Ok(_)) = (dict, key.parse::<i32>())
+                {
+                    Some(Type::Number)
                 } else {
                     let error_message = format!("can't field access to {}", infered.format());
                     ctx.occurred_error = Some(error_message);
