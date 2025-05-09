@@ -38,19 +38,20 @@ fn main() {
     if cli.summary {
         println!("# Type Inference Summary");
         println!("Functions:");
-        for (name, (var, arg, ret)) in &compiler.function_type {
+        for (name, func) in &compiler.function_type {
             println!(" - {name}:");
             println!("     Locals:");
-            for (name, typ) in var {
+            for (name, typ) in &func.variables {
                 let typ = typ.decompress_alias(&compiler).format();
                 println!("      - {name}: {typ}");
             }
             println!("     Arguments:");
-            for (name, typ) in arg {
+            for (name, typ) in &func.arguments {
                 let typ = typ.decompress_alias(&compiler).format();
                 println!("      - {name}: {typ}");
             }
-            println!("     Returns: {}", ret.decompress_alias(&compiler).format());
+            let ret = func.returns.decompress_alias(&compiler).format();
+            println!("     Returns: {ret}",);
         }
         println!("Variables:");
         for (name, typ) in &compiler.variable_type {
