@@ -11,7 +11,6 @@ pub enum Stmt {
     Return(Option<Expr>),
     Next,
     Break,
-    Drop,
 }
 
 impl Node for Stmt {
@@ -202,7 +201,6 @@ impl Node for Stmt {
                 ctx.import_code.push(code);
                 String::new()
             }
-            Stmt::Drop => "(drop)".to_string(),
             Stmt::Return(Some(expr)) => format!("(return {})", expr.compile(ctx)?),
             Stmt::Return(_) => "(return)".to_string(),
             Stmt::Type(_, _) => String::new(),
@@ -291,7 +289,6 @@ impl Node for Stmt {
                 );
                 Type::Void
             }
-            Stmt::Drop => Type::Void,
             Stmt::Return(_) => Type::Void,
         })
     }
