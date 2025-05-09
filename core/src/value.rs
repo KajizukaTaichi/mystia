@@ -37,7 +37,7 @@ impl Node for Value {
             let token = source.get(1..source.len() - 1)?.trim();
             let mut result = IndexMap::new();
             for line in tokenize(token, &[","], false, true)? {
-                let (name, value) = line.split_once("=")?;
+                let (name, value) = line.split_once(" ")?;
                 result.insert(name.trim().to_string(), Expr::parse(value)?);
             }
             Some(Value::Dict(result))
