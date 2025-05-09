@@ -68,8 +68,9 @@ impl Node for Expr {
         } else if token.contains("(") && token.ends_with(")") {
             let token = token.get(..token.len() - 1)?.trim();
             let (name, args) = token.split_once("(")?;
-            let func = |i: String| Expr::parse(&i);
-            let args = iter_map!(tokenize(args, &[","], false, true)?, func);
+            let args = tokenize(args, &[","], false, true)?;
+            let args = args.iter().map(|i| Expr::parse(&i));
+            let args = args.collect::<Option<Vec<_>>>()?;
             Some(Expr::Call(name.to_string(), args))
         // Dictionary access `dict.key`
         } else if token.contains(".") {
