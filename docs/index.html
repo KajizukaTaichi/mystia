@@ -64,17 +64,19 @@
 
                 <div class="inline-elements">
                     <button id="run" type="button" class="button">Run</button>
-                    <div class="field-label is-normal">
-                        <label id="example-guide" class="label">
-                            Example code:
-                        </label>
-                    </div>
+                    <button class="button" style="pointer-events: none">
+                        Example code:
+                    </button>
                     <input id="example-field" class="input" value="prime" />
                     <button id="example-select" type="button" class="button">
                         Select
                     </button>
                 </div>
-                <textarea id="code" class="textarea"></textarea>
+                <textarea
+                    id="code"
+                    class="textarea"
+                    placeholder="Your code is here..."
+                ></textarea>
                 <br />
                 <div class="field">
                     <label class="label" for="result">Result: </label>
@@ -107,7 +109,7 @@
                 loadExample(exampleFieldInput.value);
             });
 
-            codeEditor.value = runBtn.addEventListener("click", async (e) => {
+            runBtn.addEventListener("click", async (e) => {
                 const startTime = Date.now();
                 timer = setInterval(() => {
                     timerLabel.textContent = `Time: ${Date.now() - startTime}ms`;
