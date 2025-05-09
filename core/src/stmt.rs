@@ -52,21 +52,20 @@ impl Node for Stmt {
                 Some(Stmt::Let(Expr::parse(name)?, Expr::parse(value)?))
             } else {
                 let source = Oper::parse(source)?;
-                if let Oper::Add(name, value) = source {
-                    let value = Expr::Oper(Box::new(Oper::Add(name.clone(), value)));
-                    Some(Stmt::Let(name, value))
-                } else if let Oper::Sub(name, value) = source {
-                    let value = Expr::Oper(Box::new(Oper::Sub(name.clone(), value)));
-                    Some(Stmt::Let(name, value))
-                } else if let Oper::Mul(name, value) = source {
-                    let value = Expr::Oper(Box::new(Oper::Mul(name.clone(), value)));
-                    Some(Stmt::Let(name, value))
-                } else if let Oper::Div(name, value) = source {
-                    let value = Expr::Oper(Box::new(Oper::Div(name.clone(), value)));
-                    Some(Stmt::Let(name, value))
-                } else {
-                    None
+                macro_rules! assign_with {
+                    ($op: ident) => {
+                        if let Oper::$op(name, value) = source {
+                            let value = Expr::Oper(Box::new(Oper::$op(name.clone(), value)));
+                            return Some(Stmt::Let(name, value));
+                        }
+                    };
                 }
+                assign_with!(Add);
+                assign_with!(Sub);
+                assign_with!(Mul);
+                assign_with!(Div);
+                assign_with!(Mod);
+                None
             }
         } else if let Some(source) = source.strip_prefix("type ") {
             let (name, value) = source.split_once("=")?;
