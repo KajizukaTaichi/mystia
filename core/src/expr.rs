@@ -165,7 +165,11 @@ impl Node for Expr {
             }
             Expr::Call(name, args) => format!(
                 "(call ${name} {})",
-                join!(iter_map!(args, |x: &Expr| x.compile(ctx)))
+                join!(
+                    args.iter()
+                        .map(|x| x.compile(ctx))
+                        .collect::<Option<Vec<_>>>()?
+                )
             ),
             Expr::Access(array, index) => {
                 let Type::Array(typ, len) = array.type_infer(ctx)? else {
@@ -240,8 +244,17 @@ impl Node for Expr {
             Expr::Literal(literal) => literal.type_infer(ctx)?,
             Expr::Call(name, args) => {
                 let function = ctx.function_type.get(name)?.clone();
-                let mut func = |(arg, typ): (&Expr, &Type)| type_check!(arg, typ, ctx);
-                let _ = iter_map!(args.iter().zip(function.arguments.values()), func);
+                let func = |(arg, typ): (&Expr, &Type)| type_check!(arg, typ, ctx);
+                if args.len() == function.arguments.len() {
+                    let errmsg = format!(
+                        "arguments of function `{name}` length should be {}, but passed {} values",
+                        function.arguments.len(),
+                        args.len()
+                    );
+                    ctx.occurred_error = Some(errmsg);
+                    return None;
+                }
+                let _ = args.iter().zip(function.arguments.values()).map(func);
                 function.returns.clone()
             }
             Expr::Access(arr, _) => {
