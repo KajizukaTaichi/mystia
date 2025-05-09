@@ -144,7 +144,7 @@ impl Node for Stmt {
                     ctx.declare_code.push(code);
                     String::new()
                 }
-                Expr::Access(array, index) => {
+                Expr::Index(array, index) => {
                     let Type::Array(typ, len) = array.type_infer(ctx)? else {
                         return None;
                     };
@@ -166,26 +166,22 @@ impl Node for Stmt {
                         value.compile(ctx)?
                     )
                 }
-                Expr::Oper(oper) => {
-                    if let Oper::Field(expr, key) = &*oper.clone() {
-                        let Type::Dict(dict) = expr.type_infer(ctx)? else {
-                            return None;
-                        };
-                        let (offset, typ) = dict.get(key)?.clone();
-                        type_check!(typ, value.type_infer(ctx)?, ctx)?;
-                        let addr = Oper::Add(
-                            Expr::Oper(Box::new(Oper::Cast(expr.clone(), Type::Integer))),
-                            Expr::Literal(Value::Integer(offset)),
-                        );
-                        format!(
-                            "({}.store {} {})",
-                            typ.compile(ctx)?,
-                            addr.compile(ctx)?,
-                            value.compile(ctx)?
-                        )
-                    } else {
+                Expr::Field(expr, key) => {
+                    let Type::Dict(dict) = expr.type_infer(ctx)? else {
                         return None;
-                    }
+                    };
+                    let (offset, typ) = dict.get(key)?.clone();
+                    type_check!(typ, value.type_infer(ctx)?, ctx)?;
+                    let addr = Oper::Add(
+                        Expr::Oper(Box::new(Oper::Cast(*expr.clone(), Type::Integer))),
+                        Expr::Literal(Value::Integer(offset)),
+                    );
+                    format!(
+                        "({}.store {} {})",
+                        typ.compile(ctx)?,
+                        addr.compile(ctx)?,
+                        value.compile(ctx)?
+                    )
                 }
                 _ => return None,
             },
