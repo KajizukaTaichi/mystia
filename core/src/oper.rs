@@ -140,7 +140,7 @@ impl Node for Oper {
                 };
                 let (offset, typ) = dict.get(key)?.clone();
                 let addr = Oper::Add(
-                    Expr::Oper(Box::new(Oper::Cast(expr.clone(), Type::Integer))),
+                    Expr::Oper(Box::new(Oper::Cast(expr, Type::Integer))),
                     Expr::Literal(Value::Integer(offset.clone())),
                 );
                 format!("({}.load {})", typ.compile(ctx)?, addr.compile(ctx)?)
@@ -189,6 +189,20 @@ impl Node for Oper {
                 Some(Type::Integer)
             }
             Oper::Enum(typ, _) => Some(typ.type_infer(ctx)?),
+            Oper::Field(dict, key) => {
+                let infered = dict.type_infer(ctx)?;
+                let Type::Dict(dict) = infered.clone() else {
+                    let error_message = format!("can't field access to {}", infered.format());
+                    ctx.occurred_error = Some(error_message);
+                    return None;
+                };
+                let Some((_offset, typ)) = dict.get(key) else {
+                    let error_message = format!("{} haven't property \"{key}\"", infered.format());
+                    ctx.occurred_error = Some(error_message);
+                    return None;
+                };
+                typ.clone()
+            }
         }
     }
 }
