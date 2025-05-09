@@ -163,12 +163,6 @@ impl Node for Stmt {
                     let function = ctx.function_type.get(name)?.clone();
                     ctx.variable_type = function.variables.clone();
                     ctx.argument_type = function.arguments.clone();
-                    let ptr = format!(
-                        "(type $fn_type (func {}) {}) (elem (i32.const {}) ${name})",
-                        compile_args_type!(function.clone(), ctx),
-                        compile_return!(function.returns, ctx),
-                        ctx.function_pointer
-                    );
                     let code = format!(
                         "(func ${name} (export \"{name}\") {args} {ret} {locals} {body})",
                         args =
@@ -185,9 +179,7 @@ impl Node for Stmt {
                     );
                     ctx.variable_type.clear();
                     ctx.argument_type.clear();
-                    ctx.declare_code.push(ptr);
                     ctx.declare_code.push(code);
-                    ctx.function_pointer += 1;
                     String::new()
                 }
                 _ => return None,
