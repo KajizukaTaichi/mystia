@@ -71,10 +71,6 @@ impl Node for Expr {
             let args = args.iter().map(|i| Expr::parse(&i));
             let args = args.collect::<Option<Vec<_>>>()?;
             Some(Expr::Call(name.to_string(), args))
-        // Dictionary access `dict.key`
-        } else if token.contains(".") {
-            let (name, key) = token.rsplit_once(".")?;
-            Some(Expr::Field(Box::new(Expr::parse(name)?), key.to_string()))
         // Variable reference
         } else if !RESERVED.contains(&token) && token.is_ascii() {
             Some(Expr::Variable(token.to_string()))
