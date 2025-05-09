@@ -39,10 +39,10 @@ macro_rules! config_return {
 
 #[macro_export]
 macro_rules! config_args {
-    ($function: expr) => {
+    ($function: expr, $ctx: expr) => {
         format!(
             "(param {})",
-            join!(iter_map!($function.arguments, |(_, typ): (_, Type)| typ.compile(ctx)))
+            join!(iter_map!($function.arguments, |(_, typ): (_, Type)| typ.compile($ctx)))
         )
     };
 }
