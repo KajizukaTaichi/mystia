@@ -9,9 +9,9 @@ type Weekday = (
 );
 
 let is_weekend(the_day: Weekday) = {
-    (Weekday::Sunday   == the_day) ||
-    (Weekday::Saturday == the_day)
+    (Weekday#Sunday   == the_day) ||
+    (Weekday#Saturday == the_day)
 };
 
-let today = Weekday::Sunday;
+let today = Weekday#Sunday;
 is_weekend(today)
