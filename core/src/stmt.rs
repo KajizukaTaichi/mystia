@@ -92,7 +92,7 @@ impl Node for Stmt {
             Stmt::If(cond, then, r#else) => {
                 format!(
                     "(if {} {} (then {}) {})",
-                    config_return!(self.type_infer(ctx)?, ctx)?,
+                    compile_return!(self.type_infer(ctx)?, ctx),
                     cond.compile(ctx)?,
                     then.compile(ctx)?,
                     if let Some(r#else) = r#else {
@@ -163,7 +163,12 @@ impl Node for Stmt {
                     let function = ctx.function_type.get(name)?.clone();
                     ctx.variable_type = function.variables.clone();
                     ctx.argument_type = function.arguments.clone();
-                    let ptr = "(type $fn_type (func (param i32) (result i32)))";
+                    let ptr = format!(
+                        "(type $fn_type (func {}) {}) (elem (i32.const {}) ${name})",
+                        compile_args_type!(function.clone(), ctx),
+                        compile_return!(function.returns, ctx),
+                        ctx.function_pointer
+                    );
                     let code = format!(
                         "(func ${name} (export \"{name}\") {args} {ret} {locals} {body})",
                         args =
@@ -174,13 +179,15 @@ impl Node for Stmt {
                                     typ.type_infer(ctx)?.compile(ctx)?
                                 ))
                             )),
-                        ret = config_return!(function.returns, ctx)?,
+                        ret = compile_return!(function.returns, ctx),
                         body = value.compile(ctx)?,
                         locals = expand_local(ctx)?
                     );
                     ctx.variable_type.clear();
                     ctx.argument_type.clear();
+                    ctx.declare_code.push(ptr);
                     ctx.declare_code.push(code);
+                    ctx.function_pointer += 1;
                     String::new()
                 }
                 _ => return None,
@@ -195,9 +202,9 @@ impl Node for Stmt {
                     if func.arguments.is_empty() {
                         String::new()
                     } else {
-                        config_args!(func)
+                        compile_args_type!(func, ctx)
                     },
-                    config_return!(func.returns, ctx)?,
+                    compile_return!(func.returns, ctx),
                 );
                 ctx.import_code.push(code);
                 String::new()
