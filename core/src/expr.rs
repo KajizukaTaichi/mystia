@@ -6,8 +6,6 @@ pub enum Expr {
     Variable(String),
     Oper(Box<Oper>),
     Call(String, Vec<Expr>),
-    Array(Vec<Expr>),
-    Dict(IndexMap<String, Expr>),
     Access(Box<Expr>, Box<Expr>),
     Block(Block),
     MemCpy(Box<Expr>),
@@ -32,7 +30,7 @@ impl Node for Expr {
             for i in tokenize(token, &[","], false, true)? {
                 result.push(Expr::parse(&i)?);
             }
-            Some(Expr::Array(result))
+            Some(Expr::Literal(Value::Array(result)))
         // Code block `{ stmt; ... }`
         } else if token.starts_with("{") && token.ends_with("}") {
             let token = token.get(1..token.len() - 1)?.trim();
@@ -45,7 +43,7 @@ impl Node for Expr {
                     let (name, value) = line.split_once("=")?;
                     result.insert(name.trim().to_string(), Expr::parse(value)?);
                 }
-                Some(Expr::Dict(result))
+                Some(Expr::Literal(Value::Dict(result)))
             }
         // Prioritize higher than others
         } else if token.starts_with("(") && token.ends_with(")") {
@@ -84,81 +82,6 @@ impl Node for Expr {
             Expr::Oper(oper) => oper.compile(ctx)?,
             Expr::Variable(name) => format!("(local.get ${name})"),
             Expr::Literal(literal) => literal.compile(ctx)?,
-            Expr::Array(array) => {
-                let len = array.len();
-                let inner_type = array.first()?.type_infer(ctx)?;
-                let array = array.clone();
-                let mut result: Vec<_> = vec![];
-                let pointer;
-
-                if_ptr!(
-                    inner_type =>
-                    // if inner type is pointer (not primitive)
-                    {
-                        let mut inner_codes = vec![];
-                        for elm in array {
-                            type_check!(inner_type, elm.type_infer(ctx)?, ctx)?;
-                            inner_codes.push(elm.compile(ctx)?)
-                        }
-                        pointer = ctx.allocator;
-                        for code in inner_codes {
-                            result.push(format!(
-                                "({type}.store {address} {code})",
-                                r#type = &inner_type.compile(ctx)?,
-                                address = Value::Integer(ctx.allocator).compile(ctx)?,
-                            ));
-                            ctx.allocator += inner_type.pointer_length();
-                        }
-                    } else {
-                        pointer = ctx.allocator;
-                        for elm in array {
-                            type_check!(inner_type, elm.type_infer(ctx)?, ctx)?;
-                            result.push(format!(
-                                "({type}.store {address} {value})",
-                                r#type = &inner_type.compile(ctx)?,
-                                address = Value::Integer(ctx.allocator).compile(ctx)?,
-                                value = elm.compile(ctx)?
-                            ));
-                            ctx.allocator += inner_type.pointer_length();
-                        }
-                    }
-                );
-                format!(
-                    "{} {}",
-                    Value::Array(pointer, len, inner_type).compile(ctx)?,
-                    join!(result)
-                )
-            }
-            Expr::Dict(dict) => {
-                let mut result: Vec<_> = vec![];
-                let Type::Dict(infered) = self.type_infer(ctx)? else {
-                    return None;
-                };
-
-                let mut prestore = IndexMap::new();
-                for (name, elm) in dict {
-                    let typ = elm.type_infer(ctx)?;
-                    if_ptr!(typ => { prestore.insert(name, elm.compile(ctx)?) });
-                }
-
-                let pointer = ctx.allocator;
-                for (name, elm) in dict {
-                    let typ = elm.type_infer(ctx)?;
-                    result.push(format!(
-                        "({type}.store {address} {value})",
-                        r#type = typ.clone().compile(ctx)?,
-                        address = Value::Integer(ctx.allocator).compile(ctx)?,
-                        value = prestore.get(name).cloned().or_else(|| elm.compile(ctx))?
-                    ));
-                    ctx.allocator += typ.pointer_length();
-                }
-
-                format!(
-                    "{} {}",
-                    Value::Dict(pointer, infered).compile(ctx)?,
-                    join!(result)
-                )
-            }
             Expr::Call(name, args) => format!(
                 "(call ${name} {})",
                 join!(
@@ -214,17 +137,6 @@ impl Node for Expr {
                     ctx.occurred_error = Some(format!("undefined variable `{name}`"));
                     return None;
                 }
-            }
-            Expr::Array(e) => Type::Array(Box::new(e.first()?.type_infer(ctx)?), e.len()),
-            Expr::Dict(dict) => {
-                let mut result = IndexMap::new();
-                let mut index: i32 = 0;
-                for (name, elm) in dict {
-                    let typ = elm.type_infer(ctx)?;
-                    result.insert(name.to_string(), (index, typ.clone()));
-                    index += typ.pointer_length();
-                }
-                Type::Dict(result)
             }
             Expr::Literal(literal) => literal.type_infer(ctx)?,
             Expr::Call(name, args) => {
