@@ -221,10 +221,6 @@ impl Node for Expr {
                     local.clone()
                 } else if let Some(arg) = ctx.argument_type.get(name) {
                     arg.clone()
-                } else if let Some(expect) = ctx.expect_type.clone() {
-                    ctx.expect_type = None;
-                    ctx.argument_type.insert(name.to_owned(), expect.clone());
-                    expect.clone()
                 } else {
                     ctx.occurred_error = Some(format!("undefined variable: {name}"));
                     return None;
