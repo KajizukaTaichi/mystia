@@ -70,25 +70,57 @@ impl Node for Oper {
     }
 
     fn compile(&self, ctx: &mut Compiler) -> Option<String> {
+        macro_rules! compile_arithmetic {
+            ($oper: expr, $lhs: expr, $rhs: expr) => {{
+                type_check!($lhs, $rhs, ctx)?;
+                format!(
+                    "({}.{} {} {})",
+                    $lhs.type_infer(ctx)?.compile(ctx)?,
+                    $oper,
+                    $lhs.compile(ctx)?,
+                    $rhs.compile(ctx)?
+                )
+            }};
+        }
+        macro_rules! compile_compare {
+            ($oper: expr, $lhs: expr, $rhs: expr) => {{
+                let ret = type_check!($lhs, $rhs, ctx)?.compile(ctx)?;
+                format!(
+                    "({ret}.{}{} {} {})",
+                    $oper,
+                    if ret == "i32" { "_s" } else { "" },
+                    $lhs.compile(ctx)?,
+                    $rhs.compile(ctx)?
+                )
+            }};
+            ($oper: expr, $lhs: expr) => {
+                format!(
+                    "({}.{} {})",
+                    $lhs.type_infer(ctx)?.compile(ctx)?,
+                    $oper,
+                    $lhs.compile(ctx)?
+                )
+            };
+        }
         Some(match self {
-            Oper::Add(lhs, rhs) => compile_arithmetic!("add", self, ctx, lhs, rhs),
-            Oper::Sub(lhs, rhs) => compile_arithmetic!("sub", self, ctx, lhs, rhs),
-            Oper::Mul(lhs, rhs) => compile_arithmetic!("mul", self, ctx, lhs, rhs),
-            Oper::Div(lhs, rhs) => compile_compare!("div", ctx, lhs, rhs),
-            Oper::Shr(lhs, rhs) => compile_compare!("shr", ctx, lhs, rhs),
-            Oper::Shl(lhs, rhs) => compile_arithmetic!("shl", self, ctx, lhs, rhs),
-            Oper::BAnd(lhs, rhs) => compile_arithmetic!("and", self, ctx, lhs, rhs),
-            Oper::BOr(lhs, rhs) => compile_arithmetic!("or", self, ctx, lhs, rhs),
-            Oper::XOr(lhs, rhs) => compile_arithmetic!("xor", self, ctx, lhs, rhs),
-            Oper::LNot(lhs) => compile_compare!("eqz", ctx, lhs),
-            Oper::Eql(lhs, rhs) => compile_arithmetic!("eq", self, ctx, lhs, rhs),
-            Oper::Neq(lhs, rhs) => compile_arithmetic!("ne", self, ctx, lhs, rhs),
-            Oper::Lt(lhs, rhs) => compile_compare!("lt", ctx, lhs, rhs),
-            Oper::Gt(lhs, rhs) => compile_compare!("gt", ctx, lhs, rhs),
-            Oper::LtEq(lhs, rhs) => compile_compare!("le", ctx, lhs, rhs),
-            Oper::GtEq(lhs, rhs) => compile_compare!("ge", ctx, lhs, rhs),
-            Oper::LAnd(lhs, rhs) => compile_arithmetic!("and", self, ctx, lhs, rhs),
-            Oper::LOr(lhs, rhs) => compile_arithmetic!("or", self, ctx, lhs, rhs),
+            Oper::Add(lhs, rhs) => compile_arithmetic!("add", lhs, rhs),
+            Oper::Sub(lhs, rhs) => compile_arithmetic!("sub", lhs, rhs),
+            Oper::Mul(lhs, rhs) => compile_arithmetic!("mul", lhs, rhs),
+            Oper::Div(lhs, rhs) => compile_compare!("div", lhs, rhs),
+            Oper::Shr(lhs, rhs) => compile_compare!("shr", lhs, rhs),
+            Oper::Shl(lhs, rhs) => compile_arithmetic!("shl", lhs, rhs),
+            Oper::BAnd(lhs, rhs) => compile_arithmetic!("and", lhs, rhs),
+            Oper::BOr(lhs, rhs) => compile_arithmetic!("or", lhs, rhs),
+            Oper::XOr(lhs, rhs) => compile_arithmetic!("xor", lhs, rhs),
+            Oper::LNot(lhs) => compile_compare!("eqz", lhs),
+            Oper::Eql(lhs, rhs) => compile_arithmetic!("eq", lhs, rhs),
+            Oper::Neq(lhs, rhs) => compile_arithmetic!("ne", lhs, rhs),
+            Oper::Lt(lhs, rhs) => compile_compare!("lt", lhs, rhs),
+            Oper::Gt(lhs, rhs) => compile_compare!("gt", lhs, rhs),
+            Oper::LtEq(lhs, rhs) => compile_compare!("le", lhs, rhs),
+            Oper::GtEq(lhs, rhs) => compile_compare!("ge", lhs, rhs),
+            Oper::LAnd(lhs, rhs) => compile_arithmetic!("and", lhs, rhs),
+            Oper::LOr(lhs, rhs) => compile_arithmetic!("or", lhs, rhs),
             Oper::Mod(lhs, rhs) => {
                 let typ = lhs.type_infer(ctx)?.compile(ctx)?;
                 let (lhs, rhs) = (lhs.compile(ctx)?, rhs.compile(ctx)?);
@@ -100,7 +132,7 @@ impl Node for Oper {
             }
             Oper::BNot(lhs) => {
                 let minus_one = Expr::Literal(Value::Integer(-1));
-                compile_arithmetic!("xor", self, ctx, lhs, minus_one)
+                compile_arithmetic!("xor", lhs, minus_one)
             }
             Oper::Cast(lhs, rhs) => {
                 let rhs = rhs.type_infer(ctx)?;
