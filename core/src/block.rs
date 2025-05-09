@@ -5,25 +5,37 @@ pub struct Block(pub Vec<Stmt>);
 
 impl Node for Block {
     fn parse(source: &str) -> Option<Block> {
-        Some(Block(iter_map!(
-            tokenize(source, &[";"], false, false)?,
-            |line: String| if line.trim().is_empty() {
-                Some(Stmt::Drop)
-            } else {
-                Stmt::parse(&line)
-            }
-        )))
+        Some(Block(
+            tokenize(source, &[";"], false, false)?
+                .iter()
+                .map(|line| {
+                    if line.trim().is_empty() {
+                        Some(Stmt::Drop)
+                    } else {
+                        Stmt::parse(&line)
+                    }
+                })
+                .collect::<Option<Vec<_>>>()?,
+        ))
     }
 
     fn compile(&self, ctx: &mut Compiler) -> Option<String> {
-        Some(join!(iter_map!(&self.0, |x: &Stmt| x.compile(ctx))))
+        Some(join!(
+            &self
+                .0
+                .iter()
+                .map(|x| x.compile(ctx))
+                .collect::<Option<Vec<_>>>()?
+        ))
     }
 
     fn type_infer(&self, ctx: &mut Compiler) -> Option<Type> {
-        Some(
-            iter_map!(self.0.clone(), |x: Stmt| x.type_infer(ctx))
-                .last()?
-                .clone(),
-        )
+        self.0
+            .clone()
+            .iter()
+            .map(|x| x.type_infer(ctx))
+            .collect::<Option<Vec<_>>>()?
+            .last()
+            .cloned()
     }
 }
