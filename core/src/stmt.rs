@@ -160,14 +160,20 @@ impl Node for Stmt {
                     )
                 }
                 Expr::Call(name, _) => {
-                    let (var_typ, arg_typ, ret_typ) = ctx.function_type.get(name)?.clone();
-                    (ctx.variable_type, ctx.argument_type) = (var_typ, arg_typ.clone());
+                    let function = ctx.function_type.get(name)?.clone();
+                    ctx.variable_type = function.variables.clone();
+                    ctx.argument_type = function.arguments.clone();
                     let code = format!(
                         "(func ${name} (export \"{name}\") {args} {ret} {locals} {body})",
-                        args = join!(iter_map!(&arg_typ, |(name, typ): (&String, &Type)| Some(
-                            format!("(param ${name} {})", typ.type_infer(ctx)?.compile(ctx)?)
-                        ))),
-                        ret = config_return!(ret_typ, ctx)?,
+                        args =
+                            join!(iter_map!(
+                                &function.arguments,
+                                |(name, typ): (&String, &Type)| Some(format!(
+                                    "(param ${name} {})",
+                                    typ.type_infer(ctx)?.compile(ctx)?
+                                ))
+                            )),
+                        ret = config_return!(function.returns, ctx)?,
                         body = value.compile(ctx)?,
                         locals = expand_local(ctx)?
                     );
@@ -182,18 +188,19 @@ impl Node for Stmt {
                 let Oper::Cast(Expr::Call(name, _), _) = func else {
                     return None;
                 };
-                let (_, arg_typ, ret_typ) = ctx.function_type.get(name)?.clone();
+                let function = ctx.function_type.get(name)?.clone();
                 let code = format!(
                     "(import \"env\" \"{name}\" (func ${name} {} {}))",
-                    if arg_typ.is_empty() {
+                    if function.arguments.is_empty() {
                         String::new()
                     } else {
                         format!(
                             "(param {})",
-                            join!(iter_map!(arg_typ, |(_, typ): (_, Type)| typ.compile(ctx)))
+                            join!(iter_map!(function.arguments, |(_, typ): (_, Type)| typ
+                                .compile(ctx)))
                         )
                     },
-                    config_return!(ret_typ, ctx)?,
+                    config_return!(function.returns, ctx)?,
                 );
                 ctx.import_code.push(code);
                 String::new()
@@ -245,7 +252,11 @@ impl Node for Stmt {
                         let ret = value.type_infer(ctx)?;
                         ctx.function_type.insert(
                             name.to_owned(),
-                            (ctx.variable_type.clone(), ctx.argument_type.clone(), ret),
+                            Function {
+                                variables: ctx.variable_type.clone(),
+                                arguments: ctx.argument_type.clone(),
+                                returns: ret,
+                            },
                         );
                         ctx.variable_type.clear();
                         ctx.argument_type.clear();
@@ -275,7 +286,11 @@ impl Node for Stmt {
                 }
                 ctx.function_type.insert(
                     name.to_owned(),
-                    (IndexMap::new(), args_typ.clone(), ret_typ.clone()),
+                    Function {
+                        variables: IndexMap::new(),
+                        arguments: args_typ.clone(),
+                        returns: ret_typ.clone(),
+                    },
                 );
                 Type::Void
             }
