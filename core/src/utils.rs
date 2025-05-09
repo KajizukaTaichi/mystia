@@ -18,12 +18,18 @@ pub fn include_letter(query: &str, chars: &Vec<String>, idx: usize) -> bool {
 }
 
 pub fn expand_local(ctx: &mut Compiler) -> Option<String> {
-    Some(join!(iter_map!(ctx.variable_type.clone(), |x: (
-        String,
-        Type
-    )| Some(
-        format!("(local ${} {})", x.0, x.1.compile(ctx)?)
-    ))))
+    Some(join!(
+        ctx.variable_type
+            .iter()
+            .map(|x| {
+                Some(format!(
+                    "(local ${} {})",
+                    x.0,
+                    x.1.compile(&mut ctx.clone())?
+                ))
+            })
+            .collect::<Option<Vec<String>>>()?
+    ))
 }
 
 #[macro_export]
@@ -42,7 +48,13 @@ macro_rules! compile_args_type {
     ($function: expr, $ctx: expr) => {
         format!(
             "(param {})",
-            join!(iter_map!($function.arguments, |(_, typ): (_, Type)| typ.compile($ctx)))
+            join!(
+                $function
+                    .arguments
+                    .iter()
+                    .map(|(_, typ)| typ.compile($ctx))
+                    .collect::<Option<Vec<_>>>()?
+            )
         )
     };
 }
