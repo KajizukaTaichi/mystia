@@ -8,7 +8,6 @@ pub enum Expr {
     Call(String, Vec<Expr>),
     Array(Vec<Expr>),
     Dict(IndexMap<String, Expr>),
-    Field(Box<Expr>, String),
     Access(Box<Expr>, Box<Expr>),
     Block(Block),
     MemCpy(Box<Expr>),
@@ -188,17 +187,6 @@ impl Node for Expr {
                 );
                 format!("({}.load {})", typ.compile(ctx)?, addr.compile(ctx)?)
             }
-            Expr::Field(expr, key) => {
-                let Type::Dict(dict) = expr.type_infer(ctx)? else {
-                    return None;
-                };
-                let (offset, typ) = dict.get(key)?.clone();
-                let addr = Oper::Add(
-                    Expr::Oper(Box::new(Oper::Cast(*expr.clone(), Type::Integer))),
-                    Expr::Literal(Value::Integer(offset.clone())),
-                );
-                format!("({}.load {})", typ.compile(ctx)?, addr.compile(ctx)?)
-            }
             Expr::Block(block) => block.compile(ctx)?,
             Expr::MemCpy(from) => {
                 let typ = from.type_infer(ctx)?;
@@ -266,20 +254,6 @@ impl Node for Expr {
                     return None;
                 };
                 *typ
-            }
-            Expr::Field(dict, key) => {
-                let infered = dict.type_infer(ctx)?;
-                let Type::Dict(dict) = infered.clone() else {
-                    let error_message = format!("can't field access to {}", infered.format());
-                    ctx.occurred_error = Some(error_message);
-                    return None;
-                };
-                let Some((_offset, typ)) = dict.get(key) else {
-                    let error_message = format!("{} haven't property \"{key}\"", infered.format());
-                    ctx.occurred_error = Some(error_message);
-                    return None;
-                };
-                typ.clone()
             }
             Expr::Block(block) => block.type_infer(ctx)?,
             Expr::MemCpy(from) => from.type_infer(ctx)?,
