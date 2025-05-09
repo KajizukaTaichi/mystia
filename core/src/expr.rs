@@ -229,7 +229,6 @@ impl Node for Expr {
             Expr::Literal(literal) => literal.type_infer(ctx)?,
             Expr::Call(name, args) => {
                 let function = ctx.function_type.get(name)?.clone();
-                let func = |(arg, typ): (&Expr, &Type)| type_check!(arg, typ, ctx);
                 if args.len() != function.arguments.len() {
                     let errmsg = format!(
                         "arguments of function `{name}` length should be {}, but passed {} values",
@@ -239,7 +238,9 @@ impl Node for Expr {
                     ctx.occurred_error = Some(errmsg);
                     return None;
                 }
-                let _ = args.iter().zip(function.arguments.values()).map(func);
+                let func = |(arg, typ): (&Expr, &Type)| type_check!(arg, typ, ctx);
+                let ziped = args.iter().zip(function.arguments.values());
+                ziped.map(func).collect::<Option<Vec<_>>>()?;
                 function.returns.clone()
             }
             Expr::Access(arr, _) => {
