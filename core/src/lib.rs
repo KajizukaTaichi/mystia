@@ -28,7 +28,13 @@ pub trait Node {
 }
 
 /// Function includes local variables, arguments, and returns
-type Function = (IndexMap<String, Type>, IndexMap<String, Type>, Type);
+#[derive(Debug, Clone)]
+pub struct Function {
+    pub variables: IndexMap<String, Type>,
+    pub arguments: IndexMap<String, Type>,
+    pub returns: Type,
+}
+
 /// Context in compiling
 #[derive(Debug, Clone)]
 pub struct Compiler {
