@@ -69,20 +69,6 @@ macro_rules! type_check {
                 ));
                 None
             }
-        } else if let (Some(typ), _) | (_, Some(typ)) = (lhs, rhs) {
-            $ctx.expect_type = Some(typ);
-            let lhs = $lhs.type_infer($ctx)?;
-            let rhs = $rhs.type_infer($ctx)?;
-            if lhs.format() == rhs.format() {
-                Some(lhs.clone())
-            } else {
-                $ctx.occurred_error = Some(format!(
-                    "type mismatch between {} and {}",
-                    lhs.format(),
-                    rhs.format()
-                ));
-                None
-            }
         } else {
             None
         }
