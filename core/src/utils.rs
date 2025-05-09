@@ -102,8 +102,7 @@ macro_rules! compile_compare {
     ($oper: expr, $ctx: expr, $lhs: expr, $rhs: expr) => {{
         let ret = type_check!($lhs, $rhs, $ctx)?.compile($ctx)?;
         format!(
-            "({}.{}{} {} {})",
-            ret,
+            "({ret}.{}{} {} {})",
             $oper,
             if ret == "i32" { "_s" } else { "" },
             $lhs.compile($ctx)?,
