@@ -198,8 +198,7 @@ impl Node for Oper {
                 let infered = dict.type_infer(ctx)?;
                 if let Type::Dict(dict) = infered.clone() {
                     let Some((_offset, typ)) = dict.get(key) else {
-                        let error_message =
-                            format!("{} haven't property \"{key}\"", infered.format());
+                        let error_message = format!("{} haven't field `{key}`", infered.format());
                         ctx.occurred_error = Some(error_message);
                         return None;
                     };
