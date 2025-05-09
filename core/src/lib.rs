@@ -40,6 +40,8 @@ pub struct Function {
 pub struct Compiler {
     /// Address tracker
     pub allocator: i32,
+    /// For store on table
+    pub function_pointer: usize,
     /// Code that imports external module
     pub import_code: Vec<String>,
     /// Static string data
@@ -64,6 +66,7 @@ impl Compiler {
     pub fn new() -> Self {
         Compiler {
             allocator: 0,
+            function_pointer: 0,
             import_code: vec![],
             static_data: vec![],
             declare_code: vec![],
@@ -82,12 +85,12 @@ impl Compiler {
         Some(format!(
             "(module {import} {memory} {memcpy} {strings} {table} {declare} (func (export \"_start\") {ret} {locals} {code}))",
             code = ast.compile(self)?,
-            ret = config_return!(self.program_return.clone(), self)?,
+            ret = compile_return!(self.program_return.clone(), self),
             import = join!(self.import_code),
             strings = join!(self.static_data),
             declare = join!(self.declare_code),
             memory = "(memory $mem (export \"mem\") 1)",
-            table = "(table 1 funcref)",
+            table = "(table $func_table 64 funcref)",
             memcpy = &format!(
                 "(global $allocator (export \"allocator\") (mut i32) (i32.const {allocator})) {}",
                 "(func (export \"malloc\") (param $size i32) (global.set $allocator (i32.add (global.get $allocator) (local.get $size))))",
