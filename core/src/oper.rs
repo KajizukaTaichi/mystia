@@ -24,6 +24,7 @@ pub enum Oper {
     LNot(Expr),
     Cast(Expr, Type),
     Enum(Type, String),
+    Field(Expr, String),
 }
 
 impl Node for Oper {
@@ -63,6 +64,7 @@ impl Node for Oper {
                 "&&" => Oper::LAnd(Expr::parse(lhs)?, Expr::parse(rhs)?),
                 "||" => Oper::LOr(Expr::parse(lhs)?, Expr::parse(rhs)?),
                 ":" | "as" => Oper::Cast(Expr::parse(lhs)?, Type::parse(rhs)?),
+                "." => Oper::Field(Expr::parse(lhs)?, rhs.trim().to_string()),
                 "::" => Oper::Enum(Type::parse(lhs)?, rhs.trim().to_string()),
                 _ => return None,
             })
@@ -131,6 +133,17 @@ impl Node for Oper {
                     return None;
                 };
                 Value::Enum(value as i32, enum_type.clone()).compile(ctx)?
+            }
+            Oper::Field(expr, key) => {
+                let Type::Dict(dict) = expr.type_infer(ctx)? else {
+                    return None;
+                };
+                let (offset, typ) = dict.get(key)?.clone();
+                let addr = Oper::Add(
+                    Expr::Oper(Box::new(Oper::Cast(expr.clone(), Type::Integer))),
+                    Expr::Literal(Value::Integer(offset.clone())),
+                );
+                format!("({}.load {})", typ.compile(ctx)?, addr.compile(ctx)?)
             }
         })
     }
