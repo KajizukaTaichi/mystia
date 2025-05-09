@@ -140,7 +140,7 @@ impl Node for Oper {
                 };
                 let (offset, typ) = dict.get(key)?.clone();
                 let addr = Oper::Add(
-                    Expr::Oper(Box::new(Oper::Cast(expr, Type::Integer))),
+                    Expr::Oper(Box::new(Oper::Cast(expr.clone(), Type::Integer))),
                     Expr::Literal(Value::Integer(offset.clone())),
                 );
                 format!("({}.load {})", typ.compile(ctx)?, addr.compile(ctx)?)
@@ -201,7 +201,7 @@ impl Node for Oper {
                     ctx.occurred_error = Some(error_message);
                     return None;
                 };
-                typ.clone()
+                Some(typ.clone())
             }
         }
     }
