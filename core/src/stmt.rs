@@ -119,45 +119,6 @@ impl Node for Stmt {
                     }
                     format!("(local.set ${name} {})", value.compile(ctx)?)
                 }
-                Expr::Access(array, index) => {
-                    let Type::Array(typ, len) = array.type_infer(ctx)? else {
-                        return None;
-                    };
-                    type_check!(typ, value.type_infer(ctx)?, ctx)?;
-                    let addr = Oper::Add(
-                        Expr::Oper(Box::new(Oper::Cast(*array.clone(), Type::Integer))),
-                        Expr::Oper(Box::new(Oper::Mul(
-                            Expr::Oper(Box::new(Oper::Mod(
-                                *index.clone(),
-                                Expr::Literal(Value::Integer(len as i32)),
-                            ))),
-                            Expr::Literal(Value::Integer(typ.pointer_length())),
-                        ))),
-                    );
-                    format!(
-                        "({}.store {} {})",
-                        typ.compile(ctx)?,
-                        addr.compile(ctx)?,
-                        value.compile(ctx)?
-                    )
-                }
-                Expr::Field(expr, key) => {
-                    let Type::Dict(dict) = expr.type_infer(ctx)? else {
-                        return None;
-                    };
-                    let (offset, typ) = dict.get(key)?.clone();
-                    type_check!(typ, value.type_infer(ctx)?, ctx)?;
-                    let addr = Oper::Add(
-                        Expr::Oper(Box::new(Oper::Cast(*expr.clone(), Type::Integer))),
-                        Expr::Literal(Value::Integer(offset)),
-                    );
-                    format!(
-                        "({}.store {} {})",
-                        typ.compile(ctx)?,
-                        addr.compile(ctx)?,
-                        value.compile(ctx)?
-                    )
-                }
                 Expr::Call(name, _) => {
                     let function = ctx.function_type.get(name)?.clone();
                     ctx.variable_type = function.variables.clone();
@@ -182,6 +143,49 @@ impl Node for Stmt {
                     ctx.argument_type.clear();
                     ctx.declare_code.push(code);
                     String::new()
+                }
+                Expr::Access(array, index) => {
+                    let Type::Array(typ, len) = array.type_infer(ctx)? else {
+                        return None;
+                    };
+                    type_check!(typ, value.type_infer(ctx)?, ctx)?;
+                    let addr = Oper::Add(
+                        Expr::Oper(Box::new(Oper::Cast(*array.clone(), Type::Integer))),
+                        Expr::Oper(Box::new(Oper::Mul(
+                            Expr::Oper(Box::new(Oper::Mod(
+                                *index.clone(),
+                                Expr::Literal(Value::Integer(len as i32)),
+                            ))),
+                            Expr::Literal(Value::Integer(typ.pointer_length())),
+                        ))),
+                    );
+                    format!(
+                        "({}.store {} {})",
+                        typ.compile(ctx)?,
+                        addr.compile(ctx)?,
+                        value.compile(ctx)?
+                    )
+                }
+                Expr::Oper(oper) => {
+                    if let Oper::Field(expr, key) = &*oper.clone() {
+                        let Type::Dict(dict) = expr.type_infer(ctx)? else {
+                            return None;
+                        };
+                        let (offset, typ) = dict.get(key)?.clone();
+                        type_check!(typ, value.type_infer(ctx)?, ctx)?;
+                        let addr = Oper::Add(
+                            Expr::Oper(Box::new(Oper::Cast(expr.clone(), Type::Integer))),
+                            Expr::Literal(Value::Integer(offset)),
+                        );
+                        format!(
+                            "({}.store {} {})",
+                            typ.compile(ctx)?,
+                            addr.compile(ctx)?,
+                            value.compile(ctx)?
+                        )
+                    } else {
+                        return None;
+                    }
                 }
                 _ => return None,
             },
