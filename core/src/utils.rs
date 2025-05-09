@@ -38,6 +38,16 @@ macro_rules! config_return {
 }
 
 #[macro_export]
+macro_rules! config_args {
+    ($function: expr) => {
+        format!(
+            "(param {})",
+            join!(iter_map!($function.arguments, |(_, typ): (_, Type)| typ.compile(ctx)))
+        )
+    };
+}
+
+#[macro_export]
 macro_rules! if_ptr {
     ($typ: expr, $block: block) => {
         if let Type::String | Type::Array(_, _) | Type::Dict(_) = $typ {
