@@ -1,4 +1,4 @@
-let is_prime(n) = {
+let is_prime(n: int) = {
     if n < 2 then false
     else if n < 4 then true
     else if (n % 2 == 0) || (n % 3 == 0) then false
