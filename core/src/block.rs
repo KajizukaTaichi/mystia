@@ -8,13 +8,7 @@ impl Node for Block {
         Some(Block(
             tokenize(source, &[";"], false, false)?
                 .iter()
-                .map(|line| {
-                    if line.trim().is_empty() {
-                        Some(Stmt::Drop)
-                    } else {
-                        Stmt::parse(&line)
-                    }
-                })
+                .map(|line| Stmt::parse(&line))
                 .collect::<Option<Vec<_>>>()?,
         ))
     }
