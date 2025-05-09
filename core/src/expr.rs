@@ -97,7 +97,7 @@ impl Node for Expr {
                 let pointer;
 
                 if_ptr!(
-                    inner_type,
+                    inner_type =>
                     // if inner type is pointer (not primitive)
                     {
                         let mut inner_codes = vec![];
@@ -143,7 +143,7 @@ impl Node for Expr {
                 let mut prestore = IndexMap::new();
                 for (name, elm) in dict {
                     let typ = elm.type_infer(ctx)?;
-                    if_ptr!(typ, { prestore.insert(name, elm.compile(ctx)?) });
+                    if_ptr!(typ => { prestore.insert(name, elm.compile(ctx)?) });
                 }
 
                 let pointer = ctx.allocator;
@@ -204,7 +204,7 @@ impl Node for Expr {
                 let typ = from.type_infer(ctx)?;
                 let size = typ.bytes_length()?;
                 let size = Value::Integer(size as i32).compile(ctx)?;
-                if_ptr!(typ, {
+                if_ptr!(typ => {
                     return Some(format!(
                         "(global.get $allocator) (memory.copy (global.get $allocator) {object} {size}) {}",
                         format!("(global.set $allocator (i32.add (global.get $allocator) {size}))"),
