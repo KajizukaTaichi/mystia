@@ -86,25 +86,6 @@ macro_rules! type_check {
 }
 
 #[macro_export]
-macro_rules! compile_compare {
-    ($oper: expr, $ctx: expr, $lhs: expr, $rhs: expr) => {{
-        let ret = type_check!($lhs, $rhs, $ctx)?.compile($ctx)?;
-        format!(
-            "({}.{}{} {} {})",
-            ret,
-            $oper,
-            if ret == "i32" { "_s" } else { "" },
-            $lhs.compile($ctx)?,
-            $rhs.compile($ctx)?
-        )
-    }};
-    ($oper: expr, $ctx: expr, $lhs: expr) => {{
-        let ret = $lhs.type_infer($ctx)?.compile($ctx)?;
-        format!("({}.{} {})", ret, $oper, $lhs.compile($ctx)?)
-    }};
-}
-
-#[macro_export]
 macro_rules! ok {
     ($result:expr) => {
         if let Ok(val) = $result {
@@ -113,31 +94,6 @@ macro_rules! ok {
             None
         }
     };
-}
-
-#[macro_export]
-macro_rules! compile_arithmetic {
-    ($oper: expr, $self: expr, $ctx: expr, $lhs: expr, $rhs: expr) => {{
-        type_check!($lhs, $rhs, $ctx)?;
-        format!(
-            "({}.{} {} {})",
-            $lhs.type_infer($ctx)?.compile($ctx)?,
-            $oper,
-            $lhs.compile($ctx)?,
-            $rhs.compile($ctx)?
-        )
-    }};
-}
-
-#[macro_export]
-macro_rules! iter_map {
-    ($iter: expr, $proc: expr) => {{
-        let mut result = vec![];
-        for i in $iter {
-            result.push($proc(i)?);
-        }
-        result
-    }};
 }
 
 #[macro_export]
