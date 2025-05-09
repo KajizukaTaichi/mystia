@@ -8,7 +8,6 @@ pub enum Expr {
     Call(String, Vec<Expr>),
     Array(Vec<Expr>),
     Dict(IndexMap<String, Expr>),
-    Access(Box<Expr>, Box<Expr>),
     Block(Block),
     MemCpy(Box<Expr>),
 }
@@ -55,14 +54,6 @@ impl Node for Expr {
         } else if token.starts_with("memcpy(") && token.ends_with(")") {
             let token = token.get("memcpy(".len()..token.len() - 1)?.trim();
             Some(Expr::MemCpy(Box::new(Expr::parse(token)?)))
-        // Index access `array[index]`
-        } else if token.contains("[") && token.ends_with("]") {
-            let token = token.get(..token.len() - 1)?.trim();
-            let (array, index) = token.rsplit_once("[")?;
-            Some(Expr::Access(
-                Box::new(Expr::parse(array)?),
-                Box::new(Expr::parse(index)?),
-            ))
         // Function call `name(args, ...)`
         } else if token.contains("(") && token.ends_with(")") {
             let token = token.get(..token.len() - 1)?.trim();
@@ -167,22 +158,7 @@ impl Node for Expr {
                         .collect::<Option<Vec<_>>>()?
                 )
             ),
-            Expr::Access(array, index) => {
-                let Type::Array(typ, len) = array.type_infer(ctx)? else {
-                    return None;
-                };
-                let addr = Oper::Add(
-                    Expr::Oper(Box::new(Oper::Cast(*array.clone(), Type::Integer))),
-                    Expr::Oper(Box::new(Oper::Mul(
-                        Expr::Oper(Box::new(Oper::Mod(
-                            *index.clone(),
-                            Expr::Literal(Value::Integer(len as i32)),
-                        ))),
-                        Expr::Literal(Value::Integer(typ.pointer_length())),
-                    ))),
-                );
-                format!("({}.load {})", typ.compile(ctx)?, addr.compile(ctx)?)
-            }
+
             Expr::Block(block) => block.compile(ctx)?,
             Expr::MemCpy(from) => {
                 let typ = from.type_infer(ctx)?;
@@ -243,15 +219,7 @@ impl Node for Expr {
                 ziped.map(func).collect::<Option<Vec<_>>>()?;
                 function.returns.clone()
             }
-            Expr::Access(arr, _) => {
-                let infered = arr.type_infer(ctx)?;
-                let Some(Type::Array(typ, _)) = infered.type_infer(ctx) else {
-                    let error_message = format!("can't index access to {}", infered.format());
-                    ctx.occurred_error = Some(error_message);
-                    return None;
-                };
-                *typ
-            }
+
             Expr::Block(block) => block.type_infer(ctx)?,
             Expr::MemCpy(from) => from.type_infer(ctx)?,
         })
