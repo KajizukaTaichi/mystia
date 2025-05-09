@@ -211,7 +211,7 @@ impl Node for Expr {
                 } else if let Some(arg) = ctx.argument_type.get(name) {
                     arg.clone()
                 } else {
-                    ctx.occurred_error = Some(format!("undefined variable: {name}"));
+                    ctx.occurred_error = Some(format!("undefined variable `{name}`"));
                     return None;
                 }
             }
