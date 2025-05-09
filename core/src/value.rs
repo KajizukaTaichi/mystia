@@ -27,6 +27,11 @@ impl Node for Value {
             } else if source.starts_with("\"") && source.ends_with("\"") {
                 let source = source.get(1..source.len() - 1)?.trim();
                 Value::String(str_escape(source))
+            } else if source.starts_with("[") && source.ends_with("]") {
+                let source = source.get(1..source.len() - 1)?.trim();
+                let elms = tokenize(source, &[","], false, true)?;
+                let elms = elms.iter().map(|i| Expr::parse(&i));
+                Value::Array(elms.collect())
             } else {
                 return None;
             },
