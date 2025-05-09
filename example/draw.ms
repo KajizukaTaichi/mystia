@@ -17,10 +17,10 @@ while y_index < (height + top) loop {
         let one_third = width / 3;
         let color = {
             if  one_third > (x_index - left)
-                then Color::blue
+                then Color#blue
             else if one_third * 2 >  (x_index - left)
-                then Color::white
-                else Color::red
+                then Color#white
+                else Color#red
         };
         draw(x_index, y_index, color);
         let x_index + 1
