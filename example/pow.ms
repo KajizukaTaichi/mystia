@@ -1,4 +1,4 @@
-let pow(x: int, y) = {
+let pow(x: int, y: int) = {
     let result = x;
     let index = 1;
     while index < y loop {
