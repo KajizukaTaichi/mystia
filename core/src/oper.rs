@@ -23,8 +23,9 @@ pub enum Oper {
     LOr(Expr, Expr),
     LNot(Expr),
     Cast(Expr, Type),
-    Enum(Type, String),
+    Index(Expr, Expr),
     Field(Expr, String),
+    Enum(Type, String),
 }
 
 impl Node for Oper {
@@ -37,7 +38,13 @@ impl Node for Oper {
                 "~" => Oper::BNot(Expr::parse(token)?),
                 "!" => Oper::LNot(Expr::parse(token)?),
                 "-" => Oper::Sub(Expr::Literal(Value::Integer(0)), Expr::parse(token)?),
-                _ => return None,
+                _ => {
+                    if let Expr::Array(idx) = Expr::parse(token)? {
+                        Oper::Index(Expr::parse(token)?, idx.get(0)?.clone())
+                    } else {
+                        return None;
+                    }
+                }
             })
         } else {
             // Parsing is from right to left because operator is left-associative
@@ -66,7 +73,13 @@ impl Node for Oper {
                 ":" | "as" => Oper::Cast(Expr::parse(lhs)?, Type::parse(rhs)?),
                 "." => Oper::Field(Expr::parse(lhs)?, rhs.trim().to_string()),
                 "::" => Oper::Enum(Type::parse(lhs)?, rhs.trim().to_string()),
-                _ => return None,
+                lhs => {
+                    if let Expr::Array(idx) = Expr::parse(rhs)? {
+                        Oper::Index(Expr::parse(lhs)?, idx.get(0)?.clone())
+                    } else {
+                        return None;
+                    }
+                }
             })
         }
     }
@@ -120,19 +133,21 @@ impl Node for Oper {
                     lhs.compile(ctx)?,
                 )
             }
-            Oper::Enum(typ, key) => {
-                let typ = typ.type_infer(ctx)?;
-                let Type::Enum(enum_type) = typ.clone() else {
-                    let error_message = format!("can't access enumerator to {}", typ.format());
-                    ctx.occurred_error = Some(error_message);
+            Oper::Index(array, index) => {
+                let Type::Array(typ, len) = array.type_infer(ctx)? else {
                     return None;
                 };
-                let Some(value) = enum_type.iter().position(|item| item == key) else {
-                    let error_message = format!("{key} is invalid variant of {}", typ.format());
-                    ctx.occurred_error = Some(error_message);
-                    return None;
-                };
-                Value::Enum(value as i32, enum_type.clone()).compile(ctx)?
+                let addr = Oper::Add(
+                    Expr::Oper(Box::new(Oper::Cast(array.clone(), Type::Integer))),
+                    Expr::Oper(Box::new(Oper::Mul(
+                        Expr::Oper(Box::new(Oper::Mod(
+                            index.clone(),
+                            Expr::Literal(Value::Integer(len as i32)),
+                        ))),
+                        Expr::Literal(Value::Integer(typ.pointer_length())),
+                    ))),
+                );
+                format!("({}.load {})", typ.compile(ctx)?, addr.compile(ctx)?)
             }
             Oper::Field(expr, key) => {
                 let typ = expr.type_infer(ctx)?;
@@ -149,6 +164,20 @@ impl Node for Oper {
                 } else {
                     return None;
                 }
+            }
+            Oper::Enum(typ, key) => {
+                let typ = typ.type_infer(ctx)?;
+                let Type::Enum(enum_type) = typ.clone() else {
+                    let error_message = format!("can't access enumerator to {}", typ.format());
+                    ctx.occurred_error = Some(error_message);
+                    return None;
+                };
+                let Some(value) = enum_type.iter().position(|item| item == key) else {
+                    let error_message = format!("{key} is invalid variant of {}", typ.format());
+                    ctx.occurred_error = Some(error_message);
+                    return None;
+                };
+                Value::Enum(value as i32, enum_type.clone()).compile(ctx)?
             }
         })
     }
@@ -193,7 +222,15 @@ impl Node for Oper {
                 type_check!(lhs, Type::Integer, ctx)?;
                 Some(Type::Integer)
             }
-            Oper::Enum(typ, _) => Some(typ.type_infer(ctx)?),
+            Oper::Index(arr, _) => {
+                let infered = arr.type_infer(ctx)?;
+                let Some(Type::Array(typ, _)) = infered.type_infer(ctx) else {
+                    let error_message = format!("can't index access to {}", infered.format());
+                    ctx.occurred_error = Some(error_message);
+                    return None;
+                };
+                Some(*typ)
+            }
             Oper::Field(dict, key) => {
                 let infered = dict.type_infer(ctx)?;
                 if let Type::Dict(dict) = infered.clone() {
@@ -212,6 +249,7 @@ impl Node for Oper {
                     None
                 }
             }
+            Oper::Enum(typ, _) => Some(typ.type_infer(ctx)?),
         }
     }
 }
