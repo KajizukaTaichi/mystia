@@ -100,20 +100,15 @@ impl Node for Expr {
             }
             Expr::Field(expr, key) => {
                 let typ = expr.type_infer(ctx)?;
-                if let Type::Dict(dict) = typ {
-                    let (offset, typ) = dict.get(key)?.clone();
-                    let addr = Oper::Add(
-                        Expr::Oper(Box::new(Oper::Cast(*expr.clone(), Type::Integer))),
-                        Expr::Literal(Value::Integer(offset.clone())),
-                    );
-                    format!("({}.load {})", typ.compile(ctx)?, addr.compile(ctx)?)
-                } else if let (Expr::Literal(Value::Integer(d)), Ok(n)) =
-                    (*expr.clone(), key.parse::<i32>())
-                {
-                    Value::Number(ok!(format!("{d}.{n}").parse::<f64>())?).compile(ctx)?
-                } else {
+                let Type::Dict(dict) = typ else {
                     return None;
-                }
+                };
+                let (offset, typ) = dict.get(key)?.clone();
+                let addr = Oper::Add(
+                    Expr::Oper(Box::new(Oper::Cast(*expr.clone(), Type::Integer))),
+                    Expr::Literal(Value::Integer(offset.clone())),
+                );
+                format!("({}.load {})", typ.compile(ctx)?, addr.compile(ctx)?)
             }
             Expr::Enum(typ, key) => {
                 let typ = typ.type_infer(ctx)?;
