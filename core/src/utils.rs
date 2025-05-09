@@ -27,18 +27,18 @@ pub fn expand_local(ctx: &mut Compiler) -> Option<String> {
 }
 
 #[macro_export]
-macro_rules! config_return {
+macro_rules! compile_return {
     ($ret: expr, $ctx: expr) => {
         if let Type::Void = $ret {
-            Some(String::new())
+            String::new()
         } else {
-            Some(format!("(result {})", $ret.compile($ctx)?))
+            format!("(result {})", $ret.compile($ctx)?)
         }
     };
 }
 
 #[macro_export]
-macro_rules! config_args {
+macro_rules! compile_args_type {
     ($function: expr, $ctx: expr) => {
         format!(
             "(param {})",
