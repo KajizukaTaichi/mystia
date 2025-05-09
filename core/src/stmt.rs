@@ -164,14 +164,16 @@ impl Node for Stmt {
                     ctx.argument_type = function.arguments.clone();
                     let code = format!(
                         "(func ${name} (export \"{name}\") {args} {ret} {locals} {body})",
-                        args =
-                            join!(iter_map!(
-                                &function.arguments,
-                                |(name, typ): (&String, &Type)| Some(format!(
+                        args = join!(
+                            &function
+                                .arguments
+                                .iter()
+                                .map(|(name, typ): (&String, &Type)| Some(format!(
                                     "(param ${name} {})",
                                     typ.type_infer(ctx)?.compile(ctx)?
-                                ))
-                            )),
+                                )))
+                                .collect::<Option<Vec<_>>>()?
+                        ),
                         ret = compile_return!(function.returns, ctx),
                         body = value.compile(ctx)?,
                         locals = expand_local(ctx)?
