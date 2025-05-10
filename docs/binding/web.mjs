@@ -1,4 +1,4 @@
-import init, { mystia as compile } from "../web/mystia_wasm.js";
+import init, { mystia as compile } from "../wasm/web/mystia_wasm.js";
 import { write as mystia_write, read as mystia_read } from "./ffi.mjs";
 
 await init();
