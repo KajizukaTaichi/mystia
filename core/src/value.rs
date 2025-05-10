@@ -33,7 +33,7 @@ impl Node for Value {
             let elms = elms.iter().map(|i| Expr::parse(&i));
             Some(Value::Array(elms.collect::<Option<Vec<_>>>()?))
         // Dict `{ field expr, ... }`
-        } else if source.starts_with("{") && source.ends_with("}") {
+        } else if source.starts_with("@{") && source.ends_with("}") {
             let token = source.get(1..source.len() - 1)?.trim();
             let mut result = IndexMap::new();
             for line in tokenize(token, &[","], false, true)? {
