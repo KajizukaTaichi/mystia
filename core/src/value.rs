@@ -34,7 +34,7 @@ impl Node for Value {
             Some(Value::Array(elms.collect::<Option<Vec<_>>>()?))
         // Dict `{ field expr, ... }`
         } else if source.starts_with("@{") && source.ends_with("}") {
-            let token = source.get(1..source.len() - 1)?.trim();
+            let token = source.get(2..source.len() - 1)?.trim();
             let mut result = IndexMap::new();
             for line in tokenize(token, &[","], false, true)? {
                 let (name, value) = line.trim().split_once(" ")?;
