@@ -1,7 +1,7 @@
-let alice = {
+let alice = @{
     name "Alice",
     age 13.2,
-    score {
+    score @{
         math 10,
         english 49,
         science 87
