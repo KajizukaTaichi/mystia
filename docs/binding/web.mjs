@@ -1,4 +1,4 @@
-import init, { mystia as compile } from "../wasm/web/wasm.js";
+import init, { mystia as compile } from "../wasm/web/mystia_wasm.js";
 import { write as write, read as read } from "./ffi.mjs";
 
 await init();
@@ -114,7 +114,7 @@ export async function mystia(code) {
     mystiaFunctions.get_status = (id) => {
         return appStatus[read(instance, "str", id)];
     };
-    mystiaFunctions.get_status = (id, val) => {
+    mystiaFunctions.set_status = (id, val) => {
         appStatus[read(instance, "str", id)] = val;
     };
 
