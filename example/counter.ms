@@ -13,6 +13,8 @@ let inc() = {
     set_elm("view", concat("Number: ", int_to_str(current)))
 };
 
+set_status("number", 0);
+
 new_elm("title", "h1");
 set_elm("title", "Counter App");
 
