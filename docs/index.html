@@ -122,15 +122,17 @@
 
                 let scr = newTab.document.createElement("script");
                 scr.setAttribute("type", "module");
-                src.setAttribute(
+                scr.setAttribute(
                     "src",
                     "https://kajizukataichi.github.io/mystia/izakaya.mjs",
                 );
                 newTab.document.body.appendChild(scr);
 
-                let mys = newTab.document.createElement("mystia");
+                let mys = newTab.document.createElement("mystia-code");
                 mys.textContent = codeEditor.value;
                 newTab.document.body.appendChild(mys);
+
+                console.log(newTab.document.body.innerHTML);
             });
         </script>
     </body>
