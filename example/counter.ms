@@ -4,17 +4,23 @@ load tap_elm(id: str, funcname: str): void;
 load get_status(id: str): int;
 load set_status(id: str, val: int): void;
 load int_to_str(n: int): str;
+load concat(a: str, b: str): str;
 
 let inc() = {
     let current = get_status("number");
     let current + 1;
     set_status("number", current);
-    set_elm("view", int_to_str(current));
-    0
+    set_elm("view", concat("Number: ", int_to_str(current)))
 };
 
-new_elm("view", "h1");
-new_elm("btn", "button");
+new_elm("title", "h1");
+set_elm("title", "Counter App");
 
+new_elm("view", "p");
+sew_elm("view", "Number: 0");
+
+new_elm("btn", "button");
+set_elm("btn", "Increment");
 tap_elm("btn", "inc");
-0
+
+"Counter App"
