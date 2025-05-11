@@ -7,10 +7,9 @@ load int_to_str(n: int): str;
 load concat(a: str, b: str): str;
 
 let inc() = {
-    let current = get_status("number");
-    let current + 1;
-    set_status("number", current);
-    set_elm("view", concat("Number: ", int_to_str(current)))
+    let n = get_status("number") + 1;
+    set_elm("view", concat("Number: ", int_to_str(n)));
+    set_status("number", n)
 };
 
 set_status("number", 0);
@@ -24,5 +23,4 @@ sew_elm("view", "Number: 0");
 new_elm("btn", "button");
 set_elm("btn", "Increment");
 tap_elm("btn", "inc");
-
-"Counter App"
+0
