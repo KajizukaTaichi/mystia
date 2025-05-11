@@ -48,6 +48,8 @@ export async function mystia(code) {
             canvas = document.createElement("canvas");
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
+            canvas.style.width = `${window.innerWidth}px`;
+            canvas.style.height = `${window.innerHeight}px`;
             canvas.id = "mystia-canvas";
             document.body.appendChild(canvas);
         } else {
