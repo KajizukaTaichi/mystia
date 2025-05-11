@@ -89,8 +89,8 @@ export async function mystia(code) {
     mystiaFunctions.rand = () => {
         return Math.random();
     };
-    mystiaFunctions.new_elm = (tag, id) => {
-        const elm = document.createElement(ead(instance, "str", tag));
+    mystiaFunctions.new_elm = (id, tag) => {
+        const elm = document.createElement(read(instance, "str", tag));
         elm.setAttribute("id", read(instance, "str", id));
         document.body.appendChild(elm);
     };
