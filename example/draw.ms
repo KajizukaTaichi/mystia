@@ -32,21 +32,21 @@ while (xsiz >= 2) || (ysiz >= 2) loop {
     let color_index = color_index + 1;
 
     if state==0 then {
-        let xidx = xidx + xsiz;
-        let ysiz = ysiz / 2
+        let xidx + xsiz;
+        let ysiz / 2
     } else if state==1 then {
-        let yidx = yidx + ysiz;
-        let xsiz = xsiz / 2;
-        let xidx = xidx + xsiz
+        let yidx + ysiz;
+        let xsiz / 2;
+        let xidx + xsiz
     } else if state==2 then {
-        let xidx = xidx - xsiz;
-        let ysiz = ysiz / 2;
-        let yidx = yidx + ysiz
+        let xidx - xsiz;
+        let ysiz / 2;
+        let yidx + ysiz
     } else {
-        let yidx = yidx - ysiz;
-        let xsiz = xsiz / 2
+        let yidx - ysiz;
+        let xsiz / 2
     };
-    let state = state + 1;
-    let state = state % 4
+    let state + 1;
+    let state % 4
 };
 "zukei"
