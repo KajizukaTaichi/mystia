@@ -106,7 +106,7 @@ export async function mystia(code) {
         elm.innerHTML = read(instance, "str", content);
     };
     mystiaFunctions.tap_elm = (id, funcname) => {
-        const elm = document.getElementById(id);
+        const elm = document.getElementById(read(instance, "str", id));
         elm.onclick = function () {
             instance.exports[read(instance, "str", funcname)]();
         };
