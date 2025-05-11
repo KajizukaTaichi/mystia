@@ -42,7 +42,7 @@ export async function mystia(code) {
             set_elm: (id, cotent) => mystiaFunctions.set_elm(id, cotent),
             tap_elm: (id, funcname) => mystiaFunctions.tap_elm(id, funcname),
             get_status: (id) => mystiaFunctions.get_status(id),
-            get_status: (id, val) => mystiaFunctions.set_status(id, val),
+            set_status: (id, val) => mystiaFunctions.set_status(id, val),
         },
     });
     mystiaFunctions.alert = (message) => {
