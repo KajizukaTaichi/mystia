@@ -32,8 +32,8 @@ impl Node for Type {
                         Box::new(Type::parse(typ)?),
                         ok!(len.trim().parse())?,
                     ))
-                } else if source.starts_with("{") && source.ends_with("}") {
-                    let source = source.get(1..source.len() - 1)?.trim();
+                } else if source.starts_with("@{") && source.ends_with("}") {
+                    let source = source.get(2..source.len() - 1)?.trim();
                     let mut result = IndexMap::new();
                     let mut index = 0;
                     for line in tokenize(source, &[","], false, true)? {
