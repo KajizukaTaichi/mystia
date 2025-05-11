@@ -2,6 +2,9 @@ import init, { mystia as compile } from "../wasm/web/wasm.js";
 import { write as write, read as read } from "./ffi.mjs";
 
 await init();
+
+let appStatus = {};
+
 export async function mystia(code) {
     const result = compile(code);
     const type = eval(`(${result.get_return_type()})`);
@@ -21,6 +24,8 @@ export async function mystia(code) {
         new_elm: null,
         set_elm: null,
         tap_elm: null,
+        get_status: null,
+        set_status: null,
     };
     const { instance } = await WebAssembly.instantiate(bytecodes, {
         env: {
@@ -33,9 +38,11 @@ export async function mystia(code) {
             concat: (str1, str2) => mystiaFunctions.concat(str1, str2),
             write: (data) => mystiaFunctions.write(data),
             rand: () => mystiaFunctions.rand(),
-            new_elm: (a, b) => mystiaFunctions.new_elm(a, b),
-            set_elm: (a, b) => mystiaFunctions.set_elm(a, b),
-            tap_elm: (a, b) => mystiaFunctions.tap_elm(a, b),
+            new_elm: (id, tag) => mystiaFunctions.new_elm(id, tag),
+            set_elm: (id, cotent) => mystiaFunctions.set_elm(id, cotent),
+            tap_elm: (id, funcname) => mystiaFunctions.tap_elm(id, funcname),
+            get_status: (id) => mystiaFunctions.get_status(id),
+            get_status: (id, val) => mystiaFunctions.set_status(id, val),
         },
     });
     mystiaFunctions.alert = (message) => {
@@ -103,6 +110,12 @@ export async function mystia(code) {
         elm.onclick = function () {
             instance.exports[read(instance, "str", funcname)]();
         };
+    };
+    mystiaFunctions.get_status = (id) => {
+        return appStatus[read(instance, "str", id)];
+    };
+    mystiaFunctions.get_status = (id, val) => {
+        appStatus[read(instance, "str", id)] = val;
     };
 
     const value = instance.exports._start();
