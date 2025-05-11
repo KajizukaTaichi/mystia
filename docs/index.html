@@ -121,7 +121,7 @@
                             <title>Mystia App</title>
                         </head>
                         <body>
-                            <script type="module" src="https://kajizukataichi.github.io/mystia/izakaya.mjs">
+                            <script type="module" src="https://kajizukataichi.github.io/mystia/izakaya.mjs"></\script>
                             <mystia-code>${codeEditor.value}</mystia-code>
                         </body>
                     </html>
@@ -129,7 +129,7 @@
                 const blob = new Blob([data], { type: "text/plain" });
                 const link = document.createElement("a");
                 link.href = URL.createObjectURL(blob);
-                link.download = "main.ms";
+                link.download = "mystia-app.html";
                 link.click();
             });
         </script>
