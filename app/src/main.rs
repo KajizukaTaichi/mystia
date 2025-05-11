@@ -31,7 +31,8 @@ fn main() {
         return;
     };
     let Some(wat_code) = compiler.build(&source) else {
-        let err = compiler.occurred_error.unwrap_or(String::new());
+        let error_message = "failed to parse, compile or check type consistency";
+        let err = compiler.occurred_error.unwrap_or(error_message.to_owned());
         eprintln!("Error: {err}");
         return;
     };
