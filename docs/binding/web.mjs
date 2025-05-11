@@ -85,14 +85,20 @@ export async function mystia(code) {
     mystiaFunctions.rand = () => {
         return Math.random();
     };
-    mystiaFunctions.new_elm = (tag, id, content) => {
+    mystiaFunctions.new_elm = (tag, id) => {
         const elm = document.createElement(tag);
         elm.setAttribute("id", id);
-        elm.innerHTML = read(instance, "str", content);
         document.body.appendChild(elm);
     };
     mystiaFunctions.set_elm = (id, content) => {
         const elm = document.getElementById(id);
+        elm.innerHTML = read(instance, "str", content);
+    };
+    mystiaFunctions.onclick_elm = (id, funcname) => {
+        const elm = document.getElementById(id);
+        elm.onclick = function () {
+            instance.exports[funcname]();
+        };
     };
 
     const value = instance.exports._start();
