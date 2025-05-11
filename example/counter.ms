@@ -18,7 +18,7 @@ new_elm("title", "h1");
 set_elm("title", "Counter App");
 
 new_elm("view", "p");
-sew_elm("view", "Number: 0");
+set_elm("view", "Number: 0");
 
 new_elm("btn", "button");
 set_elm("btn", "Increment");
