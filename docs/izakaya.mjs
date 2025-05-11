@@ -12,4 +12,4 @@ class Mystia extends HTMLElement {
     }
 }
 
-customElements.define("mystia", Mystia);
+customElements.define("mystia-code", Mystia);
