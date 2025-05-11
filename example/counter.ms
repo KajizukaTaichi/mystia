@@ -5,15 +5,16 @@ load get_status(id: str): int;
 load set_status(id: str, val: int): void;
 load int_to_str(n: int): str;
 
-let incd() = {
+let inc() = {
     let current = get_status("number");
     let current + 1;
     set_status("number", current);
-    set_elm("view", int_to_str(current))
+    set_elm("view", int_to_str(current));
+    0
 };
 
 new_elm("view", "h1");
 new_elm("btn", "button");
 
-tap_elm("btn", "incd");
+tap_elm("btn", "inc");
 0
