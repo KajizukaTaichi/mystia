@@ -51,6 +51,7 @@
 
                 <div class="inline-elements">
                     <button id="run" type="button" class="button">Run</button>
+                    <button id="build" type="button" class="button">Run</button>
                     <a
                         class="button"
                         href="https://github.com/KajizukaTaichi/mystia/tree/master/example"
@@ -83,20 +84,17 @@
             const codeEditor = document.getElementById("code");
             const resultArea = document.getElementById("result");
             const runBtn = document.getElementById("run");
+            const buildBtn = document.getElementById("build");
 
             const timerLabel = document.getElementById("timer");
             const exampleFieldInput = document.getElementById("example-field");
             const exampleSelectBtn = document.getElementById("example-select");
 
-            function loadExample(name) {
-                const exampleCodeUrl = `https://raw.githubusercontent.com/KajizukaTaichi/mystia/refs/heads/master/example/${name}.ms`;
+            exampleSelectBtn.addEventListener("click", () => {
+                const exampleCodeUrl = `https://raw.githubusercontent.com/KajizukaTaichi/mystia/refs/heads/master/example/${exampleFieldInput.value}.ms`;
                 fetch(exampleCodeUrl)
                     .then((response) => response.text())
                     .then((data) => (codeEditor.value = data));
-            }
-
-            exampleSelectBtn.addEventListener("click", () => {
-                loadExample(exampleFieldInput.value);
             });
 
             runBtn.addEventListener("click", async (e) => {
@@ -111,6 +109,14 @@
                     resultArea.innerHTML = error;
                 }
                 clearInterval(timer);
+            });
+
+            buildBtn.addEventListener("click", () => {
+                let newTab = window.open();
+                let scr = newTab.document.createElement("script");
+                scr.setAttribute("type", "module");
+                scr.textContent = `import { mystia } from "https://kajizukataichi.github.io/mystia/binding/web.mjs"; mystia(\`${codeEditor.value}\`)`;
+                newTab.document.body.appendChild(scr);
             });
         </script>
     </body>
