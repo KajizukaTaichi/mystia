@@ -1,5 +1,5 @@
-import init, { mystia as compile } from "../wasm/web/mystia_wasm.js";
-import { write as mystia_write, read as mystia_read } from "./ffi.mjs";
+import init, { mystia as compile } from "../wasm/web/wasm.js";
+import { write as write, read as read } from "./ffi.mjs";
 
 await init();
 export async function mystia(code) {
@@ -18,6 +18,8 @@ export async function mystia(code) {
         concat: null,
         write: null,
         rand: null,
+        new_elm: null,
+        set_elm: null,
     };
     const { instance } = await WebAssembly.instantiate(bytecodes, {
         env: {
@@ -33,14 +35,14 @@ export async function mystia(code) {
         },
     });
     mystiaFunctions.alert = (message) => {
-        window.alert(mystia_read(instance, "str", message));
+        window.alert(read(instance, "str", message));
     };
     mystiaFunctions.confirm = (message) => {
-        window.confirm(mystia_read(instance, "str", message));
+        window.confirm(read(instance, "str", message));
     };
     mystiaFunctions.prompt = (message) => {
-        const answer = window.prompt(mystia_read(instance, "str", message));
-        return mystia_write(instance, "str", answer);
+        const answer = window.prompt(read(instance, "str", message));
+        return write(instance, "str", answer);
     };
     mystiaFunctions.init_canvas = () => {
         let canvas = document.getElementById("mystia-canvas");
@@ -66,24 +68,33 @@ export async function mystia(code) {
                 ["green", "red", "pink", "yellow"],
             ].flat(),
         };
-        ctx.fillStyle = mystia_read(instance, type, color);
+        ctx.fillStyle = read(instance, type, color);
         ctx.fillRect(x, y, 1, 1);
     };
     mystiaFunctions.int_to_str = (value) => {
-        return mystia_write(instance, "str", value.toString());
+        return write(instance, "str", value.toString());
     };
     mystiaFunctions.concat = (str1, str2) => {
-        const strs1 = mystia_read(instance, "str", str1);
-        const strs2 = mystia_read(instance, "str", str2);
-        return mystia_write(instance, "str", strs1 + strs2);
+        const strs1 = read(instance, "str", str1);
+        const strs2 = read(instance, "str", str2);
+        return write(instance, "str", strs1 + strs2);
     };
     mystiaFunctions.write = (data) => {
-        document.write(mystia_read(instance, "str", data));
+        document.write(read(instance, "str", data));
     };
     mystiaFunctions.rand = () => {
         return Math.random();
     };
+    mystiaFunctions.new_elm = (tag, id, content) => {
+        const elm = document.createElement(tag);
+        elm.setAttribute("id", id);
+        elm.innerHTML = read(instance, "str", content);
+        document.body.appendChild(elm);
+    };
+    mystiaFunctions.set_elm = (id, content) => {
+        const elm = document.getElementById(id);
+    };
 
     const value = instance.exports._start();
-    return mystia_read(instance, type, value);
+    return read(instance, type, value);
 }
