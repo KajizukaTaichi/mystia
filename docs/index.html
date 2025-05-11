@@ -114,25 +114,23 @@
             });
 
             buildBtn.addEventListener("click", () => {
-                let newTab = window.open();
-                newTab.document.write(
-                    "<!DOCTYPE html><html><head><title>Mystia App</title></head><body></body></html>",
-                );
-                newTab.document.close();
-
-                let scr = newTab.document.createElement("script");
-                scr.setAttribute("type", "module");
-                scr.setAttribute(
-                    "src",
-                    "https://kajizukataichi.github.io/mystia/izakaya.mjs",
-                );
-                newTab.document.body.appendChild(scr);
-
-                let mys = newTab.document.createElement("mystia-code");
-                mys.textContent = codeEditor.value;
-                newTab.document.body.appendChild(mys);
-
-                console.log(newTab.document.body.innerHTML);
+                const data = `
+                    <!DOCTYPE html>
+                    <html>
+                        <head>
+                            <title>Mystia App</title>
+                        </head>
+                        <body>
+                            <script type="module" src="https://kajizukataichi.github.io/mystia/izakaya.mjs">
+                            <mystia-code>${codeEditor.value}</mystia-code>
+                        </body>
+                    </html>
+                `;
+                const blob = new Blob([data], { type: "text/plain" });
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = "main.ms";
+                link.click();
             });
         </script>
     </body>
