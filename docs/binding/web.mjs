@@ -90,18 +90,18 @@ export async function mystia(code) {
         return Math.random();
     };
     mystiaFunctions.new_elm = (tag, id) => {
-        const elm = document.createElement(tag);
-        elm.setAttribute("id", id);
+        const elm = document.createElement(ead(instance, "str", tag));
+        elm.setAttribute("id", read(instance, "str", id));
         document.body.appendChild(elm);
     };
     mystiaFunctions.set_elm = (id, content) => {
-        const elm = document.getElementById(id);
+        const elm = document.getElementById(read(instance, "str", id));
         elm.innerHTML = read(instance, "str", content);
     };
     mystiaFunctions.tap_elm = (id, funcname) => {
         const elm = document.getElementById(id);
         elm.onclick = function () {
-            instance.exports[funcname]();
+            instance.exports[read(instance, "str", funcname)]();
         };
     };
 
