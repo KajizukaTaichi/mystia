@@ -21,24 +21,24 @@ let state = 0;
 let color_index = 0;
 while (xsiz >= 2) || (ysiz >= 2) loop {
     let y_index = yidx;
-    while y_index < (yidx+ysiz) loop {
+    while y_index < (yidx + ysiz) loop {
         let x_index = xidx;
         while x_index < (xidx+xsiz) loop {
-        draw(x_index, y_index, colors[color_index%colors_num]);
-        let x_index + 1
+            draw(x_index, y_index, colors[color_index % colors_num]);
+            let x_index + 1
         };
         let y_index + 1
     };
     let color_index = color_index + 1;
 
-    if state==0 then {
+    if state == 0 then {
         let xidx + xsiz;
         let ysiz / 2
-    } else if state==1 then {
+    } else if state == 1 then {
         let yidx + ysiz;
         let xsiz / 2;
         let xidx + xsiz
-    } else if state==2 then {
+    } else if state == 2 then {
         let xidx - xsiz;
         let ysiz / 2;
         let yidx + ysiz
