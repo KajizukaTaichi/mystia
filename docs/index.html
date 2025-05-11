@@ -115,6 +115,10 @@
 
             buildBtn.addEventListener("click", () => {
                 let newTab = window.open();
+                newTab.document.write(
+                    "<!DOCTYPE html><html><head><title>Mystia App</title></head><body></body></html>",
+                );
+                newTab.document.close();
                 let scr = newTab.document.createElement("script");
                 scr.setAttribute("type", "module");
                 scr.textContent = `import { mystia } from "https://kajizukataichi.github.io/mystia/binding/web.mjs"; mystia(${JSON.stringify(codeEditor.value)})`;
