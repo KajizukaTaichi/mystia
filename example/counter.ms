@@ -12,10 +12,11 @@ let inc() = {
     set_status("number", n)
 };
 
+let app_name = "Counter App";
 set_status("number", 0);
 
 new_elm("title", "h1");
-set_elm("title", "Counter App");
+set_elm("title", app_name);
 
 new_elm("view", "p");
 set_elm("view", "Number: 0");
@@ -23,4 +24,5 @@ set_elm("view", "Number: 0");
 new_elm("btn", "button");
 set_elm("btn", "Increment");
 tap_elm("btn", "inc");
-0
+
+app_name
