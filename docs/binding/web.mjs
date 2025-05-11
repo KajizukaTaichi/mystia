@@ -20,6 +20,7 @@ export async function mystia(code) {
         rand: null,
         new_elm: null,
         set_elm: null,
+        tap_elm: null,
     };
     const { instance } = await WebAssembly.instantiate(bytecodes, {
         env: {
@@ -32,6 +33,9 @@ export async function mystia(code) {
             concat: (str1, str2) => mystiaFunctions.concat(str1, str2),
             write: (data) => mystiaFunctions.write(data),
             rand: () => mystiaFunctions.rand(),
+            new_elm: (a, b) => mystiaFunctions.new_elm(a, b),
+            set_elm: (a, b) => mystiaFunctions.set_elm(a, b),
+            tap_elm: (a, b) => mystiaFunctions.tap_elm(a, b),
         },
     });
     mystiaFunctions.alert = (message) => {
@@ -94,7 +98,7 @@ export async function mystia(code) {
         const elm = document.getElementById(id);
         elm.innerHTML = read(instance, "str", content);
     };
-    mystiaFunctions.onclick_elm = (id, funcname) => {
+    mystiaFunctions.tap_elm = (id, funcname) => {
         const elm = document.getElementById(id);
         elm.onclick = function () {
             instance.exports[funcname]();
