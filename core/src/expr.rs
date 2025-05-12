@@ -152,7 +152,7 @@ impl Node for Expr {
                 let func = |(arg, typ): (&Expr, &Type)| type_check!(arg, typ, ctx);
                 let ziped = args.iter().zip(function.arguments.values());
                 ziped.map(func).collect::<Option<Vec<_>>>()?;
-                function.returns.clone()
+                function.returns.type_infer(ctx)?
             }
             Expr::Index(arr, _) => {
                 let infered = arr.type_infer(ctx)?;
