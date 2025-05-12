@@ -1,14 +1,12 @@
-load new_elm(id: str, tag: str): void;
-load set_elm(id: str, content: str): void;
-load tap_elm(id: str, func: str): void;
-
 type Model = @{
     number: int,
 };
 
 load get_status(id: str): Model;
 load set_status(id: str, val: Model): void;
-
+load new_elm(id: str, tag: str): void;
+load set_elm(id: str, content: str): void;
+load tap_elm(id: str, func: str): void;
 load int_to_str(n: int): str;
 load concat(a: str, b: str): str;
 
