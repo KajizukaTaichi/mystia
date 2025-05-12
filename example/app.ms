@@ -11,9 +11,8 @@ load int_to_str(n: int): str;
 load concat(a: str, b: str): str;
 
 let inc() = {
-    let model = get_status();
-    let model.number + 1;
-    let num = int_to_str(model.number);
+    let get_status().number + 1;
+    let num = int_to_str(get_status().number);
     set_elm("view", concat("Number: ", num))
 };
 
