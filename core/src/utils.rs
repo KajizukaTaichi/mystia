@@ -34,13 +34,14 @@ pub fn expand_local(ctx: &mut Compiler) -> Option<String> {
 
 #[macro_export]
 macro_rules! compile_return {
-    ($ret: expr, $ctx: expr) => {
-        if let Type::Void = $ret {
+    ($ret: expr, $ctx: expr) => {{
+        let ret = $ret.type_infer($ctx)?;
+        if let Type::Void = ret {
             String::new()
         } else {
-            format!("(result {})", $ret.compile($ctx)?)
+            format!("(result {})", ret.compile($ctx)?)
         }
-    };
+    }};
 }
 
 #[macro_export]
