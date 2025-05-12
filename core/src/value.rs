@@ -171,7 +171,7 @@ impl Node for Value {
                 }
                 Type::Dict(result)
             }
-            Value::Enum(typ, _) => typ.clone(),
+            Value::Enum(typ, _) => typ.type_infer(ctx)?,
         })
     }
 }
