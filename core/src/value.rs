@@ -7,7 +7,7 @@ pub enum Value {
     Bool(bool),
     Array(Vec<Expr>),
     Dict(IndexMap<String, Expr>),
-    Enum(i32, Enum),
+    Enum(Type, String),
     String(String),
 }
 
@@ -41,6 +41,10 @@ impl Node for Value {
                 result.insert(name.trim().to_string(), Expr::parse(value)?);
             }
             Some(Value::Dict(result))
+        // Enumerate access `( a | b )#a`
+        } else if source.contains("#") {
+            let (dict, enuma) = source.rsplit_once("#")?;
+            Some(Value::Enum(Type::parse(dict)?, enuma.to_owned()))
         } else {
             None
         }
@@ -51,7 +55,6 @@ impl Node for Value {
             Value::Number(n) => format!("(f64.const {n})"),
             Value::Integer(n) => format!("(i32.const {n})"),
             Value::Bool(n) => Value::Integer(if *n { 1 } else { 0 }).compile(ctx)?,
-            Value::Enum(tag, _) => Value::Integer(*tag).compile(ctx)?,
             Value::String(str) => {
                 let len = str.len() + 1;
                 let result = Value::Integer(ctx.allocator).compile(ctx)?;
@@ -134,6 +137,20 @@ impl Node for Value {
                     join!(result)
                 )
             }
+            Value::Enum(typ, key) => {
+                let typ = typ.type_infer(ctx)?;
+                let Type::Enum(enum_type) = typ.clone() else {
+                    let error_message = format!("can't access enumerator to {}", typ.format());
+                    ctx.occurred_error = Some(error_message);
+                    return None;
+                };
+                let Some(value) = enum_type.iter().position(|item| item == key) else {
+                    let error_message = format!("`{key}` is invalid variant of {}", typ.format());
+                    ctx.occurred_error = Some(error_message);
+                    return None;
+                };
+                Value::Integer(value as i32).compile(ctx)?
+            }
         })
     }
 
@@ -154,7 +171,7 @@ impl Node for Value {
                 }
                 Type::Dict(result)
             }
-            Value::Enum(_, typ) => Type::Enum(typ.clone()),
+            Value::Enum(typ, _) => typ.clone(),
         })
     }
 }
