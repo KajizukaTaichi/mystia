@@ -1,6 +1,6 @@
 load new_elm(id: str, tag: str): void;
 load set_elm(id: str, content: str): void;
-load tap_elm(id: str, funcname: str): void;
+load tap_elm(id: str, func: str): void;
 load get_status(id: str): int;
 load set_status(id: str, val: int): void;
 load int_to_str(n: int): str;
