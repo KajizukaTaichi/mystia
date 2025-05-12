@@ -3,7 +3,7 @@ import { write as write, read as read } from "./ffi.mjs";
 
 await init();
 
-let appStatus = {};
+let appStatus;
 
 export async function mystia(code) {
     const result = compile(code);
@@ -41,8 +41,8 @@ export async function mystia(code) {
             new_elm: (id, tag) => mystiaFunctions.new_elm(id, tag),
             set_elm: (id, cotent) => mystiaFunctions.set_elm(id, cotent),
             tap_elm: (id, funcname) => mystiaFunctions.tap_elm(id, funcname),
-            get_status: (id) => mystiaFunctions.get_status(id),
-            set_status: (id, val) => mystiaFunctions.set_status(id, val),
+            get_status: () => mystiaFunctions.get_status(),
+            set_status: (val) => mystiaFunctions.set_status(val),
         },
     });
     mystiaFunctions.alert = (message) => {
@@ -111,11 +111,11 @@ export async function mystia(code) {
             instance.exports[read(instance, "str", funcname)]();
         };
     };
-    mystiaFunctions.get_status = (id) => {
-        return appStatus[read(instance, "str", id)];
+    mystiaFunctions.get_status = () => {
+        return appStatus;
     };
-    mystiaFunctions.set_status = (id, val) => {
-        appStatus[read(instance, "str", id)] = val;
+    mystiaFunctions.set_status = (val) => {
+        appStatus = val;
     };
 
     const value = instance.exports._start();
