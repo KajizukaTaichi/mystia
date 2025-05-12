@@ -8,7 +8,6 @@ pub enum Expr {
     Call(String, Vec<Expr>),
     Index(Box<Expr>, Box<Expr>),
     Field(Box<Expr>, String),
-    Enum(Type, String),
     Block(Block),
     MemCpy(Box<Expr>),
 }
@@ -57,10 +56,6 @@ impl Node for Expr {
         } else if token.contains(".") {
             let (dict, field) = token.rsplit_once(".")?;
             Some(Expr::Field(Box::new(Expr::parse(dict)?), field.to_owned()))
-        // Enumerate access `( a | b )#a`
-        } else if token.contains("#") {
-            let (dict, enuma) = token.rsplit_once("#")?;
-            Some(Expr::Enum(Type::parse(dict)?, enuma.to_owned()))
         // Variable reference
         } else if !RESERVED.contains(&token) && token.is_ascii() {
             Some(Expr::Variable(token.to_string()))
@@ -109,20 +104,6 @@ impl Node for Expr {
                     Expr::Literal(Value::Integer(offset.clone())),
                 );
                 format!("({}.load {})", typ.compile(ctx)?, addr.compile(ctx)?)
-            }
-            Expr::Enum(typ, key) => {
-                let typ = typ.type_infer(ctx)?;
-                let Type::Enum(enum_type) = typ.clone() else {
-                    let error_message = format!("can't access enumerator to {}", typ.format());
-                    ctx.occurred_error = Some(error_message);
-                    return None;
-                };
-                let Some(value) = enum_type.iter().position(|item| item == key) else {
-                    let error_message = format!("`{key}` is invalid variant of {}", typ.format());
-                    ctx.occurred_error = Some(error_message);
-                    return None;
-                };
-                Value::Enum(value as i32, enum_type.clone()).compile(ctx)?
             }
             Expr::Block(block) => block.compile(ctx)?,
             Expr::MemCpy(from) => {
@@ -197,7 +178,6 @@ impl Node for Expr {
                     return None;
                 }
             }
-            Expr::Enum(typ, _) => typ.type_infer(ctx)?,
             Expr::Block(block) => block.type_infer(ctx)?,
             Expr::MemCpy(from) => from.type_infer(ctx)?,
         })
