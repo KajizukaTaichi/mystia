@@ -4,7 +4,6 @@ load tap_elm(id: str, func: str): void;
 
 type Model = @{
     number: int,
-    level: int
 };
 
 load get_status(id: str): Model;
@@ -21,7 +20,7 @@ let inc() = {
 };
 
 let app_name = "Counter App";
-set_status("number", @{ number: 0, level: 0 });
+set_status("number", @{ number: 0 });
 
 new_elm("title", "h1");
 set_elm("title", app_name);
