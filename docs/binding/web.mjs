@@ -41,8 +41,8 @@ export async function mystia(code) {
             new_elm: (id, tag) => libFuncs.new_elm(id, tag),
             upd_elm: (id, prop, content) => libFuncs.upd_elm(id, prop, content),
             evt_elm: (id, name, func) => libFuncs.evt_elm(id, name, func),
-            status: () => libFuncs.status(),
-            upd_status: (val) => libFuncs.upd_status(val),
+            model: () => libFuncs.model(),
+            init_model: (val) => libFuncs.init_model(val),
         },
     });
     libFuncs.alert = (message) => {
@@ -101,20 +101,20 @@ export async function mystia(code) {
         elm.setAttribute("id", read(instance, "str", id));
         document.body.appendChild(elm);
     };
-    libFuncs.set_elm = (id, property, content) => {
+    libFuncs.evt_elm = (id, property, content) => {
         const elm = document.getElementById(read(instance, "str", id));
         elm[read(instance, "str", property)] = read(instance, "str", content);
     };
-    libFuncs.tap_elm = (id, name, funcname) => {
+    libFuncs.evt_elm = (id, name, funcname) => {
         const elm = document.getElementById(read(instance, "str", id));
         elm.addEventListener(read(instance, "str", name), function () {
             instance.exports[read(instance, "str", funcname)]();
         });
     };
-    libFuncs.get_status = () => {
+    libFuncs.model = () => {
         return appStatus;
     };
-    libFuncs.set_status = (val) => {
+    libFuncs.init_model = (val) => {
         appStatus = val;
     };
 
