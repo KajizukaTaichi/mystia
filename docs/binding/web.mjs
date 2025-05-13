@@ -2,9 +2,6 @@ import init, { mystia as compile } from "../wasm/web/mystia_wasm.js";
 import { write as write, read as read } from "./ffi.mjs";
 
 await init();
-
-let appStatus;
-
 export async function mystia(code) {
     const result = compile(code);
     const type = eval(`(${result.get_return_type()})`);
@@ -23,8 +20,6 @@ export async function mystia(code) {
         new_elm: null,
         upd_elm: null,
         evt_elm: null,
-        model: null,
-        init_model: null,
     };
     const { instance } = await WebAssembly.instantiate(bytecodes, {
         env: {
@@ -39,8 +34,6 @@ export async function mystia(code) {
             new_elm: (id, tag, parent) => libFuncs.new_elm(id, tag, parent),
             upd_elm: (id, prop, content) => libFuncs.upd_elm(id, prop, content),
             evt_elm: (id, name, func) => libFuncs.evt_elm(id, name, func),
-            model: () => libFuncs.model(),
-            init_model: (val) => libFuncs.init_model(val),
         },
     });
     libFuncs.alert = (message) => {
@@ -102,12 +95,6 @@ export async function mystia(code) {
         elm.addEventListener(read(instance, "str", name), function () {
             instance.exports[read(instance, "str", funcname)]();
         });
-    };
-    libFuncs.model = () => {
-        return appStatus;
-    };
-    libFuncs.init_model = (val) => {
-        appStatus = val;
     };
 
     const value = instance.exports._start();
