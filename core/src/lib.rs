@@ -52,6 +52,8 @@ pub struct Compiler {
     pub occurred_error: Option<String>,
     /// Type environment for variable
     pub variable_type: IndexMap<String, Type>,
+    /// Type environment for global varibale
+    pub global_type: IndexMap<String, Type>,
     /// Type environment for argument
     pub argument_type: IndexMap<String, Type>,
     /// Type environment for function
@@ -70,6 +72,7 @@ impl Compiler {
             occurred_error: None,
             type_alias: IndexMap::new(),
             variable_type: IndexMap::new(),
+            global_type: IndexMap::new(),
             argument_type: IndexMap::new(),
             function_type: IndexMap::new(),
             program_return: Type::Void,
