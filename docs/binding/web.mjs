@@ -101,7 +101,7 @@ export async function mystia(code) {
         elm.setAttribute("id", read(instance, "str", id));
         document.body.appendChild(elm);
     };
-    libFuncs.evt_elm = (id, property, content) => {
+    libFuncs.upd_elm = (id, property, content) => {
         const elm = document.getElementById(read(instance, "str", id));
         elm[read(instance, "str", property)] = read(instance, "str", content);
     };
