@@ -89,7 +89,7 @@ impl Compiler {
             import = join!(self.import_code),
             strings = join!(self.static_data),
             declare = join!(self.declare_code),
-            memory = "(memory $mem (export \"mem\") 1)",
+            memory = "(memory $mem (export \"mem\") 64)",
             memcpy = &format!(
                 "(global $allocator (export \"allocator\") (mut i32) (i32.const {allocator})) {}",
                 "(func (export \"malloc\") (param $size i32) (global.set $allocator (i32.add (global.get $allocator) (local.get $size))))",
