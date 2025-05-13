@@ -31,6 +31,7 @@ upd_elm("view", "innerHTML", "Number: 0");
 
 new_elm("btn", "button", "container");
 upd_elm("btn", "innerHTML", "Increment");
+upd_elm("btn", "className", "button");
 evt_elm("btn", "click", "inc");
 
 app_name
