@@ -37,7 +37,8 @@ let game() = {
     new_elm(model.player.id, "img", "body");
     upd_elm(model.player.id, "src", "https://pixiv.navirank.com/jpg/153/15371090.jpg");
     upd_elm(model.player.id, "style", "height: 100px; position: absolute;");
-    evt_elm(model.player.id, "keydown", "user_operation")
+    evt_elm(model.player.id, "keydown", "user_operation");
+    draw_player()
 };
 
 game(); 0
