@@ -39,9 +39,10 @@ export async function mystia(code) {
             write: (data) => mystiaFunctions.write(data),
             rand: () => mystiaFunctions.rand(),
             new_elm: (id, tag) => mystiaFunctions.new_elm(id, tag),
-            set_elm: (id, prop, content) =>
+            upd_elm: (id, prop, content) =>
                 mystiaFunctions.set_elm(id, prop, content),
-            tap_elm: (id, funcname) => mystiaFunctions.tap_elm(id, funcname),
+            evt_elm: (id, name, funcname) =>
+                mystiaFunctions.tap_elm(id, name, funcname),
             get_status: () => mystiaFunctions.get_status(),
             set_status: (val) => mystiaFunctions.set_status(val),
         },
@@ -106,11 +107,11 @@ export async function mystia(code) {
         const elm = document.getElementById(read(instance, "str", id));
         elm[read(instance, "str", property)] = read(instance, "str", content);
     };
-    mystiaFunctions.tap_elm = (id, funcname) => {
+    mystiaFunctions.tap_elm = (id, name, funcname) => {
         const elm = document.getElementById(read(instance, "str", id));
-        elm.onclick = function () {
+        elm.addEventListener(read(instance, "str", name), function () {
             instance.exports[read(instance, "str", funcname)]();
-        };
+        });
     };
     mystiaFunctions.get_status = () => {
         return appStatus;
