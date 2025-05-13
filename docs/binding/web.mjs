@@ -19,7 +19,6 @@ export async function mystia(code) {
         draw: null,
         int_to_str: null,
         concat: null,
-        write: null,
         rand: null,
         new_elm: null,
         upd_elm: null,
@@ -36,7 +35,6 @@ export async function mystia(code) {
             draw: (x, y, color) => libFuncs.draw(x, y, color),
             int_to_str: (num) => libFuncs.int_to_str(num),
             concat: (str1, str2) => libFuncs.concat(str1, str2),
-            write: (data) => libFuncs.write(data),
             rand: () => libFuncs.rand(),
             new_elm: (id, tag, parent) => libFuncs.new_elm(id, tag, parent),
             upd_elm: (id, prop, content) => libFuncs.upd_elm(id, prop, content),
@@ -72,12 +70,10 @@ export async function mystia(code) {
     };
     libFuncs.draw = (x, y, color) => {
         const ctx = document.getElementById("mystia-canvas").getContext("2d");
+        const color = "white|black|grey|blue|violet|green|red|pink|yellow";
         const type = {
             type: "enum",
-            enum: [
-                ["white", "black", "grey", "blue", "violet"],
-                ["green", "red", "pink", "yellow"],
-            ].flat(),
+            enum: color.split("|"),
         };
         ctx.fillStyle = read(instance, type, color);
         ctx.fillRect(x, y, 1, 1);
@@ -90,9 +86,6 @@ export async function mystia(code) {
         const strs2 = read(instance, "str", str2);
         return write(instance, "str", strs1 + strs2);
     };
-    libFuncs.write = (data) => {
-        document.write(read(instance, "str", data));
-    };
     libFuncs.rand = () => {
         return Math.random();
     };
@@ -100,7 +93,7 @@ export async function mystia(code) {
         const elm = document.createElement(read(instance, "str", tag));
         elm.setAttribute("id", read(instance, "str", id));
         parent = document.getElementById(read(instance, "str", parent));
-        if (parent == null) parent = document.body;
+        if (parent === null) parent = document.body;
         parent.appendChild(elm);
     };
     libFuncs.upd_elm = (id, property, content) => {
