@@ -38,7 +38,7 @@ export async function mystia(code) {
             concat: (str1, str2) => libFuncs.concat(str1, str2),
             write: (data) => libFuncs.write(data),
             rand: () => libFuncs.rand(),
-            new_elm: (id, tag) => libFuncs.new_elm(id, tag),
+            new_elm: (id, tag, parent) => libFuncs.new_elm(id, tag, parent),
             upd_elm: (id, prop, content) => libFuncs.upd_elm(id, prop, content),
             evt_elm: (id, name, func) => libFuncs.evt_elm(id, name, func),
             model: () => libFuncs.model(),
