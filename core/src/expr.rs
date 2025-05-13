@@ -67,6 +67,9 @@ impl Node for Expr {
     fn compile(&self, ctx: &mut Compiler) -> Option<String> {
         Some(match self {
             Expr::Oper(oper) => oper.compile(ctx)?,
+            Expr::Variable(name) if ctx.global_type.contains_key(name) => {
+                format!("(global.get ${name})")
+            }
             Expr::Variable(name) => format!("(local.get ${name})"),
             Expr::Literal(literal) => literal.compile(ctx)?,
             Expr::Call(name, args) => format!(
@@ -132,6 +135,8 @@ impl Node for Expr {
                     local.clone()
                 } else if let Some(arg) = ctx.argument_type.get(name) {
                     arg.clone()
+                } else if let Some(glb) = ctx.global_type.get(name) {
+                    glb.clone()
                 } else {
                     ctx.occurred_error = Some(format!("undefined variable `{name}`"));
                     return None;
