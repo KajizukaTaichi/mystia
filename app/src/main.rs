@@ -58,6 +58,10 @@ fn main() {
         for (name, typ) in &compiler.variable_type {
             println!(" - {name}: {}", typ.decompress_alias(&compiler).format());
         }
+        println!("Globals:");
+        for (name, typ) in &compiler.global_type {
+            println!(" - {name}: {}", typ.decompress_alias(&compiler).format());
+        }
         println!("Aliases:");
         for (name, typ) in &compiler.type_alias {
             println!(" - {name}: {}", typ.format());
