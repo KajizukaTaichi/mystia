@@ -13,7 +13,8 @@ pub enum Stmt {
     Break,
 }
 
-enum Scope {
+#[derive(Clone, Debug)]
+pub enum Scope {
     Global,
     Local,
 }
@@ -119,20 +120,29 @@ impl Node for Stmt {
             }
             Stmt::Next => "(br $while_start)".to_string(),
             Stmt::Break => "(br $outer)".to_string(),
-            Stmt::Let(name, value) => match name {
-                Expr::Variable(name) => {
-                    let typ = value.type_infer(ctx)?;
-                    if !ctx.argument_type.contains_key(name) {
-                        ctx.variable_type.insert(name.to_string(), typ);
+            Stmt::Let(scope, name, value) => match name {
+                Expr::Variable(name) => match scope {
+                    Scope::Local => {
+                        let typ = value.type_infer(ctx)?;
+                        if !ctx.argument_type.contains_key(name) {
+                            ctx.variable_type.insert(name.to_string(), typ);
+                        }
+                        format!("(local.set ${name} {})", value.compile(ctx)?)
                     }
-                    format!("(local.set ${name} {})", value.compile(ctx)?)
-                }
+                    Scope::Global => {
+                        let typ = value.type_infer(ctx)?;
+                        if !ctx.global_type.contains_key(name) {
+                            ctx.global_type.insert(name.to_string(), typ);
+                        }
+                        format!("(global.set ${name} {})", value.compile(ctx)?)
+                    }
+                },
                 Expr::Call(name, _) => {
                     let function = ctx.function_type.get(name)?.clone();
                     ctx.variable_type = function.variables.clone();
                     ctx.argument_type = function.arguments.clone();
                     let code = format!(
-                        "(func ${name} (export \"{name}\") {args} {ret} {locals} {body})",
+                        "(func ${name} {pub} {args} {ret} {locals} {body})",
                         args = join!(
                             &function
                                 .arguments
@@ -144,6 +154,7 @@ impl Node for Stmt {
                                 .collect::<Option<Vec<_>>>()?
                         ),
                         ret = compile_return!(function.returns, ctx),
+                        pub =if let Scope::Global=scope{ "(export \"{name}\")"}else{""},
                         body = value.compile(ctx)?,
                         locals = expand_local(ctx)?
                     );
@@ -234,16 +245,28 @@ impl Node for Stmt {
             }
             Stmt::Break => Type::Void,
             Stmt::Next => Type::Void,
-            Stmt::Let(name, value) => {
+            Stmt::Let(scope, name, value) => {
                 match name {
-                    Expr::Variable(name) if !ctx.argument_type.contains_key(name) => {
-                        let value_type = value.type_infer(ctx)?;
-                        if let Some(exist_val) = ctx.clone().variable_type.get(name) {
-                            type_check!(exist_val, value_type, ctx)?;
-                        } else {
-                            ctx.variable_type.insert(name.to_string(), value_type);
+                    Expr::Variable(name) => match scope {
+                        Scope::Local => {
+                            if !ctx.argument_type.contains_key(name) {
+                                let value_type = value.type_infer(ctx)?;
+                                if let Some(exist_val) = ctx.clone().variable_type.get(name) {
+                                    type_check!(exist_val, value_type, ctx)?;
+                                } else {
+                                    ctx.variable_type.insert(name.to_string(), value_type);
+                                }
+                            }
                         }
-                    }
+                        Scope::Global => {
+                            let value_type = value.type_infer(ctx)?;
+                            if let Some(exist_val) = ctx.clone().global_type.get(name) {
+                                type_check!(exist_val, value_type, ctx)?;
+                            } else {
+                                ctx.global_type.insert(name.to_string(), value_type);
+                            }
+                        }
+                    },
                     Expr::Call(name, args) => {
                         for arg in args {
                             let Expr::Oper(oper) = arg else { return None };
