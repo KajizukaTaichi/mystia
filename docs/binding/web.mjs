@@ -70,8 +70,8 @@ export async function mystia(code) {
     };
     libFuncs.draw = (x, y, color) => {
         const ctx = document.getElementById("mystia-canvas").getContext("2d");
-        const color = "white|black|grey|blue|violet|green|red|pink|yellow";
-        const type = { type: "enum", enum: color.split("|") };
+        const pallet = "white|black|grey|blue|violet|green|red|pink|yellow";
+        const type = { type: "enum", enum: pallet.split("|") };
         ctx.fillStyle = read(instance, type, color);
         ctx.fillRect(x, y, 1, 1);
     };
