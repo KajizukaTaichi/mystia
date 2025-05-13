@@ -23,6 +23,7 @@ new_elm("title", "h1");
 upd_elm("title", "innerHTML", "Number: 0");
 
 new_elm("view", "p");
+upd_elm("view", "style", "font-family: monospace");
 upd_elm("view", "innerHTML", "Number: 0");
 
 new_elm("btn", "button");
