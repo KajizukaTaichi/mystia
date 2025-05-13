@@ -72,9 +72,9 @@ export async function mystia(code) {
         return write(instance, "str", value.toString());
     };
     libFuncs.concat = (str1, str2) => {
-        const strs1 = read(instance, "str", str1);
-        const strs2 = read(instance, "str", str2);
-        return write(instance, "str", strs1 + strs2);
+        str1 = read(instance, "str", str1);
+        str2 = read(instance, "str", str2);
+        return write(instance, "str", str1 + str2);
     };
     libFuncs.rand = () => {
         return Math.random();
