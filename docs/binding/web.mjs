@@ -39,7 +39,8 @@ export async function mystia(code) {
             write: (data) => mystiaFunctions.write(data),
             rand: () => mystiaFunctions.rand(),
             new_elm: (id, tag) => mystiaFunctions.new_elm(id, tag),
-            set_elm: (id, cotent) => mystiaFunctions.set_elm(id, cotent),
+            set_elm: (id, prop, content) =>
+                mystiaFunctions.set_elm(id, prop, content),
             tap_elm: (id, funcname) => mystiaFunctions.tap_elm(id, funcname),
             get_status: () => mystiaFunctions.get_status(),
             set_status: (val) => mystiaFunctions.set_status(val),
