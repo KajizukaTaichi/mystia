@@ -27,6 +27,6 @@ upd_elm("view", "innerHTML", "Number: 0");
 
 new_elm("btn", "button");
 upd_elm("btn", "innerHTML", "Increment");
-tap_elm("btn", "inc");
+evt_elm("btn", "click", "inc");
 
 app_name
