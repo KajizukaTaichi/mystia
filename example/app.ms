@@ -15,10 +15,14 @@ pub let model = @{
     }
 };
 
-pub let inc() = {
-    let model.number + 1;
+let format() = {
     let num = int_to_str(model.number);
     upd_elm(model.layout.view, "innerHTML", concat("Number: ", num))
+};
+
+pub let inc() = {
+    let model.number + 1;
+    format()
 };
 
 let app() = {
@@ -30,7 +34,7 @@ let app() = {
 
     new_elm(model.layout.view, "p", model.layout.frame);
     upd_elm(model.layout.view, "style", "font-family: monospace");
-    upd_elm(model.layout.view, "innerHTML", "Number: 0");
+    format();
 
     new_elm(model.layout.btn, "button", model.layout.frame);
     upd_elm(model.layout.btn, "innerHTML", "Increment");
