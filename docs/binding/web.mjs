@@ -18,7 +18,6 @@ export async function mystia(code) {
         concat: null,
         rand: null,
         new_elm: null,
-        get_elm: null,
         upd_elm: null,
         evt_elm: null,
     };
@@ -33,7 +32,6 @@ export async function mystia(code) {
             concat: (str1, str2) => libFuncs.concat(str1, str2),
             rand: () => libFuncs.rand(),
             new_elm: (id, tag, parent) => libFuncs.new_elm(id, tag, parent),
-            get_elm: (id, prop) => libFuncs.get_elm(id, prop),
             upd_elm: (id, prop, content) => libFuncs.upd_elm(id, prop, content),
             evt_elm: (id, name, func) => libFuncs.evt_elm(id, name, func),
         },
@@ -88,16 +86,17 @@ export async function mystia(code) {
         if (parent === null) parent = document.body;
         parent.appendChild(elm);
     };
-    libFuncs.get_elm = (id, property) => {
-        property = read(instance, "str", property);
-        const elm = document.getElementById(read(instance, "str", id));
-        let value = elm[property];
-        if (typeof value != "string") value = elm.getAttribute(property);
-        return write(instance, "str", value);
-    };
     libFuncs.upd_elm = (id, property, content) => {
+        property = read(instance, "str", property);
+        content = read(instance, "str", content);
         const elm = document.getElementById(read(instance, "str", id));
-        elm[read(instance, "str", property)] = read(instance, "str", content);
+        if (property == "style") {
+            let old = elm.getAttribute("style");
+            if (old == null) old = "";
+            elm.setAttribute("style", old + content);
+        } else {
+            elm[property] = content;
+        }
     };
     libFuncs.evt_elm = (id, name, func) => {
         const elm = document.getElementById(read(instance, "str", id));
