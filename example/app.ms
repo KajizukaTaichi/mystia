@@ -20,7 +20,7 @@ let app_name = "Counter App";
 init_model(@{ number: 0 });
 
 new_elm("title", "h1");
-upd_elm("title", "innerHTML", "Counter");
+upd_elm("title", "innerHTML", "Counter App");
 
 new_elm("view", "p");
 upd_elm("view", "style", "font-family: monospace");
