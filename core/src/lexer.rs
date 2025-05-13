@@ -118,13 +118,9 @@ pub fn str_escape(str: &str) -> String {
 }
 
 pub fn remove_comment(source: &str) -> String {
-    let mut result = vec![];
-    for line in source.lines() {
-        let (line, _) = line.split_once("<--").unwrap_or((&line, ""));
-        if line.trim().is_empty() {
-            continue;
-        }
-        result.push(line);
-    }
-    result.join("\n")
+    source
+        .lines()
+        .map(|line| line.split_once("<--").unwrap_or((&line, "")).0)
+        .collect::<Vec<_>>()
+        .join("\n")
 }
