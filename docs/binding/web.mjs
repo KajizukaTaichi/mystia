@@ -90,11 +90,15 @@ export async function mystia(code) {
     };
     libFuncs.get_elm = (id, property) => {
         const elm = document.getElementById(read(instance, "str", id));
-        return write(instance, "str", elm[read(instance, "str", property)]);
+        const value = elm.getAttribute(read(instance, "str", property));
+        return write(instance, "str", value);
     };
     libFuncs.upd_elm = (id, property, content) => {
         const elm = document.getElementById(read(instance, "str", id));
-        elm[read(instance, "str", property)] = read(instance, "str", content);
+        elm.setAttribute(
+            read(instance, "str", property),
+            read(instance, "str", content),
+        );
     };
     libFuncs.evt_elm = (id, name, func) => {
         const elm = document.getElementById(read(instance, "str", id));
