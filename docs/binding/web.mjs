@@ -33,7 +33,7 @@ export async function mystia(code) {
             concat: (str1, str2) => libFuncs.concat(str1, str2),
             rand: () => libFuncs.rand(),
             new_elm: (id, tag, parent) => libFuncs.new_elm(id, tag, parent),
-            get_elm: (id, prop) => libFuncs.new_elm(id, prop),
+            get_elm: (id, prop) => libFuncs.get_elm(id, prop),
             upd_elm: (id, prop, content) => libFuncs.upd_elm(id, prop, content),
             evt_elm: (id, name, func) => libFuncs.evt_elm(id, name, func),
         },
@@ -90,7 +90,11 @@ export async function mystia(code) {
     };
     libFuncs.get_elm = (id, property) => {
         const elm = document.getElementById(read(instance, "str", id));
-        return write(instance, "str", elm[read(instance, "str", property)]);
+        return write(
+            instance,
+            "str",
+            elm[read(instance, "str", property)].toString(),
+        );
     };
     libFuncs.upd_elm = (id, property, content) => {
         const elm = document.getElementById(read(instance, "str", id));
