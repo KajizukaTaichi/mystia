@@ -100,8 +100,8 @@ impl Compiler {
                     .iter()
                     .map(|(name, typ)| {
                         Some(format!(
-                            "(global ${name} (mut {}))",
-                            typ.compile(&mut self.clone())?
+                            "(global ${name} (mut {typ}) ({typ}.const 0))",
+                            typ = typ.compile(&mut self.clone())?
                         ))
                     })
                     .collect::<Option<Vec<String>>>()?
