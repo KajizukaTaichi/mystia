@@ -21,23 +21,23 @@ let draw_player() = {
 };
 
 let move_player(n: int) = {
-    let model.player.x + n;
+    let model.player.position.x + n;
     draw_player()
 };
 
-pub let on_key(key_code: int) = {
-    if key_code == 37 then {
+pub let user_operation(key_code: int) = {
+    if key_code == 39 then {
         move_player(100)
-    } else if key_code == 39 then {
+    } else if key_code == 37 then {
         move_player(-100)
     }
 };
 
 let game() = {
-    new_elm(model.player.id, "button", "body");
-    upd_elm(model.player.id, "innerHTML", "P1");
-    upd_elm(model.player.id, "style", "height: 100px; position: fixed;");
-    evt_elm(model.player.id, "keydown", "on_key")
+    new_elm(model.player.id, "img", "body");
+    upd_elm(model.player.id, "src", "https://pixiv.navirank.com/jpg/153/15371090.jpg");
+    upd_elm(model.player.id, "style", "height: 100px; position: absolute;");
+    evt_elm(model.player.id, "keydown", "user_operation")
 };
 
 game(); 0
