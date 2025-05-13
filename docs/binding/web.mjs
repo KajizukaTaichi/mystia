@@ -103,7 +103,7 @@ export async function mystia(code) {
         func = read(instance, "str", func);
         name = read(instance, "str", name);
         if (name.includes("key")) {
-            elm.addEventListener(name, (event) =>
+            document.body.addEventListener(name, (event) =>
                 instance.exports[func](event.keyCode),
             );
         } else {
