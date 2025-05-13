@@ -83,7 +83,7 @@ impl Compiler {
         let ast = Block::parse(source)?;
         self.program_return = ast.type_infer(self)?;
         Some(format!(
-            "(module {import} {memory} {memcpy} {strings} {declare} (func (export \"_start\") {ret} {locals} {code}))",
+            "(module {import} {memory} {memcpy} {strings} {declare} {global} (func (export \"_start\") {ret} {locals} {code}))",
             code = ast.compile(self)?,
             ret = compile_return!(self.program_return.clone(), self),
             import = join!(self.import_code),
@@ -94,6 +94,17 @@ impl Compiler {
                 "(global $allocator (export \"allocator\") (mut i32) (i32.const {allocator})) {}",
                 "(func (export \"malloc\") (param $size i32) (global.set $allocator (i32.add (global.get $allocator) (local.get $size))))",
                 allocator = self.allocator
+            ),
+            global = join!(
+                self.global_type
+                    .iter()
+                    .map(|(name, typ)| {
+                        Some(format!(
+                            "(global ${name} (mut {}))",
+                            typ.compile(&mut self.clone())?
+                        ))
+                    })
+                    .collect::<Option<Vec<String>>>()?
             ),
             locals = expand_local(self)?,
         ))
