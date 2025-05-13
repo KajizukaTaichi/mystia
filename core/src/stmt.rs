@@ -4,13 +4,18 @@ use crate::*;
 pub enum Stmt {
     If(Expr, Expr, Option<Box<Stmt>>),
     While(Expr, Expr),
-    Let(Expr, Expr),
+    Let(Scope, Expr, Expr),
     Type(String, Type),
     Import(Oper),
     Expr(Expr),
     Return(Option<Expr>),
     Next,
     Break,
+}
+
+enum Scope {
+    Global,
+    Local,
 }
 
 impl Node for Stmt {
@@ -46,16 +51,20 @@ impl Node for Stmt {
                 Expr::parse(&cond_sec)?,
                 Expr::parse(&body_sec)?,
             ))
-        } else if let Some(source) = source.strip_prefix("let ") {
+        } else if let (Some(source), _) | (_, Some(source)) =
+            (source.strip_prefix("let "), source.strip_prefix("pub let"))
+        {
+            let is_pub = source.starts_with("pub");
+            let scope = if is_pub { Scope::Global } else { Scope::Local };
             if let Some((name, value)) = source.split_once("=") {
-                Some(Stmt::Let(Expr::parse(name)?, Expr::parse(value)?))
+                Some(Stmt::Let(scope, Expr::parse(name)?, Expr::parse(value)?))
             } else {
                 let source = Oper::parse(source)?;
                 macro_rules! assign_with {
                     ($op: ident) => {
                         if let Oper::$op(name, value) = source {
                             let value = Expr::Oper(Box::new(Oper::$op(name.clone(), value)));
-                            return Some(Stmt::Let(name, value));
+                            return Some(Stmt::Let(scope, name, value));
                         }
                     };
                 }
