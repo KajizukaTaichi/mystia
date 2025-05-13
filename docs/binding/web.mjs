@@ -11,7 +11,7 @@ export async function mystia(code) {
     const bytecodes = result.get_bytecode().buffer;
     if (type == null) return null;
 
-    let mystiaFunctions = {
+    let libFuncs = {
         alert: null,
         confirm: null,
         prompt: null,
@@ -22,42 +22,40 @@ export async function mystia(code) {
         write: null,
         rand: null,
         new_elm: null,
-        set_elm: null,
-        tap_elm: null,
-        get_status: null,
-        set_status: null,
+        upd_elm: null,
+        evt_elm: null,
+        model: null,
+        init_model: null,
     };
     const { instance } = await WebAssembly.instantiate(bytecodes, {
         env: {
-            alert: (ptr) => mystiaFunctions.alert(ptr),
-            confirm: (ptr) => mystiaFunctions.confirm(ptr),
-            prompt: (ptr) => mystiaFunctions.prompt(ptr),
-            init_canvas: () => mystiaFunctions.init_canvas(),
-            draw: (x, y, color) => mystiaFunctions.draw(x, y, color),
-            int_to_str: (num) => mystiaFunctions.int_to_str(num),
-            concat: (str1, str2) => mystiaFunctions.concat(str1, str2),
-            write: (data) => mystiaFunctions.write(data),
-            rand: () => mystiaFunctions.rand(),
-            new_elm: (id, tag) => mystiaFunctions.new_elm(id, tag),
-            upd_elm: (id, prop, content) =>
-                mystiaFunctions.set_elm(id, prop, content),
-            evt_elm: (id, name, funcname) =>
-                mystiaFunctions.tap_elm(id, name, funcname),
-            get_status: () => mystiaFunctions.get_status(),
-            set_status: (val) => mystiaFunctions.set_status(val),
+            alert: (ptr) => libFuncs.alert(ptr),
+            confirm: (ptr) => libFuncs.confirm(ptr),
+            prompt: (ptr) => libFuncs.prompt(ptr),
+            init_canvas: () => libFuncs.init_canvas(),
+            draw: (x, y, color) => libFuncs.draw(x, y, color),
+            int_to_str: (num) => libFuncs.int_to_str(num),
+            concat: (str1, str2) => libFuncs.concat(str1, str2),
+            write: (data) => libFuncs.write(data),
+            rand: () => libFuncs.rand(),
+            new_elm: (id, tag) => libFuncs.new_elm(id, tag),
+            upd_elm: (id, prop, content) => libFuncs.upd_elm(id, prop, content),
+            evt_elm: (id, name, func) => libFuncs.evt_elm(id, name, func),
+            status: () => libFuncs.status(),
+            upd_status: (val) => libFuncs.upd_status(val),
         },
     });
-    mystiaFunctions.alert = (message) => {
+    libFuncs.alert = (message) => {
         window.alert(read(instance, "str", message));
     };
-    mystiaFunctions.confirm = (message) => {
+    libFuncs.confirm = (message) => {
         window.confirm(read(instance, "str", message));
     };
-    mystiaFunctions.prompt = (message) => {
+    libFuncs.prompt = (message) => {
         const answer = window.prompt(read(instance, "str", message));
         return write(instance, "str", answer);
     };
-    mystiaFunctions.init_canvas = () => {
+    libFuncs.init_canvas = () => {
         let canvas = document.getElementById("mystia-canvas");
         if (canvas == null) {
             canvas = document.createElement("canvas");
@@ -72,7 +70,7 @@ export async function mystia(code) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
     };
-    mystiaFunctions.draw = (x, y, color) => {
+    libFuncs.draw = (x, y, color) => {
         const ctx = document.getElementById("mystia-canvas").getContext("2d");
         const type = {
             type: "enum",
@@ -84,39 +82,39 @@ export async function mystia(code) {
         ctx.fillStyle = read(instance, type, color);
         ctx.fillRect(x, y, 1, 1);
     };
-    mystiaFunctions.int_to_str = (value) => {
+    libFuncs.int_to_str = (value) => {
         return write(instance, "str", value.toString());
     };
-    mystiaFunctions.concat = (str1, str2) => {
+    libFuncs.concat = (str1, str2) => {
         const strs1 = read(instance, "str", str1);
         const strs2 = read(instance, "str", str2);
         return write(instance, "str", strs1 + strs2);
     };
-    mystiaFunctions.write = (data) => {
+    libFuncs.write = (data) => {
         document.write(read(instance, "str", data));
     };
-    mystiaFunctions.rand = () => {
+    libFuncs.rand = () => {
         return Math.random();
     };
-    mystiaFunctions.new_elm = (id, tag) => {
+    libFuncs.new_elm = (id, tag) => {
         const elm = document.createElement(read(instance, "str", tag));
         elm.setAttribute("id", read(instance, "str", id));
         document.body.appendChild(elm);
     };
-    mystiaFunctions.set_elm = (id, property, content) => {
+    libFuncs.set_elm = (id, property, content) => {
         const elm = document.getElementById(read(instance, "str", id));
         elm[read(instance, "str", property)] = read(instance, "str", content);
     };
-    mystiaFunctions.tap_elm = (id, name, funcname) => {
+    libFuncs.tap_elm = (id, name, funcname) => {
         const elm = document.getElementById(read(instance, "str", id));
         elm.addEventListener(read(instance, "str", name), function () {
             instance.exports[read(instance, "str", funcname)]();
         });
     };
-    mystiaFunctions.get_status = () => {
+    libFuncs.get_status = () => {
         return appStatus;
     };
-    mystiaFunctions.set_status = (val) => {
+    libFuncs.set_status = (val) => {
         appStatus = val;
     };
 
