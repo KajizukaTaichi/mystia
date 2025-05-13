@@ -1,5 +1,5 @@
 import { mystia as compile } from "../wasm/node/mystia_wasm.js";
-import { read } from "./ffi.mjs";
+import { read, write } from "./ffi.mjs";
 
 export async function mystia(code) {
     const result = compile(code);
@@ -24,12 +24,12 @@ export async function mystia(code) {
         return console.log(read(instance, "str", ptr));
     };
     mystiaFunctions.int_to_str = (value) => {
-        return mystia_write(instance, "str", value.toString());
+        return write(instance, "str", value.toString());
     };
     mystiaFunctions.concat = (str1, str2) => {
-        const strs1 = mystia_read(instance, "str", str1);
-        const strs2 = mystia_read(instance, "str", str2);
-        return mystia_write(instance, "str", strs1 + strs2);
+        str1 = read(instance, "str", str1);
+        str2 = read(instance, "str", str2);
+        return write(instance, "str", str1 + str2);
     };
     mystiaFunctions.rand = () => {
         return Math.random();
