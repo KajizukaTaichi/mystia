@@ -18,6 +18,7 @@ export async function mystia(code) {
         concat: null,
         rand: null,
         new_elm: null,
+        get_elm: null,
         upd_elm: null,
         evt_elm: null,
     };
@@ -32,6 +33,7 @@ export async function mystia(code) {
             concat: (str1, str2) => libFuncs.concat(str1, str2),
             rand: () => libFuncs.rand(),
             new_elm: (id, tag, parent) => libFuncs.new_elm(id, tag, parent),
+            get_elm: (id, prop) => libFuncs.new_elm(id, prop),
             upd_elm: (id, prop, content) => libFuncs.upd_elm(id, prop, content),
             evt_elm: (id, name, func) => libFuncs.evt_elm(id, name, func),
         },
@@ -85,6 +87,10 @@ export async function mystia(code) {
         parent = document.getElementById(read(instance, "str", parent));
         if (parent === null) parent = document.body;
         parent.appendChild(elm);
+    };
+    libFuncs.get_elm = (id, property) => {
+        const elm = document.getElementById(read(instance, "str", id));
+        return write(instance, "str", elm[read(instance, "str", property)]);
     };
     libFuncs.upd_elm = (id, property, content) => {
         const elm = document.getElementById(read(instance, "str", id));
