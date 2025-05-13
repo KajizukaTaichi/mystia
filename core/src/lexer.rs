@@ -117,7 +117,7 @@ pub fn str_escape(str: &str) -> String {
     result
 }
 
-pub fn remove_coment(source: &str) -> String {
+pub fn remove_comment(source: &str) -> String {
     let mut result = vec![];
     for line in source.lines() {
         let (line, _) = line.split_once("<--").unwrap_or((&line, ""));
