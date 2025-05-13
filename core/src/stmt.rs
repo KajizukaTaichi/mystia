@@ -52,15 +52,15 @@ impl Node for Stmt {
                 Expr::parse(&cond_sec)?,
                 Expr::parse(&body_sec)?,
             ))
-        } else if let (Some(source), _) | (_, Some(source)) =
+        } else if let (Some(token), _) | (_, Some(token)) =
             (source.strip_prefix("let "), source.strip_prefix("pub let"))
         {
             let is_pub = source.starts_with("pub");
             let scope = if is_pub { Scope::Global } else { Scope::Local };
-            if let Some((name, value)) = source.split_once("=") {
+            if let Some((name, value)) = token.split_once("=") {
                 Some(Stmt::Let(scope, Expr::parse(name)?, Expr::parse(value)?))
             } else {
-                let source = Oper::parse(source)?;
+                let source = Oper::parse(token)?;
                 macro_rules! assign_with {
                     ($op: ident) => {
                         if let Oper::$op(name, value) = source {
@@ -154,7 +154,7 @@ impl Node for Stmt {
                                 .collect::<Option<Vec<_>>>()?
                         ),
                         ret = compile_return!(function.returns, ctx),
-                        pub =if let Scope::Global=scope{ "(export \"{name}\")"}else{""},
+                        pub = if let Scope::Global = scope{ format!("(export \"{name}\")") } else { String::new() },
                         body = value.compile(ctx)?,
                         locals = expand_local(ctx)?
                     );
