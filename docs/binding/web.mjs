@@ -89,12 +89,11 @@ export async function mystia(code) {
         parent.appendChild(elm);
     };
     libFuncs.get_elm = (id, property) => {
+        property = read(instance, "str", property);
         const elm = document.getElementById(read(instance, "str", id));
-        return write(
-            instance,
-            "str",
-            elm[read(instance, "str", property)].toString(),
-        );
+        let value = elm[property];
+        if (typeof value != "string") value = elm.getAttribute(property);
+        return write(instance, "str", value);
     };
     libFuncs.upd_elm = (id, property, content) => {
         const elm = document.getElementById(read(instance, "str", id));
