@@ -96,10 +96,12 @@ export async function mystia(code) {
     libFuncs.rand = () => {
         return Math.random();
     };
-    libFuncs.new_elm = (id, tag) => {
+    libFuncs.new_elm = (id, tag, parent) => {
         const elm = document.createElement(read(instance, "str", tag));
         elm.setAttribute("id", read(instance, "str", id));
-        document.body.appendChild(elm);
+        parent = document.getElementById(read(instance, "str", parent));
+        if (parent == null) parent = document.body;
+        parent.appendChild(elm);
     };
     libFuncs.upd_elm = (id, property, content) => {
         const elm = document.getElementById(read(instance, "str", id));
