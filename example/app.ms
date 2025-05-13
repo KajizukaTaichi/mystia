@@ -12,6 +12,10 @@ pub let model = @{
         title: "app-title",
         view: "number-view",
         btn: "inc-button"
+    },
+    handlers: @{
+        btn: "inc_btn"
+        key: "inc_key"
     }
 };
 
@@ -20,14 +24,24 @@ let format() = {
     upd_elm(model.layout.view, "innerHTML", concat("Number: ", num))
 };
 
-pub let inc() = {
-    let model.number + 1;
+pub let inc_btn() = {
+    let model.number + 1
+    format()
+};
+
+pub let inc_key(key_code: int) = {
+    if key_code == 39 then {
+        let model.number + 1
+    } else if key_code == 37 then {
+        let model.number - 1
+    };
     format()
 };
 
 let app() = {
     new_elm(model.layout.frame, "div", "body");
     upd_elm(model.layout.frame, "style", "margin: 100px");
+    evt_elm(model.layout.btn, "keypress", model.handlers.key);
 
     new_elm(model.layout.title, "h1", model.layout.frame);
     upd_elm(model.layout.title, "innerHTML", model.title);
@@ -39,7 +53,7 @@ let app() = {
     new_elm(model.layout.btn, "button", model.layout.frame);
     upd_elm(model.layout.btn, "innerHTML", "Increment");
     upd_elm(model.layout.btn, "className", "button");
-    evt_elm(model.layout.btn, "click", "inc")
+    evt_elm(model.layout.btn, "click", model.handlers.btn);
 };
 
 app();
