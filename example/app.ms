@@ -4,29 +4,39 @@ load evt_elm(id: str, name: str, func: str): void;
 load int_to_str(n: int): str;
 load concat(a: str, b: str): str;
 
-type Counter = @{
-    number: int,
+pub let model = @{
+    number: 0,
+    title: "Counter App",
+    layout: @{
+        frame: "container",
+        title: "app-title",
+        view: "number-view",
+        btn: "inc-button"
+    }
 };
-pub let model = @{ number: 0 };
 
 pub let inc() = {
     let model.number + 1;
     let num = int_to_str(model.number);
-    upd_elm("view", "innerHTML", concat("Number: ", num))
+    upd_elm(model.layout.view, "innerHTML", concat("Number: ", num))
 };
 
-new_elm("container", "div", "body");
-upd_elm("container", "style", "margin: 100px");
+let app() = {
+    new_elm(model.layout.frame, "div", "body");
+    upd_elm(model.layout.frame, "style", "margin: 100px");
 
-new_elm("title", "h1", "container");
-upd_elm("title", "innerHTML", "Counter App");
+    new_elm(model.layout.title, "h1", model.layout.frame);
+    upd_elm(model.layout.title, "innerHTML", model.title);
 
-new_elm("view", "p", "container");
-upd_elm("view", "style", "font-family: monospace");
-upd_elm("view", "innerHTML", "Number: 0");
+    new_elm(model.layout.view, "p", model.layout.frame);
+    upd_elm(model.layout.view, "style", "font-family: monospace");
+    upd_elm(model.layout.view, "innerHTML", "Number: 0");
 
-new_elm("btn", "button", "container");
-upd_elm("btn", "innerHTML", "Increment");
-upd_elm("btn", "className", "button");
-evt_elm("btn", "click", "inc");
-0
+    new_elm(model.layout.btn, "button", model.layout.frame);
+    upd_elm(model.layout.btn, "innerHTML", "Increment");
+    upd_elm(model.layout.btn, "className", "button");
+    evt_elm(model.layout.btn, "click", "inc")
+};
+
+app();
+model.title
