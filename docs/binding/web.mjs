@@ -90,11 +90,16 @@ export async function mystia(code) {
         const elm = document.getElementById(read(instance, "str", id));
         elm[read(instance, "str", property)] = read(instance, "str", content);
     };
-    libFuncs.evt_elm = (id, name, funcname) => {
+    libFuncs.evt_elm = (id, name, func) => {
         const elm = document.getElementById(read(instance, "str", id));
-        elm.addEventListener(read(instance, "str", name), function () {
-            instance.exports[read(instance, "str", funcname)]();
-        });
+        func = read(instance, "str", func);
+        name = read(instance, "str", name);
+        if (name.includes("key")) {
+            elm.addEventListener(name, function (event) {
+                instance.exports[func](write(instance, "str", event.key));
+            });
+        } else {
+        }
     };
 
     const value = instance.exports._start();
