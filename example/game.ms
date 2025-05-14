@@ -10,10 +10,12 @@ pub let model = @{
     lives: 5,
     player: @{
         id: "player",
+        src: "https://pixiv.navirank.com/jpg/153/15371090.jpg",
         position: @{ x: 1, y: 0 }
     },
     target: @{
         id: "target",
+        src: "https://pixiv.navirank.com/jpg/153/15371090.jpg",
         position: @{ x: 500, y: 500 }
     }
 };
@@ -55,12 +57,12 @@ pub let user_operation(key_code: int) = {
 
 let game() = {
     new_elm(model.player.id, "img", "body");
-    upd_elm(model.player.id, "src", "https://pixiv.navirank.com/jpg/153/15371090.jpg");
+    upd_elm(model.player.id, "src", model.player.src);
     upd_elm(model.player.id, "style", "height: 100px; position: absolute;");
     evt_elm(model.player.id, "keydown", "user_operation");
 
     new_elm(model.target.id, "img", "body");
-    upd_elm(model.target.id, "src", "https://pixiv.navirank.com/jpg/153/15371090.jpg");
+    upd_elm(model.target.id, "src", model.target.src);
     upd_elm(model.target.id, "style", "height: 100px; position: absolute;");
 
     draw_player()
