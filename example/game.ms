@@ -41,11 +41,12 @@ let draw_target() = {
 };
 
 let is_touch() = {
-    let target_x = model.target.position.x / 10;
-    let target_y = model.target.position.y / 10;
-    let player_x = model.player.position.x / 10;
-    let player_y = model.player.position.y / 10;
-    (player_x == target_x) && (player_y == target_y)
+    let target_x = model.target.position.x;
+    let target_y = model.target.position.y;
+    let player_x = model.player.position.x;
+    let player_y = model.player.position.y;
+    ((player_x + 10 > target_x) && (player_x - 10 < target_x)) &&
+    ((player_y + 10 > target_y) && (player_y - 10 < target_y))
 };
 
 let move_target() = {
