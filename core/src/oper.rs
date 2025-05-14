@@ -89,7 +89,8 @@ impl Node for Oper {
             Oper::Add(lhs, rhs) => {
                 let typ = self.type_infer(ctx)?;
                 if let Type::String = typ {
-                    Expr::Call(String::from("concat"), vec![lhs, rhs]).compile(ctx)?
+                    Expr::Call(String::from("concat"), vec![lhs.clone(), rhs.clone()])
+                        .compile(ctx)?
                 } else {
                     compile_arithmetic!("add", self, ctx, lhs, rhs)
                 }
