@@ -110,19 +110,23 @@ impl Node for Oper {
             }
             Oper::Cast(lhs, rhs) => {
                 let rhs = rhs.type_infer(ctx)?;
-                if lhs.type_infer(ctx)?.compile(ctx)? == rhs.compile(ctx)? {
-                    return lhs.compile(ctx);
+                if let (Type::Integer, Type::String) = (lhs.type_infer(ctx)?, &rhs) {
+                    Expr::Call(String::from("int_to_str"), vec![lhs.clone()]).compile(ctx)?
+                } else {
+                    if lhs.type_infer(ctx)?.compile(ctx)? == rhs.compile(ctx)? {
+                        return lhs.compile(ctx);
+                    }
+                    format!(
+                        "({}.{} {})",
+                        rhs.compile(ctx)?,
+                        match rhs.compile(ctx)?.as_str() {
+                            "f64" => "convert_i32_s",
+                            "i32" => "trunc_f64_s",
+                            _ => return None,
+                        },
+                        lhs.compile(ctx)?,
+                    )
                 }
-                format!(
-                    "({}.{} {})",
-                    rhs.compile(ctx)?,
-                    match rhs.compile(ctx)?.as_str() {
-                        "f64" => "convert_i32_s",
-                        "i32" => "trunc_f64_s",
-                        _ => return None,
-                    },
-                    lhs.compile(ctx)?,
-                )
             }
         })
     }
