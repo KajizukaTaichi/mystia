@@ -52,20 +52,17 @@ impl Node for Stmt {
                 Expr::parse(&cond_sec)?,
                 Expr::parse(&body_sec)?,
             ))
-        } else if let (Some(token), _) | (_, Some(token)) =
-            (source.strip_prefix("let "), source.strip_prefix("pub let"))
-        {
-            let is_pub = source.starts_with("pub");
-            let scope = if is_pub { Scope::Global } else { Scope::Local };
+        } else if let Some(token) = source.strip_prefix("let ") {
             if let Some((name, value)) = token.split_once("=") {
-                Some(Stmt::Let(scope, Expr::parse(name)?, Expr::parse(value)?))
+                let (name, value) = (Expr::parse(name)?, Expr::parse(value)?);
+                Some(Stmt::Let(Scope::Local, name, value))
             } else {
                 let source = Oper::parse(token)?;
                 macro_rules! assign_with {
                     ($op: ident) => {
                         if let Oper::$op(name, value) = source {
                             let value = Expr::Oper(Box::new(Oper::$op(name.clone(), value)));
-                            return Some(Stmt::Let(scope, name, value));
+                            return Some(Stmt::Let(Scope::Local, name, value));
                         }
                     };
                 }
@@ -75,6 +72,11 @@ impl Node for Stmt {
                 assign_with!(Div);
                 assign_with!(Mod);
                 None
+            }
+        } else if let Some(token) = source.strip_prefix("pub ") {
+            match Stmt::parse(token)? {
+                Stmt::Let(Scope::Local, name, value) => Some(Stmt::Let(Scope::Global, name, value)),
+                _ => None,
             }
         } else if let Some(source) = source.strip_prefix("type ") {
             let (name, value) = source.split_once("=")?;
