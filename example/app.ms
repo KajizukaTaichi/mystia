@@ -20,8 +20,8 @@ pub let model = @{
 };
 
 let format() = {
-    let view = "Number: " + int_to_str(model.number);
-    upd_elm(model.layout.view, "innerHTML", view))
+    let view = "Number: " + (model.number: str);
+    upd_elm(model.layout.view, "innerHTML", view)
 };
 
 pub let inc_btn() = {
