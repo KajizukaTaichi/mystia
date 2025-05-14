@@ -20,7 +20,7 @@ pub let model = @{
 };
 
 let format() = {
-    let view = "Number: " + (model.number: str);
+    let view = "Number: " + (model.number as str);
     upd_elm(model.layout.view, "innerHTML", view)
 };
 
