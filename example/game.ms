@@ -13,7 +13,6 @@ type Character = @{
 };
 
 pub let model = @{
-    lives: 5,
     player: @{
         id: "player",
         src: "https://pixiv.navirank.com/jpg/153/15371090.jpg",
@@ -25,7 +24,8 @@ pub let model = @{
         position: @{ x: 500, y: 500 }
     },
     style: @{
-        char: "height: 100px; position: absolute;"
+        char: "height: 100px; position: absolute;",
+        after_clear: "display: none"
     },
 };
 
@@ -58,8 +58,8 @@ let move_player(x_move: int, y_move: int) = {
     let model.player.position.y + y_move;
     if is_touch() then {
         alert("Clear!");
-        upd_elm(model.player.id, "style", "display: none");
-        upd_elm(model.target.id, "style", "display: none")
+        upd_elm(model.player.id, "style", model.style.after_clear);
+        upd_elm(model.target.id, "style", model.style.after_clear)
     };
     move_target();
     draw_player()
