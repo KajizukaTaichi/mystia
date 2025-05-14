@@ -87,9 +87,11 @@ export async function mystia(code) {
         parent.appendChild(elm);
     };
     libFuncs.upd_elm = (id, property, content) => {
+        id = read(instance, "str", id);
         property = read(instance, "str", property);
         content = read(instance, "str", content);
-        const elm = document.getElementById(read(instance, "str", id));
+        let elm = document.getElementById(id);
+        if (elm === null) elm = document.querySelector(id);
         if (property == "style") {
             elm.style.cssText += content;
         } else {
