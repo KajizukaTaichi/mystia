@@ -4,25 +4,40 @@ load evt_elm(id: str, name: str, func: str): void;
 load int_to_str(n: int): str;
 load concat(a: str, b: str): str;
 load alert(msg: str): void;
+load rand(): num;
 
 pub let model = @{
     lives: 5,
     player: @{
         id: "player",
         position: @{ x: 1, y: 0 }
+    },
+    target: @{
+        id: "target",
+        position: @{ x: 500, y: 500 }
     }
 };
 
-let x_position() = concat("left: ", concat(int_to_str(model.player.position.x), "px;"));
-let y_position() = concat("bottom: ", concat(int_to_str(model.player.position.y), "px;"));
+let x_position(n) = concat("left: ", concat(int_to_str(n.position.x), "px;"));
+let y_position(n) = concat("bottom: ", concat(int_to_str(n.position.y), "px;"));
 let draw_player() = {
-    upd_elm(model.player.id, "style", x_position());
-    upd_elm(model.player.id, "style", y_position())
+    upd_elm(model.player.id, "style", x_position(model.player));
+    upd_elm(model.player.id, "style", y_position(model.player))
+};
+let draw_target() = {
+    upd_elm(model.target.id, "style", x_position(model.target));
+    upd_elm(model.target.id, "style", y_position(model.target))
 };
 
+let move_target() = {
+    pub let model.target.position.x + (rand() * 100.0: int);
+    pub let model.target.position.y + (rand() * 100.0: int);
+    draw_target()
+};
 let move_player(x_move: int, y_move: int) = {
-    pub let model.player.position.x + x_move;
-    pub let model.player.position.y + y_move;
+    let model.player.position.x + x_move;
+    let model.player.position.y + y_move;
+    move_target();
     draw_player()
 };
 
@@ -43,6 +58,11 @@ let game() = {
     upd_elm(model.player.id, "src", "https://pixiv.navirank.com/jpg/153/15371090.jpg");
     upd_elm(model.player.id, "style", "height: 100px; position: absolute;");
     evt_elm(model.player.id, "keydown", "user_operation");
+
+    new_elm(model.target.id, "img", "body");
+    upd_elm(model.target.id, "src", "https://pixiv.navirank.com/jpg/153/15371090.jpg");
+    upd_elm(model.target.id, "style", "height: 100px; position: absolute;");
+
     draw_player()
 };
 
