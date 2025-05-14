@@ -56,13 +56,9 @@ let move_target() = {
 let move_player(x_move: int, y_move: int) = {
     let model.player.position.x + x_move;
     let model.player.position.y + y_move;
-    if is_touch() then {
-        alert("Clear!");
-        upd_elm(model.player.id, "style", model.style.after_clear);
-        upd_elm(model.target.id, "style", model.style.after_clear)
-    };
+    draw_player();
+    if is_touch() then alert("Clear!");
     move_target();
-    draw_player()
 };
 
 pub let user_operation(key_code: int) = {
