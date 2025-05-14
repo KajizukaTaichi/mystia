@@ -24,8 +24,7 @@ pub let model = @{
         position: @{ x: 500, y: 500 }
     },
     style: @{
-        char: "height: 100px; position: absolute;",
-        after_clear: "display: none"
+        char: "height: 100px; position: absolute;"
     },
 };
 
