@@ -20,16 +20,21 @@ let draw_player() = {
     upd_elm(model.player.id, "style", y_position())
 };
 
-let move_player(n: int) = {
-    let model.player.position.x + n;
+let move_player(x_move: int, y_move: int) = {
+    pub let model.player.position.x + x_move;
+    pub let model.player.position.y + y_move;
     draw_player()
 };
 
 pub let user_operation(key_code: int) = {
     if key_code == 39 then {
-        move_player(100)
+        move_player(100, 0)
     } else if key_code == 37 then {
-        move_player(-100)
+        move_player(-100, 0)
+    } else if key_code == 38 then {
+        move_player(0, 100)
+    } else if key_code == 40 then {
+        move_player(0, -100)
     }
 };
 
