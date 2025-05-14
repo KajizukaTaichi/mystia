@@ -91,9 +91,7 @@ export async function mystia(code) {
         content = read(instance, "str", content);
         const elm = document.getElementById(read(instance, "str", id));
         if (property == "style") {
-            let old = elm.getAttribute("style");
-            if (old == null) old = "";
-            elm.setAttribute("style", old + content);
+            elm.style.cssText += content;
         } else {
             elm[property] = content;
         }
