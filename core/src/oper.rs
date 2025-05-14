@@ -69,7 +69,6 @@ impl Node for Oper {
 
     fn compile(&self, ctx: &mut Compiler) -> Option<String> {
         Some(match self {
-            Oper::Add(lhs, rhs) => compile_arithmetic!("add", self, ctx, lhs, rhs),
             Oper::Sub(lhs, rhs) => compile_arithmetic!("sub", self, ctx, lhs, rhs),
             Oper::Mul(lhs, rhs) => compile_arithmetic!("mul", self, ctx, lhs, rhs),
             Oper::Div(lhs, rhs) => compile_compare!("div", ctx, lhs, rhs),
@@ -87,6 +86,14 @@ impl Node for Oper {
             Oper::GtEq(lhs, rhs) => compile_compare!("ge", ctx, lhs, rhs),
             Oper::LAnd(lhs, rhs) => compile_arithmetic!("and", self, ctx, lhs, rhs),
             Oper::LOr(lhs, rhs) => compile_arithmetic!("or", self, ctx, lhs, rhs),
+            Oper::Add(lhs, rhs) => {
+                let typ = self.type_infer(ctx)?;
+                if let Type::String = typ {
+                    Expr::Call(String::from("concat"), vec![lhs, rhs])
+                } else {
+                    compile_arithmetic!("add", self, ctx, lhs, rhs)
+                }
+            }
             Oper::Mod(lhs, rhs) => {
                 let typ = lhs.type_infer(ctx)?.compile(ctx)?;
                 let (lhs, rhs) = (lhs.compile(ctx)?, rhs.compile(ctx)?);
