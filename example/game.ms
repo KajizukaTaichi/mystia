@@ -6,6 +6,12 @@ load concat(a: str, b: str): str;
 load alert(msg: str): void;
 load rand(): num;
 
+type Character = @{
+    id: str,
+    src: str,
+    position: @{ x: int, y: int }
+};
+
 pub let model = @{
     lives: 5,
     player: @{
@@ -23,8 +29,8 @@ pub let model = @{
     },
 };
 
-let x_position(n) = concat("left: ", concat(int_to_str(n.position.x), "px;"));
-let y_position(n) = concat("bottom: ", concat(int_to_str(n.position.y), "px;"));
+let x_position(n: Character) = concat("left: ", concat(int_to_str(n.position.x), "px;"));
+let y_position(n: Character) = concat("bottom: ", concat(int_to_str(n.position.y), "px;"));
 let draw_player() = {
     upd_elm(model.player.id, "style", x_position(model.player));
     upd_elm(model.player.id, "style", y_position(model.player))
@@ -34,16 +40,25 @@ let draw_target() = {
     upd_elm(model.target.id, "style", y_position(model.target))
 };
 
+let is_touch() = {
+    let target_x = model.target.position.x / 100;
+    let target_y = model.target.position.y / 100;
+    let player_x = model.player.position.x / 100;
+    let player_y = model.player.position.y / 100;
+    (player_x == target_x) && (player_y == target_y)
+};
+
 let move_target() = {
-    pub let model.target.position.x + (rand() * 100.0: int);
-    pub let model.target.position.y + (rand() * 100.0: int);
+    let model.target.position.x + (rand() * 100.0: int - 50);
+    let model.target.position.y + (rand() * 100.0: int - 50);
     draw_target()
 };
 let move_player(x_move: int, y_move: int) = {
     let model.player.position.x + x_move;
     let model.player.position.y + y_move;
     move_target();
-    draw_player()
+    draw_player();
+    if is_touch() then alert("Clear!")
 };
 
 pub let user_operation(key_code: int) = {
