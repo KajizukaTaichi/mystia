@@ -49,8 +49,8 @@ let is_touch() = {
 };
 
 let move_target() = {
-    let model.target.position.x + (rand() * 100.0: int - 50);
-    let model.target.position.y + (rand() * 100.0: int - 50);
+    let model.target.position.x + (rand() * 100.0: int - 40);
+    let model.target.position.y + (rand() * 100.0: int - 40);
     draw_target()
 };
 let move_player(x_move: int, y_move: int) = {
