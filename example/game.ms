@@ -15,9 +15,12 @@ pub let model = @{
     },
     target: @{
         id: "target",
-        src: "https://pixiv.navirank.com/jpg/153/15371090.jpg",
+        src: "https://pixiv.navirank.com/jpg/786/78668328.jpg",
         position: @{ x: 500, y: 500 }
-    }
+    },
+    style: @{
+        char: "height: 100px; position: absolute;"
+    },
 };
 
 let x_position(n) = concat("left: ", concat(int_to_str(n.position.x), "px;"));
@@ -58,12 +61,12 @@ pub let user_operation(key_code: int) = {
 let game() = {
     new_elm(model.player.id, "img", "body");
     upd_elm(model.player.id, "src", model.player.src);
-    upd_elm(model.player.id, "style", "height: 100px; position: absolute;");
+    upd_elm(model.player.id, "style", model.style.char);
     evt_elm(model.player.id, "keydown", "user_operation");
 
     new_elm(model.target.id, "img", "body");
     upd_elm(model.target.id, "src", model.target.src);
-    upd_elm(model.target.id, "style", "height: 100px; position: absolute;");
+    upd_elm(model.target.id, "style", model.style.char);
 
     draw_player()
 };
