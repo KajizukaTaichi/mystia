@@ -16,7 +16,7 @@ rl.on("line", (input) => {
     if (input.trim() !== "") {
         mystia(`${code};${input}`)
             .then((result) => {
-                if (result === null) {
+                if (result === undefined) {
                     code += `;${input}`;
                 } else {
                     console.log(result);
