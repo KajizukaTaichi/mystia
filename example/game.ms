@@ -28,8 +28,8 @@ pub let model = @{
     },
 };
 
-let x_position(n: Character) = concat("left: ", concat(int_to_str(n.position.x), "px;"));
-let y_position(n: Character) = concat("bottom: ", concat(int_to_str(n.position.y), "px;"));
+let x_position(n: Character) = "left: " + (n.position.x as str) + "px;";
+let y_position(n: Character) = "bottom: " + (n.position.y as str) + "px;";
 let draw_player() = {
     upd_elm(model.player.id, "style", x_position(model.player));
     upd_elm(model.player.id, "style", y_position(model.player))
@@ -61,15 +61,10 @@ let move_player(x_move: int, y_move: int) = {
 };
 
 pub let user_operation(key_code: int) = {
-    if key_code == 39 then {
-        move_player(100, 0)
-    } else if key_code == 37 then {
-        move_player(-100, 0)
-    } else if key_code == 38 then {
-        move_player(0, 100)
-    } else if key_code == 40 then {
-        move_player(0, -100)
-    }
+    if key_code == 39 then  move_player(100, 0)
+    else if key_code == 37 then move_player(-100, 0)
+    else if key_code == 38 then move_player(0, 100)
+    else if key_code == 40 then move_player(0, -100)
 };
 
 let game() = {
