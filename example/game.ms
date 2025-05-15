@@ -1,7 +1,7 @@
 load new_elm(id: str, tag: str, parent: str): void;
 load upd_elm(id: str, prop: str, content: str): void;
 load evt_elm(id: str, name: str, func: str): void;
-load to_str(n: int): str;
+load to_str(n: num): str;
 load concat(a: str, b: str): str;
 load alert(msg: str): void;
 load rand(): num;
@@ -28,8 +28,8 @@ pub let model = @{
     },
 };
 
-let x_position(n: Character) = "left: " + (n.position.x as str) + "px;";
-let y_position(n: Character) = "bottom: " + (n.position.y as str) + "px;";
+let x_position(n: Character) = "left: " + (n.position.x:num as str) + "px;";
+let y_position(n: Character) = "bottom: " + (n.position.y:num as str) + "px;";
 let draw_player() = {
     upd_elm(model.player.id, "style", x_position(model.player));
     upd_elm(model.player.id, "style", y_position(model.player))
