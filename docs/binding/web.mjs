@@ -107,7 +107,7 @@ export async function mystia(code) {
         }
     };
     libFuncs.evt_elm = (id, name, func) => {
-        const elm = document.getElementByIdgetMystiaDom(id);
+        const elm = document.getElementById(getMystiaDom(id));
         func = read(instance, "str", func);
         name = read(instance, "str", name);
         if (name.includes("key")) {
