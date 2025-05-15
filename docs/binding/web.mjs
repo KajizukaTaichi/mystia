@@ -14,7 +14,8 @@ export async function mystia(code) {
         prompt: null,
         init_canvas: null,
         draw: null,
-        int_to_str: null,
+        to_str: null,
+        to_num: null,
         concat: null,
         rand: null,
         new_elm: null,
@@ -28,7 +29,8 @@ export async function mystia(code) {
             prompt: (ptr) => libFuncs.prompt(ptr),
             init_canvas: () => libFuncs.init_canvas(),
             draw: (x, y, color) => libFuncs.draw(x, y, color),
-            int_to_str: (num) => libFuncs.int_to_str(num),
+            to_str: (num) => libFuncs.to_str(num),
+            to_num: (str) => libFuncs.to_num(str),
             concat: (str1, str2) => libFuncs.concat(str1, str2),
             rand: () => libFuncs.rand(),
             new_elm: (id, tag, parent) => libFuncs.new_elm(id, tag, parent),
@@ -68,8 +70,11 @@ export async function mystia(code) {
         ctx.fillStyle = read(instance, type, color);
         ctx.fillRect(x, y, 1, 1);
     };
-    libFuncs.int_to_str = (value) => {
+    libFuncs.to_str = (value) => {
         return write(instance, "str", value.toString());
+    };
+    libFuncs.to_num = (value) => {
+        return parseFloat(read(instance, "str", value));
     };
     libFuncs.concat = (str1, str2) => {
         str1 = read(instance, "str", str1);
