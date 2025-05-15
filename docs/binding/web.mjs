@@ -1,6 +1,9 @@
 import init, { mystia as compile } from "../wasm/web/mystia_wasm.js";
 import { write as write, read as read } from "./ffi.mjs";
 
+let mystiaDomIndex = 0;
+let getMystiaDom = (id) => `mystia-dom-${id}`;
+
 await init();
 export async function mystia(code) {
     const result = compile(code);
@@ -84,18 +87,18 @@ export async function mystia(code) {
     libFuncs.rand = () => {
         return Math.random();
     };
-    libFuncs.new_elm = (id, tag, parent) => {
+    libFuncs.new_elm = (tag, parent) => {
         const elm = document.createElement(read(instance, "str", tag));
-        elm.setAttribute("id", read(instance, "str", id));
-        parent = document.getElementById(read(instance, "str", parent));
+        elm.setAttribute("id", getMystiaDom(mystiaDomIndex++));
+        parent = document.getElementById(getMystiaDom(parent));
         if (parent === null) parent = document.body;
         parent.appendChild(elm);
+        return mystiaDomIndex - 1;
     };
     libFuncs.upd_elm = (id, property, content) => {
-        id = read(instance, "str", id);
         property = read(instance, "str", property);
         content = read(instance, "str", content);
-        let elm = document.getElementById(id);
+        let elm = document.getElementById(getMystiaDom(id));
         if (elm === null) elm = document.querySelector(id);
         if (property == "style") {
             elm.style.cssText += content;
@@ -104,7 +107,7 @@ export async function mystia(code) {
         }
     };
     libFuncs.evt_elm = (id, name, func) => {
-        const elm = document.getElementById(read(instance, "str", id));
+        const elm = document.getElementByIdgetMystiaDom(id);
         func = read(instance, "str", func);
         name = read(instance, "str", name);
         if (name.includes("key")) {
