@@ -73,7 +73,15 @@ impl Node for Type {
 
     fn type_infer(&self, ctx: &mut Compiler) -> Option<Type> {
         match self {
-            Type::Alias(name) => ctx.type_alias.get(name).cloned(),
+            Type::Alias(name) => ctx.type_alias.get(name)?.clone().type_infer(ctx),
+            Type::Array(typ, len) => Some(Type::Array(Box::new(typ.type_infer(ctx)?), *len)),
+            Type::Dict(dict) => {
+                let mut a = IndexMap::new();
+                for (name, (offset, typ)) in dict {
+                    a.insert(name.clone(), (offset.clone(), typ.type_infer(ctx)?));
+                }
+                Some(Type::Dict(a))
+            }
             _ => Some(self.clone()),
         }
     }
@@ -132,7 +140,7 @@ impl Type {
             Type::String => "str".to_string(),
             Type::Void => "void".to_string(),
             Type::Dict(dict) => format!(
-                "{{ {} }}",
+                "@{{ {} }}",
                 dict.iter()
                     .map(|(k, t)| format!("{k}: {}", t.1.format()))
                     .collect::<Vec<_>>()
