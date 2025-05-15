@@ -42,7 +42,7 @@ impl Node for Value {
             }
             Some(Value::Dict(result))
         // Enumerate access `( a | b )#a`
-        } else if source.contains("#") {
+        } else if source.contains("#") && source.split_whitespace().count() == 1 {
             let (dict, enuma) = source.rsplit_once("#")?;
             Some(Value::Enum(Type::parse(dict)?, enuma.to_owned()))
         } else if source == "null" {
