@@ -2,8 +2,8 @@ type T = [int; 3];
 type Status = ( Some | None );
 type Option = @{ status: Status, value: T };
 
-let Some(value: T) = @{ status: Status::Some, value: value };
-let None = @{ status: Status::None, value: null as T };
+let Some(value: T) = @{ status: Status#Some, value: value };
+let None() = @{ status: Status#None, value: null as T };
 
 let unwrap(value: Option) = value.value;
 let unwrap_or(value: Option, or: T) = {
@@ -13,6 +13,6 @@ let unwrap_or(value: Option, or: T) = {
 };
 
 let a = Some([1, 2, 3]);
-let b = None;
+let b = None();
 
 unwrap_or(b, unwrap(a))
