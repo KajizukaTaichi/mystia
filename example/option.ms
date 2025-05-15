@@ -1,9 +1,9 @@
-type T = [int; 3];
+type T = int;
 type Status = ( Some | None );
 type Option = @{ status: Status, value: T };
 
-pub let Some(value: T) = @{ status: Status#Some, value: value };
-pub let None = @{ status: Status#None, value: null as T };
+pub let Some(value: T) = memcpy(@{ status: Status#Some, value: value });
+pub let None = memcpy(@{ status: Status#None, value: null as T });
 
 let unwrap(value: Option) = value.value;
 let unwrap_or(value: Option, or: T) = {
@@ -12,7 +12,7 @@ let unwrap_or(value: Option, or: T) = {
         else or
 };
 
-let a = Some([1, 2, 3]);
-let b = None();
+let a = Some(1);
+let b = None;
 
 unwrap_or(b, unwrap(a))
