@@ -20,7 +20,7 @@ pub let model = @{
     },
     target: @{
         id: "target",
-        src: "https://pixiv.navirank.com/jpg/786/78668328.jpg",
+        src: "https://pixiv.navirank.com/jpg/1263/126387033.jpg",
         position: @{ x: 500, y: 500 }
     },
     style: @{
