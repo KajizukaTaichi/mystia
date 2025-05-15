@@ -41,10 +41,6 @@ impl Node for Value {
                 result.insert(name.trim().to_string(), Expr::parse(value)?);
             }
             Some(Value::Dict(result))
-        // Enumerate access `( a | b )#a`
-        } else if source.contains("#") {
-            let (dict, enuma) = source.rsplit_once("#")?;
-            Some(Value::Enum(Type::parse(dict)?, enuma.to_owned()))
         } else if source == "null" {
             Some(Value::Integer(-1))
         } else {
