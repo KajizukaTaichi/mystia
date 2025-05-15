@@ -21,11 +21,8 @@ impl Node for Expr {
         };
         let token = token_list.last()?.trim();
 
-        // Literal value
-        if let Some(literal) = Value::parse(&token) {
-            Some(Expr::Literal(literal))
         // Code block `{ stmt; ... }`
-        } else if token.starts_with("{") && token.ends_with("}") {
+        if token.starts_with("{") && token.ends_with("}") {
             let token = token.get(1..token.len() - 1)?.trim();
             Some(Expr::Block(Block::parse(token)?))
         // Prioritize higher than others
@@ -56,6 +53,9 @@ impl Node for Expr {
         } else if token.contains(".") {
             let (dict, field) = token.rsplit_once(".")?;
             Some(Expr::Field(Box::new(Expr::parse(dict)?), field.to_owned()))
+            // Literal value
+        } else if let Some(literal) = Value::parse(&token) {
+            Some(Expr::Literal(literal))
         // Variable reference
         } else if !RESERVED.contains(&token) && token.is_ascii() {
             Some(Expr::Variable(token.to_string()))
