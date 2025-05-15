@@ -1,10 +1,10 @@
 export function read(instance, type, value) {
-    if (type == null) return null;
     if (type == "int" || type == "num") {
         return value;
     } else if (type == "bool") {
         return value != 0;
     } else if (type == "str") {
+        if (value == -1) return null;
         const memoryView = new Uint8Array(instance.exports.mem.buffer);
         let stringLength = value;
         while (memoryView[stringLength] != 0) {
@@ -14,6 +14,7 @@ export function read(instance, type, value) {
         const textDecoder = new TextDecoder("utf-8");
         return textDecoder.decode(stringBytes);
     } else if (type.type == "array") {
+        if (value == -1) return null;
         const [innerType, length] = [type.element, type.length];
         const memoryView = new Uint8Array(instance.exports.mem.buffer);
         const byte = innerType == "num" ? 8 : 4;
@@ -26,6 +27,7 @@ export function read(instance, type, value) {
         }
         return result;
     } else if (type.type == "dict") {
+        if (value == -1) return null;
         const [pointer, result] = [value, {}];
         const memoryView = new Uint8Array(instance.exports.mem.buffer);
         for (let [name, field] of Object.entries(type.fields)) {
