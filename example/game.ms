@@ -1,7 +1,7 @@
 load new_elm(id: str, tag: str, parent: str): void;
 load upd_elm(id: str, prop: str, content: str): void;
 load evt_elm(id: str, name: str, func: str): void;
-load int_to_str(n: int): str;
+load to_str(n: int): str;
 load concat(a: str, b: str): str;
 load alert(msg: str): void;
 load rand(): num;
