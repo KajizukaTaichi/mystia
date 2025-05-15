@@ -34,7 +34,7 @@ pub let inc_key(key_code: int) = {
 };
 
 let app() = {
-    let frame = new_elm("div", 0);
+    let frame = new_elm("div", null);
     upd_elm(frame, "style", "margin: 100px");
     evt_elm(frame, "keydown", "inc_key");
 
