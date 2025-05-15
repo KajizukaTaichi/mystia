@@ -110,13 +110,14 @@ impl Node for Oper {
             }
             Oper::Cast(lhs, rhs) => {
                 let rhs = rhs.type_infer(ctx)?;
-                let numized = Expr::Oper(Box::new(Oper::Cast(lhs.clone(), Type::Number)));
                 if let (Type::Number | Type::Integer, Type::String) = (lhs.type_infer(ctx)?, &rhs) {
+                    let numized = Expr::Oper(Box::new(Oper::Cast(lhs.clone(), Type::Number)));
                     Expr::Call(String::from("to_str"), vec![numized]).compile(ctx)?
                 } else if let (Type::String, Type::Number | Type::Integer) =
                     (lhs.type_infer(ctx)?, &rhs)
                 {
-                    Expr::Call(String::from("to_num"), vec![numized]).compile(ctx)?
+                    Oper::Cast(Expr::Call(String::from("to_num"), vec![lhs.clone()]), rhs)
+                        .compile(ctx)?
                 } else {
                     if lhs.type_infer(ctx)?.compile(ctx)? == rhs.compile(ctx)? {
                         return lhs.compile(ctx);
