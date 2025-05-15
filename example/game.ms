@@ -56,7 +56,7 @@ let move_player(x_move: int, y_move: int) = {
     let model.player.position.x + x_move;
     let model.player.position.y + y_move;
     draw_player(); move_target();
-    if is_touch() then alert("Clear!")
+    if is_touch() then alert("Touch!")
 };
 
 pub let user_operation(key_code: int) = {
@@ -79,4 +79,5 @@ let game() = {
     draw_player(); draw_target()
 };
 
-game(); 0
+game();
+"Nazrin Toucher"
