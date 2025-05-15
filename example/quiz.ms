@@ -4,8 +4,8 @@ load to_str(n: num): str;
 load to_num(n: str): num;
 load rand(): num;
 
-let n_a = rand() * 10.0: int;
-let n_b = rand() * 10.0: int;
+let n_a = rand() * 10.0: int + 1;
+let n_b = rand() * 10.0: int + 1;
 let n_sum = n_a + n_b;
 
 let s_a = n_a:num as str;
