@@ -1,4 +1,5 @@
 export function read(instance, type, value) {
+    if (type == null) return undefined;
     if (type == "int" || type == "num") {
         return value;
     } else if (type == "bool") {
