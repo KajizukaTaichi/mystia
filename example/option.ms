@@ -2,12 +2,12 @@ type T = [int; 3];
 type Status = ( Some | None );
 type Option = @{ status: Status, value: T };
 
-let Some(value: T) = @{ status: Status#Some, value: value };
-let None() = @{ status: Status#None, value: null as T };
+pub let Some(value: T) = @{ status: Status#Some, value: value };
+pub let None = @{ status: Status#None, value: null as T };
 
 let unwrap(value: Option) = value.value;
 let unwrap_or(value: Option, or: T) = {
-    if null: T != value.value
+    if value.status == Status#Some
         then value.value
         else or
 };
