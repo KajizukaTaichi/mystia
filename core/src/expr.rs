@@ -21,18 +21,17 @@ impl Node for Expr {
         };
         let token = token_list.last()?.trim();
 
-        // Code block `{ stmt; ... }`
-        if token.starts_with("{") && token.ends_with("}") {
-            let token = token.get(1..token.len() - 1)?.trim();
-            Some(Expr::Block(Block::parse(token)?))
+        // Literal value
+        if let Some(literal) = Value::parse(&token) {
+            Some(Expr::Literal(literal))
         // Prioritize higher than others
         } else if token.starts_with("(") && token.ends_with(")") {
             let token = token.get(1..token.len() - 1)?.trim();
             Some(Expr::parse(token)?)
-        // syntax sugar of memcpy statement
-        } else if token.starts_with("memcpy(") && token.ends_with(")") {
-            let token = token.get("memcpy(".len()..token.len() - 1)?.trim();
-            Some(Expr::MemCpy(Box::new(Expr::parse(token)?)))
+            // Code block `{ stmt; ... }`
+        } else if token.starts_with("{") && token.ends_with("}") {
+            let token = token.get(1..token.len() - 1)?.trim();
+            Some(Expr::Block(Block::parse(token)?))
         // Index access `array[index]`
         } else if token.contains("[") && token.ends_with("]") {
             let token = token.get(..token.len() - 1)?.trim();
@@ -41,6 +40,10 @@ impl Node for Expr {
                 Box::new(Expr::parse(array)?),
                 Box::new(Expr::parse(index)?),
             ))
+        // Memory copy
+        } else if token.starts_with("memcpy(") && token.ends_with(")") {
+            let token = token.get("memcpy(".len()..token.len() - 1)?.trim();
+            Some(Expr::MemCpy(Box::new(Expr::parse(token)?)))
         // Function call `name(args, ...)`
         } else if token.contains("(") && token.ends_with(")") {
             let token = token.get(..token.len() - 1)?.trim();
@@ -53,9 +56,11 @@ impl Node for Expr {
         } else if token.contains(".") {
             let (dict, field) = token.rsplit_once(".")?;
             Some(Expr::Field(Box::new(Expr::parse(dict)?), field.to_owned()))
-            // Literal value
-        } else if let Some(literal) = Value::parse(&token) {
-            Some(Expr::Literal(literal))
+        // Enumerate access `( a | b )#a`
+        } else if source.contains("#") {
+            let (typ, enum_) = source.rsplit_once("#")?;
+            let enum_ = Value::Enum(Type::parse(typ)?, enum_.to_owned());
+            Some(Expr::Literal(enum_))
         // Variable reference
         } else if !RESERVED.contains(&token) && token.is_ascii() {
             Some(Expr::Variable(token.to_string()))
