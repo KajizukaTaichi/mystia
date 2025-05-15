@@ -45,6 +45,8 @@ impl Node for Value {
         } else if source.contains("#") {
             let (dict, enuma) = source.rsplit_once("#")?;
             Some(Value::Enum(Type::parse(dict)?, enuma.to_owned()))
+        } else if source == "null" {
+            Some(Value::Integer(-1))
         } else {
             None
         }
