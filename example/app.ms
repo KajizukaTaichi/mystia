@@ -1,6 +1,6 @@
 type Elm = int;
 
-load new_elm(tag: str, parent: str): Elm;
+load new_elm(tag: str, parent: Elm): Elm;
 load upd_elm(id: Elm, prop: str, content: str): void;
 load evt_elm(id: Elm, name: str, func: str): void;
 load concat(a: str, b: str): str;
