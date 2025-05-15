@@ -1,11 +1,11 @@
 load new_elm(id: str, tag: str, parent: str): void;
 load upd_elm(id: str, prop: str, content: str): void;
 load evt_elm(id: str, name: str, func: str): void;
-load int_to_str(n: int): str;
+load to_str(n: num): str;
 load concat(a: str, b: str): str;
 
 pub let model = @{
-    number: 0,
+    count: 0,
     title: "Counter App",
     layout: @{
         frame: "container",
@@ -20,20 +20,20 @@ pub let model = @{
 };
 
 let format() = {
-    let view = "Number: " + (model.number as str);
+    let view = "Number: " + (model.count: num as str);
     upd_elm(model.layout.view, "innerHTML", view)
 };
 
 pub let inc_btn() = {
-    let model.number + 1;
+    let model.count + 1;
     format()
 };
 
 pub let inc_key(key_code: int) = {
     if key_code == 39 then {
-        let model.number + 1
+        let model.count + 1
     } else if key_code == 37 then {
-        let model.number - 1
+        let model.count - 1
     };
     format()
 };
