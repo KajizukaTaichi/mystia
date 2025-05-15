@@ -1,8 +1,8 @@
 load new_elm(id: str, tag: str, parent: str): void;
 load upd_elm(id: str, prop: str, content: str): void;
 load evt_elm(id: str, name: str, func: str): void;
-load to_str(n: num): str;
 load concat(a: str, b: str): str;
+load to_str(n: num): str;
 
 pub let model = @{
     count: 0,
