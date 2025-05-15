@@ -1,6 +1,8 @@
-load new_elm(id: str, tag: str, parent: str): void;
-load upd_elm(id: str, prop: str, content: str): void;
-load evt_elm(id: str, name: str, func: str): void;
+type Elm = int;
+
+load new_elm(tag: str, parent: str): Elm;
+load upd_elm(id: Elm, prop: str, content: str): void;
+load evt_elm(id: Elm, name: str, func: str): void;
 load to_str(n: num): str;
 load concat(a: str, b: str): str;
 load alert(msg: str): void;
@@ -14,12 +16,12 @@ type Character = @{
 
 pub let model = @{
     player: @{
-        id: "player",
+        dom: null,
         src: "https://pixiv.navirank.com/jpg/153/15371090.jpg",
         position: @{ x: 1, y: 0 }
     },
     target: @{
-        id: "target",
+        dom: null,
         src: "https://pixiv.navirank.com/jpg/1263/126387033.jpg",
         position: @{ x: 500, y: 500 }
     },
@@ -31,12 +33,12 @@ pub let model = @{
 let x_position(n: Character) = "left: " + (n.position.x:num as str) + "px;";
 let y_position(n: Character) = "bottom: " + (n.position.y:num as str) + "px;";
 let draw_player() = {
-    upd_elm(model.player.id, "style", x_position(model.player));
-    upd_elm(model.player.id, "style", y_position(model.player))
+    upd_elm(model.player.dom, "style", x_position(model.player));
+    upd_elm(model.player.dom, "style", y_position(model.player))
 };
 let draw_target() = {
-    upd_elm(model.target.id, "style", x_position(model.target));
-    upd_elm(model.target.id, "style", y_position(model.target))
+    upd_elm(model.target.dom, "style", x_position(model.target));
+    upd_elm(model.target.dom, "style", y_position(model.target))
 };
 
 let is_touch() = {
@@ -67,14 +69,14 @@ pub let user_operation(key_code: int) = {
 };
 
 let game() = {
-    new_elm(model.player.id, "img", "body");
-    upd_elm(model.player.id, "src", model.player.src);
-    upd_elm(model.player.id, "style", model.style.char);
-    evt_elm(model.player.id, "keydown", "user_operation");
+    let model.player.dom = new_elm("img", null);
+    upd_elm(model.player.dom, "src", model.player.src);
+    upd_elm(model.player.dom, "style", model.style.char);
+    evt_elm(model.player.dom, "keydown", "user_operation");
 
-    new_elm(model.target.id, "img", "body");
-    upd_elm(model.target.id, "src", model.target.src);
-    upd_elm(model.target.id, "style", model.style.char);
+    let model.target.dom = new_elm("img", "body");
+    upd_elm(model.target.dom, "src", model.target.src);
+    upd_elm(model.target.dom, "style", model.style.char);
 
     draw_player(); draw_target()
 };
