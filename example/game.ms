@@ -1,6 +1,6 @@
 type Elm = int;
 
-load new_elm(tag: str, parent: str): Elm;
+load new_elm(tag: str, parent: Elm): Elm;
 load upd_elm(id: Elm, prop: str, content: str): void;
 load evt_elm(id: Elm, name: str, func: str): void;
 load to_str(n: num): str;
@@ -9,7 +9,7 @@ load alert(msg: str): void;
 load rand(): num;
 
 type Character = @{
-    id: str,
+    dom: int,
     src: str,
     position: @{ x: int, y: int }
 };
@@ -74,7 +74,7 @@ let game() = {
     upd_elm(model.player.dom, "style", model.style.char);
     evt_elm(model.player.dom, "keydown", "user_operation");
 
-    let model.target.dom = new_elm("img", "body");
+    let model.target.dom = new_elm("img", null);
     upd_elm(model.target.dom, "src", model.target.src);
     upd_elm(model.target.dom, "style", model.style.char);
 
