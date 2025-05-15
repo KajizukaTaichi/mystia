@@ -10,7 +10,7 @@ pub let model = @{
     title: "Counter App",
     count: 0,
     layout: @{
-        panel: 0
+        panel: null
     }
 };
 
