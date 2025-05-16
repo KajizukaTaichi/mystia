@@ -38,8 +38,8 @@ let init_position() = {
     let model.target.position.y = 500
 };
 
-let x_position(n: Character) = "left: " + (n.position.x:num as str) + "px;";
-let y_position(n: Character) = "bottom: " + (n.position.y:num as str) + "px;";
+let x_position(n: Character) = "left: " + (n.position.x as str) + "px;";
+let y_position(n: Character) = "bottom: " + (n.position.y as str) + "px;";
 let draw_player() = {
     upd_elm(model.player.dom, "style", x_position(model.player));
     upd_elm(model.player.dom, "style", y_position(model.player))
@@ -59,7 +59,7 @@ let is_touch() = {
 
 let move_target() = {
     let model.target.position.x + (rand() * (model.speed * 2: num): int - model.speed);
-    let model.target.position.y + (rand() * (model.speed * 2: num) - model.speed);
+    let model.target.position.y + (rand() * (model.speed * 2: num): int - model.speed);
     draw_target()
 };
 let move_player(x_move: int, y_move: int) = {
