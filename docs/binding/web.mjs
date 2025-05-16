@@ -1,8 +1,6 @@
 import init, { mystia as compile } from "../wasm/web/mystia_wasm.js";
 import { MystiaWebLib } from "./lib.mjs";
-
-let mystiaDomIndex = 0;
-let getMystiaDom = (id) => `mystia-dom-${id}`;
+import { read } from "./ffi.mjs";
 
 await init();
 export async function mystia(code) {
