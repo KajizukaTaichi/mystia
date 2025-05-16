@@ -118,3 +118,20 @@ export class MystiaWebLib extends MystiaStdLib {
         };
     }
 }
+
+export class MystiaNodeLib extends MystiaStdLib {
+    constructor() {
+        super();
+        this.functions.print = (message) => {
+            console.log(read(instance, "str", message));
+        };
+    }
+    bridge() {
+        return {
+            ...super.bridge(),
+            ...{
+                print: (ptr) => this.functions.alert(ptr),
+            },
+        };
+    }
+}
