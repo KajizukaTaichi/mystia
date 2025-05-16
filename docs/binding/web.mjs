@@ -1,4 +1,5 @@
 import init, { mystia as compile } from "../wasm/web/mystia_wasm.js";
+import { MystiaWebLib } from "./lib.mjs";
 
 let mystiaDomIndex = 0;
 let getMystiaDom = (id) => `mystia-dom-${id}`;
@@ -10,113 +11,11 @@ export async function mystia(code) {
     const bytecodes = result.get_bytecode().buffer;
     if (type == null) return null;
 
-    let libFuncs = {
-        alert: null,
-        confirm: null,
-        prompt: null,
-        init_canvas: null,
-        draw: null,
-        to_str: null,
-        to_num: null,
-        concat: null,
-        rand: null,
-        new_elm: null,
-        upd_elm: null,
-        evt_elm: null,
-    };
+    let mystiaStdLib = new MystiaWebLib();
     const { instance } = await WebAssembly.instantiate(bytecodes, {
-        env: {
-            alert: (ptr) => libFuncs.alert(ptr),
-            confirm: (ptr) => libFuncs.confirm(ptr),
-            prompt: (ptr) => libFuncs.prompt(ptr),
-            init_canvas: () => libFuncs.init_canvas(),
-            draw: (x, y, color) => libFuncs.draw(x, y, color),
-            to_str: (num) => libFuncs.to_str(num),
-            to_num: (str) => libFuncs.to_num(str),
-            concat: (str1, str2) => libFuncs.concat(str1, str2),
-            rand: () => libFuncs.rand(),
-            new_elm: (id, tag, parent) => libFuncs.new_elm(id, tag, parent),
-            upd_elm: (id, prop, content) => libFuncs.upd_elm(id, prop, content),
-            evt_elm: (id, name, func) => libFuncs.evt_elm(id, name, func),
-        },
+        env: mystiaStdLib.bridge(),
     });
-    libFuncs.alert = (message) => {
-        window.alert(read(instance, "str", message));
-    };
-    libFuncs.confirm = (message) => {
-        window.confirm(read(instance, "str", message));
-    };
-    libFuncs.prompt = (message) => {
-        const answer = window.prompt(read(instance, "str", message));
-        return write(instance, "str", answer);
-    };
-    libFuncs.init_canvas = () => {
-        let canvas = document.getElementById("mystia-canvas");
-        if (canvas == null) {
-            canvas = document.createElement("canvas");
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            canvas.style.width = `${window.innerWidth}px`;
-            canvas.style.height = `${window.innerHeight}px`;
-            canvas.id = "mystia-canvas";
-            document.body.appendChild(canvas);
-        } else {
-            const ctx = canvas.getContext("2d");
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
-    };
-    libFuncs.draw = (x, y, color) => {
-        const ctx = document.getElementById("mystia-canvas").getContext("2d");
-        const pallet = "white|black|grey|blue|violet|green|red|pink|yellow";
-        const type = { type: "enum", enum: pallet.split("|") };
-        ctx.fillStyle = read(instance, type, color);
-        ctx.fillRect(x, y, 1, 1);
-    };
-    libFuncs.to_str = (value) => {
-        return write(instance, "str", value.toString());
-    };
-    libFuncs.to_num = (value) => {
-        return parseFloat(read(instance, "str", value));
-    };
-    libFuncs.concat = (str1, str2) => {
-        str1 = read(instance, "str", str1);
-        str2 = read(instance, "str", str2);
-        return write(instance, "str", str1 + str2);
-    };
-    libFuncs.rand = () => {
-        return Math.random();
-    };
-    libFuncs.new_elm = (tag, parent) => {
-        const elm = document.createElement(read(instance, "str", tag));
-        elm.setAttribute("id", getMystiaDom(mystiaDomIndex++));
-        parent = document.getElementById(getMystiaDom(parent));
-        if (parent === null) parent = document.body;
-        parent.appendChild(elm);
-        return mystiaDomIndex - 1;
-    };
-    libFuncs.upd_elm = (id, property, content) => {
-        property = read(instance, "str", property);
-        content = read(instance, "str", content);
-        let elm = document.getElementById(getMystiaDom(id));
-        if (elm === null) elm = document.querySelector(id);
-        if (property == "style") {
-            elm.style.cssText += content;
-        } else {
-            elm[property] = content;
-        }
-    };
-    libFuncs.evt_elm = (id, name, func) => {
-        const elm = document.getElementById(getMystiaDom(id));
-        func = read(instance, "str", func);
-        name = read(instance, "str", name);
-        if (name.includes("key")) {
-            document.body.addEventListener(name, (event) =>
-                instance.exports[func](event.keyCode),
-            );
-        } else {
-            elm.addEventListener(name, () => instance.exports[func]());
-        }
-    };
+    mystiaStdLib.set_wasm(instance);
 
     const value = instance.exports._start();
     return read(instance, type, value);
