@@ -1,4 +1,4 @@
-import { write as write, read as read } from "./ffi.mjs";
+import { write, read } from "./ffi.mjs";
 
 export class MystiaStdLib {
     constructor() {
@@ -30,18 +30,38 @@ export class MystiaStdLib {
     }
 }
 
+export class MystiaNodeLib extends MystiaStdLib {
+    constructor() {
+        super();
+        this.functions.print = (message) => {
+            console.log(read(this.instance, "str", message));
+        };
+    }
+    bridge() {
+        return {
+            ...super.bridge(),
+            ...{
+                print: (ptr) => this.functions.print(ptr),
+            },
+        };
+    }
+}
+
+let mystiaDomIndex = 0;
+let getMystiaDom = (id) => `mystia-dom-${id}`;
+
 export class MystiaWebLib extends MystiaStdLib {
     constructor() {
         super();
         this.functions.alert = (message) => {
-            window.alert(read(instance, "str", message));
+            window.alert(read(this.instance, "str", message));
         };
         this.functions.confirm = (message) => {
-            window.confirm(read(instance, "str", message));
+            window.confirm(read(this.instance, "str", message));
         };
         this.functions.prompt = (message) => {
-            const answer = window.prompt(read(instance, "str", message));
-            return write(instance, "str", answer);
+            const answer = window.prompt(read(this.instance, "str", message));
+            return write(this.instance, "str", answer);
         };
         this.functions.init_canvas = () => {
             let canvas = document.getElementById("mystia-canvas");
@@ -64,11 +84,11 @@ export class MystiaWebLib extends MystiaStdLib {
                 .getContext("2d");
             const pallet = "white|black|grey|blue|violet|green|red|pink|yellow";
             const type = { type: "enum", enum: pallet.split("|") };
-            ctx.fillStyle = read(instance, type, color);
+            ctx.fillStyle = read(this.instance, type, color);
             ctx.fillRect(x, y, 1, 1);
         };
         this.functions.new_elm = (tag, parent) => {
-            const elm = document.createElement(read(instance, "str", tag));
+            const elm = document.createElement(read(this.instance, "str", tag));
             elm.setAttribute("id", getMystiaDom(mystiaDomIndex++));
             parent = document.getElementById(getMystiaDom(parent));
             if (parent === null) parent = document.body;
@@ -76,8 +96,8 @@ export class MystiaWebLib extends MystiaStdLib {
             return mystiaDomIndex - 1;
         };
         this.functions.upd_elm = (id, property, content) => {
-            property = read(instance, "str", property);
-            content = read(instance, "str", content);
+            property = read(this.instance, "str", property);
+            content = read(this.instance, "str", content);
             let elm = document.getElementById(getMystiaDom(id));
             if (elm === null) elm = document.querySelector(id);
             if (property == "style") {
@@ -88,14 +108,14 @@ export class MystiaWebLib extends MystiaStdLib {
         };
         this.functions.evt_elm = (id, name, func) => {
             const elm = document.getElementById(getMystiaDom(id));
-            func = read(instance, "str", func);
-            name = read(instance, "str", name);
+            func = read(this.instance, "str", func);
+            name = read(this.instance, "str", name);
             if (name.includes("key")) {
                 document.body.addEventListener(name, (event) =>
-                    instance.exports[func](event.keyCode),
+                    this.instance.exports[func](event.keyCode),
                 );
             } else {
-                elm.addEventListener(name, () => instance.exports[func]());
+                elm.addEventListener(name, () => this.instance.exports[func]());
             }
         };
     }
@@ -114,23 +134,6 @@ export class MystiaWebLib extends MystiaStdLib {
                     this.functions.upd_elm(id, prop, content),
                 evt_elm: (id, name, func) =>
                     this.functions.evt_elm(id, name, func),
-            },
-        };
-    }
-}
-
-export class MystiaNodeLib extends MystiaStdLib {
-    constructor() {
-        super();
-        this.functions.print = (message) => {
-            console.log(read(this.instance, "str", message));
-        };
-    }
-    bridge() {
-        return {
-            ...super.bridge(),
-            ...{
-                print: (ptr) => this.functions.print(ptr),
             },
         };
     }
