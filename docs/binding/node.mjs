@@ -1,6 +1,6 @@
 import { mystia as compile } from "../wasm/node/mystia_wasm.js";
-import { read } from "./ffi.mjs";
 import { MystiaNodeLib } from "./lib.mjs";
+import { read } from "./ffi.mjs";
 
 export async function mystia(code) {
     const result = compile(code);
