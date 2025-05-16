@@ -1,5 +1,4 @@
 import init, { mystia as compile } from "../wasm/web/mystia_wasm.js";
-import { write as write, read as read } from "./ffi.mjs";
 
 let mystiaDomIndex = 0;
 let getMystiaDom = (id) => `mystia-dom-${id}`;
