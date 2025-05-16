@@ -123,14 +123,14 @@ export class MystiaNodeLib extends MystiaStdLib {
     constructor() {
         super();
         this.functions.print = (message) => {
-            console.log(read(instance, "str", message));
+            console.log(read(this.instance, "str", message));
         };
     }
     bridge() {
         return {
             ...super.bridge(),
             ...{
-                print: (ptr) => this.functions.alert(ptr),
+                print: (ptr) => this.functions.print(ptr),
             },
         };
     }
