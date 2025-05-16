@@ -15,19 +15,27 @@ type Character = @{
 };
 
 pub let model = @{
+    count: 0,
     player: @{
         dom: null,
         src: "https://pixiv.navirank.com/jpg/153/15371090.jpg",
-        position: @{ x: 1, y: 0 }
+        position: @{ x: null, y: null }
     },
     target: @{
         dom: null,
         src: "https://pixiv.navirank.com/jpg/1263/126387033.jpg",
-        position: @{ x: 500, y: 500 }
+        position: @{ x: null, y: null }
     },
     style: @{
         char: "height: 100px; position: absolute;"
     },
+};
+
+let init_position() = {
+    let model.player.position.x = 0;
+    let model.player.position.y = 0;
+    let model.target.position.x = 500;
+    let model.target.position.y = 500
 };
 
 let x_position(n: Character) = "left: " + (n.position.x:num as str) + "px;";
@@ -58,7 +66,11 @@ let move_player(x_move: int, y_move: int) = {
     let model.player.position.x + x_move;
     let model.player.position.y + y_move;
     draw_player(); move_target();
-    if is_touch() then alert("Touch!")
+    if is_touch() then {
+        let model.count + 1;
+        alert("Touch! " + (model.count: str) + "th times");
+        init_position()
+    }
 };
 
 pub let user_operation(key_code: int) = {
@@ -78,7 +90,9 @@ let game() = {
     upd_elm(model.target.dom, "src", model.target.src);
     upd_elm(model.target.dom, "style", model.style.char);
 
-    draw_player(); draw_target()
+    init_position();
+    draw_player();
+    draw_target()
 };
 
 game();
