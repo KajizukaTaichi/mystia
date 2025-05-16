@@ -1,5 +1,5 @@
 import { mystia as compile } from "../wasm/node/mystia_wasm.js";
-import { read, write } from "./ffi.mjs";
+import { read } from "./ffi.mjs";
 import { MystiaStdLib } from "./lib.mjs";
 
 export async function mystia(code) {
