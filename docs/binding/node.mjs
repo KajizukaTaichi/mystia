@@ -12,6 +12,7 @@ export async function mystia(code) {
         env: mystiaStdLib.bridge(),
     });
     mystiaStdLib.set_wasm(instance);
+
     const value = instance.exports._start();
     return read(instance, type, value);
 }
