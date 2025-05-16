@@ -9,13 +9,13 @@ load alert(msg: str): void;
 load rand(): num;
 
 type Character = @{
-    dom: int,
-    src: str,
+    dom: int, src: str,
     position: @{ x: int, y: int }
 };
 
 pub let model = @{
     count: 0,
+    speed: 50,
     player: @{
         dom: null,
         src: "https://pixiv.navirank.com/jpg/153/15371090.jpg",
@@ -58,8 +58,8 @@ let is_touch() = {
 };
 
 let move_target() = {
-    let model.target.position.x + (rand() * 100.0: int - 40);
-    let model.target.position.y + (rand() * 100.0: int - 40);
+    let model.target.position.x + (rand() * (model.speed * 2: num): int - model.speed);
+    let model.target.position.y + (rand() * (model.speed * 2: num) - model.speed);
     draw_target()
 };
 let move_player(x_move: int, y_move: int) = {
@@ -69,15 +69,15 @@ let move_player(x_move: int, y_move: int) = {
     if is_touch() then {
         let model.count + 1;
         alert("Touch! " + (model.count: str) + "th times");
-        init_position()
+        init_position(); draw_player(); move_target()
     }
 };
 
 pub let user_operation(key_code: int) = {
-    if key_code == 39 then  move_player(100, 0)
-    else if key_code == 37 then move_player(-100, 0)
-    else if key_code == 38 then move_player(0, 100)
-    else if key_code == 40 then move_player(0, -100)
+    if key_code == 39 then  move_player(model.speed, 0)
+    else if key_code == 37 then move_player(-model.speed, 0)
+    else if key_code == 38 then move_player(0, model.speed)
+    else if key_code == 40 then move_player(0, -model.speed)
 };
 
 let game() = {
@@ -90,9 +90,7 @@ let game() = {
     upd_elm(model.target.dom, "src", model.target.src);
     upd_elm(model.target.dom, "style", model.style.char);
 
-    init_position();
-    draw_player();
-    draw_target()
+    init_position(); draw_player(); draw_target()
 };
 
 game();
