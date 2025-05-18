@@ -112,7 +112,7 @@ impl Type {
         }
     }
 
-    pub fn decompress_alias(&self, ctx: & Compiler) -> Type {
+    pub fn decompress_alias(&self, ctx: &Compiler) -> Type {
         let mut aliases = ctx.type_alias.iter();
         if let Some(i) = aliases.find(|(_, v)| v.format() == self.format()) {
             Type::Alias(i.0.clone())
@@ -139,7 +139,7 @@ impl Type {
             Type::Dict(dict) => format!(
                 "@{{ {} }}",
                 dict.iter()
-                    .map(|(k, t)| format!("{k}: {}", t.1.format()))
+                    .map(|(key, (_, typ))| format!("{key}: {}", typ.format()))
                     .collect::<Vec<_>>()
                     .join(", ")
             ),
