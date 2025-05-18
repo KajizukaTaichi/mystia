@@ -62,7 +62,11 @@ impl Node for Oper {
                 "&&" => Oper::LAnd(Expr::parse(lhs)?, Expr::parse(rhs)?),
                 "||" => Oper::LOr(Expr::parse(lhs)?, Expr::parse(rhs)?),
                 ":" | "as" => Oper::Cast(Expr::parse(lhs)?, Type::parse(rhs)?),
-                _ => return None,
+                _ => {
+                    let errmsg = format!("unknown operator `{operator}`",);
+                    ctx.occurred_error = Some(errmsg);
+                    return None;
+                }
             })
         }
     }
