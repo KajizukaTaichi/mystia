@@ -52,10 +52,8 @@ impl Node for Expr {
             let args = args.iter().map(|i| Expr::parse(&i));
             let args = args.collect::<Option<Vec<_>>>()?;
             match Expr::parse(name)? {
-                Expr::Variable(name) => Some(Expr::Call(name.to_string(), args)),
-                Expr::Field(obj, name) => {
-                    Some(Expr::Call(name.to_string(), [vec![*obj], args].concat()))
-                }
+                Expr::Variable(name) => Some(Expr::Call(name, args)),
+                Expr::Field(obj, name) => Some(Expr::Call(name, [vec![*obj], args].concat())),
                 _ => None,
             }
         // Dictionary access `dict.field`
@@ -155,7 +153,11 @@ impl Node for Expr {
             }
             Expr::Literal(literal) => literal.type_infer(ctx)?,
             Expr::Call(name, args) => {
-                let function = ctx.function_type.get(name)?.clone();
+                let Some(function) = ctx.function_type.get(name).cloned() else {
+                    let errmsg = format!("function `{name}` you want to call is not defined");
+                    ctx.occurred_error = Some(errmsg);
+                    return None;
+                };
                 if args.len() != function.arguments.len() {
                     let errmsg = format!(
                         "arguments of function `{name}` length should be {}, but passed {} values",
