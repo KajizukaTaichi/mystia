@@ -23,35 +23,24 @@ impl Node for Stmt {
     fn parse(source: &str) -> Option<Self> {
         let source = source.trim();
         if let Some(source) = source.strip_prefix("if ") {
-            let code = tokenize(source, SPACE.as_ref(), false, true)?;
-            let then_pos = code.iter().position(|i| i == "then")?;
-            if let Some(else_pos) = code.iter().position(|i| i == "else") {
-                let cond_sec = join!(code.get(0..then_pos)?);
-                let then_sec = join!(code.get(then_pos + 1..else_pos)?);
-                let else_sec = join!(code.get(else_pos + 1..)?);
-                Some(Stmt::If(
-                    Expr::parse(&cond_sec)?,
-                    Expr::parse(&then_sec)?,
-                    Some(Box::new(Stmt::parse(&else_sec)?)),
-                ))
+            let tokens = tokenize(source, SPACE.as_ref(), false, true)?;
+            let then = tokens.iter().position(|i| i == "then")?;
+            if let Some(r#else) = tokens.iter().position(|i| i == "else") {
+                let cond = Expr::parse(&join!(tokens.get(0..then)?))?;
+                let then = Expr::parse(&join!(tokens.get(then + 1..r#else)?))?;
+                let r#else = Stmt::parse(&join!(tokens.get(r#else + 1..)?))?;
+                Some(Stmt::If(cond, then, Some(Box::new(r#else))))
             } else {
-                let cond_sec = join!(code.get(0..then_pos)?);
-                let then_sec = join!(code.get(then_pos + 1..)?);
-                Some(Stmt::If(
-                    Expr::parse(&cond_sec)?,
-                    Expr::parse(&then_sec)?,
-                    None,
-                ))
+                let cond = Expr::parse(&join!(tokens.get(0..then)?))?;
+                let then = Expr::parse(&join!(tokens.get(then + 1..)?))?;
+                Some(Stmt::If(cond, then, None))
             }
         } else if let Some(source) = source.strip_prefix("while ") {
-            let code = tokenize(source, SPACE.as_ref(), false, true)?;
-            let loop_pos = code.iter().position(|i| i == "loop")?;
-            let cond_sec = join!(code.get(0..loop_pos)?);
-            let body_sec = join!(code.get(loop_pos + 1..)?);
-            Some(Stmt::While(
-                Expr::parse(&cond_sec)?,
-                Expr::parse(&body_sec)?,
-            ))
+            let tokens = tokenize(source, SPACE.as_ref(), false, true)?;
+            let r#loop = tokens.iter().position(|i| i == "loop")?;
+            let cond = Expr::parse(&join!(tokens.get(0..r#loop)?))?;
+            let body = Expr::parse(&join!(tokens.get(r#loop + 1..)?))?;
+            Some(Stmt::While(cond, body))
         } else if let Some(token) = source.strip_prefix("let ") {
             if let Some((name, value)) = token.split_once("=") {
                 let (name, value) = (Expr::parse(name)?, Expr::parse(value)?);
