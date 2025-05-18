@@ -51,7 +51,13 @@ impl Node for Expr {
             let args = tokenize(args, &[","], false, true)?;
             let args = args.iter().map(|i| Expr::parse(&i));
             let args = args.collect::<Option<Vec<_>>>()?;
-            Some(Expr::Call(name.to_string(), args))
+            match Expr::parse(name)? {
+                Expr::Variable(name) => Some(Expr::Call(name.to_string(), args)),
+                Expr::Field(obj, name) => {
+                    Some(Expr::Call(name.to_string(), [vec![*obj], args].concat()))
+                }
+                _ => None,
+            }
         // Dictionary access `dict.field`
         } else if token.contains(".") {
             let (dict, field) = token.rsplit_once(".")?;
