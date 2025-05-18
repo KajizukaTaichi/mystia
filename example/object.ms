@@ -8,7 +8,7 @@ let get(self: Counter) = self.x;
 
 let obj = Counter();
 obj.up(); obj.up(); obj.up();
-obj.reset(obj.get() * 10)
+obj.reset(obj.get() * 10);
 obj.down(); obj.down();
 
 obj.get()
