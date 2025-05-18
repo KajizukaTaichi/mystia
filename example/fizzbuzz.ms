@@ -9,7 +9,7 @@ let fizzbuzz(n: int) = {
 };
 
 let i = 1;
-while i < 100 loop {
+while i <= 100 loop {
     print(fizzbuzz(i));
     let i + 1
 }
