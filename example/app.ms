@@ -35,20 +35,21 @@ pub let inc_key(key_code: int) = {
 
 let app() = {
     let frame = new_elm("div", null);
-    upd_elm(frame, "style", "margin: 100px");
-    evt_elm(frame, "keydown", "inc_key");
+    frame.upd_elm("style", "margin: 100px");
+    frame.evt_elm("keydown", "inc_key");
 
     let title = new_elm("h1", frame);
-    upd_elm(title, "innerHTML", model.title);
+    title.upd_elm("innerHTML", model.title);
 
-    let model.layout.panel = new_elm("p", frame);
-    upd_elm(model.layout.panel, "style", "font-family: monospace");
+    let panel = new_elm("p", frame);
+    let model.layout.panel = panel;
+    panel.upd_elm("style", "font-family: monospace");
     view();
 
     let btn = new_elm("button", frame);
-    upd_elm(btn, "innerHTML", "Increment");
-    upd_elm(btn, "className", "button");
-    evt_elm(btn, "click", "inc_btn")
+    btn.upd_elm("innerHTML", "Increment");
+    btn.upd_elm("className", "button");
+    btn.evt_elm("click", "inc_btn")
 };
 
 app();
