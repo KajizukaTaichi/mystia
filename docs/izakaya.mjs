@@ -8,7 +8,7 @@ class Mystia extends HTMLElement {
 
     async connectedCallback() {
         await mystia(this.innerHTML);
-        this.innerHTML = "";
+        this.remove();
     }
 }
 
