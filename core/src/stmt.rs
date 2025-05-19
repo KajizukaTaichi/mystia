@@ -1,3 +1,5 @@
+use std::array;
+
 use crate::*;
 
 #[derive(Clone, Debug)]
@@ -159,22 +161,10 @@ impl Node for Stmt {
                         return None;
                     };
                     type_check!(typ, value.type_infer(ctx)?, ctx)?;
-                    let addr = Oper::Add(
-                        Expr::Oper(Box::new(Oper::Cast(*array.clone(), Type::Integer))),
-                        Expr::Oper(Box::new(Oper::Mul(
-                            Expr::Oper(Box::new(Oper::Mod(
-                                *index.clone(),
-                                Expr::Literal(Value::Integer(len as i32)),
-                            ))),
-                            Expr::Literal(Value::Integer(typ.pointer_length())),
-                        ))),
-                    );
-                    format!(
-                        "({}.store {} {})",
-                        typ.compile(ctx)?,
-                        addr.compile(ctx)?,
-                        value.compile(ctx)?
-                    )
+                    let addr = address_calc!(array, index, len, typ);
+                    let [typ, addr, value] =
+                        [typ.compile(ctx)?, addr.compile(ctx)?, value.compile(ctx)?];
+                    format!("({typ}.store {addr} {value})",)
                 }
                 Expr::Field(expr, key) => {
                     let Type::Dict(dict) = expr.type_infer(ctx)? else {
