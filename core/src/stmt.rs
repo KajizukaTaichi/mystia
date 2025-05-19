@@ -1,5 +1,3 @@
-use std::array;
-
 use crate::*;
 
 #[derive(Clone, Debug)]
@@ -140,16 +138,15 @@ impl Node for Stmt {
                             &function
                                 .arguments
                                 .iter()
-                                .map(|(name, typ): (&String, &Type)| Some(format!(
+                                .map(|(name, typ)| Some(format!(
                                     "(param ${name} {})",
                                     typ.type_infer(ctx)?.compile(ctx)?
                                 )))
                                 .collect::<Option<Vec<_>>>()?
                         ),
                         ret = compile_return!(function.returns, ctx),
-                        pub = if let Scope::Global = scope{ format!("(export \"{name}\")") } else { String::new() },
-                        body = value.compile(ctx)?,
-                        locals = expand_local(ctx)?
+                        pub = if let Scope::Global = scope { format!("(export \"{name}\")") } else { String::new() },
+                        body = value.compile(ctx)?, locals = expand_local(ctx)?
                     );
                     ctx.variable_type.clear();
                     ctx.argument_type.clear();
@@ -171,16 +168,9 @@ impl Node for Stmt {
                     };
                     let (offset, typ) = dict.get(key)?.clone();
                     type_check!(typ, value.type_infer(ctx)?, ctx)?;
-                    let addr = Oper::Add(
-                        Expr::Oper(Box::new(Oper::Cast(*expr.clone(), Type::Integer))),
-                        Expr::Literal(Value::Integer(offset)),
-                    );
-                    format!(
-                        "({}.store {} {})",
-                        typ.compile(ctx)?,
-                        addr.compile(ctx)?,
-                        value.compile(ctx)?
-                    )
+                    let addr = offset_calc!(expr, offset);
+                    let [typ, addr] = [typ.compile(ctx)?, addr.compile(ctx)?];
+                    format!("({typ}.store {addr} {})", value.compile(ctx)?)
                 }
                 _ => return None,
             },
