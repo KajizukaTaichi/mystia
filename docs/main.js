@@ -1,4 +1,4 @@
-import { mystia } from "./binding/web.mjs";
+import { mystia } from "./runtime/web.mjs";
 let timer;
 
 const codeEditor = document.getElementById("code");
@@ -38,7 +38,7 @@ buildBtn.addEventListener("click", () => {
                 <title>Mystia App</title>
             </head>
             <body>
-                <script type="module" src="https://kajizukataichi.github.io/mystia/izakaya.mjs"></\script>
+                <script type="module" src="https://kajizukataichi.github.io/mystia/runtime/web.mjs"></\script>
                 <mystia-code>${codeEditor.value}</mystia-code>
             </body>
         </html>
