@@ -36,10 +36,8 @@ impl Node for Expr {
         } else if token.contains("[") && token.ends_with("]") {
             let token = token.get(..token.len() - 1)?.trim();
             let (array, index) = token.rsplit_once("[")?;
-            Some(Expr::Index(
-                Box::new(Expr::parse(array)?),
-                Box::new(Expr::parse(index)?),
-            ))
+            let (array, index) = (Expr::parse(array)?, Expr::parse(index)?);
+            Some(Expr::Index(Box::new(array), Box::new(index)))
         // Memory copy
         } else if token.starts_with("memcpy(") && token.ends_with(")") {
             let token = token.get("memcpy(".len()..token.len() - 1)?.trim();
