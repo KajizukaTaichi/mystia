@@ -91,16 +91,7 @@ impl Node for Expr {
                 let Type::Array(typ, len) = array.type_infer(ctx)? else {
                     return None;
                 };
-                let addr = Oper::Add(
-                    Expr::Oper(Box::new(Oper::Cast(*array.clone(), Type::Integer))),
-                    Expr::Oper(Box::new(Oper::Mul(
-                        Expr::Oper(Box::new(Oper::Mod(
-                            *index.clone(),
-                            Expr::Literal(Value::Integer(len as i32)),
-                        ))),
-                        Expr::Literal(Value::Integer(typ.pointer_length())),
-                    ))),
-                );
+                let addr = address_calc!(array, index, len, typ);
                 format!("({}.load {})", typ.compile(ctx)?, addr.compile(ctx)?)
             }
             Expr::Field(expr, key) => {
@@ -109,10 +100,7 @@ impl Node for Expr {
                     return None;
                 };
                 let (offset, typ) = dict.get(key)?.clone();
-                let addr = Oper::Add(
-                    Expr::Oper(Box::new(Oper::Cast(*expr.clone(), Type::Integer))),
-                    Expr::Literal(Value::Integer(offset.clone())),
-                );
+                let addr = offset_calc!(expr, offset);
                 format!("({}.load {})", typ.compile(ctx)?, addr.compile(ctx)?)
             }
             Expr::Block(block) => block.compile(ctx)?,
