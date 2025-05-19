@@ -1,5 +1,5 @@
 import { createInterface } from "readline";
-import { mystia } from "./docs/binding/node.mjs";
+import { mystia } from "./docs/runtime/node.mjs";
 
 const rl = createInterface({
     input: process.stdin,
