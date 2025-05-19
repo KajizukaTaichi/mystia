@@ -108,13 +108,28 @@ macro_rules! compile_compare {
 }
 
 #[macro_export]
-macro_rules! ok {
-    ($result:expr) => {
-        if let Ok(val) = $result {
-            Some(val)
-        } else {
-            None
-        }
+macro_rules! address_calc {
+    ($array: expr, $index: expr, $len: expr, $typ: expr) => {
+        Oper::Add(
+            Expr::Oper(Box::new(Oper::Cast(*$array.clone(), Type::Integer))),
+            Expr::Oper(Box::new(Oper::Mul(
+                Expr::Oper(Box::new(Oper::Mod(
+                    *$index.clone(),
+                    Expr::Literal(Value::Integer($len as i32)),
+                ))),
+                Expr::Literal(Value::Integer($typ.pointer_length())),
+            ))),
+        )
+    };
+}
+
+#[macro_export]
+macro_rules! offset_calc {
+    ($dict: expr, $offset: expr) => {
+        Oper::Add(
+            Expr::Oper(Box::new(Oper::Cast(*$dict.clone(), Type::Integer))),
+            Expr::Literal(Value::Integer($offset.clone())),
+        )
     };
 }
 
@@ -133,14 +148,14 @@ macro_rules! compile_arithmetic {
 }
 
 #[macro_export]
-macro_rules! iter_map {
-    ($iter: expr, $proc: expr) => {{
-        let mut result = vec![];
-        for i in $iter {
-            result.push($proc(i)?);
+macro_rules! ok {
+    ($result:expr) => {
+        if let Ok(val) = $result {
+            Some(val)
+        } else {
+            None
         }
-        result
-    }};
+    };
 }
 
 #[macro_export]
