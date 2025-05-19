@@ -18,3 +18,17 @@ export async function mystia(code) {
     const value = instance.exports._start();
     return read(instance, type, value);
 }
+
+class Mystia extends HTMLElement {
+    constructor() {
+        super();
+        console.log("Welcome to the Mystia programming!");
+    }
+
+    async connectedCallback() {
+        await mystia(this.innerHTML);
+        this.remove();
+    }
+}
+
+customElements.define("mystia-code", Mystia);
