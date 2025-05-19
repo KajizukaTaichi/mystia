@@ -20,14 +20,9 @@ pub fn include_letter(query: &str, chars: &Vec<String>, idx: usize) -> bool {
 pub fn expand_local(ctx: &mut Compiler) -> Option<String> {
     Some(join!(
         ctx.variable_type
+            .clone()
             .iter()
-            .map(|x| {
-                Some(format!(
-                    "(local ${} {})",
-                    x.0,
-                    x.1.compile(&mut ctx.clone())?
-                ))
-            })
+            .map(|(name, typ)| { Some(format!("(local ${name} {})", typ.compile(ctx)?)) })
             .collect::<Option<Vec<String>>>()?
     ))
 }
