@@ -15,4 +15,4 @@ let unwrap_or(value: Option, or: T) = {
 let a = Some([1,2,3]);
 let b = None;
 
-unwrap_or(b, unwrap(a))
+b.unwrap_or(a.unwrap())
