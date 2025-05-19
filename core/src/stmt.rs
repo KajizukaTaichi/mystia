@@ -239,6 +239,8 @@ impl Node for Stmt {
                         }
                     },
                     Expr::Call(name, args) => {
+                        let var_typ = ctx.variable_type.clone();
+                        let arg_typ = ctx.argument_type.clone();
                         for arg in args {
                             let Expr::Oper(oper) = arg else { return None };
                             let Oper::Cast(Expr::Variable(name), typ) = *oper.clone() else {
@@ -256,8 +258,8 @@ impl Node for Stmt {
                                 returns: ret,
                             },
                         );
-                        ctx.variable_type.clear();
-                        ctx.argument_type.clear();
+                        ctx.variable_type = var_typ;
+                        ctx.argument_type = arg_typ;
                     }
                     _ => {
                         value.type_infer(ctx);
