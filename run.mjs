@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { mystia } from "./docs/binding/node.mjs";
+import { mystia } from "./docs/runtime/node.mjs";
 
 const args = process.argv.slice(2);
 if (args.length === 0) {
