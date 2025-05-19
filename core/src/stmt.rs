@@ -162,9 +162,8 @@ impl Node for Stmt {
                     };
                     type_check!(typ, value.type_infer(ctx)?, ctx)?;
                     let addr = address_calc!(array, index, len, typ);
-                    let [typ, addr, value] =
-                        [typ.compile(ctx)?, addr.compile(ctx)?, value.compile(ctx)?];
-                    format!("({typ}.store {addr} {value})",)
+                    let [typ, addr] = [typ.compile(ctx)?, addr.compile(ctx)?];
+                    format!("({typ}.store {addr} {})", value.compile(ctx)?)
                 }
                 Expr::Field(expr, key) => {
                     let Type::Dict(dict) = expr.type_infer(ctx)? else {
