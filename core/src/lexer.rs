@@ -5,6 +5,7 @@ pub fn tokenize(
     delimiter: &[&str],
     is_expr: bool,
     is_trim: bool,
+    is_split: bool,
 ) -> Option<Vec<String>> {
     let mut tokens: Vec<String> = Vec::new();
     let mut current_token = String::new();
@@ -27,6 +28,10 @@ pub fn tokenize(
             is_escape = false;
             index += 1;
         } else if ["(", "[", "{"].contains(&c.as_str()) {
+            if is_split {
+                tokens.push(current_token.clone());
+                current_token.clear();
+            }
             current_token.push_str(c.as_str());
             in_parentheses += 1;
             index += 1;
