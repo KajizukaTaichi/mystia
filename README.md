@@ -9,4 +9,4 @@ Errors around type system are checked in compile time strictly. Inference is ava
 ### Rust/ML-like syntax
 The syntax is inspired by Rust and OCaml. for example, definition using `let` statement.
 ### Associate with JS
-You can use functions from abstracted WebAPI. Mystia can be running on web browser and Node too.
+You can use functions of abstracted WebAPI from Mystia. UI-framework adopts virtual DOM.
