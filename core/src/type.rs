@@ -36,7 +36,7 @@ impl Node for Type {
                     let source = source.get(2..source.len() - 1)?.trim();
                     let mut result = IndexMap::new();
                     let mut index = 0;
-                    for line in tokenize(source, &[","], false, true)? {
+                    for line in tokenize(source, &[","], false, true, false)? {
                         let (name, value) = line.split_once(":")?;
                         let typ = Type::parse(value)?;
                         result.insert(name.trim().to_string(), (index, typ.clone()));
@@ -45,7 +45,7 @@ impl Node for Type {
                     Some(Type::Dict(result))
                 } else if source.starts_with("(") && source.ends_with(")") {
                     let source = source.get(1..source.len() - 1)?.trim();
-                    let result = tokenize(source, &["|"], false, true)?;
+                    let result = tokenize(source, &["|"], false, true, false)?;
                     let result = result.iter().map(|x| x.trim().to_string()).collect();
                     Some(Type::Enum(result))
                 } else {
