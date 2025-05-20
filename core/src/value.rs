@@ -29,14 +29,14 @@ impl Node for Value {
         // Array `[expr, ...]`
         } else if source.starts_with("[") && source.ends_with("]") {
             let source = source.get(1..source.len() - 1)?.trim();
-            let elms = tokenize(source, &[","], false, true)?;
+            let elms = tokenize(source, &[","], false, true, false)?;
             let elms = elms.iter().map(|i| Expr::parse(&i));
             Some(Value::Array(elms.collect::<Option<Vec<_>>>()?))
         // Dict `{ field expr, ... }`
         } else if source.starts_with("@{") && source.ends_with("}") {
             let token = source.get(2..source.len() - 1)?.trim();
             let mut result = IndexMap::new();
-            for line in tokenize(token, &[","], false, true)? {
+            for line in tokenize(token, &[","], false, true, false)? {
                 let (name, value) = line.trim().split_once(":")?;
                 result.insert(name.trim().to_string(), Expr::parse(value)?);
             }
