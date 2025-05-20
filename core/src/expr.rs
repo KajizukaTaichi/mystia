@@ -15,7 +15,7 @@ pub enum Expr {
 impl Node for Expr {
     fn parse(source: &str) -> Option<Expr> {
         let source = source.trim();
-        let token_list: Vec<String> = tokenize(source, SPACE.as_ref(), true, true)?;
+        let token_list: Vec<String> = tokenize(source, SPACE.as_ref(), true, true, false)?;
         if token_list.len() >= 2 {
             return Some(Expr::Oper(Box::new(Oper::parse(source)?)));
         };
@@ -44,12 +44,12 @@ impl Node for Expr {
             Some(Expr::MemCpy(Box::new(Expr::parse(token)?)))
         // Function call `name(args, ...)`
         } else if token.contains("(") && token.ends_with(")") {
-            let token = token.get(..token.len() - 1)?.trim();
-            let (name, args) = token.split_once("(")?;
-            let args = tokenize(args, &[","], false, true)?;
+            let token = tokenize(token, &["("], false, true, true)?;
+            let (name, args) = (join!(token.get(0..token.len() - 1)?), token.last()?);
+            let args = tokenize(args.get(1..token.len() - 1)?, &[","], false, true, false)?;
             let args = args.iter().map(|i| Expr::parse(&i));
             let args = args.collect::<Option<Vec<_>>>()?;
-            match Expr::parse(name)? {
+            match Expr::parse(&name)? {
                 Expr::Variable(name) => Some(Expr::Call(name, args)),
                 Expr::Field(obj, name) => Some(Expr::Call(name, [vec![*obj], args].concat())),
                 _ => None,
