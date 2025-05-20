@@ -27,7 +27,7 @@ pub enum Oper {
 
 impl Node for Oper {
     fn parse(source: &str) -> Option<Self> {
-        let token_list: Vec<String> = tokenize(source, SPACE.as_ref(), true, true)?;
+        let token_list: Vec<String> = tokenize(source, SPACE.as_ref(), true, true, false)?;
         if token_list.len() == 2 {
             let oper = token_list.first()?.trim();
             let token = token_list.last()?.trim();
@@ -62,7 +62,7 @@ impl Node for Oper {
                 "&&" => Oper::LAnd(Expr::parse(lhs)?, Expr::parse(rhs)?),
                 "||" => Oper::LOr(Expr::parse(lhs)?, Expr::parse(rhs)?),
                 ":" | "as" => Oper::Cast(Expr::parse(lhs)?, Type::parse(rhs)?),
-                _ => return None
+                _ => return None,
             })
         }
     }
