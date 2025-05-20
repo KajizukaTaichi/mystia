@@ -23,7 +23,7 @@ impl Node for Stmt {
     fn parse(source: &str) -> Option<Self> {
         let source = source.trim();
         if let Some(source) = source.strip_prefix("if ") {
-            let tokens = tokenize(source, SPACE.as_ref(), false, true)?;
+            let tokens = tokenize(source, SPACE.as_ref(), false, true, false)?;
             let then = tokens.iter().position(|i| i == "then")?;
             if let Some(r#else) = tokens.iter().position(|i| i == "else") {
                 let cond = Expr::parse(&join!(tokens.get(0..then)?))?;
@@ -36,7 +36,7 @@ impl Node for Stmt {
                 Some(Stmt::If(cond, then, None))
             }
         } else if let Some(source) = source.strip_prefix("while ") {
-            let tokens = tokenize(source, SPACE.as_ref(), false, true)?;
+            let tokens = tokenize(source, SPACE.as_ref(), false, true, false)?;
             let r#loop = tokens.iter().position(|i| i == "loop")?;
             let cond = Expr::parse(&join!(tokens.get(0..r#loop)?))?;
             let body = Expr::parse(&join!(tokens.get(r#loop + 1..)?))?;
