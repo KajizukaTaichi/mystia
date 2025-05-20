@@ -6,7 +6,7 @@ pub struct Block(pub Vec<Stmt>);
 impl Node for Block {
     fn parse(source: &str) -> Option<Block> {
         Some(Block(
-            tokenize(source, &[";"], false, false)?
+            tokenize(source, &[";"], false, false, false)?
                 .iter()
                 .map(|line| Stmt::parse(&line))
                 .collect::<Option<Vec<_>>>()?,
