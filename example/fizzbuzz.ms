@@ -10,6 +10,6 @@ let fizzbuzz(n: int) = {
 
 let i = 1;
 while i <= 100 loop {
-    print(fizzbuzz(i));
+    i.fizzbuzz().print();
     let i + 1
 }
