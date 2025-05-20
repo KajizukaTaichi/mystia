@@ -242,8 +242,14 @@ impl Node for Stmt {
                         let var_typ = ctx.variable_type.clone();
                         let arg_typ = ctx.argument_type.clone();
                         for arg in args {
-                            let Expr::Oper(oper) = arg else { return None };
+                            let Expr::Oper(oper) = arg else {
+                                let msg = "function argument definition needs type annotation";
+                                ctx.occurred_error = Some(msg.to_string());
+                                return None;
+                            };
                             let Oper::Cast(Expr::Variable(name), typ) = *oper.clone() else {
+                                let msg = "function argument name should be identifier";
+                                ctx.occurred_error = Some(msg.to_string());
                                 return None;
                             };
                             let typ = typ.type_infer(ctx)?;
