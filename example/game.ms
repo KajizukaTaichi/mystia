@@ -41,12 +41,12 @@ let init_position() = {
 let x_position(n: Character) = "left: " + (n.position.x as str) + "px;";
 let y_position(n: Character) = "bottom: " + (n.position.y as str) + "px;";
 let draw_player() = {
-    upd_elm(model.player.dom, "style", x_position(model.player));
-    upd_elm(model.player.dom, "style", y_position(model.player))
+    model.player.dom.upd_elm("style", x_position(model.player));
+    model.player.dom.upd_elm("style", y_position(model.player))
 };
 let draw_target() = {
-    upd_elm(model.target.dom, "style", x_position(model.target));
-    upd_elm(model.target.dom, "style", y_position(model.target))
+    model.target.dom.upd_elm("style", x_position(model.target));
+    model.target.dom.upd_elm("style", y_position(model.target))
 };
 
 let is_touch() = {
@@ -82,13 +82,13 @@ pub let user_operation(key_code: int) = {
 
 let game() = {
     let model.player.dom = new_elm("img", null);
-    upd_elm(model.player.dom, "src", model.player.src);
-    upd_elm(model.player.dom, "style", model.style.char);
-    evt_elm(model.player.dom, "keydown", "user_operation");
+    model.player.dom.upd_elm("src", model.player.src);
+    model.player.dom.upd_elm("style", model.style.char);
+    model.player.dom.evt_elm("keydown", "user_operation");
 
     let model.target.dom = new_elm("img", null);
-    upd_elm(model.target.dom, "src", model.target.src);
-    upd_elm(model.target.dom, "style", model.style.char);
+    model.target.dom.upd_elm("src", model.target.src);
+    model.target.dom.upd_elm("style", model.style.char);
 
     init_position(); draw_player(); draw_target()
 };
