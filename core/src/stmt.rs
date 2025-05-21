@@ -149,8 +149,7 @@ impl Node for Stmt {
                         pub = if let Scope::Global = scope { format!("(export \"{name}\")") } else { String::new() },
                         body = value.compile(ctx)?, locals = expand_local(ctx)?
                     );
-                    ctx.variable_type = var_typ;
-                    ctx.argument_type = arg_typ;
+                    [ctx.variable_type, ctx.argument_type] = [var_typ, arg_typ];
                     ctx.declare_code.push(code);
                     String::new()
                 }
