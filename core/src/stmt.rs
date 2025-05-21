@@ -194,11 +194,7 @@ impl Node for Stmt {
             }
             Stmt::Return(Some(expr)) => format!("(return {})", expr.compile(ctx)?),
             Stmt::Return(_) => "(return)".to_string(),
-            Stmt::Type(name, value) => {
-                let value = value.type_infer(ctx)?;
-                ctx.type_alias.insert(name.to_string(), value);
-                String::new()
-            }
+            Stmt::Type(_, _) => String::new(),
         })
     }
 
