@@ -38,10 +38,6 @@ impl Node for Expr {
             let (array, index) = token.rsplit_once("[")?;
             let (array, index) = (Expr::parse(array)?, Expr::parse(index)?);
             Some(Expr::Index(Box::new(array), Box::new(index)))
-        // Memory copy
-        } else if token.starts_with("memcpy(") && token.ends_with(")") {
-            let token = token.get("memcpy(".len()..token.len() - 1)?.trim();
-            Some(Expr::MemCpy(Box::new(Expr::parse(token)?)))
         // Function call `name(args, ...)`
         } else if token.contains("(") && token.ends_with(")") {
             let token = tokenize(token, &["("], false, true, true)?;
@@ -51,6 +47,9 @@ impl Node for Expr {
             let args = args.iter().map(|i| Expr::parse(&i));
             let args = args.collect::<Option<Vec<_>>>()?;
             match Expr::parse(&name)? {
+                Expr::Variable(name) if name == "memcpy" => {
+                    Some(Expr::MemCpy(Box::new(args.first()?.clone())))
+                }
                 Expr::Variable(name) => Some(Expr::Call(name, args)),
                 Expr::Field(obj, name) => Some(Expr::Call(name, [vec![*obj], args].concat())),
                 _ => None,
