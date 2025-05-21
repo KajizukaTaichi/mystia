@@ -73,7 +73,14 @@ impl Node for Type {
 
     fn type_infer(&self, ctx: &mut Compiler) -> Option<Type> {
         match self {
-            Type::Alias(name) => ctx.type_alias.get(name)?.clone().type_infer(ctx),
+            Type::Alias(name) => {
+                let Some(typ) = ctx.type_alias.get(name).cloned() else {
+                    let msg = format!("undefined type alias `{name}`");
+                    ctx.occurred_error = Some(msg);
+                    return None;
+                };
+                typ.type_infer(ctx)
+            }
             Type::Array(typ, len) => Some(Type::Array(Box::new(typ.type_infer(ctx)?), *len)),
             Type::Dict(dict) => {
                 let mut a = IndexMap::new();
