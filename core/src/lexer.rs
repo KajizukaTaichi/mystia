@@ -28,7 +28,7 @@ pub fn tokenize(
             is_escape = false;
             index += 1;
         } else if ["(", "[", "{"].contains(&c.as_str()) {
-            if is_split {
+            if is_split && in_parentheses == 0 {
                 tokens.push(current_token.clone());
                 current_token.clear();
             }
