@@ -9,6 +9,13 @@ export class MystiaStdLib {
             to_num: (value) => {
                 return parseFloat(read(this.instance, "str", value));
             },
+            repeat: (value, count) => {
+                return write(
+                    this.instance,
+                    "str",
+                    read(this.instance, "str", value).repeat(count),
+                );
+            },
             concat: (str1, str2) => {
                 str1 = read(this.instance, "str", str1);
                 str2 = read(this.instance, "str", str2);
@@ -25,6 +32,7 @@ export class MystiaStdLib {
             to_str: (num) => this.functions.to_str(num),
             to_num: (str) => this.functions.to_num(str),
             concat: (str1, str2) => this.functions.concat(str1, str2),
+            repeat: (str, count) => this.functions.repeat(str, count),
             rand: () => this.functions.rand(),
         };
     }
