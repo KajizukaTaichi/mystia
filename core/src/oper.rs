@@ -23,6 +23,7 @@ pub enum Oper {
     LOr(Expr, Expr),
     LNot(Expr),
     Cast(Expr, Type),
+    Transmute(Expr, Type),
 }
 
 impl Node for Oper {
@@ -125,9 +126,13 @@ impl Node for Oper {
                 } else if lhs.type_infer(ctx)?.format() == rhs.format() {
                     lhs.compile(ctx)?
                 } else {
+                    let lhs = lhs.type_infer(ctx)?.format();
+                    let msg = format!("type {lhs} can't convert to {}", rhs.format());
+                    ctx.occurred_error = Some(msg);
                     return None;
                 }
             }
+            Oper::Transmute(lhs, _) => lhs.compile(ctx)?,
         })
     }
 
@@ -170,6 +175,10 @@ impl Node for Oper {
             Oper::BNot(lhs) => {
                 type_check!(lhs, Type::Integer, ctx)?;
                 Some(Type::Integer)
+            }
+            Oper::Transmute(lhs, rhs) => {
+                lhs.type_infer(ctx)?;
+                rhs.type_infer(ctx)
             }
         }
     }
