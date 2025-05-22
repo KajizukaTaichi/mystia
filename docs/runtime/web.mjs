@@ -1,5 +1,6 @@
 import init, { mystia as compile } from "../wasm/web/mystia_wasm.js";
 import { MystiaWebLib } from "./lib.mjs";
+import { MathLib } from "./math.mjs";
 import { read } from "./ffi.mjs";
 
 await init();
@@ -10,10 +11,13 @@ export async function mystia(code) {
     if (type == null) return null;
 
     let mystiaStdLib = new MystiaWebLib();
+    let math = new MathLib();
     const { instance } = await WebAssembly.instantiate(bytecodes, {
-        env: mystiaStdLib.bridge(),
+        env: {...mystiaStdLib.bridge(),
+        ...math.bridge()},
     });
     mystiaStdLib.set_wasm(instance);
+    math.set_wasm(instance);
 
     const value = instance.exports._start();
     return read(instance, type, value);
