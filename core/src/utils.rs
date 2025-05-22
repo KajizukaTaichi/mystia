@@ -111,7 +111,7 @@ macro_rules! compile_compare {
 macro_rules! address_calc {
     ($array: expr, $index: expr, $len: expr, $typ: expr) => {
         Oper::Add(
-            Expr::Oper(Box::new(Oper::Cast(*$array.clone(), Type::Integer))),
+            Expr::Oper(Box::new(Oper::Transmute(*$array.clone(), Type::Integer))),
             Expr::Oper(Box::new(Oper::Mul(
                 Expr::Oper(Box::new(Oper::Mod(
                     *$index.clone(),
@@ -127,7 +127,7 @@ macro_rules! address_calc {
 macro_rules! offset_calc {
     ($dict: expr, $offset: expr) => {
         Oper::Add(
-            Expr::Oper(Box::new(Oper::Cast(*$dict.clone(), Type::Integer))),
+            Expr::Oper(Box::new(Oper::Transmute(*$dict.clone(), Type::Integer))),
             Expr::Literal(Value::Integer($offset.clone())),
         )
     };
