@@ -11,6 +11,7 @@ pub fn tokenize(
     let mut current_token = String::new();
     let mut in_parentheses: usize = 0;
     let mut in_quote = false;
+    let mut is_comment = false;
     let mut is_escape = false;
 
     let chars: Vec<String> = input.chars().map(String::from).collect();
@@ -18,6 +19,15 @@ pub fn tokenize(
 
     while index < chars.len() {
         let c = chars.get(index)?.to_owned();
+        if include_letter("~~", &chars, index) {
+            is_comment = !is_comment;
+            index += 2;
+            continue;
+        }
+        if is_comment {
+            index += 1;
+            continue;
+        }
         if is_escape {
             current_token.push_str(match c.as_str() {
                 "n" => "\n",
