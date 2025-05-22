@@ -128,31 +128,35 @@ impl Node for Stmt {
                         format!("(global.set ${name} {})", value.compile(ctx)?)
                     }
                 },
-                Expr::Call(name, _) => {
-                    let function = ctx.function_type.get(name)?.clone();
-                    let [var_typ, arg_typ] = [ctx.variable_type.clone(), ctx.argument_type.clone()];
-                    ctx.variable_type = function.variables.clone();
-                    ctx.argument_type = function.arguments.clone();
-                    let code = format!(
-                        "(func ${name} {pub} {args} {ret} {locals} {body})",
-                        args = join!(
-                            &function
-                                .arguments
-                                .iter()
-                                .map(|(name, typ)| Some(format!(
-                                    "(param ${name} {})",
-                                    typ.type_infer(ctx)?.compile(ctx)?
-                                )))
-                                .collect::<Option<Vec<_>>>()?
-                        ),
-                        ret = compile_return!(function.returns, ctx),
-                        pub = if let Scope::Global = scope { format!("(export \"{name}\")") } else { String::new() },
-                        body = value.compile(ctx)?, locals = expand_local(ctx)?
-                    );
-                    [ctx.variable_type, ctx.argument_type] = [var_typ, arg_typ];
-                    ctx.declare_code.push(code);
-                    String::new()
-                }
+                Expr::Oper(oper) => match *oper.clone() {
+                    Oper::Cast(Expr::Call(name, _), _) => {
+                        let function = ctx.function_type.get(&name)?.clone();
+                        let [var_typ, arg_typ] =
+                            [ctx.variable_type.clone(), ctx.argument_type.clone()];
+                        ctx.variable_type = function.variables.clone();
+                        ctx.argument_type = function.arguments.clone();
+                        let code = format!(
+                            "(func ${name} {pub} {args} {ret} {locals} {body})",
+                            args = join!(
+                                &function
+                                    .arguments
+                                    .iter()
+                                    .map(|(name, typ)| Some(format!(
+                                        "(param ${name} {})",
+                                        typ.type_infer(ctx)?.compile(ctx)?
+                                    )))
+                                    .collect::<Option<Vec<_>>>()?
+                            ),
+                            ret = compile_return!(function.returns, ctx),
+                            pub = if let Scope::Global = scope { format!("(export \"{name}\")") } else { String::new() },
+                            body = value.compile(ctx)?, locals = expand_local(ctx)?
+                        );
+                        [ctx.variable_type, ctx.argument_type] = [var_typ, arg_typ];
+                        ctx.declare_code.push(code);
+                        String::new()
+                    }
+                    _ => return None,
+                },
                 Expr::Index(array, index) => {
                     let Type::Array(typ, len) = array.type_infer(ctx)? else {
                         return None;
@@ -237,35 +241,40 @@ impl Node for Stmt {
                             }
                         }
                     },
-                    Expr::Call(name, args) => {
-                        let var_typ = ctx.variable_type.clone();
-                        let arg_typ = ctx.argument_type.clone();
-                        for arg in args {
-                            let Expr::Oper(oper) = arg else {
-                                let msg = "function argument definition needs type annotation";
-                                ctx.occurred_error = Some(msg.to_string());
-                                return None;
-                            };
-                            let Oper::Cast(Expr::Variable(name), typ) = *oper.clone() else {
-                                let msg = "function argument name should be identifier";
-                                ctx.occurred_error = Some(msg.to_string());
-                                return None;
-                            };
-                            let typ = typ.type_infer(ctx)?;
-                            ctx.argument_type.insert(name.to_string(), typ);
+                    Expr::Oper(oper) => match *oper.clone() {
+                        Oper::Cast(Expr::Call(name, args), ret) => {
+                            let var_typ = ctx.variable_type.clone();
+                            let arg_typ = ctx.argument_type.clone();
+                            for arg in args {
+                                let Expr::Oper(oper) = arg else {
+                                    let msg = "function argument definition needs type annotation";
+                                    ctx.occurred_error = Some(msg.to_string());
+                                    return None;
+                                };
+                                let Oper::Cast(Expr::Variable(name), typ) = *oper.clone() else {
+                                    let msg = "function argument name should be identifier";
+                                    ctx.occurred_error = Some(msg.to_string());
+                                    return None;
+                                };
+                                let typ = typ.type_infer(ctx)?;
+                                ctx.argument_type.insert(name.to_string(), typ);
+                            }
+                            ctx.function_type.insert(
+                                name.to_owned(),
+                                Function {
+                                    variables: ctx.variable_type.clone(),
+                                    arguments: ctx.argument_type.clone(),
+                                    returns: ret,
+                                },
+                            );
+                            value.type_infer(ctx)?;
+                            let frame = ctx.function_type.get_mut(&name)?;
+                            frame.variables = ctx.variable_type.clone();
+                            ctx.variable_type = var_typ;
+                            ctx.argument_type = arg_typ;
                         }
-                        let ret = value.type_infer(ctx)?;
-                        ctx.function_type.insert(
-                            name.to_owned(),
-                            Function {
-                                variables: ctx.variable_type.clone(),
-                                arguments: ctx.argument_type.clone(),
-                                returns: ret,
-                            },
-                        );
-                        ctx.variable_type = var_typ;
-                        ctx.argument_type = arg_typ;
-                    }
+                        _ => return None,
+                    },
                     _ => {
                         value.type_infer(ctx);
                     }
