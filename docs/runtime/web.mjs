@@ -8,7 +8,6 @@ export async function mystia(code) {
     const result = compile(code);
     const type = eval(`(${result.get_return_type()})`);
     const bytecodes = result.get_bytecode().buffer;
-    if (type == null) return null;
 
     let mystiaStdLib = new MystiaWebLib();
     let math = new MathLib();
