@@ -131,11 +131,3 @@ pub fn str_escape(str: &str) -> String {
     }
     result
 }
-
-pub fn remove_comment(source: &str) -> String {
-    source
-        .lines()
-        .map(|line| line.split_once("<--").unwrap_or((&line, "")).0)
-        .collect::<Vec<_>>()
-        .join("\n")
-}

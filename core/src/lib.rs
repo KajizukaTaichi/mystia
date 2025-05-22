@@ -11,7 +11,7 @@ use indexmap::IndexMap;
 pub use {
     block::Block,
     expr::Expr,
-    lexer::{remove_comment, str_escape, tokenize},
+    lexer::{str_escape, tokenize},
     oper::Oper,
     stmt::Stmt,
     r#type::{Dict, Enum, Type},
@@ -80,7 +80,7 @@ impl Compiler {
     }
 
     pub fn build(&mut self, source: &str) -> Option<String> {
-        let ast = Block::parse(&remove_comment(source))?;
+        let ast = Block::parse(source)?;
         self.program_return = ast.type_infer(self)?;
         Some(format!(
             "(module {import} {memory} {memcpy} {strings} {declare} {global} (func (export \"_start\") {ret} {locals} {code}))",
