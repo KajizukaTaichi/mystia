@@ -124,6 +124,26 @@ macro_rules! address_calc {
 }
 
 #[macro_export]
+macro_rules! compile_args {
+    ($args: expr, $ctx: expr) => {
+        for arg in $args {
+            let Expr::Oper(oper) = arg else {
+                let msg = "function argument definition needs type annotation";
+                $ctx.occurred_error = Some(msg.to_string());
+                return None;
+            };
+            let Oper::Cast(Expr::Variable(name), typ) = *oper.clone() else {
+                let msg = "function argument name should be identifier";
+                $ctx.occurred_error = Some(msg.to_string());
+                return None;
+            };
+            let typ = typ.type_infer($ctx)?;
+            $ctx.argument_type.insert(name.to_string(), typ);
+        }
+    };
+}
+
+#[macro_export]
 macro_rules! offset_calc {
     ($dict: expr, $offset: expr) => {
         Oper::Add(
