@@ -19,7 +19,7 @@ pub fn tokenize(
 
     while index < chars.len() {
         let c = chars.get(index)?.to_owned();
-        if include_letter("~~", &chars, index) {
+        if include_letter("~~", &chars, index) && !in_quote {
             is_comment = !is_comment;
             index += 2;
             continue;
