@@ -13,7 +13,7 @@ pub enum Stmt {
     Break,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub enum Scope {
     Global,
     Local,
@@ -129,7 +129,7 @@ impl Node for Stmt {
                     }
                 },
                 Expr::Call(name, _) => {
-                    let function = ctx.function_type.get(&name)?.clone();
+                    let function = ctx.function_type.get(name)?.clone();
                     let [var_typ, arg_typ] = [ctx.variable_type.clone(), ctx.argument_type.clone()];
                     ctx.variable_type = function.variables.clone();
                     ctx.argument_type = function.arguments.clone();
@@ -244,16 +244,13 @@ impl Node for Stmt {
                     Expr::Call(name, args) => {
                         let var_typ = ctx.variable_type.clone();
                         let arg_typ = ctx.argument_type.clone();
-                        let ret_typ = value.type_infer(ctx)?;
                         compile_args!(args, ctx);
-                        ctx.function_type.insert(
-                            name.to_owned(),
-                            Function {
-                                variables: ctx.variable_type.clone(),
-                                arguments: ctx.argument_type.clone(),
-                                returns: ret_typ,
-                            },
-                        );
+                        let frame = Function {
+                            variables: ctx.variable_type.clone(),
+                            arguments: ctx.argument_type.clone(),
+                            returns: value.type_infer(ctx)?,
+                        };
+                        ctx.function_type.insert(name.to_owned(), frame);
                         ctx.variable_type = var_typ;
                         ctx.argument_type = arg_typ;
                     }
