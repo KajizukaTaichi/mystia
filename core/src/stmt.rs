@@ -245,20 +245,7 @@ impl Node for Stmt {
                         Oper::Cast(Expr::Call(name, args), ret) => {
                             let var_typ = ctx.variable_type.clone();
                             let arg_typ = ctx.argument_type.clone();
-                            for arg in args {
-                                let Expr::Oper(oper) = arg else {
-                                    let msg = "function argument definition needs type annotation";
-                                    ctx.occurred_error = Some(msg.to_string());
-                                    return None;
-                                };
-                                let Oper::Cast(Expr::Variable(name), typ) = *oper.clone() else {
-                                    let msg = "function argument name should be identifier";
-                                    ctx.occurred_error = Some(msg.to_string());
-                                    return None;
-                                };
-                                let typ = typ.type_infer(ctx)?;
-                                ctx.argument_type.insert(name.to_string(), typ);
-                            }
+                            compile_args!(args, ctx);
                             ctx.function_type.insert(
                                 name.to_owned(),
                                 Function {
@@ -288,24 +275,21 @@ impl Node for Stmt {
             }
             Stmt::Import(func) => {
                 let Oper::Cast(Expr::Call(name, args), ret_typ) = func else {
+                    let msg = "load statement needs type annotation of return value";
+                    ctx.occurred_error = Some(msg.to_string());
                     return None;
                 };
-                let mut args_typ = IndexMap::new();
-                for arg in args {
-                    let Expr::Oper(arg) = arg else { return None };
-                    let Oper::Cast(Expr::Variable(name), arg_typ) = *arg.clone() else {
-                        return None;
-                    };
-                    args_typ.insert(name, arg_typ.type_infer(ctx)?);
-                }
+                let arg_typ = ctx.argument_type.clone();
+                compile_args!(args, ctx);
                 ctx.function_type.insert(
                     name.to_owned(),
                     Function {
                         variables: IndexMap::new(),
-                        arguments: args_typ.clone(),
+                        arguments: ctx.argument_type.clone(),
                         returns: ret_typ.clone(),
                     },
                 );
+                ctx.argument_type = arg_typ;
                 Type::Void
             }
             Stmt::Return(_) => Type::Void,
