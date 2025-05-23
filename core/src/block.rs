@@ -14,13 +14,18 @@ impl Node for Block {
     }
 
     fn compile(&self, ctx: &mut Compiler) -> Option<String> {
-        Some(join!(
-            &self
-                .0
-                .iter()
-                .map(|x| x.compile(ctx))
-                .collect::<Option<Vec<_>>>()?
-        ))
+        let mut result = vec![];
+        for (n, line) in self.0.iter().enumerate() {
+            let mut output = line.compile(ctx)?;
+            if n != self.0.len() - 1 {
+                if let Type::Void = line.type_infer(ctx)? {
+                } else {
+                    output.push_str("(drop)");
+                }
+            }
+            result.push(output);
+        }
+        Some(join!(result))
     }
 
     fn type_infer(&self, ctx: &mut Compiler) -> Option<Type> {
