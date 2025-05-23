@@ -23,7 +23,9 @@ runBtn.addEventListener("click", async (e) => {
     }, 1);
     try {
         const result = await mystia(codeEditor.value);
-        resultArea.innerHTML = JSON.stringify(result, null, 2);
+        if (result !== undefined) {
+            resultArea.innerHTML = JSON.stringify(result, null, 2);
+        }
     } catch (error) {
         resultArea.innerHTML = error;
     }
