@@ -13,9 +13,7 @@ export async function mystia(code) {
     let math = new MathLib();
     let os = new OSLib();
     const { instance } = await WebAssembly.instantiate(bytecodes, {
-        env: {...mystiaStdLib.bridge(), 
-            ...math.bridge(),
-        ...os.bridge()}
+        env: { ...mystiaStdLib.bridge(), ...math.bridge(), ...os.bridge() },
     });
     mystiaStdLib.set_wasm(instance);
     math.set_wasm(instance);
