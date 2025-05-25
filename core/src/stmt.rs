@@ -90,7 +90,8 @@ impl Node for Stmt {
                     .trim();
                 return Some(Stmt::Import(Oper::Module(module, None, parse_sigs(sigs)?)));
             }
-            Some(Stmt::Import(Oper::parse(source)?))
+            let module = "";
+            return Some(Stmt::Import(Oper::Module(module.to_string(), None, parse_sigs(&rest.trim())?)));
         } else if source == "return" {
             Some(Stmt::Return(None))
         } else if source == "next" {
@@ -215,7 +216,11 @@ impl Node for Stmt {
                         for (fn_name, _args, ret_ty, maybe_alias) in funcs {
                             let export_name = maybe_alias.as_ref().unwrap_or(fn_name);
                             let import_as = alias.as_ref().unwrap_or(module);
-                            let wasm_name = format!("{import_as}.{fn_name}");
+                            let wasm_name = if import_as.is_empty() {
+                                fn_name.clone()
+                            } else {
+                                format!("{import_as}.{fn_name}")
+                            };
                             let sig = if _args.is_empty() {
                                 String::new()
                             } else {

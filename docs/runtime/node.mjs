@@ -22,27 +22,31 @@ export async function mystia(code, customModules = {}) {
 
   const moduleNames = new Set(
     importsInfo
-      .map(i => {
-        if (i.module !== "env") return null;
-        const [modName] = i.name.split(".");
-        return modName;
-      })
-      .filter(Boolean)
+      .filter(i => i.module === "env" && i.kind === "func")
+      .map(i => i.name.split(".")[0])
   );
 
-  for (const modName of moduleNames) {
+  for (const { module, name, kind } of importsInfo) {
+    if (module !== "env" || kind !== "func") continue;
+    let modName, fnName, key;
+    if (name.includes(".")) {
+        [modName, fnName] = name.split(".");
+        key = name;
+    } else {
+        modName = "MystiaNodeLib";
+        fnName = name;
+        key = fnName;
+    }
     const instanceObj =
-      customModules[modName] ?? (MODULE_CLASSES[modName] && new MODULE_CLASSES[modName]());
+      customModules[modName] ?? instances[modName] ?? (MODULE_CLASSES[modName] && new MODULE_CLASSES[modName]());
     if (!instanceObj) {
       throw new Error(`Unknown import module: ${modName}`);
     }
     const bridge = instanceObj.bridge();
-    for (const [fnName, fn] of Object.entries(instanceObj.bridge())) {
-      if (!(fnName in bridge)) {
-            throw new Error(`Function ${fnName} not found in module ${modName}`);
-      }
-      importObject.env[`${modName}.${fnName}`] = fn;
+    if (!(fnName in bridge)) {
+        throw new Error(`Function ${fnName} not found in module ${modName}`);
     }
+    importObject.env[key] = bridge[fnName];
     instances[modName] = instanceObj;
   }
   const wab = bytecodes;

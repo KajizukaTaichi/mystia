@@ -21,32 +21,39 @@ export async function mystia(code, customModules = {}) {
 
   const moduleNames = new Set(
     importsInfo
-      .map(i => {
-        if (i.module !== "env") return null;
-        const [modName] = i.name.split(".");
-        return modName;
-      })
-      .filter(Boolean)
+      .filter(i => i.module === "env" && i.kind === "func")
+      .map(i => i.name.split(".")[0])
   );
 
-  for (const modName of moduleNames) {
-    const instanceObj =
-      customModules[modName] ?? (MODULE_CLASSES[modName] && new MODULE_CLASSES[modName]());
-    if (!instanceObj) {
-      throw new Error(`Unknown import module: ${modName}`);
+  for (const { module, name, kind } of importsInfo) {
+      if (module !== "env" || kind !== "func") continue;
+      let modName, fnName, key;
+      if (name.includes(".")) {
+          [modName, fnName] = name.split(".");
+          key = name;
+      } else {
+          modName = "MystiaWebLib";
+          fnName = name;
+          key = fnName;
+      }
+      const instanceObj =
+        customModules[modName] ?? instances[modName] ?? (MODULE_CLASSES[modName] && new MODULE_CLASSES[modName]());
+      if (!instanceObj) {
+        throw new Error(`Unknown import module: ${modName}`);
+      }
+      const bridge = instanceObj.bridge();
+      if (!(fnName in bridge)) {
+          throw new Error(`Function ${fnName} not found in module ${modName}`);
+      }
+      importObject.env[key] = bridge[fnName];
+      instances[modName] = instanceObj;
     }
-
-    for (const [fnName, fn] of Object.entries(instanceObj.bridge())) {
-      importObject.env[`${modName}.${fnName}`] = fn;
-    }
-    instances[modName] = instanceObj;
+    const wab = bytecodes;
+    const { instance } = await WebAssembly.instantiate(wab, importObject);
+    Object.values(instances).forEach(inst => inst.set_wasm(instance));
+    const raw = instance.exports._start();
+    return read(instance, returnType, raw);
   }
-  const wab = bytecodes;
-  const { instance } = await WebAssembly.instantiate(wab, importObject);
-  Object.values(instances).forEach(inst => inst.set_wasm(instance));
-  const raw = instance.exports._start();
-  return read(instance, returnType, raw);
-}
 
 class Mystia extends HTMLElement {
     constructor() {
