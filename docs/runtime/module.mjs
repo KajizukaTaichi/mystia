@@ -17,8 +17,8 @@ export function module(
             key = fnName;
         }
         const instanceObj =
-            new customModules[modName]() ??
-            new instances[modName]() ??
+            customModules[modName] ??
+            instances[modName] ??
             new MODULE_CLASSES[modName]();
         if (!instanceObj) {
             throw new Error(`Unknown import module: ${modName}`);
