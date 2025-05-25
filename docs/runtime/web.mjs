@@ -26,7 +26,7 @@ export async function mystia(code, customModules = {}) {
   );
 
   for (const { module, name, kind } of importsInfo) {
-      if (module !== "env" || kind !== "func") continue;
+      if (module !== "env") continue;
       let modName, fnName, key;
       if (name.includes(".")) {
           [modName, fnName] = name.split(".");
