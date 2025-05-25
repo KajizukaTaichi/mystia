@@ -29,11 +29,9 @@ pub fn expand_local(ctx: &mut Compiler) -> Option<String> {
 
 /// Signature String: "fn1():ret1 as alias, fn2(arg:t):ret2, …" to
 /// Vec<(Function Name, List of input and type, return type, alias)>
-pub fn parse_sigs(
-    sigs: &str,
-) -> Option<Vec<(String, Vec<Type>, Type, Option<String>)>> {
+pub fn parse_sigs(sigs: &str) -> Option<Vec<(String, Vec<Type>, Type, Option<String>)>> {
     let mut result = Vec::new();
-    for part in sigs.split(',') {
+    for part in tokenize(sigs, &[","], false, true, false)? {
         let part = part.trim();
         // Separate alias: "... as alias"
         let (sig, alias) = if let Some(idx) = part.rfind(" as ") {
@@ -50,7 +48,7 @@ pub fn parse_sigs(
         let body = args_list.trim();
         let mut args = Vec::new();
         if !body.is_empty() {
-            for part in body.split(","){
+            for part in body.split(",") {
                 let part = part.trim();
                 if part.is_empty() {
                     continue;
