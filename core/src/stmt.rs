@@ -201,7 +201,7 @@ impl Node for Stmt {
                 _ => return None,
             },
             Stmt::Import(module, alias, funcs) => {
-                for (fn_name, _args, ret_ty, maybe_alias) in funcs {
+                for (fn_name, args, ret_ty, maybe_alias) in funcs {
                     let export_name = maybe_alias.as_ref().unwrap_or(fn_name);
                     let import_as = alias.as_ref().unwrap_or(module);
                     let wasm_name = if import_as.is_empty() {
@@ -209,15 +209,17 @@ impl Node for Stmt {
                     } else {
                         format!("{import_as}.{fn_name}")
                     };
-                    let sig = if _args.is_empty() {
+                    let sig = if args.is_empty() {
                         String::new()
                     } else {
-                        let params = _args
-                            .iter()
-                            .map(|t| t.compile(ctx).map(|s| format!("(param {})", s)))
+                        args.iter()
+                            .map(|t| {
+                                t.type_infer(ctx)?
+                                    .compile(ctx)
+                                    .map(|s| format!("(param {})", s))
+                            })
                             .collect::<Option<Vec<_>>>()?
-                            .join(" ");
-                        params
+                            .join(" ")
                     };
                     let ret = compile_return!(ret_ty, ctx);
                     let entry = format!(
