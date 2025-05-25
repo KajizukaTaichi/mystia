@@ -1,4 +1,4 @@
-import { mystia as compile } from "../wasm/web/mystia_wasm.js";
+import init, { mystia as compile } from "../wasm/web/mystia_wasm.js";
 import { MystiaWebLib } from "./lib.mjs";
 import { MathLib } from "./math.mjs";
 import { read } from "./ffi.mjs";
