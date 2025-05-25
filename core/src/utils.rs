@@ -39,26 +39,19 @@ pub fn parse_sigs(sigs: &str) -> Option<Vec<(String, Vec<Type>, Type, Option<Str
         } else {
             (part, None)
         };
-        // Signature: "name(args):ret"
-        let (lhs, ret_str) = sig.rsplit_once(':')?;
-        let ret_ty = Type::parse(ret_str.trim())?;
-        // Separate Function and Inputs
-        let (name, args_list) = lhs.strip_suffix(')')?.split_once('(')?;
-        let name = name.trim().to_string();
-        let body = args_list.trim();
-        let mut args = Vec::new();
-        if !body.is_empty() {
-            for part in body.split(",") {
-                let part = part.trim();
-                if part.is_empty() {
-                    continue;
-                }
-                let (_, ty_str) = part.rsplit_once(":")?;
-                let ty = Type::parse(ty_str.trim())?;
-                args.push(ty);
-            }
+        let sig = Oper::parse(sig)?;
+        let Oper::Cast(Expr::Call(name, args), ret_ty) = sig else {
+            return None;
+        };
+        let mut args_ty = vec![];
+        for arg in args {
+            let Expr::Oper(arg) = arg else { return None };
+            let Oper::Cast(_, arg_ty) = *arg.clone() else {
+                return None;
+            };
+            args_ty.push(arg_ty);
         }
-        result.push((name, args, ret_ty, alias));
+        result.push((name, args_ty, ret_ty, alias));
     }
     Some(result)
 }
