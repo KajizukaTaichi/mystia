@@ -27,6 +27,44 @@ pub fn expand_local(ctx: &mut Compiler) -> Option<String> {
     ))
 }
 
+/// Signature String: "fn1():ret1 as alias, fn2(arg:t):ret2, …" to
+/// Vec<(Function Name, List of input and type, return type, alias)>
+pub fn parse_sigs(
+    sigs: &str,
+) -> Option<Vec<(String, Vec<Type>, Type, Option<String>)>> {
+    let mut result = Vec::new();
+    for part in sigs.split(',') {
+        let part = part.trim();
+        // Separate alias: "... as alias"
+        let (sig, alias) = if let Some(idx) = part.rfind(" as ") {
+            (&part[..idx], Some(part[idx + 4..].trim().to_string()))
+        } else {
+            (part, None)
+        };
+        // Signature: "name(args):ret"
+        let (lhs, ret_str) = sig.rsplit_once(':')?;
+        let ret_ty = Type::parse(ret_str.trim())?;
+        // Separate Function and Inputs
+        let (name, args_list) = lhs.strip_suffix(')')?.split_once('(')?;
+        let name = name.trim().to_string();
+        let body = args_list.trim();
+        let mut args = Vec::new();
+        if !body.is_empty() {
+            for part in body.split(","){
+                let part = part.trim();
+                if part.is_empty() {
+                    continue;
+                }
+                let (_, ty_str) = part.rsplit_once(":")?;
+                let ty = Type::parse(ty_str.trim())?;
+                args.push(ty);
+            }
+        }
+        result.push((name, args, ret_ty, alias));
+    }
+    Some(result)
+}
+
 #[macro_export]
 macro_rules! compile_return {
     ($ret: expr, $ctx: expr) => {{

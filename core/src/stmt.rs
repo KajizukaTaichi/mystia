@@ -1,4 +1,5 @@
 use crate::*;
+use crate::utils::parse_sigs;
 
 #[derive(Clone, Debug)]
 pub enum Stmt {
@@ -72,8 +73,25 @@ impl Node for Stmt {
             Some(Stmt::Type(name.trim().to_string(), Type::parse(value)?))
         } else if let Some(source) = source.strip_prefix("return ") {
             Some(Stmt::Return(Some(Expr::parse(source)?)))
-        } else if let Some(source) = source.strip_prefix("load ") {
-            Some(Stmt::Import(Oper::parse(source)?))
+        } else if let Some(after) = source.strip_prefix("load") {
+            let rest = after.trim_start();
+            if rest.starts_with('<') || rest.starts_with('\'') || rest.starts_with('"') {
+                let idx = rest.find(|c: char| c.is_whitespace())
+                    .expect("Expected signature `{…}` on Module Import");
+                let mod_part = &rest[..idx];
+                let sig_part = &rest[idx..].trim_start();
+                let module = mod_part
+                    .trim_matches(&['<','>','\'','"'][..])
+                    .to_string();
+                let sigs = sig_part
+                    .strip_prefix('{')
+                    .and_then(|s| s.strip_suffix('}'))
+                    .unwrap_or("")
+                    .trim();
+                return Some(Stmt::Import(Oper::Module(module, None, parse_sigs(sigs)?)));
+            }
+            let module = "";
+            return Some(Stmt::Import(Oper::Module(module.to_string(), None, parse_sigs(&rest.trim())?)));
         } else if source == "return" {
             Some(Stmt::Return(None))
         } else if source == "next" {
@@ -179,21 +197,54 @@ impl Node for Stmt {
                 _ => return None,
             },
             Stmt::Import(func) => {
-                let Oper::Cast(Expr::Call(name, _), _) = func else {
-                    return None;
-                };
-                let func = ctx.function_type.get(name)?.clone();
-                let code = format!(
-                    "(import \"env\" \"{name}\" (func ${name} {} {}))",
-                    if func.arguments.is_empty() {
+                match func {
+                    Oper::Cast(Expr::Call(name, _), _) => {
+                        let frame = ctx.function_type.get(name)?.clone();
+                        let code = format!(
+                            "(import \"env\" \"{name}\" (func ${name} {} {}))",
+                            if frame.arguments.is_empty() {
+                                String::new()
+                            } else {
+                                compile_args_type!(frame, ctx)
+                            },
+                            compile_return!(frame.returns, ctx),
+                        );
+                        ctx.import_code.push(code);
                         String::new()
-                    } else {
-                        compile_args_type!(func, ctx)
-                    },
-                    compile_return!(func.returns, ctx),
-                );
-                ctx.import_code.push(code);
-                String::new()
+                    }
+                    Oper::Module(module, alias, funcs) => {
+                        for (fn_name, _args, ret_ty, maybe_alias) in funcs {
+                            let export_name = maybe_alias.as_ref().unwrap_or(fn_name);
+                            let import_as = alias.as_ref().unwrap_or(module);
+                            let wasm_name = if import_as.is_empty() {
+                                fn_name.clone()
+                            } else {
+                                format!("{import_as}.{fn_name}")
+                            };
+                            let sig = if _args.is_empty() {
+                                String::new()
+                            } else {
+                                let params = _args
+                                    .iter()
+                                    .map(|t| t.compile(ctx).map(|s| format!("(param {})", s)))
+                                    .collect::<Option<Vec<_>>>()?
+                                    .join(" ");
+                                params
+                            };
+                            let ret = if let Type::Void = ret_ty {
+                                String::new()
+                            } else {
+                                format!("(result {} )", ret_ty.compile(ctx)?)
+                            };
+                            let entry = format!(
+                                "(import \"env\" \"{wasm_name}\" (func ${export_name} {sig} {ret}))"
+                            );
+                            ctx.import_code.push(entry);
+                        }
+                        String::new()
+                    }
+                    _=> return None,
+                }
             }
             Stmt::Return(Some(expr)) => format!("(return {})", expr.compile(ctx)?),
             Stmt::Return(_) => "(return)".to_string(),
@@ -287,23 +338,42 @@ impl Node for Stmt {
                 Type::Void
             }
             Stmt::Import(func) => {
-                let Oper::Cast(Expr::Call(name, args), ret_typ) = func else {
-                    let msg = "load statement needs type annotation of return value";
-                    ctx.occurred_error = Some(msg.to_string());
-                    return None;
-                };
-                let arg_typ = ctx.argument_type.clone();
-                compile_args!(args, ctx);
-                ctx.function_type.insert(
-                    name.to_owned(),
-                    Function {
-                        variables: IndexMap::new(),
-                        arguments: ctx.argument_type.clone(),
-                        returns: ret_typ.clone(),
-                    },
-                );
-                ctx.argument_type = arg_typ;
-                Type::Void
+                if let Oper::Module(_module, _alias, funcs) = func {
+                    for (fn_name, args, ret_ty, alias) in funcs {
+                        let import_name = alias.as_ref().unwrap_or(fn_name).clone();
+                        let mut arg_map = IndexMap::new();
+                        for (i, ty) in args.iter().enumerate() {
+                            arg_map.insert(format!("arg{i}"), ty.clone());
+                        }
+                        ctx.function_type.insert(
+                            import_name,
+                            Function {
+                                variables: IndexMap::new(),
+                                arguments: arg_map,
+                                returns: ret_ty.clone(),
+                            },
+                        );
+                    }
+                    Type::Void
+                } else {
+                    let Oper::Cast(Expr::Call(name, args), ret_typ) = func else {
+                        let msg = "load statement needs type annotation of return value";
+                        ctx.occurred_error = Some(msg.to_string());
+                        return None;
+                    };
+                    let arg_typ = ctx.argument_type.clone();
+                    compile_args!(args, ctx);
+                    ctx.function_type.insert(
+                        name.to_owned(),
+                        Function {
+                            variables: IndexMap::new(),
+                            arguments: ctx.argument_type.clone(),
+                            returns: ret_typ.clone(),
+                        },
+                    );
+                    ctx.argument_type = arg_typ;
+                    Type::Void
+                }
             }
             Stmt::Return(_) => Type::Void,
         })
