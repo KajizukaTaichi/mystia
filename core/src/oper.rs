@@ -24,11 +24,6 @@ pub enum Oper {
     LNot(Expr),
     Cast(Expr, Type),
     Transmute(Expr, Type),
-    Module(
-        String,
-        Option<String>,
-        Vec<(String, Vec<Type>, Type, Option<String>)>,
-    ),
 }
 
 impl Node for Oper {
@@ -138,7 +133,6 @@ impl Node for Oper {
                 }
             }
             Oper::Transmute(lhs, _) => lhs.compile(ctx)?,
-            Oper::Module(_, _, _) => String::new(),
         })
     }
 
@@ -186,7 +180,6 @@ impl Node for Oper {
                 lhs.type_infer(ctx)?;
                 rhs.type_infer(ctx)
             }
-            Oper::Module(_, _, _) => Some(Type::Void)
         }
     }
 }
