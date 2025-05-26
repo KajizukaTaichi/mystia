@@ -5,7 +5,7 @@ import { OSLib } from "./os.mjs";
 import { module } from "./module.mjs";
 import { read } from "./ffi.mjs";
 
-const MODULE_CLASSES = {
+const moduleClasses = {
     MathLib,
     OSLib,
 };
@@ -19,7 +19,14 @@ export async function mystia(code, customModules = {}) {
     const stdLib = new MystiaNodeLib();
     const importObject = { env: { ...stdLib.bridge() } };
     const instances = { MystiaNodeLib: stdLib };
-    module(importsInfo, MODULE_CLASSES, customModules, instances, importObject);
+    module({
+        importsInfo,
+        moduleClasses,
+        customModules,
+        instances,
+        importObject,
+        runtime: "Node",
+    });
 
     const wab = bytecodes;
     const { instance } = await WebAssembly.instantiate(wab, importObject);
