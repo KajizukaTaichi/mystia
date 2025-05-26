@@ -80,22 +80,17 @@ impl Node for Stmt {
         } else if let Some(after) = source.strip_prefix("load") {
             let rest = after.trim_start();
             if rest.starts_with('<') || rest.starts_with('\'') || rest.starts_with('"') {
-                let idx = rest
-                    .find(|c: char| c.is_whitespace())
-                    .expect("Expected signature `{…}` on Module Import");
-                let mod_part = &rest[..idx];
-                let sig_part = &rest[idx..].trim_start();
+                let (mod_part, sig_part) = rest.split_once(" ")?;
                 let module = mod_part
                     .trim_matches(&['<', '>', '\'', '"'][..])
                     .to_string();
                 let sigs = sig_part
                     .strip_prefix('{')
-                    .and_then(|s| s.strip_suffix('}'))
-                    .unwrap_or("")
-                    .trim();
-                return Some(Stmt::Import(module, None, parse_sigs(sigs)?));
+                    .and_then(|s| s.strip_suffix('}'))?;
+                Some(Stmt::Import(module, None, parse_sigs(sigs.trim())?))
+            } else {
+                Some(Stmt::Import(String::new(), None, parse_sigs(&rest.trim())?))
             }
-            return Some(Stmt::Import(String::new(), None, parse_sigs(&rest.trim())?));
         } else if source == "return" {
             Some(Stmt::Return(None))
         } else if source == "next" {
