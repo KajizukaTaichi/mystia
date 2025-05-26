@@ -2,7 +2,7 @@ import { write, read } from "../ffi.mjs";
 import fs from "fs";
 import path from "path";
 
-export class OSLib {
+export class MystiaOSLib {
     constructor() {
         this.functions = {
             getcwd: () => write(this.instance, "str", process.cwd()),
@@ -96,7 +96,7 @@ export class OSLib {
                     "str",
                     fs.readFileSync(read(this.instance, "str", value), "utf8"),
                 ),
-            write_file: (path,content) => {
+            write_file: (path, content) => {
                 fs.writeFileSync(
                     read(this.instance, "str", path),
                     read(this.instance, "str", content),
