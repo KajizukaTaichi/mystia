@@ -32,15 +32,13 @@ pub fn expand_local(ctx: &mut Compiler) -> Option<String> {
 pub fn parse_sigs(sigs: &str) -> Option<Vec<(String, Vec<Type>, Type, Option<String>)>> {
     let mut result = Vec::new();
     for part in tokenize(sigs, &[","], false, true, false)? {
-        let part = part.trim();
         // Separate alias: "... as alias"
-        let (sig, alias) = if let Some(idx) = part.rfind(" as ") {
-            (&part[..idx], Some(part[idx + 4..].trim().to_string()))
-        } else {
-            (part, None)
-        };
-        let sig = Oper::parse(sig)?;
-        let Oper::Cast(Expr::Call(name, args), ret_ty) = sig else {
+        let part = part.trim();
+        let (sig, alias) = part
+            .rsplit_once(" as ")
+            .map(|(sig, alias)| (sig, Some(alias.to_string())))
+            .unwrap_or((part, None));
+        let Oper::Cast(Expr::Call(name, args), ret_ty) = Oper::parse(sig)? else {
             return None;
         };
         let mut args_ty = vec![];
