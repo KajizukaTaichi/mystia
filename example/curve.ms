@@ -2,11 +2,7 @@ type Color = ( white | black | grey | blue | violet | green | red | pink | yello
 
 load init_canvas(): void;
 load draw(x: int, y: int, color: Color): void;
-
-load pi(): num;
-load sin(_: num): num;
-load cos(_: num): num;
-load rad(_: int): num;
+load math::{ pi(): num, sin(_: num): num, cos(_: num): num, rad(_: int): num };
 
 let draw_circle(cx: num, cy: num, r: num) = {
     let angle = 0;
