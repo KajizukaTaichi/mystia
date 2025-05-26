@@ -1,9 +1,10 @@
 import init, { mystia as compile } from "../wasm/web/mystia_wasm.js";
 import { MystiaWebLib } from "./lib.mjs";
 import { MathLib } from "./math.mjs";
+import { module } from "./module.mjs";
 import { read } from "./ffi.mjs";
 
-const MODULE_CLASSES = {
+const moduleClasses = {
     MathLib,
 };
 
@@ -17,7 +18,14 @@ export async function mystia(code, customModules = {}) {
     const stdLib = new MystiaWebLib();
     const importObject = { env: { ...stdLib.bridge() } };
     const instances = { MystiaWebLib: stdLib };
-    module(importsInfo, MODULE_CLASSES, customModules, instances, importObject);
+    module({
+        importsInfo,
+        moduleClasses,
+        customModules,
+        instances,
+        importObject,
+        runtime: "Web",
+    });
 
     const wab = bytecodes;
     const { instance } = await WebAssembly.instantiate(wab, importObject);
