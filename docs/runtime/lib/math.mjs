@@ -1,4 +1,4 @@
-export class MathLib {
+export class MystiaMathLib {
     constructor() {
         this.functions = {
             e: () => Math.E,
