@@ -325,7 +325,7 @@ impl Node for Stmt {
                     let import_name = alias.as_ref().unwrap_or(fn_name).clone();
                     let mut arg_map = IndexMap::new();
                     for (i, ty) in args.iter().enumerate() {
-                        arg_map.insert(format!("arg{i}"), ty.clone());
+                        arg_map.insert(i.to_string(), ty.clone());
                     }
                     ctx.function_type.insert(
                         import_name,
