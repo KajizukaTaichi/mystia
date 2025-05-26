@@ -79,15 +79,11 @@ impl Node for Stmt {
             Some(Stmt::Return(Some(Expr::parse(source)?)))
         } else if let Some(after) = source.strip_prefix("load") {
             let rest = after.trim_start();
-            if rest.starts_with('<') || rest.starts_with('\'') || rest.starts_with('"') {
-                let (mod_part, sig_part) = rest.split_once(" ")?;
-                let module = mod_part
-                    .trim_matches(&['<', '>', '\'', '"'][..])
-                    .to_string();
-                let sigs = sig_part
-                    .strip_prefix('{')
-                    .and_then(|s| s.strip_suffix('}'))?;
-                Some(Stmt::Import(module, None, parse_sigs(sigs.trim())?))
+            if let Some((module, sigs)) = rest.split_once("::") {
+                let sigs = sigs.strip_prefix('{').and_then(|s| s.strip_suffix('}'))?;
+                let sigs = parse_sigs(sigs.trim())?;
+                let module = module.trim().to_string();
+                Some(Stmt::Import(module, None, sigs))
             } else {
                 Some(Stmt::Import(String::new(), None, parse_sigs(&rest.trim())?))
             }
