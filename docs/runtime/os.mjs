@@ -93,7 +93,6 @@ export class OSLib {
             path_isabs: (value) => {
                 return path.isAbsolute(read(this.instance, "str", value));
             },
-            //path_split: (value) => Math.exp(value),
             path_root: (value) => {
                 return write(
                     this.instance,
@@ -101,11 +100,23 @@ export class OSLib {
                     path.parse(read(this.instance, "str", value)).root,
                 );
             },
-            path_ext: (value) => {
-                return write(
+            path_ext: (value) =>
+                write(
                     this.instance,
                     "str",
                     path.extname(read(this.instance, "str", value)),
+                ),
+            read_file: (value) =>
+                write(
+                    this.instance,
+                    "str",
+                    fs.readFileSync(read(this.instance, "str", value), "utf8"),
+                ),
+            write_file: (value) => {
+                fs.writeFileSync(
+                    read(this.instance, "str", value),
+                    read(this.instance, "str", value),
+                    "utf8",
                 );
             },
         };
