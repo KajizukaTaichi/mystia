@@ -1,10 +1,11 @@
-export function module(
+export function module({
     importsInfo,
-    MODULE_CLASSES,
+    moduleClasses,
     customModules = {},
     instances,
     importObject,
-) {
+    runtime,
+}) {
     for (const { module, name, kind: _ } of importsInfo) {
         if (module !== "env") continue;
         let modName, fnName, key;
@@ -12,14 +13,14 @@ export function module(
             [modName, fnName] = name.split(".");
             key = name;
         } else {
-            modName = "MystiaNodeLib";
+            modName = `Mystia${runtime}Lib`;
             fnName = name;
             key = fnName;
         }
         const instanceObj =
             customModules[modName] ??
             instances[modName] ??
-            new MODULE_CLASSES[modName]();
+            new moduleClasses[modName]();
         if (!instanceObj) {
             throw new Error(`Unknown import module: ${modName}`);
         }
