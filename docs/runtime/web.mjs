@@ -5,7 +5,7 @@ import { module } from "./module.mjs";
 import { read } from "./ffi.mjs";
 
 const moduleClasses = {
-    MathLib,
+    math: MathLib,
 };
 
 await init();
