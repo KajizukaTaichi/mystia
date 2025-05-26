@@ -1,13 +1,13 @@
 import { mystia as compile } from "../wasm/node/mystia_wasm.js";
-import { MystiaNodeLib } from "./lib.mjs";
-import { MathLib } from "./math.mjs";
-import { OSLib } from "./os.mjs";
+import { MystiaNodeLib } from "./lib/std.mjs";
+import { MathLib } from "./lib/math.mjs";
+import { OSLib } from "./lib/os.mjs";
 import { module } from "./module.mjs";
 import { read } from "./ffi.mjs";
 
 const moduleClasses = {
-    MathLib,
-    OSLib,
+    math: MathLib,
+    os: OSLib,
 };
 
 export async function mystia(code, customModules = {}) {
