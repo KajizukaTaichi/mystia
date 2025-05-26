@@ -8,7 +8,6 @@ export class OSLib {
             getcwd: () => {
                 return write(this.instance, "str", process.cwd());
             },
-            // env: () => Math.PI,
             remove: (value) => {
                 fs.unlinkSync(read(this.instance, "str", value));
             },
@@ -102,44 +101,6 @@ export class OSLib {
                     path.parse(read(this.instance, "str", value)).root,
                 );
             },
-            // path_match: (p,s) => {
-            //     const name = path.basename(p);
-            //     const escaped = s.replace(/[-\/\\^$+?.()|[\]{}]/g, "\\$&");
-            //     const regexStr = '^' + escaped.replace(/\\\*/g, '.*').replace(/\\\?/g, '.') + '$';
-            //     return new RegExp(regexStr).test(name);
-            // },
-            // path_glob: (p,s) => {
-            //     if (!fs.existsSync(p) || !fs.statSync(p).isDirectory()) return [];
-            //         const entries = fs.readdirSync(p);
-            //         const escaped = s.replace(/[-\/\\^$+?.()|[\]{}]/g, "\\$&");
-            //         const regexStr = '^' + escaped.replace(/\\\*/g, '.*').replace(/\\\?/g, '.') + '$';
-            //         return entries
-            //           .filter(e => new RegExp(regexStr).test(e))
-            //           .map(e => new Path(path.join(p, e)));
-            // },
-            // path_rglob: (p,s) => {
-            //     const results = [];
-            //     const escaped = s.replace(/[-\/\\^$+?.()|[\]{}]/g, "\\$&");
-            //     const regexStr = '^' + escaped.replace(/\\\*/g, '.*').replace(/\\\?/g, '.') + '$';
-            //     const regex = new RegExp(regexStr);
-            //     const recurse = dir => {
-            //         const entries = fs.readdirSync(dir);
-            //         for (const entry of entries) {
-            //         const full = path.join(dir, entry);
-            //         const stat = fs.statSync(full);
-            //         if (regex.test(entry)) {
-            //             results.push(new Path(full));
-            //         }
-            //         if (stat.isDirectory()) {
-            //             recurse(full);
-            //         }
-            //         }
-            //     };
-            //     if (fs.existsSync(p) && fs.statSync(p).isDirectory()) {
-            //         recurse(p);
-            //     }
-            //     return results;
-            // },
             path_ext: (value) => {
                 return write(
                     this.instance,
@@ -169,9 +130,6 @@ export class OSLib {
             path_isdir: (value) => this.functions.path_isdir(value),
             path_isabs: (value) => this.functions.path_isabs(value),
             path_root: (value) => this.functions.path_root(value),
-            //path_match: (path, pattern) => this.functions.path_match(path,pattern),
-            //path_glob: (path, pattern) => this.functions.path_glob(path,pattern),
-            //path_rglob: (path, pattern) => this.functions.path_rglob(path,pattern),
             path_ext: (value) => this.functions.path_ext(value),
         };
     }
