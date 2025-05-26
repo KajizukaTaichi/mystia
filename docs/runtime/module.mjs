@@ -1,7 +1,7 @@
 export function module(
     importsInfo,
-    customModules = {},
     MODULE_CLASSES,
+    customModules = {},
     instances,
     importObject,
 ) {
