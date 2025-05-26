@@ -96,10 +96,10 @@ export class OSLib {
                     "str",
                     fs.readFileSync(read(this.instance, "str", value), "utf8"),
                 ),
-            write_file: (value) => {
+            write_file: (path,content) => {
                 fs.writeFileSync(
-                    read(this.instance, "str", value),
-                    read(this.instance, "str", value),
+                    read(this.instance, "str", path),
+                    read(this.instance, "str", content),
                     "utf8",
                 );
             },
