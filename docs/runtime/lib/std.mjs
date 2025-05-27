@@ -21,7 +21,12 @@ export class MystiaStdLib {
                 str2 = read(this.instance, "str", str2);
                 return write(this.instance, "str", str1 + str2);
             },
-            rand: () => Math.random(),
+            split: (str, delimiter) => {
+                str = read(this.instance, "str", str);
+                delimiter = read(this.instance, "str", delimiter);
+                let typ = { type: "array", element: "str", length: 2 };
+                return write(this.instance, typ, str.split(delimiter));
+            },
         };
     }
     set_wasm(instance) {
@@ -33,7 +38,7 @@ export class MystiaStdLib {
             to_num: (str) => this.functions.to_num(str),
             concat: (str1, str2) => this.functions.concat(str1, str2),
             repeat: (str, count) => this.functions.repeat(str, count),
-            rand: () => this.functions.rand(),
+            split: (str, delimiter) => this.functions.split(str, delimiter),
         };
     }
 }
