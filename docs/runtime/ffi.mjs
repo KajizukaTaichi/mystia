@@ -53,33 +53,34 @@ export function read(instance, type, value) {
 }
 
 export function write(instance, type, value) {
-    const memory = new Uint8Array(instance.exports.mem.buffer);
+    const buffer = instance.exports.mem.buffer;
+  
     if (type == null) return null;
-    if (type == "int" || type == "num") {
-        return value;
-    } else if (type == "str") {
-        const binary = new TextEncoder().encode(value + "\0");
-        const pointer = instance.exports.allocator;
-        instance.exports.malloc(binary.length);
-        memory.set(binary, pointer);
-        return pointer;
-    } else if (type.type == "array") {
-        let array = [];
-        for (let elm of value) {
-            array.push(write(instance, type.element, elm));
+    if (type === "int")  return value;
+    if (type === "num")  return value;
+  
+    if (type === "str") {
+      const utf8 = new TextEncoder().encode(value + "\0");
+      const ptr = instance.exports.malloc(utf8.length);
+      new Uint8Array(buffer, ptr, utf8.length).set(utf8);
+      return ptr;
+    }
+  
+    if (type.type === "array") {
+      const elemSize = type.element === "num" ? 8 : 4;
+      const total  = elemSize * value.length;
+      const ptr    = instance.exports.malloc(total);
+  
+      const view = new DataView(buffer, ptr, total);
+      for (let i = 0; i < value.length; i++) {
+        const off = i * elemSize;
+        if (type.element === "num") {
+          view.setFloat64(off, value[i], true);
+        } else {
+          view.setInt32  (off, value[i], true);
         }
-        console.log(array);
-        const bytes = type.element == "num" ? 8 : 4;
-        const pointer = JSON.stringify(instance.exports.allocator);
-        for (let elm of array) {
-            const addr = instance.exports.allocator;
-            console.log(addr, elm);
-            instance.exports.malloc(bytes);
-            memory.set(new Uint32Array([elm]), addr);
-        }
-        console.log(new Uint32Array(instance.exports.mem.buffer));
-        console.log(type, read(instance, type, JSON.parse(pointer)));
-        return JSON.parse(pointer);
+      }
+      return ptr;
     } else if (type.type == "dict") {
         let array = [];
         for (let [_name, field] of Object.entries(type.fields)) {
