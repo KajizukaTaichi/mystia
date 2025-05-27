@@ -68,27 +68,29 @@ export function write(instance, type, value) {
         for (let elm of value) {
             array.push(write(instance, type.element, elm));
         }
+        console.log(array);
         const bytes = type.element == "num" ? 8 : 4;
-        const pointer = instance.exports.allocator;
+        const pointer = JSON.stringify(instance.exports.allocator);
         for (let elm of array) {
-            let addr = instance.exports.allocator;
+            const addr = instance.exports.allocator;
             instance.exports.malloc(bytes);
-            memory.set([elm], addr);
+            memory.set(new Uint32Array([elm]), addr);
         }
-        return pointer - type.length * bytes;
+        console.log(type, read(instance, type, JSON.parse(pointer)));
+        return JSON.parse(pointer);
     } else if (type.type == "dict") {
         let array = [];
         for (let [_name, field] of Object.entries(type.fields)) {
             array.push(write(instance, field.type, field));
         }
-        const bytes = type.element == "num" ? 8 : 4;
         const pointer = instance.exports.allocator;
         for (let [_name, field] of Object.entries(type.fields)) {
+            const bytes = field.type == "num" ? 8 : 4;
             let addr = instance.exports.allocator;
             instance.exports.malloc(bytes);
             memory.set([field], addr);
         }
-        return pointer - type.length * bytes;
+        return pointer;
     }
 }
 
