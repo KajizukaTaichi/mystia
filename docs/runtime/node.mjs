@@ -2,12 +2,18 @@ import { mystia as compile } from "../wasm/node/mystia_wasm.js";
 import { MystiaNodeLib } from "./lib/std.mjs";
 import { MystiaMathLib } from "./lib/math.mjs";
 import { MystiaOSLib } from "./lib/os.mjs";
+import { MystiaRandomLib } from "./lib/random.mjs";
+import { MystiaDatetimeLib } from "./lib/datetime.mjs";
+import { MystiaTimeLib } from "./lib/time.mjs";
 import { module } from "./module.mjs";
 import { read } from "./ffi.mjs";
 
 const moduleClasses = {
     math: MystiaMathLib,
     os: MystiaOSLib,
+    random: MystiaRandomLib,
+    datetime: MystiaDatetimeLib,
+    time: MystiaTimeLib,
 };
 
 export async function mystia(code, customModules = {}) {
