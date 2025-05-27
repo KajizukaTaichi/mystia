@@ -3,6 +3,7 @@ import { MystiaWebLib } from "./lib/std.mjs";
 import { MystiaMathLib } from "./lib/math.mjs";
 import { MystiaRandomLib } from "./lib/random.mjs";
 import { MystiaDatetimeLib } from "./lib/datetime.mjs";
+import { MystiaTimeLib } from "./lib/time.mjs";
 import { module } from "./module.mjs";
 import { read } from "./ffi.mjs";
 
@@ -10,6 +11,7 @@ const moduleClasses = {
     math: MystiaMathLib,
     random: MystiaRandomLib,
     datetime: MystiaDatetimeLib,
+    time: MystiaTimeLib,
 };
 
 await init();

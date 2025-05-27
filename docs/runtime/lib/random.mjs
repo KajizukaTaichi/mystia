@@ -1,4 +1,4 @@
-import { write, read } from "./ffi.mjs";
+import { write, read } from "../ffi.mjs";
 
 class MersenneTwister {
   constructor(seed) {

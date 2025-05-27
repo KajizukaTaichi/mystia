@@ -1,4 +1,4 @@
-import { write, read } from "./ffi.mjs";
+import { write, read } from "../ffi.mjs";
 
 export const spec = {
   now:           { args: [],                                      ret: "str" },  // current local datetime

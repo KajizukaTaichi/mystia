@@ -4,6 +4,7 @@ import { MystiaMathLib } from "./lib/math.mjs";
 import { MystiaOSLib } from "./lib/os.mjs";
 import { MystiaRandomLib } from "./lib/random.mjs";
 import { MystiaDatetimeLib } from "./lib/datetime.mjs";
+import { MystiaTimeLib } from "./lib/time.mjs";
 import { module } from "./module.mjs";
 import { read } from "./ffi.mjs";
 
@@ -12,6 +13,7 @@ const moduleClasses = {
     os: MystiaOSLib,
     random: MystiaRandomLib,
     datetime: MystiaDatetimeLib,
+    time: MystiaTimeLib,
 };
 
 export async function mystia(code, customModules = {}) {
