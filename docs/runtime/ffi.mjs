@@ -69,7 +69,7 @@ export function write(instance, type, value) {
         const view = new DataView(buffer, ptr, total);
         for (let i = 0; i < value.length; i++) {
             const off = i * elemSize;
-            let method = type.element === "num" ? setFloat64 : setInt32;
+            let method = type.element === "num" ? "setFloat64" : "setInt32";
             view[method](off, value[i], true);
         }
         return ptr;
