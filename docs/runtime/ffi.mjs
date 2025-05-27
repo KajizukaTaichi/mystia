@@ -73,9 +73,11 @@ export function write(instance, type, value) {
         const pointer = JSON.stringify(instance.exports.allocator);
         for (let elm of array) {
             const addr = instance.exports.allocator;
+            console.log(addr, elm);
             instance.exports.malloc(bytes);
             memory.set(new Uint32Array([elm]), addr);
         }
+        console.log(new Uint32Array(instance.exports.mem.buffer));
         console.log(type, read(instance, type, JSON.parse(pointer)));
         return JSON.parse(pointer);
     } else if (type.type == "dict") {
