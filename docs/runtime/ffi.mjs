@@ -67,10 +67,16 @@ export function write(instance, type, value) {
         const total = elemSize * value.length;
         const ptr = instance.exports.malloc(total);
         const view = new DataView(buffer, ptr, total);
+
+        let array = [];
+        for (elm of value) {
+            array.push(write(instance, type.element, elm));
+        }
+
         for (let i = 0; i < value.length; i++) {
             const off = i * elemSize;
             let method = type.element === "num" ? "setFloat64" : "setInt32";
-            view[method](off, value[i], true);
+            view[method](off, array[i], true);
         }
         return ptr;
     } else if (type.type == "dict") {
