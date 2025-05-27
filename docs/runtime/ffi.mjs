@@ -65,15 +65,14 @@ export function write(instance, type, value) {
     } else if (type.type === "array") {
         const elemSize = type.element === "num" ? 8 : 4;
         const total = elemSize * value.length;
-        const ptr = instance.exports.malloc(total);
+        const ptr = instance.exports.allocator + 0;
         const view = new DataView(buffer, ptr, total);
-
+        instance.exports.malloc(total);
         let array = [];
-        for (elm of value) {
+        for (let elm of value) {
             array.push(write(instance, type.element, elm));
         }
-
-        for (let i = 0; i < value.length; i++) {
+        for (let i = 0; i < array.length; i++) {
             const off = i * elemSize;
             let method = type.element === "num" ? "setFloat64" : "setInt32";
             view[method](off, array[i], true);
