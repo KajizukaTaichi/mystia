@@ -73,9 +73,8 @@ export function write(instance, type, value) {
             array.push(write(instance, type.element, elm));
         }
         for (let i = 0; i < array.length; i++) {
-            const off = i * elemSize;
             let method = type.element === "num" ? "setFloat64" : "setInt32";
-            view[method](off, array[i], true);
+            view[method](i * elemSize, array[i], true);
         }
         return ptr;
     } else if (type.type == "dict") {
