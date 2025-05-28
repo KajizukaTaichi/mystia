@@ -59,8 +59,9 @@ export function write(instance, type, value) {
     else if (type === "num") return value;
     else if (type === "str") {
         const utf8 = new TextEncoder().encode(value + "\0");
-        const ptr = instance.exports.malloc(utf8.length);
+        const ptr = instance.exports.allocator + 0;
         new Uint8Array(buffer, ptr, utf8.length).set(utf8);
+        instance.exports.malloc(utf8.length);
         return ptr;
     } else if (type.type === "array") {
         let array = [];
@@ -71,9 +72,9 @@ export function write(instance, type, value) {
         const ptr = instance.exports.allocator + 0;
         const view = new DataView(buffer, ptr, elemSize * type.length);
         for (let elm of array) {
-            const addr = instance.exports.allocator + 0;
-            instance.exports.malloc(elemSize);
+            const addr = instance.exports.allocator - ptr;
             const method = elemSize === 8 ? "setFloat64" : "setInt32";
+            instance.exports.malloc(elemSize);
             view[method](addr, elm, true);
         }
         return ptr;
