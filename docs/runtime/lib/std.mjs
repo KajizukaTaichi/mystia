@@ -25,7 +25,17 @@ export class MystiaStdLib {
                 str = read(this.instance, "str", str);
                 delimiter = read(this.instance, "str", delimiter);
                 let typ = { type: "array", element: "str", length: 2 };
-                return write(this.instance, typ, str.split(delimiter));
+                return write(
+                    this.instance,
+                    typ,
+                    (() => {
+                        const index = str.indexOf(delimiter);
+                        return [
+                            str.substring(0, index),
+                            str.substring(index + delimiter.length),
+                        ];
+                    })(),
+                );
             },
         };
     }
