@@ -63,18 +63,18 @@ export function write(instance, type, value) {
         new Uint8Array(buffer, ptr, utf8.length).set(utf8);
         return ptr;
     } else if (type.type === "array") {
-        const elemSize = type.element === "num" ? 8 : 4;
-        const total = elemSize * value.length;
-        const ptr = instance.exports.allocator + 0;
-        const view = new DataView(buffer, ptr, total);
-        instance.exports.malloc(total);
         let array = [];
         for (let elm of value) {
             array.push(write(instance, type.element, elm));
         }
-        for (let i = 0; i < array.length; i++) {
-            let method = type.element === "num" ? "setFloat64" : "setInt32";
-            view[method](i * elemSize, array[i], true);
+        const elemSize = type.element === "num" ? 8 : 4;
+        const ptr = instance.exports.allocator + 0;
+        const view = new DataView(buffer, ptr, elemSize * type.length);
+        for (let elm of array) {
+            const addr = instance.exports.allocator + 0;
+            instance.exports.malloc(elemSize);
+            const method = elemSize === 8 ? "setFloat64" : "setInt32";
+            view[method](addr, elm, true);
         }
         return ptr;
     } else if (type.type == "dict") {
