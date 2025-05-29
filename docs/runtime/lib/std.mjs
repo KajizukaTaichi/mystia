@@ -24,13 +24,12 @@ export class MystiaStdLib {
             split: (str, delimiter) => {
                 str = read(this.instance, "str", str);
                 delimiter = read(this.instance, "str", delimiter);
-
                 const index = str.indexOf(delimiter);
-                let splitted = [
+                const splitted = [
                     str.substring(0, index),
                     str.substring(index + delimiter.length),
                 ];
-                let typ = { type: "array", element: "str", length: 2 };
+                const typ = { type: "array", element: "str", length: 2 };
                 return write(this.instance, typ, splitted);
             },
         };
