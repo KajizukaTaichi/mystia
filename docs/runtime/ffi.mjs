@@ -83,14 +83,14 @@ export function write(instance, type, value) {
         for (let [_name, field] of Object.entries(type.fields)) {
             array.push(write(instance, field.type, field));
         }
-        const pointer = instance.exports.allocator;
+        const ptr = instance.exports.allocator + 0;
         for (let [_name, field] of Object.entries(type.fields)) {
             const bytes = field.type == "num" ? 8 : 4;
-            let addr = instance.exports.allocator;
+            let addr = instance.exports.allocator - ptr;
             instance.exports.malloc(bytes);
             memory.set([field], addr);
         }
-        return pointer;
+        return ptr;
     }
 }
 
