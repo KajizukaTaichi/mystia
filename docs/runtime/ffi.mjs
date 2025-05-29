@@ -86,9 +86,10 @@ export function write(instance, type, value) {
         const ptr = instance.exports.allocator + 0;
         for (let [_name, field] of Object.entries(type.fields)) {
             const bytes = field.type == "num" ? 8 : 4;
-            let addr = instance.exports.allocator - ptr;
+            const addr = instance.exports.allocator - ptr;
+            const method = bytes === 8 ? "setFloat64" : "setInt32";
             instance.exports.malloc(bytes);
-            memory.set([field], addr);
+            view[method](addr, elm, true);
         }
         return ptr;
     }
