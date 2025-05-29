@@ -84,7 +84,7 @@ export function write(instance, type, value) {
             array.push(write(instance, field.type, field));
         }
         const ptr = instance.exports.allocator + 0;
-        for (let [_name, field] of Object.entries(type.fields)) {
+        for (let field of array) {
             const bytes = field.type == "num" ? 8 : 4;
             const addr = instance.exports.allocator - ptr;
             const method = bytes === 8 ? "setFloat64" : "setInt32";
