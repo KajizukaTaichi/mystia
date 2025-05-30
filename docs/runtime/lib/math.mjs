@@ -43,43 +43,10 @@ export class MystiaMathLib {
         this.instance = instance;
     }
     bridge() {
-        return {
-            e: () => this.functions.e(),
-            pi: () => this.functions.pi(),
-            abs: (value) => this.functions.abs(value),
-            acos: (value) => this.functions.acos(value),
-            acosh: (value) => this.functions.acosh(value),
-            asin: (value) => this.functions.asin(value),
-            asinh: (value) => this.functions.asinh(value),
-            atan: (value) => this.functions.atan(value),
-            atan2: (value) => this.functions.atan2(value),
-            atanh: (value) => this.functions.atanh(value),
-            cbrt: (value) => this.functions.cbrt(value),
-            ceil: (value) => this.functions.ceil(value),
-            clz32: (value) => this.functions.clz32(value),
-            cos: (value) => this.functions.cos(value),
-            cosh: (value) => this.functions.cosh(value),
-            exp: (value) => this.functions.exp(value),
-            expm1: (value) => this.functions.expm1(value),
-            floor: (value) => this.functions.floor(value),
-            f16round: (value) => this.functions.f16round(value),
-            fround: (value) => this.functions.fround(value),
-            imul: (value1, value2) => this.functions.imul(value1, value2),
-            log: (value) => this.functions.log(value),
-            log10: (value) => this.functions.log10(value),
-            log1p: (value) => this.functions.log1p(value),
-            log2: (value) => this.functions.log2(value),
-            pow: (value1, value2) => this.functions.pow(value1, value2),
-            rad: (value) => this.functions.rad(value),
-            round: (value) => this.functions.round(value),
-            sign: (value) => this.functions.sign(value),
-            sin: (value) => this.functions.sin(value),
-            sinh: (value) => this.functions.sinh(value),
-            sqrt: (value) => this.functions.sqrt(value),
-            sum_precise: (value) => this.functions.sum_precise(value),
-            tan: (value) => this.functions.tan(value),
-            tanh: (value) => this.functions.tanh(value),
-            trunc: (value) => this.functions.trunc(value),
-        };
+        const b = {};
+        for (const k of Object.keys(this.functions)) {
+            b[k] = (...a) => this.functions[k](...a);
+        }
+        return b;
     }
 }
