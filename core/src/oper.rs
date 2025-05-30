@@ -79,7 +79,6 @@ impl Node for Oper {
             Oper::BOr(lhs, rhs) => compile_arithmetic!("or", self, ctx, lhs, rhs),
             Oper::XOr(lhs, rhs) => compile_arithmetic!("xor", self, ctx, lhs, rhs),
             Oper::LNot(lhs) => compile_compare!("eqz", ctx, lhs),
-            Oper::Eql(lhs, rhs) => compile_arithmetic!("eq", self, ctx, lhs, rhs),
             Oper::Neq(lhs, rhs) => compile_arithmetic!("ne", self, ctx, lhs, rhs),
             Oper::Lt(lhs, rhs) => compile_compare!("lt", ctx, lhs, rhs),
             Oper::Gt(lhs, rhs) => compile_compare!("gt", ctx, lhs, rhs),
@@ -94,6 +93,15 @@ impl Node for Oper {
                         .compile(ctx)?
                 } else {
                     compile_arithmetic!("add", self, ctx, lhs, rhs)
+                }
+            }
+            Oper::Eql(lhs, rhs) => {
+                let typ = self.type_infer(ctx)?;
+                if let Type::String = typ {
+                    Expr::Call(String::from("strcmp"), vec![lhs.clone(), rhs.clone()])
+                        .compile(ctx)?
+                } else {
+                    compile_arithmetic!("eq", self, ctx, lhs, rhs)
                 }
             }
             Oper::Mod(lhs, rhs) => {
