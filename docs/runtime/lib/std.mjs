@@ -47,13 +47,11 @@ export class MystiaStdLib {
         this.instance = instance;
     }
     bridge() {
-        return {
-            to_str: (num) => this.functions.to_str(num),
-            to_num: (str) => this.functions.to_num(str),
-            concat: (str1, str2) => this.functions.concat(str1, str2),
-            repeat: (str, count) => this.functions.repeat(str, count),
-            split: (str, delimiter) => this.functions.split(str, delimiter),
-        };
+        const b = {};
+        for (const k of Object.keys(this.functions)) {
+            b[k] = (...a) => this.functions[k](...a);
+        }
+        return b;
     }
 }
 
@@ -62,14 +60,6 @@ export class MystiaNodeLib extends MystiaStdLib {
         super();
         this.functions.print = (message) => {
             console.log(read(this.instance, "str", message));
-        };
-    }
-    bridge() {
-        return {
-            ...super.bridge(),
-            ...{
-                print: (ptr) => this.functions.print(ptr),
-            },
         };
     }
 }
@@ -144,24 +134,6 @@ export class MystiaWebLib extends MystiaStdLib {
             } else {
                 elm.addEventListener(name, () => this.instance.exports[func]());
             }
-        };
-    }
-    bridge() {
-        return {
-            ...super.bridge(),
-            ...{
-                alert: (ptr) => this.functions.alert(ptr),
-                confirm: (ptr) => this.functions.confirm(ptr),
-                prompt: (ptr) => this.functions.prompt(ptr),
-                init_canvas: () => this.functions.init_canvas(),
-                draw: (x, y, color) => this.functions.draw(x, y, color),
-                new_elm: (id, tag, parent) =>
-                    this.functions.new_elm(id, tag, parent),
-                upd_elm: (id, prop, content) =>
-                    this.functions.upd_elm(id, prop, content),
-                evt_elm: (id, name, func) =>
-                    this.functions.evt_elm(id, name, func),
-            },
         };
     }
 }
