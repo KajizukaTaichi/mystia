@@ -109,25 +109,10 @@ export class MystiaOSLib {
         this.instance = instance;
     }
     bridge() {
-        return {
-            getcwd: () => this.functions.getcwd(),
-            remove: (value) => this.functions.remove(value),
-            mkdir: (value) => this.functions.mkdir(value),
-            rename: (from, to) => this.functions.rename(from, to),
-            chdir: (value) => this.functions.chdir(value),
-            listdir: (value) => this.functions.listdir(value),
-            path_join: (value) => this.functions.path_join(value),
-            path_basename: (value) => this.functions.path_basename(value),
-            path_parent: (value) => this.functions.path_parent(value),
-            path_abs: (value) => this.functions.path_abs(value),
-            path_exist: (value) => this.functions.path_exist(value),
-            path_isfile: (value) => this.functions.path_isfile(value),
-            path_isdir: (value) => this.functions.path_isdir(value),
-            path_isabs: (value) => this.functions.path_isabs(value),
-            path_root: (value) => this.functions.path_root(value),
-            path_ext: (value) => this.functions.path_ext(value),
-            read_file: (value) => this.functions.read_file(value),
-            write_file: (a, b) => this.functions.write_file(a, b),
-        };
+        const b = {};
+        for (const k of Object.keys(this.functions)) {
+            b[k] = (...a) => this.functions[k](...a);
+        }
+        return b;
     }
 }
