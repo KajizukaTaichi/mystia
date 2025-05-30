@@ -136,11 +136,9 @@ export class MystiaDatetimeLib {
                 ),
         };
     }
-
     set_wasm(instance) {
         this.instance = instance;
     }
-
     bridge() {
         const b = {};
         for (const k of Object.keys(this.functions)) {
