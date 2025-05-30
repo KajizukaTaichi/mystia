@@ -142,11 +142,10 @@ export class MystiaDatetimeLib {
     }
 
     bridge() {
-        return Object.fromEntries(
-            Object.entries(this.functions).map(([k, v]) => [
-                k,
-                (...a) => v(...a),
-            ]),
-        );
+        const b = {};
+        for (const k of Object.keys(this.functions)) {
+            b[k] = (...a) => this.functions[k](...a);
+        }
+        return b;
     }
 }
