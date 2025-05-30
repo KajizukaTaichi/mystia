@@ -79,17 +79,16 @@ export function write(instance, type, value) {
         }
         return ptr;
     } else if (type.type == "dict") {
-        let array = [];
-        for (let [_name, field] of Object.entries(type.fields)) {
-            array.push(write(instance, field.type, field));
+        for (let [name, field] of Object.entries(type.fields)) {
+            type.fields[name] = write(instance, field.type, field);
         }
         const ptr = instance.exports.allocator + 0;
-        for (let field of array) {
+        for (let [_name, field] of Object.entries(type.fields)) {
             const bytes = field.type == "num" ? 8 : 4;
             const addr = instance.exports.allocator - ptr;
             const method = bytes === 8 ? "setFloat64" : "setInt32";
             instance.exports.malloc(bytes);
-            view[method](addr, elm, true);
+            view[method](addr, field, true);
         }
         return ptr;
     }
