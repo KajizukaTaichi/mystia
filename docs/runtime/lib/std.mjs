@@ -21,6 +21,15 @@ export class MystiaStdLib {
                 str2 = read(this.instance, "str", str2);
                 return write(this.instance, "str", str1 + str2);
             },
+            strcmp: (str1, str2) => {
+                str1 = read(this.instance, "str", str1);
+                str2 = read(this.instance, "str", str2);
+                return str1 === str2;
+            },
+            strlen: (str) => {
+                str = read(this.instance, "str", str);
+                return str.length;
+            },
             split: (str, delimiter) => {
                 str = read(this.instance, "str", str);
                 delimiter = read(this.instance, "str", delimiter);
