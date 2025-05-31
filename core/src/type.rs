@@ -11,7 +11,7 @@ pub enum Type {
     Array(Box<Type>, usize),
     Dict(Dict),
     Enum(Enum),
-    Alias(String),
+    Alias(String, Vec<Type>),
     Void,
 }
 
@@ -49,7 +49,7 @@ impl Node for Type {
                     let result = result.iter().map(|x| x.trim().to_string()).collect();
                     Some(Type::Enum(result))
                 } else {
-                    Some(Type::Alias(source))
+                    Some(Type::Alias(source, vec![]))
                 }
             }
         }
@@ -73,13 +73,17 @@ impl Node for Type {
 
     fn type_infer(&self, ctx: &mut Compiler) -> Option<Type> {
         match self {
-            Type::Alias(name) => {
+            Type::Alias(name, args) => {
                 let Some(typ) = ctx.type_alias.get(name).cloned() else {
                     let msg = format!("undefined type alias `{name}`");
                     ctx.occurred_error = Some(msg);
                     return None;
                 };
-                typ.type_infer(ctx)
+                let mut new_ctx = ctx.clone();
+                for (id, arg) in args.iter().enumerate() {
+                    new_ctx.type_alias.insert(format!("T{id}"), arg.clone());
+                }
+                typ.type_infer(&mut new_ctx)
             }
             Type::Array(typ, len) => Some(Type::Array(Box::new(typ.type_infer(ctx)?), *len)),
             Type::Dict(dict) => {
@@ -122,7 +126,7 @@ impl Type {
     pub fn decompress_alias(&self, ctx: &Compiler) -> Type {
         let mut aliases = ctx.type_alias.iter();
         if let Some(i) = aliases.find(|(_, v)| v.format() == self.format()) {
-            Type::Alias(i.0.clone())
+            Type::Alias(i.0.clone(), None)
         } else {
             match self {
                 Type::Array(typ, len) => Type::Array(Box::new(typ.decompress_alias(ctx)), *len),
@@ -152,7 +156,7 @@ impl Type {
             ),
             Type::Enum(e) => format!("( {} )", e.join(" | ")),
             Type::Array(typ, len) => format!("[{}; {len}]", typ.format()),
-            Type::Alias(name) => name.to_string(),
+            Type::Alias(name, _) => name.to_string(),
         }
     }
 }
