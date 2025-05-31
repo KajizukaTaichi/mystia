@@ -96,8 +96,7 @@ impl Node for Oper {
                 }
             }
             Oper::Eql(lhs, rhs) => {
-                let typ = self.type_infer(ctx)?;
-                if let Type::String = typ {
+                if let (Type::String, Type::String) = (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?) {
                     Expr::Call(String::from("strcmp"), vec![lhs.clone(), rhs.clone()])
                         .compile(ctx)?
                 } else {
