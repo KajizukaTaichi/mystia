@@ -308,8 +308,7 @@ impl Node for Stmt {
                 Type::Void
             }
             Stmt::Type(name, value) => {
-                let value = value.type_infer(ctx)?;
-                ctx.type_alias.insert(name.to_string(), value);
+                ctx.type_alias.insert(name.to_string(), value.clone());
                 Type::Void
             }
             Stmt::Import(_module, _alias, funcs) => {
