@@ -48,6 +48,12 @@ impl Node for Type {
                     let result = tokenize(source, &["|"], false, true, false)?;
                     let result = result.iter().map(|x| x.trim().to_string()).collect();
                     Some(Type::Enum(result))
+                } else if source.contains("(") && source.ends_with(")") {
+                    let (name, args) = source.get(..source.len() - 1)?.split_once("(")?;
+                    let args = tokenize(args, &[","], false, true, false)?;
+                    let args = args.iter().map(|i| Type::parse(&i));
+                    let args = args.collect::<Option<Vec<_>>>()?;
+                    Some(Type::Alias(name.to_string(), args))
                 } else {
                     Some(Type::Alias(source, vec![]))
                 }
