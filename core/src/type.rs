@@ -126,7 +126,7 @@ impl Type {
     pub fn decompress_alias(&self, ctx: &Compiler) -> Type {
         let mut aliases = ctx.type_alias.iter();
         if let Some(i) = aliases.find(|(_, v)| v.format() == self.format()) {
-            Type::Alias(i.0.clone(), None)
+            Type::Alias(i.0.clone(), vec![])
         } else {
             match self {
                 Type::Array(typ, len) => Type::Array(Box::new(typ.decompress_alias(ctx)), *len),
