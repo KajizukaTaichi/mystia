@@ -203,14 +203,15 @@ impl Node for Stmt {
                     let sig = if args.is_empty() {
                         String::new()
                     } else {
-                        args.iter()
-                            .map(|t| {
-                                t.type_infer(ctx)?
-                                    .compile(ctx)
-                                    .map(|s| format!("(param {})", s))
-                            })
-                            .collect::<Option<Vec<_>>>()?
-                            .join(" ")
+                        join!(
+                            args.iter()
+                                .map(|t| {
+                                    t.type_infer(ctx)?
+                                        .compile(ctx)
+                                        .map(|s| format!("(param {})", s))
+                                })
+                                .collect::<Option<Vec<_>>>()?
+                        )
                     };
                     let ret = compile_return!(ret_ty, ctx);
                     let entry = format!(
