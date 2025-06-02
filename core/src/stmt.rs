@@ -1,4 +1,3 @@
-use crate::utils::parse_sigs;
 use crate::*;
 
 #[derive(Clone, Debug)]
@@ -78,6 +77,34 @@ impl Node for Stmt {
         } else if let Some(source) = source.strip_prefix("return ") {
             Some(Stmt::Return(Some(Expr::parse(source)?)))
         } else if let Some(after) = source.strip_prefix("load") {
+            /// Signature String: "fn1():ret1 as alias, fn2(arg:t):ret2, …" to
+            /// Vec<(Function Name, List of input and type, return type, alias)>
+            pub fn parse_sigs(
+                sigs: &str,
+            ) -> Option<Vec<(String, Vec<Type>, Type, Option<String>)>> {
+                let mut result = Vec::new();
+                for part in tokenize(sigs, &[","], false, true, false)? {
+                    // Separate alias: "... as alias"
+                    let part = part.trim();
+                    let (sig, alias) = part
+                        .rsplit_once(" as ")
+                        .map(|(sig, alias)| (sig, Some(alias.to_string())))
+                        .unwrap_or((part, None));
+                    let Oper::Cast(Expr::Call(name, args), ret_ty) = Oper::parse(sig)? else {
+                        return None;
+                    };
+                    let mut args_ty = vec![];
+                    for arg in args {
+                        let Expr::Oper(arg) = arg else { return None };
+                        let Oper::Cast(_, arg_ty) = *arg.clone() else {
+                            return None;
+                        };
+                        args_ty.push(arg_ty);
+                    }
+                    result.push((name, args_ty, ret_ty, alias));
+                }
+                Some(result)
+            }
             let rest = after.trim_start();
             if let Some((module, sigs)) = rest.split_once("::") {
                 let sigs = sigs.strip_prefix('{').and_then(|s| s.strip_suffix('}'))?;
