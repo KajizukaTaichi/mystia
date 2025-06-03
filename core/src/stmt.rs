@@ -302,6 +302,7 @@ impl Node for Stmt {
                             variables: ctx.variable_type.clone(),
                             arguments: ctx.argument_type.clone(),
                             returns: value.type_infer(ctx)?,
+                            value: Some(value.clone()),
                         };
                         ctx.function_type.insert(name.to_owned(), frame);
                         ctx.variable_type = var_typ;
@@ -318,6 +319,7 @@ impl Node for Stmt {
                                     variables: ctx.variable_type.clone(),
                                     arguments: ctx.argument_type.clone(),
                                     returns: ret,
+                                    value: Some(value.clone()),
                                 },
                             );
                             value.type_infer(ctx)?;
@@ -351,6 +353,7 @@ impl Node for Stmt {
                             variables: IndexMap::new(),
                             arguments: arg_map,
                             returns: ret_ty.clone(),
+                            value: None,
                         },
                     );
                 }
