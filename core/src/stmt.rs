@@ -169,29 +169,33 @@ impl Node for Stmt {
                     }
                 },
                 Expr::Call(name, _) => {
-                    let function = ctx.function_type.get(name)?.clone();
-                    let [var_typ, arg_typ] = [ctx.variable_type.clone(), ctx.argument_type.clone()];
-                    ctx.variable_type = function.variables.clone();
-                    ctx.argument_type = function.arguments.clone();
-                    let code = format!(
-                        "(func ${name} {pub} {args} {ret} {locals} {body})",
-                        args = join!(
-                            &function
-                                .arguments
-                                .iter()
-                                .map(|(name, typ)| Some(format!(
-                                    "(param ${name} {})",
-                                    typ.type_infer(ctx)?.compile(ctx)?
-                                )))
-                                .collect::<Option<Vec<_>>>()?
-                        ),
-                        ret = compile_return!(function.returns, ctx),
-                        pub = if let Scope::Global = scope { format!("(export \"{name}\")") } else { String::new() },
-                        body = value.compile(ctx)?, locals = expand_local(ctx)?
-                    );
-                    [ctx.variable_type, ctx.argument_type] = [var_typ, arg_typ];
-                    ctx.declare_code.push(code);
-                    String::new()
+                    let mut funcgen = || {
+                        let function = ctx.function_type.get(name)?.clone();
+                        let [var_typ, arg_typ] =
+                            [ctx.variable_type.clone(), ctx.argument_type.clone()];
+                        ctx.variable_type = function.variables.clone();
+                        ctx.argument_type = function.arguments.clone();
+                        let code = format!(
+                            "(func ${name} {pub} {args} {ret} {locals} {body})",
+                            args = join!(
+                                &function
+                                    .arguments
+                                    .iter()
+                                    .map(|(name, typ)| Some(format!(
+                                        "(param ${name} {})",
+                                        typ.type_infer(ctx)?.compile(ctx)?
+                                    )))
+                                    .collect::<Option<Vec<_>>>()?
+                            ),
+                            ret = compile_return!(function.returns, ctx),
+                            pub = if let Scope::Global = scope { format!("(export \"{name}\")") } else { String::new() },
+                            body = value.compile(ctx)?, locals = expand_local(ctx)?
+                        );
+                        [ctx.variable_type, ctx.argument_type] = [var_typ, arg_typ];
+                        ctx.declare_code.push(code);
+                        Some(String::new())
+                    };
+                    funcgen().unwrap_or(String::new())
                 }
                 Expr::Oper(oper) => match *oper.clone() {
                     Oper::Cast(func, _) => Stmt::Let(*scope, func, value.clone()).compile(ctx)?,
