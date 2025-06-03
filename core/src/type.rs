@@ -13,6 +13,7 @@ pub enum Type {
     Enum(Enum),
     Alias(String, Vec<Type>),
     Void,
+    Any,
 }
 
 impl Node for Type {
@@ -163,6 +164,7 @@ impl Type {
             Type::Enum(e) => format!("( {} )", e.join(" | ")),
             Type::Array(typ, len) => format!("[{}; {len}]", typ.format()),
             Type::Alias(name, _) => name.to_string(),
+            Type::Any => "any".to_string(),
         }
     }
 }
