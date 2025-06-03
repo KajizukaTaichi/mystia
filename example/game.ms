@@ -17,14 +17,14 @@ pub let model = @{
     count: 0,
     speed: 50,
     player: @{
-        dom: null,
+        dom: null:Elm,
         src: "https://pixiv.navirank.com/jpg/153/15371090.jpg",
-        position: @{ x: null, y: null }
+        position: @{ x: null:int, y: null:int }
     },
     target: @{
-        dom: null,
+        dom: null:Elm,
         src: "https://pixiv.navirank.com/jpg/1263/126387033.jpg",
-        position: @{ x: null, y: null }
+        position: @{ x: null:int, y: null:int }
     },
     style: @{
         char: "height: 100px; position: absolute;"
