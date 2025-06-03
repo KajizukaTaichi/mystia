@@ -11,7 +11,7 @@ pub enum Type {
     Array(Box<Type>, usize),
     Dict(Dict),
     Enum(Enum),
-    Alias(String, Vec<Type>),
+    Alias(String, Option<Box<Type>>),
     Void,
     Any,
 }
@@ -49,14 +49,14 @@ impl Node for Type {
                     let result = tokenize(source, &["|"], false, true, false)?;
                     let result = result.iter().map(|x| x.trim().to_string()).collect();
                     Some(Type::Enum(result))
-                } else if source.contains("(") && source.ends_with(")") {
-                    let (name, args) = source.get(..source.len() - 1)?.split_once("(")?;
-                    let args = tokenize(args, &[","], false, true, false)?;
-                    let args = args.iter().map(|i| Type::parse(&i));
-                    let args = args.collect::<Option<Vec<_>>>()?;
-                    Some(Type::Alias(name.to_string(), args))
+                } else if source.contains("@") {
+                    let (name, args) = source.split_once("@")?;
+                    Some(Type::Alias(
+                        name.to_string(),
+                        Some(Box::new(Type::parse(args)?)),
+                    ))
                 } else {
-                    Some(Type::Alias(source, vec![]))
+                    Some(Type::Alias(source, None))
                 }
             }
         }
@@ -87,8 +87,8 @@ impl Node for Type {
                     return None;
                 };
                 let mut new_ctx = ctx.clone();
-                for (id, arg) in args.iter().enumerate() {
-                    new_ctx.type_alias.insert(format!("T{id}"), arg.clone());
+                if let Some(arg) = args {
+                    new_ctx.type_alias.insert("T".to_string(), *arg.clone());
                 }
                 typ.type_infer(&mut new_ctx)
             }
@@ -133,7 +133,7 @@ impl Type {
     pub fn decompress_alias(&self, ctx: &Compiler) -> Type {
         let mut aliases = ctx.type_alias.iter();
         if let Some(i) = aliases.find(|(_, v)| v.format() == self.format()) {
-            Type::Alias(i.0.clone(), vec![])
+            Type::Alias(i.0.clone(), None)
         } else {
             match self {
                 Type::Array(typ, len) => Type::Array(Box::new(typ.decompress_alias(ctx)), *len),
