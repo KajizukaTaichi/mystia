@@ -130,7 +130,9 @@ impl Node for Oper {
                     format!("(f64.convert_i32_s {})", lhs.compile(ctx)?,)
                 } else if let (Type::Number, Type::Integer) = (lhs.type_infer(ctx)?, &rhs) {
                     format!("(i32.trunc_f64_s {})", lhs.compile(ctx)?,)
-                } else if lhs.type_infer(ctx)?.format() == rhs.format() {
+                } else if matches!(lhs.type_infer(ctx)?, Type::Any)
+                    && lhs.type_infer(ctx)?.format() == rhs.format()
+                {
                     lhs.compile(ctx)?
                 } else {
                     let lhs = lhs.type_infer(ctx)?.format();
