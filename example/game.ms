@@ -80,18 +80,15 @@ pub let user_operation(key_code: int) = {
     else if key_code == 40 then move_player(0, -model.speed)
 };
 
-let game() = {
-    let model.player.dom = new_elm("img", null);
-    model.player.dom.upd_elm("src", model.player.src);
-    model.player.dom.upd_elm("style", model.style.char);
-    model.player.dom.evt_elm("keydown", "user_operation");
+let model.player.dom = new_elm("img", null:Elm);
+model.player.dom.upd_elm("src", model.player.src);
+model.player.dom.upd_elm("style", model.style.char);
+model.player.dom.evt_elm("keydown", "user_operation");
 
-    let model.target.dom = new_elm("img", null);
-    model.target.dom.upd_elm("src", model.target.src);
-    model.target.dom.upd_elm("style", model.style.char);
+let model.target.dom = new_elm("img", null:Elm);
+model.target.dom.upd_elm("src", model.target.src);
+model.target.dom.upd_elm("style", model.style.char);
 
-    init_position(); draw_player(); draw_target()
-};
+init_position(); draw_player(); draw_target();
 
-game();
 "Nazrin Toucher"
