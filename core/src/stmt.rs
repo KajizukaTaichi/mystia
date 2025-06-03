@@ -169,10 +169,8 @@ impl Node for Stmt {
                     }
                 },
                 Expr::Call(name, _) => {
-                    let mut funcgen = || {
+                    let funcgen = |ctx: &mut Compiler| {
                         let function = ctx.function_type.get(name)?.clone();
-                        let var_typ = ctx.variable_type.clone();
-                        let arg_typ = ctx.argument_type.clone();
                         ctx.variable_type = function.variables.clone();
                         ctx.argument_type = function.arguments.clone();
                         let code = format!(
@@ -191,13 +189,17 @@ impl Node for Stmt {
                             pub = if let Scope::Global = scope { format!("(export \"{name}\")") } else { String::new() },
                             body = value.compile(ctx)?, locals = expand_local(ctx)?
                         );
-                        [ctx.variable_type, ctx.argument_type] = [var_typ, arg_typ];
+
                         if !ctx.declare_code.contains(&code) {
                             ctx.declare_code.push(code);
                         }
                         Some(String::new())
                     };
-                    funcgen().unwrap_or_else(|| String::new())
+                    let var_typ = ctx.variable_type.clone();
+                    let arg_typ = ctx.argument_type.clone();
+                    let result = funcgen(ctx).unwrap_or_else(|| String::new());
+                    [ctx.variable_type, ctx.argument_type] = [var_typ, arg_typ];
+                    result
                 }
                 Expr::Oper(oper) => match *oper.clone() {
                     Oper::Cast(func, _) => Stmt::Let(*scope, func, value.clone()).compile(ctx)?,
