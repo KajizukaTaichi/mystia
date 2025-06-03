@@ -80,7 +80,8 @@ impl Node for Expr {
             Expr::Variable(name) => format!("(local.get ${name})"),
             Expr::Literal(literal) => literal.compile(ctx)?,
             Expr::Call(name, args) => format!(
-                "(call ${name} {})",
+                "(call ${} {})",
+                name.replace("@", "__"),
                 join!(
                     args.iter()
                         .map(|x| x.compile(ctx))
@@ -149,7 +150,7 @@ impl Node for Expr {
                         func.variables.insert(k, v.type_infer(ctx)?);
                     }
                     func.returns = func.returns.type_infer(ctx)?;
-                    let name = format!("{name}_{typ}");
+                    let name = format!("{name}__{typ}");
                     let def = Stmt::Let(
                         Scope::Local,
                         Expr::Oper(Box::new(Oper::Cast(
