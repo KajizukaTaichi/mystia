@@ -141,6 +141,7 @@ impl Node for Expr {
             Expr::Call(name, args) => {
                 if let Some((name, typ)) = name.split_once("@") {
                     ctx.type_alias.insert("T".to_string(), Type::parse(typ)?);
+                    dbg!(&ctx.type_alias);
                     let mut func = ctx.function_type.get(name)?.clone();
                     for (k, v) in func.arguments.clone() {
                         func.arguments.insert(k, v.type_infer(ctx)?);
@@ -149,7 +150,7 @@ impl Node for Expr {
                         func.variables.insert(k, v.type_infer(ctx)?);
                     }
                     func.returns = func.returns.type_infer(ctx)?;
-                    let name = format!("{name}_{typ}");
+                    let name = format!("{name}@{typ}");
                     ctx.function_type.insert(name.clone(), func.clone());
                     Stmt::Let(
                         Scope::Local,
