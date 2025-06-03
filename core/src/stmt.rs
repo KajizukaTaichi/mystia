@@ -339,7 +339,7 @@ impl Node for Stmt {
                                         returns: ret.clone(),
                                     },
                                 );
-                                value.type_infer(ctx)?;
+                                type_check!(value.type_infer(ctx)?, ret, ctx);
                                 let frame = ctx.function_type.get_mut(&name)?;
                                 frame.variables = ctx.variable_type.clone();
                                 ctx.variable_type = var_typ;
