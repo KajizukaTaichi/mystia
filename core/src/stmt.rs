@@ -171,8 +171,8 @@ impl Node for Stmt {
                 Expr::Call(name, _) => {
                     let mut funcgen = || {
                         let function = ctx.function_type.get(name)?.clone();
-                        let [var_typ, arg_typ] =
-                            [ctx.variable_type.clone(), ctx.argument_type.clone()];
+                        let var_typ = ctx.variable_type.clone();
+                        let arg_typ = ctx.argument_type.clone();
                         ctx.variable_type = function.variables.clone();
                         ctx.argument_type = function.arguments.clone();
                         let code = format!(
@@ -192,7 +192,9 @@ impl Node for Stmt {
                             body = value.compile(ctx)?, locals = expand_local(ctx)?
                         );
                         [ctx.variable_type, ctx.argument_type] = [var_typ, arg_typ];
-                        ctx.declare_code.push(code);
+                        if !ctx.declare_code.contains(&code) {
+                            ctx.declare_code.push(code);
+                        }
                         Some(String::new())
                     };
                     funcgen().unwrap_or_else(|| String::new())
