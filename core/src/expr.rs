@@ -153,12 +153,14 @@ impl Node for Expr {
                         func.variables.insert(k, v.type_infer(new_ctx)?);
                     }
                     func.returns = body.type_infer(new_ctx)?;
-                    let name = format!("{name}__{typ}");
+                    let [var_typ, arg_typ] = [ctx.variable_type.clone(), ctx.argument_type.clone()];
+                    ctx.variable_type.clear();
+                    ctx.argument_type.clear();
                     let def = Stmt::Let(
                         Scope::Local,
                         Expr::Oper(Box::new(Oper::Cast(
                             Expr::Call(
-                                name,
+                                format!("{name}__{typ}"),
                                 func.arguments
                                     .iter()
                                     .map(|(arg, typ)| {
@@ -173,8 +175,10 @@ impl Node for Expr {
                         ))),
                         body,
                     );
+                    dbg!(&ctx);
                     def.type_infer(ctx)?;
                     def.compile(ctx)?;
+                    [ctx.variable_type, ctx.argument_type] = [var_typ, arg_typ];
                     func.returns.clone()
                 } else {
                     let Some(function) = ctx.function_type.get(name).cloned() else {
