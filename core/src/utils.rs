@@ -137,6 +137,7 @@ macro_rules! compile_args {
                 $ctx.occurred_error = Some(msg.to_string());
                 return None;
             };
+            dbg!(&typ);
             $ctx.argument_type.insert(name.to_string(), typ);
         }
     };
