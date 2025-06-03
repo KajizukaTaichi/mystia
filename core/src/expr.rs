@@ -175,7 +175,6 @@ impl Node for Expr {
                         ))),
                         body,
                     );
-                    dbg!(&ctx);
                     def.type_infer(ctx)?;
                     def.compile(ctx)?;
                     [ctx.variable_type, ctx.argument_type] = [var_typ, arg_typ];
