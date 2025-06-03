@@ -1,4 +1,4 @@
-use crate::*;
+use crate::{stmt::Scope, *};
 
 #[derive(Debug, Clone)]
 pub enum Expr {
@@ -141,8 +141,7 @@ impl Node for Expr {
             Expr::Call(name, args) => {
                 if let Some((name, typ)) = name.split_once("@") {
                     ctx.type_alias.insert("T".to_string(), Type::parse(typ)?);
-                    dbg!(&ctx.type_alias);
-                    let mut func = ctx.function_type.get(name)?.clone();
+                    let (mut func, body) = ctx.generics_code.get(name)?.clone();
                     for (k, v) in func.arguments.clone() {
                         func.arguments.insert(k, v.type_infer(ctx)?);
                     }
@@ -151,7 +150,22 @@ impl Node for Expr {
                     }
                     func.returns = func.returns.type_infer(ctx)?;
                     let name = format!("{name}@{typ}");
-
+                    let def = Stmt::Let(
+                        Scope::Local,
+                        Expr::Oper(Box::new(Oper::Cast(
+                            Expr::Call(
+                                name,
+                                func.arguments
+                                    .keys()
+                                    .map(|x| Expr::Variable(x.to_owned()))
+                                    .collect(),
+                            ),
+                            func.returns.clone(),
+                        ))),
+                        body,
+                    );
+                    def.type_infer(ctx)?;
+                    def.compile(ctx)?;
                     func.returns.clone()
                 } else {
                     let Some(function) = ctx.function_type.get(name).cloned() else {
