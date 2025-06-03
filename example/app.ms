@@ -10,7 +10,7 @@ pub let model = @{
     title: "Counter App",
     count: 0,
     layout: @{
-        panel: null
+        panel: null:Elm
     }
 };
 
@@ -33,24 +33,20 @@ pub let inc_key(key_code: int) = {
     view()
 };
 
-let app() = {
-    let frame = new_elm("div", null);
-    frame.upd_elm("style", "margin: 100px");
-    frame.evt_elm("keydown", "inc_key");
+let frame = new_elm("div", null: Elm);
+frame.upd_elm("style", "margin: 100px");
+frame.evt_elm("keydown", "inc_key");
 
-    let title = new_elm("h1", frame);
-    title.upd_elm("innerHTML", model.title);
+let title = new_elm("h1", frame);
+title.upd_elm("innerHTML", model.title);
 
-    let panel = new_elm("p", frame);
-    let model.layout.panel = panel;
-    panel.upd_elm("style", "font-family: monospace");
-    view();
+let panel = new_elm("p", frame);
+let model.layout.panel = panel;
+panel.upd_elm("style", "font-family: monospace");
+view();
 
-    let btn = new_elm("button", frame);
-    btn.upd_elm("innerHTML", "Increment");
-    btn.upd_elm("className", "button");
-    btn.evt_elm("click", "inc_btn")
-};
-
-app();
+let btn = new_elm("button", frame);
+btn.upd_elm("innerHTML", "Increment");
+btn.upd_elm("className", "button");
+btn.evt_elm("click", "inc_btn");
 model.title
