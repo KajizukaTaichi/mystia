@@ -325,22 +325,34 @@ impl Node for Stmt {
                     }
                     Expr::Oper(oper) => match *oper.clone() {
                         Oper::Cast(Expr::Call(name, args), ret) => {
-                            let var_typ = ctx.variable_type.clone();
-                            let arg_typ = ctx.argument_type.clone();
-                            compile_args!(args, ctx);
-                            ctx.function_type.insert(
-                                name.to_owned(),
-                                Function {
+                            let funcgen = || {
+                                let var_typ = ctx.variable_type.clone();
+                                let arg_typ = ctx.argument_type.clone();
+                                compile_args!(args, ctx);
+                                ctx.function_type.insert(
+                                    name.to_owned(),
+                                    Function {
+                                        variables: ctx.variable_type.clone(),
+                                        arguments: ctx.argument_type.clone(),
+                                        returns: ret.clone(),
+                                    },
+                                );
+                                value.type_infer(ctx)?;
+                                let frame = ctx.function_type.get_mut(&name)?;
+                                frame.variables = ctx.variable_type.clone();
+                                ctx.variable_type = var_typ;
+                                ctx.argument_type = arg_typ;
+                                Some(())
+                            };
+                            if let None = funcgen() {
+                                let frame = Function {
                                     variables: ctx.variable_type.clone(),
                                     arguments: ctx.argument_type.clone(),
                                     returns: ret,
-                                },
-                            );
-                            value.type_infer(ctx)?;
-                            let frame = ctx.function_type.get_mut(&name)?;
-                            frame.variables = ctx.variable_type.clone();
-                            ctx.variable_type = var_typ;
-                            ctx.argument_type = arg_typ;
+                                };
+                                ctx.generics_code
+                                    .insert(name.to_owned(), (frame, value.to_owned()));
+                            }
                         }
                         _ => return None,
                     },
