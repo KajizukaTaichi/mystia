@@ -1,4 +1,4 @@
-use crate::{stmt::Scope, *};
+use crate::*;
 
 #[derive(Debug, Clone)]
 pub enum Expr {
