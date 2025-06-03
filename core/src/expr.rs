@@ -149,7 +149,7 @@ impl Node for Expr {
                     for (k, v) in func.variables.clone() {
                         func.variables.insert(k, v.type_infer(ctx)?);
                     }
-                    func.returns = func.returns.type_infer(ctx)?;
+                    func.returns = body.type_infer(ctx)?;
                     let name = format!("{name}__{typ}");
                     let def = Stmt::Let(
                         Scope::Local,
