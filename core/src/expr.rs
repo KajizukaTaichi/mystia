@@ -1,4 +1,4 @@
-use crate::*;
+use crate::{stmt::Scope, *};
 
 #[derive(Debug, Clone)]
 pub enum Expr {
@@ -139,24 +139,48 @@ impl Node for Expr {
             }
             Expr::Literal(literal) => literal.type_infer(ctx)?,
             Expr::Call(name, args) => {
-                let Some(function) = ctx.function_type.get(name).cloned() else {
-                    let errmsg = format!("function `{name}` you want to call is not defined");
-                    ctx.occurred_error = Some(errmsg);
-                    return None;
-                };
-                if args.len() != function.arguments.len() {
-                    let errmsg = format!(
-                        "arguments of function `{name}` length should be {}, but passed {} values",
-                        function.arguments.len(),
-                        args.len()
-                    );
-                    ctx.occurred_error = Some(errmsg);
-                    return None;
+                if let Some((name, typ)) = name.split_once("@") {
+                    ctx.type_alias.insert("T".to_string(), Type::parse(typ)?);
+                    let mut func = ctx.function_type.get(name)?.clone();
+                    for (k, v) in func.arguments.clone() {
+                        func.arguments.insert(k, v.type_infer(ctx)?);
+                    }
+                    for (k, v) in func.variables.clone() {
+                        func.variables.insert(k, v.type_infer(ctx)?);
+                    }
+                    func.returns = func.returns.type_infer(ctx)?;
+                    let name = format!("{name}_{typ}");
+                    ctx.function_type.insert(name.clone(), func.clone());
+                    Stmt::Let(
+                        Scope::Local,
+                        Expr::Oper(Box::new(Oper::Cast(
+                            Expr::Call(name, vec![]),
+                            func.returns.clone(),
+                        ))),
+                        func.value?,
+                    )
+                    .compile(ctx)?;
+                    func.returns.clone()
+                } else {
+                    let Some(function) = ctx.function_type.get(name).cloned() else {
+                        let errmsg = format!("function `{name}` you want to call is not defined");
+                        ctx.occurred_error = Some(errmsg);
+                        return None;
+                    };
+                    if args.len() != function.arguments.len() {
+                        let errmsg = format!(
+                            "arguments of function `{name}` length should be {}, but passed {} values",
+                            function.arguments.len(),
+                            args.len()
+                        );
+                        ctx.occurred_error = Some(errmsg);
+                        return None;
+                    }
+                    let func = |(arg, typ): (&Expr, &Type)| type_check!(arg, typ, ctx);
+                    let ziped = args.iter().zip(function.arguments.values());
+                    ziped.map(func).collect::<Option<Vec<_>>>()?;
+                    function.returns.type_infer(ctx)?
                 }
-                let func = |(arg, typ): (&Expr, &Type)| type_check!(arg, typ, ctx);
-                let ziped = args.iter().zip(function.arguments.values());
-                ziped.map(func).collect::<Option<Vec<_>>>()?;
-                function.returns.type_infer(ctx)?
             }
             Expr::Index(arr, _) => {
                 let infered = arr.type_infer(ctx)?;
