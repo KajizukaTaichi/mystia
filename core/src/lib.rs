@@ -32,6 +32,7 @@ pub trait Node {
 pub struct Function {
     pub variables: IndexMap<String, Type>,
     pub arguments: IndexMap<String, Type>,
+    pub value: Option<Expr>,
     pub returns: Type,
 }
 
