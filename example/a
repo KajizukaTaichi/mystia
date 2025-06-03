@@ -1,0 +1,2 @@
+let add(a: T, b: T) = a + b;
+add@int(1, 2)
