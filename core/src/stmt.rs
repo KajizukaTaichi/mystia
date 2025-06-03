@@ -169,6 +169,7 @@ impl Node for Stmt {
                     }
                 },
                 Expr::Call(name, _) => {
+                    dbg!(name);
                     let mut funcgen = || {
                         let function = ctx.function_type.get(name)?.clone();
                         let [var_typ, arg_typ] =
@@ -195,7 +196,10 @@ impl Node for Stmt {
                         ctx.declare_code.push(code);
                         Some(String::new())
                     };
-                    funcgen().unwrap_or(String::new())
+                    funcgen().unwrap_or_else(|| {
+                        dbg!();
+                        String::new()
+                    })
                 }
                 Expr::Oper(oper) => match *oper.clone() {
                     Oper::Cast(func, _) => Stmt::Let(*scope, func, value.clone()).compile(ctx)?,
@@ -259,6 +263,7 @@ impl Node for Stmt {
     }
 
     fn type_infer(&self, ctx: &mut Compiler) -> Option<Type> {
+        dbg!(self, &ctx);
         Some(match self {
             Stmt::Expr(expr) => expr.type_infer(ctx)?,
             Stmt::If(cond, then, r#else) => {
@@ -302,12 +307,14 @@ impl Node for Stmt {
                         let var_typ = ctx.variable_type.clone();
                         let arg_typ = ctx.argument_type.clone();
                         compile_args!(args, ctx);
+                        dbg!(value.type_infer(ctx));
                         let frame = Function {
+                            returns: value.type_infer(ctx)?,
                             variables: ctx.variable_type.clone(),
                             arguments: ctx.argument_type.clone(),
-                            returns: value.type_infer(ctx)?,
                             value: Some(value.clone()),
                         };
+                        dbg!(&frame);
                         ctx.function_type.insert(name.to_owned(), frame);
                         ctx.variable_type = var_typ;
                         ctx.argument_type = arg_typ;
