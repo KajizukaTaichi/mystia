@@ -149,15 +149,20 @@ impl Node for Expr {
                         func.variables.insert(k, v.type_infer(ctx)?);
                     }
                     func.returns = func.returns.type_infer(ctx)?;
-                    let name = format!("{name}@{typ}");
+                    let name = format!("{name}_{typ}");
                     let def = Stmt::Let(
                         Scope::Local,
                         Expr::Oper(Box::new(Oper::Cast(
                             Expr::Call(
                                 name,
                                 func.arguments
-                                    .keys()
-                                    .map(|x| Expr::Variable(x.to_owned()))
+                                    .iter()
+                                    .map(|(arg, typ)| {
+                                        Expr::Oper(Box::new(Oper::Cast(
+                                            Expr::Variable(arg.to_owned()),
+                                            typ.clone(),
+                                        )))
+                                    })
                                     .collect(),
                             ),
                             func.returns.clone(),
