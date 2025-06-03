@@ -151,16 +151,7 @@ impl Node for Expr {
                     }
                     func.returns = func.returns.type_infer(ctx)?;
                     let name = format!("{name}@{typ}");
-                    ctx.function_type.insert(name.clone(), func.clone());
-                    Stmt::Let(
-                        Scope::Local,
-                        Expr::Oper(Box::new(Oper::Cast(
-                            Expr::Call(name, vec![]),
-                            func.returns.clone(),
-                        ))),
-                        func.value?,
-                    )
-                    .compile(ctx)?;
+
                     func.returns.clone()
                 } else {
                     let Some(function) = ctx.function_type.get(name).cloned() else {
