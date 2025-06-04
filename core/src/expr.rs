@@ -172,6 +172,7 @@ impl Node for Expr {
                     def.type_infer(ctx)?;
                     def.compile(ctx)?;
                     [ctx.variable_type, ctx.argument_type] = [var_typ, arg_typ];
+                    ctx.type_alias.shift_remove("T");
                     func.returns.clone()
                 } else {
                     let Some(function) = ctx.function_type.get(name).cloned() else {
