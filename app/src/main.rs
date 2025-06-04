@@ -40,7 +40,7 @@ fn main() {
         println!("# Type Inference Summary");
         println!("Functions:");
         for (name, func) in &compiler.function_type {
-            println!(" - {name}:");
+            println!(" - {}:", name.replace("__", "@"));
             println!("     Locals:");
             for (name, typ) in &func.variables {
                 let typ = typ.decompress_alias(&compiler).format();
