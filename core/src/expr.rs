@@ -141,21 +141,15 @@ impl Node for Expr {
             Expr::Literal(literal) => literal.type_infer(ctx)?,
             Expr::Call(name, args) => {
                 if let Some((name, typ)) = name.split_once("@") {
-                    let new_ctx = &mut ctx.clone();
-                    new_ctx
-                        .type_alias
-                        .insert("T".to_string(), Type::parse(typ)?);
+                    ctx.type_alias.insert("T".to_string(), Type::parse(typ)?);
                     let (mut func, body) = ctx.generics_code.get(name)?.clone();
                     for (k, v) in func.arguments.clone() {
-                        func.arguments.insert(k, v.type_infer(new_ctx)?);
+                        func.arguments.insert(k, v.type_infer(ctx)?);
                     }
-                    for (k, v) in func.variables.clone() {
-                        func.variables.insert(k, v.type_infer(new_ctx)?);
-                    }
-                    func.returns = body.type_infer(new_ctx)?;
+                    func.returns = body.type_infer(ctx)?;
                     let [var_typ, arg_typ] = [ctx.variable_type.clone(), ctx.argument_type.clone()];
-                    ctx.variable_type.clear();
-                    ctx.argument_type.clear();
+                    ctx.variable_type = func.variables.clone();
+                    ctx.argument_type = func.arguments.clone();
                     let def = Stmt::Let(
                         Scope::Local,
                         Expr::Oper(Box::new(Oper::Cast(
