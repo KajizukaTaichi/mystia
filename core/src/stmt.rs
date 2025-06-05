@@ -201,10 +201,12 @@ impl Node for Stmt {
                     ctx.argument_type = arg_typ;
                     String::new()
                 }
-                Expr::Oper(oper) => match *oper.clone() {
-                    Oper::Cast(func, _) => Stmt::Let(*scope, func, value.clone()).compile(ctx)?,
-                    _ => return None,
-                },
+                Expr::Oper(oper) => {
+                    let Oper::Cast(func, _) = *oper.clone() else {
+                        return None;
+                    };
+                    Stmt::Let(*scope, func, value.clone()).compile(ctx)?
+                }
                 Expr::Index(array, index) => {
                     let Type::Array(typ, len) = array.type_infer(ctx)? else {
                         return None;
