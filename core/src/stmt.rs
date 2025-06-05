@@ -67,10 +67,10 @@ impl Node for Stmt {
                 None
             }
         } else if let Some(token) = source.strip_prefix("pub ") {
-            match Stmt::parse(token)? {
-                Stmt::Let(Scope::Local, name, value) => Some(Stmt::Let(Scope::Global, name, value)),
-                _ => None,
-            }
+            let Stmt::Let(Scope::Local, name, value) = Stmt::parse(token)? else {
+                return None;
+            };
+            Some(Stmt::Let(Scope::Global, name, value))
         } else if let Some(source) = source.strip_prefix("type ") {
             let (name, value) = source.split_once("=")?;
             Some(Stmt::Type(name.trim().to_string(), Type::parse(value)?))
