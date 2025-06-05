@@ -193,13 +193,13 @@ impl Node for Stmt {
                         if !ctx.declare_code.contains(&code) {
                             ctx.declare_code.push(code);
                         }
-                        Some(String::new())
+                        Some(())
                     };
                     let var_typ = ctx.variable_type.clone();
                     let arg_typ = ctx.argument_type.clone();
-                    let result = funcgen(ctx).unwrap_or_else(|| String::new());
+                    funcgen(ctx);
                     [ctx.variable_type, ctx.argument_type] = [var_typ, arg_typ];
-                    result
+                    String::new()
                 }
                 Expr::Oper(oper) => match *oper.clone() {
                     Oper::Cast(func, _) => Stmt::Let(*scope, func, value.clone()).compile(ctx)?,
