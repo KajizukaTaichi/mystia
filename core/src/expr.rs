@@ -143,8 +143,10 @@ impl Node for Expr {
                 if let Some((name, typ)) = name.split_once("@") {
                     ctx.type_alias.insert("T".to_string(), Type::parse(typ)?);
                     let (mut func, body) = ctx.generics_code.get(name)?.clone();
-                    for (k, v) in func.arguments.clone() {
-                        func.arguments.insert(k, v.type_infer(ctx)?);
+                    for ((k, v), arg) in func.arguments.clone().iter().zip(args) {
+                        let v = v.type_infer(ctx)?;
+                        func.arguments.insert(k.to_owned(), v.clone());
+                        type_check!(v, arg.type_infer(ctx)?, ctx);
                     }
                     func.returns = body.type_infer(ctx)?;
                     let [var_typ, arg_typ] = [ctx.variable_type.clone(), ctx.argument_type.clone()];
