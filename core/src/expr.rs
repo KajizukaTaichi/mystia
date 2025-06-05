@@ -146,7 +146,7 @@ impl Node for Expr {
                     for ((k, v), arg) in func.arguments.clone().iter().zip(args) {
                         let v = v.type_infer(ctx)?;
                         func.arguments.insert(k.to_owned(), v.clone());
-                        type_check!(v, arg.type_infer(ctx)?, ctx);
+                        type_check!(v, arg.type_infer(ctx)?, ctx)?;
                     }
                     func.returns = body.type_infer(ctx)?;
                     let [var_typ, arg_typ] = [ctx.variable_type.clone(), ctx.argument_type.clone()];
