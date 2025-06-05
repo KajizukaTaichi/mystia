@@ -87,7 +87,7 @@ impl Node for Stmt {
                     // Separate alias: "... as alias"
                     let part = part.trim();
                     let (sig, alias) = part
-                        .rsplit_once(" as ")
+                        .rsplit_once("as")
                         .map(|(sig, alias)| (sig, Some(alias.to_string())))
                         .unwrap_or((part, None));
                     let Oper::Cast(Expr::Call(name, args), ret_ty) = Oper::parse(sig)? else {
