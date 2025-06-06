@@ -89,6 +89,7 @@ let model.target.dom = new_elm("img", null:Elm);
 model.target.dom.upd_elm("src", model.target.src);
 model.target.dom.upd_elm("style", model.style.char);
 
-init_position(); draw_player(); draw_target();
-
+init_position();
+draw_player();
+draw_target();
 "Nazrin Toucher"
