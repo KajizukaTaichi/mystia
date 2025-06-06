@@ -16,7 +16,9 @@ exampleSelectBtn.addEventListener("click", async () => {
     codeEditor.value = await response.text();
 });
 
-runBtn.addEventListener("click", async (e) => {
+runBtn.addEventListener("click", async () => {
+    resultArea.innerHTML = "";
+    timerLabel.textContent = "";
     const startTime = Date.now();
     timer = setInterval(() => {
         timerLabel.textContent = `Time: ${Date.now() - startTime}ms`;
