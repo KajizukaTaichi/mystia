@@ -41,6 +41,7 @@ export class MystiaStdLib {
                 const typ = { type: "array", element: "str", length: 2 };
                 return write(this.instance, typ, splitted);
             },
+            rand: () => Math.random(),
         };
     }
     set_wasm(instance) {
