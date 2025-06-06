@@ -90,9 +90,12 @@ class Random {
         return result;
     }
     randbytes(n) {
-        const buf = Buffer.alloc(n);
-        for (let i = 0; i < n; i++) buf[i] = this._mt.genrand_int32() & 0xff;
-        return buf;
+        // Uint8Array を使ってバイト列を生成し、ArrayBuffer を返す
+        const ua = new Uint8Array(n);
+        for (let i = 0; i < n; i++) {
+            ua[i] = this._mt.genrand_int32() & 0xff;
+        }
+        return ua.buffer;
     }
     randrange(start, stop = null, step = 1) {
         if (stop === null) {
@@ -288,17 +291,29 @@ export class MystiaRandomLib {
                 const val = this.rng[key](...args);
                 const retType = __spec__[key].ret;
                 if (retType === "void") return;
-                const out =
-                    retType === "str" || retType === "num"
-                        ? write(
-                              this.instance,
-                              retType,
-                              val instanceof Buffer
-                                  ? val.toString("base64")
-                                  : val,
-                          )
-                        : val;
-                return out;
+
+                // ArrayBuffer / Uint8Array の判定を追加
+                let payload;
+                if (
+                    val instanceof ArrayBuffer ||
+                    ArrayBuffer.isView(val)
+                ) {
+                    // val が ArrayBuffer や TypedArray の場合、Uint8Array 化してから Base64 文字列に変換
+                    const ua = val instanceof ArrayBuffer ? new Uint8Array(val) : new Uint8Array(val.buffer, val.byteOffset, val.byteLength);
+                    payload = Buffer.from(ua).toString("base64");
+                } else if (typeof val === "string" || typeof val === "number") {
+                    payload = val;
+                } else {
+                    // その他の型はそのまま
+                    payload = val;
+                }
+
+                // 返り値が文字列 or 数値なら write を呼び出す
+                if (retType === "str" || retType === "num") {
+                    return write(this.instance, retType, payload);
+                } else {
+                    return payload;
+                }
             };
         }
     }
