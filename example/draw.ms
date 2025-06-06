@@ -1,3 +1,5 @@
+~~ Create by ChocolateKun ~~
+
 type Color = ( white | black | grey | blue | violet | green | red | pink | yellow );
 let colors = [Color#red, Color#black, Color#blue, Color#violet, Color#green, Color#white, Color#yellow];
 let colors_num = 7;
