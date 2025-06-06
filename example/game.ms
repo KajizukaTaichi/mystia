@@ -6,7 +6,7 @@ load evt_elm(id: Elm, name: str, func: str): void;
 load to_str(n: num): str;
 load concat(a: str, b: str): str;
 load alert(msg: str): void;
-load rand(): num;
+load random::{ randint(a: int, b: int): int };
 
 type Character = @{
     dom: int, src: str,
@@ -58,8 +58,8 @@ let is_touch() = {
 };
 
 let move_target() = {
-    let model.target.position.x + (rand() * (model.speed * 2: num): int - model.speed);
-    let model.target.position.y + (rand() * (model.speed * 2: num): int - model.speed);
+    let model.target.position.x + randint(-model.speed, model.speed);
+    let model.target.position.y + randint(-model.speed, model.speed);
     draw_target()
 };
 let move_player(x_move: int, y_move: int) = {
