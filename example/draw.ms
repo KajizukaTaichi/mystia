@@ -2,7 +2,6 @@
 
 type Color = ( white | black | grey | blue | violet | green | red | pink | yellow );
 let colors = [Color#red, Color#black, Color#blue, Color#violet, Color#green, Color#white, Color#yellow];
-let colors_num = 7;
 
 load init_canvas(): void;
 load draw(x: int, y: int, color: Color): void;
@@ -26,7 +25,7 @@ while (xsiz >= 2) || (ysiz >= 2) loop {
     while y_index < (yidx + ysiz) loop {
         let x_index = xidx;
         while x_index < (xidx+xsiz) loop {
-            draw(x_index, y_index, colors[color_index % colors_num]);
+            draw(x_index, y_index, colors[color_index]);
             let x_index + 1
         };
         let y_index + 1
