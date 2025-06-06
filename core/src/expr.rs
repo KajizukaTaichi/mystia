@@ -143,6 +143,15 @@ impl Node for Expr {
                 if let Some((name, typ)) = name.split_once("@") {
                     ctx.type_alias.insert("T".to_string(), Type::parse(typ)?);
                     let (mut func, body) = ctx.generics_code.get(name)?.clone();
+                    if args.len() != func.arguments.len() {
+                        let errmsg = format!(
+                            "arguments of function `{name}` length should be {}, but passed {} values",
+                            func.arguments.len(),
+                            args.len()
+                        );
+                        ctx.occurred_error = Some(errmsg);
+                        return None;
+                    }
                     for ((k, v), arg) in func.arguments.clone().iter().zip(args) {
                         let v = v.type_infer(ctx)?;
                         func.arguments.insert(k.to_owned(), v.clone());
