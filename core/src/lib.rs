@@ -72,6 +72,7 @@ impl Compiler {
             static_data: vec![],
             declare_code: vec![],
             occurred_error: None,
+            macro_code: IndexMap::new(),
             type_alias: IndexMap::new(),
             variable_type: IndexMap::new(),
             global_type: IndexMap::new(),
