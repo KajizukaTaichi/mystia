@@ -75,6 +75,14 @@ impl Node for Stmt {
         } else if let Some(source) = source.strip_prefix("type ") {
             let (name, value) = source.split_once("=")?;
             Some(Stmt::Type(name.trim().to_string(), Type::parse(value)?))
+        } else if let Some(source) = source.strip_prefix("macro ") {
+            let (head, value) = source.split_once("=")?;
+            let head = tokenize(head, SPACE.as_ref(), false, true, false)?;
+            Some(Stmt::Macro(
+                head.first()?.to_string(),
+                head.get(1..)?.to_vec(),
+                Expr::parse(value)?,
+            ))
         } else if let Some(source) = source.strip_prefix("return ") {
             Some(Stmt::Return(Some(Expr::parse(source)?)))
         } else if let Some(after) = source.strip_prefix("load") {
