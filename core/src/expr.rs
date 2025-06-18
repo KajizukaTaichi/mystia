@@ -82,8 +82,7 @@ impl Node for Expr {
             Expr::Call(name, args) => {
                 if ctx.function_type.contains_key(name) {
                     format!(
-                        "(call ${} {})",
-                        name.replace("@", "__"),
+                        "(call ${name} {})",
                         join!(
                             args.iter()
                                 .map(|x| x.compile(ctx))
