@@ -1,3 +1,9 @@
-macro dup(n) = n + n;
-let a = dup(2+3);
-let b = dup(3.4)
+load print(_: str): void;
+macro repeat(n, block) = {
+    let i = 0;
+    while i < n loop {
+        block;
+        let i + 1
+    }
+};
+repeat(10, print("Hello!"))
