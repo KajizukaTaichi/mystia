@@ -6,4 +6,5 @@ macro repeat(n, block) = {
         let i + 1
     }
 };
-repeat(10, print("Hello!"))
+repeat(3, print("Hello!"));
+repeat(5, print("World!"))
