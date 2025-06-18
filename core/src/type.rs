@@ -124,8 +124,12 @@ impl Type {
             Type::Integer | Type::Bool | Type::String | Type::Enum(_) => Some(4),
             Type::Number => Some(8),
             Type::Void => Some(0),
-            Type::Dict(dict) => Some(dict.len() * 4),
-            Type::Array(_, len) => Some(len * 4),
+            Type::Dict(dict) => Some(
+                dict.iter()
+                    .map(|x| x.1.1.pointer_length() as usize)
+                    .sum::<usize>(),
+            ),
+            Type::Array(typ, len) => Some(typ.pointer_length() as usize * len),
             _ => None,
         }
     }
