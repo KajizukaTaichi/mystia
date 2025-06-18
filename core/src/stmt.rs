@@ -305,62 +305,36 @@ impl Node for Stmt {
                         }
                     },
                     Expr::Call(name, args) => {
-                        let mut funcgen = || {
-                            let var_typ = ctx.variable_type.clone();
-                            let arg_typ = ctx.argument_type.clone();
-                            compile_args!(args, ctx);
-                            let frame = Function {
-                                variables: ctx.variable_type.clone(),
-                                arguments: ctx.argument_type.clone(),
-                                returns: value.type_infer(ctx)?,
-                            };
-                            ctx.function_type.insert(name.to_owned(), frame);
-                            ctx.variable_type = var_typ;
-                            ctx.argument_type = arg_typ;
-                            Some(())
+                        let var_typ = ctx.variable_type.clone();
+                        let arg_typ = ctx.argument_type.clone();
+                        compile_args!(args, ctx);
+                        let frame = Function {
+                            variables: ctx.variable_type.clone(),
+                            arguments: ctx.argument_type.clone(),
+                            returns: value.type_infer(ctx)?,
                         };
-                        if let None = funcgen() {
-                            compile_args!(args, ctx);
-                            let frame = Function {
-                                variables: IndexMap::new(),
-                                arguments: ctx.argument_type.clone(),
-                                returns: Type::Any,
-                            };
-                            ctx.generics_code
-                                .insert(name.to_owned(), (frame, value.to_owned()));
-                        }
+                        ctx.function_type.insert(name.to_owned(), frame);
+                        ctx.variable_type = var_typ;
+                        ctx.argument_type = arg_typ;
                     }
                     Expr::Oper(oper) => match *oper.clone() {
                         Oper::Cast(Expr::Call(name, args), ret) => {
-                            let mut funcgen = || {
-                                let var_typ = ctx.variable_type.clone();
-                                let arg_typ = ctx.argument_type.clone();
-                                compile_args!(args.clone(), ctx);
-                                ctx.function_type.insert(
-                                    name.to_owned(),
-                                    Function {
-                                        variables: ctx.variable_type.clone(),
-                                        arguments: ctx.argument_type.clone(),
-                                        returns: ret.clone(),
-                                    },
-                                );
-                                type_check!(value.type_infer(ctx)?, ret, ctx);
-                                let frame = ctx.function_type.get_mut(&name)?;
-                                frame.variables = ctx.variable_type.clone();
-                                ctx.variable_type = var_typ;
-                                ctx.argument_type = arg_typ;
-                                Some(())
-                            };
-                            if let None = funcgen() {
-                                compile_args!(args, ctx);
-                                let frame = Function {
-                                    variables: IndexMap::new(),
+                            let var_typ = ctx.variable_type.clone();
+                            let arg_typ = ctx.argument_type.clone();
+                            compile_args!(args.clone(), ctx);
+                            ctx.function_type.insert(
+                                name.to_owned(),
+                                Function {
+                                    variables: ctx.variable_type.clone(),
                                     arguments: ctx.argument_type.clone(),
-                                    returns: ret,
-                                };
-                                ctx.generics_code
-                                    .insert(name.to_owned(), (frame, value.to_owned()));
-                            }
+                                    returns: ret.clone(),
+                                },
+                            );
+                            type_check!(value.type_infer(ctx)?, ret, ctx);
+                            let frame = ctx.function_type.get_mut(&name)?;
+                            frame.variables = ctx.variable_type.clone();
+                            ctx.variable_type = var_typ;
+                            ctx.argument_type = arg_typ;
                         }
                         _ => return None,
                     },

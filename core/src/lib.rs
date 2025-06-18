@@ -46,8 +46,6 @@ pub struct Compiler {
     pub static_data: Vec<String>,
     /// Set of function declare code
     pub declare_code: Vec<String>,
-    /// Information for generic functions
-    pub generics_code: IndexMap<String, (Function, Expr)>,
     /// Type alias that's defined by user
     pub type_alias: IndexMap<String, Type>,
     /// Errors that occurred during compilation
@@ -72,7 +70,6 @@ impl Compiler {
             static_data: vec![],
             declare_code: vec![],
             occurred_error: None,
-            generics_code: IndexMap::new(),
             type_alias: IndexMap::new(),
             variable_type: IndexMap::new(),
             global_type: IndexMap::new(),
