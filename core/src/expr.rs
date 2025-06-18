@@ -79,15 +79,33 @@ impl Node for Expr {
             }
             Expr::Variable(name) => format!("(local.get ${name})"),
             Expr::Literal(literal) => literal.compile(ctx)?,
-            Expr::Call(name, args) => format!(
-                "(call ${} {})",
-                name.replace("@", "__"),
-                join!(
-                    args.iter()
-                        .map(|x| x.compile(ctx))
-                        .collect::<Option<Vec<_>>>()?
-                )
-            ),
+            Expr::Call(name, args) => {
+                if ctx.function_type.contains_key(name) {
+                    format!(
+                        "(call ${} {})",
+                        name.replace("@", "__"),
+                        join!(
+                            args.iter()
+                                .map(|x| x.compile(ctx))
+                                .collect::<Option<Vec<_>>>()?
+                        )
+                    )
+                } else if let Some((params, expr)) = ctx.macro_code.get(name).cloned() {
+                    let macro_ctx = &mut ctx.clone();
+                    for (params, arg) in params.iter().zip(args) {
+                        let typ = arg.type_infer(ctx)?;
+                        macro_ctx.variable_type.insert(params.to_owned(), typ);
+                    }
+                    let mut body = expr.compile(macro_ctx)?;
+                    for (params, arg) in params.iter().zip(args) {
+                        let var = Expr::Variable(params.to_owned()).compile(macro_ctx)?;
+                        body = body.replace(&var, &arg.compile(ctx)?);
+                    }
+                    body
+                } else {
+                    return None;
+                }
+            }
             Expr::Index(array, index) => {
                 let Type::Array(typ, len) = array.type_infer(ctx)? else {
                     return None;
@@ -140,24 +158,32 @@ impl Node for Expr {
             }
             Expr::Literal(literal) => literal.type_infer(ctx)?,
             Expr::Call(name, args) => {
-                let Some(function) = ctx.function_type.get(name).cloned() else {
+                if let Some(function) = ctx.function_type.get(name).cloned() {
+                    if args.len() != function.arguments.len() {
+                        let errmsg = format!(
+                            "arguments of function `{name}` length should be {}, but passed {} values",
+                            function.arguments.len(),
+                            args.len()
+                        );
+                        ctx.occurred_error = Some(errmsg);
+                        return None;
+                    }
+                    let func = |(arg, typ): (&Expr, &Type)| type_check!(arg, typ, ctx);
+                    let ziped = args.iter().zip(function.arguments.values());
+                    ziped.map(func).collect::<Option<Vec<_>>>()?;
+                    function.returns.type_infer(ctx)?
+                } else if let Some((params, expr)) = ctx.macro_code.get(name).cloned() {
+                    let macro_ctx = &mut ctx.clone();
+                    for (params, arg) in params.iter().zip(args) {
+                        let typ = arg.type_infer(ctx)?;
+                        macro_ctx.variable_type.insert(params.to_owned(), typ);
+                    }
+                    expr.type_infer(macro_ctx)?
+                } else {
                     let errmsg = format!("function `{name}` you want to call is not defined");
                     ctx.occurred_error = Some(errmsg);
                     return None;
-                };
-                if args.len() != function.arguments.len() {
-                    let errmsg = format!(
-                        "arguments of function `{name}` length should be {}, but passed {} values",
-                        function.arguments.len(),
-                        args.len()
-                    );
-                    ctx.occurred_error = Some(errmsg);
-                    return None;
                 }
-                let func = |(arg, typ): (&Expr, &Type)| type_check!(arg, typ, ctx);
-                let ziped = args.iter().zip(function.arguments.values());
-                ziped.map(func).collect::<Option<Vec<_>>>()?;
-                function.returns.type_infer(ctx)?
             }
             Expr::Index(arr, _) => {
                 let infered = arr.type_infer(ctx)?;
