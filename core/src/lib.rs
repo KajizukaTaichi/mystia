@@ -46,6 +46,8 @@ pub struct Compiler {
     pub static_data: Vec<String>,
     /// Set of function declare code
     pub declare_code: Vec<String>,
+    /// Macro code that's processing in compile time
+    pub macro_code: IndexMap<String, (Vec<String>, Expr)>,
     /// Type alias that's defined by user
     pub type_alias: IndexMap<String, Type>,
     /// Errors that occurred during compilation
