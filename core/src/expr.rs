@@ -91,15 +91,17 @@ impl Node for Expr {
                         )
                     )
                 } else if let Some((params, expr)) = ctx.macro_code.get(name).cloned() {
-                    let macro_ctx = &mut ctx.clone();
                     for (params, arg) in params.iter().zip(args) {
                         let typ = arg.type_infer(ctx)?;
-                        macro_ctx.variable_type.insert(params.to_owned(), typ);
+                        ctx.variable_type.insert(params.to_owned(), typ);
                     }
-                    let mut body = expr.compile(macro_ctx)?;
+                    let mut body = expr.compile(ctx)?;
                     for (params, arg) in params.iter().zip(args) {
-                        let var = Expr::Variable(params.to_owned()).compile(macro_ctx)?;
+                        let var = Expr::Variable(params.to_owned()).compile(ctx)?;
                         body = body.replace(&var, &arg.compile(ctx)?);
+                    }
+                    for params in params {
+                        ctx.variable_type.shift_remove(&params);
                     }
                     body
                 } else {
@@ -173,12 +175,15 @@ impl Node for Expr {
                     ziped.map(func).collect::<Option<Vec<_>>>()?;
                     function.returns.type_infer(ctx)?
                 } else if let Some((params, expr)) = ctx.macro_code.get(name).cloned() {
-                    let macro_ctx = &mut ctx.clone();
                     for (params, arg) in params.iter().zip(args) {
                         let typ = arg.type_infer(ctx)?;
-                        macro_ctx.variable_type.insert(params.to_owned(), typ);
+                        ctx.variable_type.insert(params.to_owned(), typ);
                     }
-                    expr.type_infer(macro_ctx)?
+                    let typ = expr.type_infer(ctx)?;
+                    for params in params {
+                        ctx.variable_type.shift_remove(&params);
+                    }
+                    typ
                 } else {
                     let errmsg = format!("function `{name}` you want to call is not defined");
                     ctx.occurred_error = Some(errmsg);
