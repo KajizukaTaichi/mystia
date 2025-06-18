@@ -11,6 +11,7 @@ pub enum Stmt {
         Option<String>,
         Vec<(String, Vec<Type>, Type, Option<String>)>,
     ),
+    Macro(Vec<String>, Expr),
     Expr(Expr),
     Return(Option<Expr>),
     Next,
