@@ -11,7 +11,7 @@ pub enum Stmt {
         Option<String>,
         Vec<(String, Vec<Type>, Type, Option<String>)>,
     ),
-    Macro(Vec<String>, Expr),
+    Macro(String, Vec<String>, Expr),
     Expr(Expr),
     Return(Option<Expr>),
     Next,
@@ -365,6 +365,11 @@ impl Node for Stmt {
                         },
                     );
                 }
+                Type::Void
+            }
+            Stmt::Macro(name, args, expr) => {
+                ctx.macro_code
+                    .insert(name.to_owned(), (args.clone(), expr.clone()));
                 Type::Void
             }
             Stmt::Return(_) => Type::Void,
