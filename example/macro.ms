@@ -7,4 +7,4 @@ macro repeat(n, block) = {
     }
 };
 repeat(3, { print("Hello!") });
-repeat(5, { print("World!") })
+5.repeat({ print("World!") })
