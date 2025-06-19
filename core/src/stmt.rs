@@ -123,7 +123,10 @@ impl Node for Stmt {
             }
             let rest = after.trim_start();
             if let Some((module, sigs)) = rest.split_once("::") {
-                let sigs = sigs.strip_prefix('{').and_then(|s| s.strip_suffix('}'))?;
+                let sigs = sigs
+                    .strip_prefix('{')
+                    .and_then(|s| s.strip_suffix('}'))
+                    .unwrap_or(sigs);
                 let sigs = parse_sigs(sigs.trim())?;
                 let module = module.trim().to_string();
                 Some(Stmt::Import(module, None, sigs))
