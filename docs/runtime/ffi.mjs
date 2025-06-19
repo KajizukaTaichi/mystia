@@ -80,7 +80,7 @@ export function write(instance, type, value) {
         return ptr;
     } else if (type.type == "dict") {
         for (let [name, field] of Object.entries(type.fields)) {
-            type.fields[name] = write(instance, field.type, field);
+            type.fields[name] = write(instance, field.type, value[name]);
         }
         const ptr = instance.exports.allocator + 0;
         for (let [_name, field] of Object.entries(type.fields)) {
