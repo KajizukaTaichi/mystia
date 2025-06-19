@@ -188,34 +188,30 @@ impl Node for Stmt {
                     }
                 },
                 Expr::Call(name, _) => {
-                    let funcgen = |ctx: &mut Compiler| {
-                        let function = ctx.function_type.get(name)?.clone();
-                        ctx.variable_type = function.variables.clone();
-                        ctx.argument_type = function.arguments.clone();
-                        let code = format!(
-                            "(func ${name} {pub} {args} {ret} {locals} {body})",
-                            args = join!(
-                                &function
-                                    .arguments
-                                    .iter()
-                                    .map(|(name, typ)| Some(format!(
-                                        "(param ${name} {})",
-                                        typ.type_infer(ctx)?.compile(ctx)?
-                                    )))
-                                    .collect::<Option<Vec<_>>>()?
-                            ),
-                            ret = compile_return!(function.returns, ctx),
-                            pub = if let Scope::Global = scope { format!("(export \"{name}\")") } else { String::new() },
-                            body = value.compile(ctx)?, locals = expand_local(ctx)?
-                        );
-                        if !ctx.declare_code.contains(&code) {
-                            ctx.declare_code.push(code);
-                        }
-                        Some(())
-                    };
                     let var_typ = ctx.variable_type.clone();
                     let arg_typ = ctx.argument_type.clone();
-                    funcgen(ctx);
+                    let function = ctx.function_type.get(name)?.clone();
+                    ctx.variable_type = function.variables.clone();
+                    ctx.argument_type = function.arguments.clone();
+                    let code = format!(
+                        "(func ${name} {pub} {args} {ret} {locals} {body})",
+                        args = join!(
+                            &function
+                                .arguments
+                                .iter()
+                                .map(|(name, typ)| Some(format!(
+                                    "(param ${name} {})",
+                                    typ.type_infer(ctx)?.compile(ctx)?
+                                )))
+                                .collect::<Option<Vec<_>>>()?
+                        ),
+                        ret = compile_return!(function.returns, ctx),
+                        pub = if let Scope::Global = scope { format!("(export \"{name}\")") } else { String::new() },
+                        body = value.compile(ctx)?, locals = expand_local(ctx)?
+                    );
+                    if !ctx.declare_code.contains(&code) {
+                        ctx.declare_code.push(code);
+                    }
                     ctx.variable_type = var_typ;
                     ctx.argument_type = arg_typ;
                     String::new()
