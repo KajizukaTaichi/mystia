@@ -94,6 +94,8 @@ impl Node for Stmt {
         } else if let Some(source) = source.strip_prefix("return ") {
             Some(Stmt::Return(Some(Expr::parse(source)?)))
         } else if let Some(after) = source.strip_prefix("load") {
+            /// Signature String: "fn1():ret1 as alias, fn2(arg:t):ret2, …" to
+            /// Vec<(Function Name, List of input and type, return type, alias)>
             pub fn parse_sigs(
                 sigs: &str,
             ) -> Option<Vec<(String, Vec<Type>, Type, Option<String>)>> {
