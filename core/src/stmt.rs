@@ -244,7 +244,7 @@ impl Node for Stmt {
                 _ => return None,
             },
             Stmt::Import(module, alias, funcs) => {
-                for (fn_name, args, ret_ty, maybe_alias) in funcs {
+                for (fn_name, args, ret_typ, maybe_alias) in funcs {
                     let export_name = maybe_alias.as_ref().unwrap_or(fn_name);
                     let import_as = alias.as_ref().unwrap_or(module);
                     let wasm_name = if import_as.is_empty() {
@@ -265,11 +265,10 @@ impl Node for Stmt {
                                 .collect::<Option<Vec<_>>>()?
                         )
                     };
-                    let ret = compile_return!(ret_ty, ctx);
-                    let entry = format!(
+                    let ret = compile_return!(ret_typ, ctx);
+                    ctx.import_code.push(format!(
                         "(import \"env\" \"{wasm_name}\" (func ${export_name} {sig} {ret}))"
-                    );
-                    ctx.import_code.push(entry);
+                    ));
                 }
                 String::new()
             }
