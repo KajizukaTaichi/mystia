@@ -91,8 +91,6 @@ impl Node for Stmt {
                 })
                 .collect::<Option<Vec<_>>>()?;
             Some(Stmt::Macro(name, args, Expr::parse(value)?))
-        } else if let Some(source) = source.strip_prefix("return ") {
-            Some(Stmt::Return(Some(Expr::parse(source)?)))
         } else if let Some(after) = source.strip_prefix("load") {
             /// Signature String: "fn1():ret1 as alias, fn2(arg:t):ret2, …" to
             /// Vec<(Function Name, List of input and type, return type, alias)>
@@ -133,6 +131,8 @@ impl Node for Stmt {
             } else {
                 Some(Stmt::Import(String::new(), None, parse_sigs(&rest.trim())?))
             }
+        } else if let Some(source) = source.strip_prefix("return ") {
+            Some(Stmt::Return(Some(Expr::parse(source)?)))
         } else if source == "return" {
             Some(Stmt::Return(None))
         } else if source == "next" {
