@@ -240,7 +240,7 @@ impl Node for Stmt {
                     };
                     let sig = format!("(param f64) (param i32)").repeat(*args_len);
                     ctx.import_code.push(format!(
-                        "(import \"env\" \"{wasm_name}\" (func ${export_name} {sig} (return f64)))"
+                        "(import \"env\" \"{wasm_name}\" (func ${export_name} {sig} (result f64)))"
                     ));
                 }
                 String::new()
