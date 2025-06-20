@@ -95,7 +95,8 @@ impl Node for Expr {
                         for arg in args {
                             result.push_str(&join!([
                                 arg.compile(ctx)?,
-                                type_to_json(&arg.type_infer(ctx)?)
+                                Expr::Literal(Value::String(type_to_json(&arg.type_infer(ctx)?)))
+                                    .compile(ctx)?
                             ]));
                         }
                         result
