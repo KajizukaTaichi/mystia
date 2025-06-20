@@ -172,3 +172,36 @@ impl Type {
         }
     }
 }
+
+pub fn type_to_json(typ: &Type) -> String {
+    match typ {
+        Type::Integer => "\"int\"".to_string(),
+        Type::Number => "\"num\"".to_string(),
+        Type::Bool => "\"bool\"".to_string(),
+        Type::String => "\"str\"".to_string(),
+        Type::Void => "null".to_string(),
+        Type::Dict(dict) => format!(
+            "{{ type: \"dict\", fields: {{ {} }} }}",
+            dict.iter()
+                .map(|(k, (offset, typ))| format!(
+                    "{k}: {{ type: {}, offset: {offset} }}",
+                    type_to_json(typ)
+                ))
+                .collect::<Vec<_>>()
+                .join(", ")
+        ),
+        Type::Array(typ, len) => format!(
+            "{{ type: \"array\", element: {}, length: {len} }}",
+            type_to_json(typ)
+        ),
+        Type::Enum(e) => format!(
+            "{{ type: \"enum\", enum: [{}] }}",
+            e.iter()
+                .map(|x| format!("\"{x}\""))
+                .collect::<Vec<_>>()
+                .join(", ")
+        ),
+        Type::Alias(name, _) => format!("{{ type: \"alias\", name: {name} }}"),
+        Type::Any => format!("\"any\""),
+    }
+}
