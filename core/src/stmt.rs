@@ -336,16 +336,9 @@ impl Node for Stmt {
                 Type::Void
             }
             Stmt::Import(_module, _alias, funcs) => {
-                for (fn_name, args, alias) in funcs {
+                for (fn_name, _, alias) in funcs {
                     let import_name = alias.as_ref().unwrap_or(fn_name).clone();
-                    ctx.function_type.insert(
-                        import_name,
-                        Function {
-                            variables: IndexMap::new(),
-                            arguments: (0..*args).map(|x| (x.to_string(), Type::Any)).collect(),
-                            returns: Type::Any,
-                        },
-                    );
+                    ctx.js_function.push(import_name);
                 }
                 Type::Void
             }
