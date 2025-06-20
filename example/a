@@ -1,2 +1,2 @@
-load to_str();
+load to_str(a);
 1 as str
