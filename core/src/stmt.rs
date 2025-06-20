@@ -6,7 +6,7 @@ pub enum Stmt {
     While(Expr, Expr),
     Let(Scope, Expr, Expr),
     Type(String, Type),
-    Import(String, Option<String>, Vec<(String, Option<String>)>),
+    Import(String, Option<String>, Vec<(String, usize, Option<String>)>),
     Macro(String, Vec<String>, Expr),
     Expr(Expr),
     Return(Option<Expr>),
@@ -90,15 +90,18 @@ impl Node for Stmt {
         } else if let Some(after) = source.strip_prefix("load") {
             /// Signature String: "fn1():ret1 as alias, fn2(arg:t):ret2, …" to
             /// Vec<(Function Name, List of input and type, return type, alias)>
-            pub fn parse_sigs(sigs: &str) -> Option<Vec<(String, Option<String>)>> {
+            pub fn parse_sigs(sigs: &str) -> Option<Vec<(String, usize, Option<String>)>> {
                 let mut result = Vec::new();
                 for part in tokenize(sigs, &[","], false, true, false)? {
                     let part = part.trim();
-                    let (name, alias) = part
+                    let (sig, alias) = part
                         .rsplit_once("as")
                         .map(|(sig, alias)| (sig, Some(alias.to_string())))
                         .unwrap_or((part, None));
-                    result.push((name.to_string(), alias));
+                    let Expr::Call(name, args) = Expr::parse(sig)? else {
+                        return None;
+                    };
+                    result.push((name, args.len(), alias));
                 }
                 Some(result)
             }
