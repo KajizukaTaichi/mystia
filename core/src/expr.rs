@@ -185,6 +185,11 @@ impl Node for Expr {
                     let ziped = args.iter().zip(function.arguments.values());
                     ziped.map(func).collect::<Option<Vec<_>>>()?;
                     function.returns.type_infer(ctx)?
+                } else if ctx.js_function.contains(name) {
+                    args.iter()
+                        .map(|x| x.type_infer(ctx))
+                        .collect::<Option<Vec<_>>>()?;
+                    Type::Any
                 } else if let Some((params, expr)) = ctx.macro_code.get(name).cloned() {
                     for (params, arg) in params.iter().zip(args) {
                         let typ = arg.type_infer(ctx)?;
