@@ -336,18 +336,14 @@ impl Node for Stmt {
                 Type::Void
             }
             Stmt::Import(_module, _alias, funcs) => {
-                for (fn_name, args, ret_ty, alias) in funcs {
+                for (fn_name, args, alias) in funcs {
                     let import_name = alias.as_ref().unwrap_or(fn_name).clone();
-                    let mut arg_map = IndexMap::new();
-                    for (i, ty) in args.iter().enumerate() {
-                        arg_map.insert(i.to_string(), ty.clone());
-                    }
                     ctx.function_type.insert(
                         import_name,
                         Function {
                             variables: IndexMap::new(),
-                            arguments: arg_map,
-                            returns: ret_ty.clone(),
+                            arguments: (0..*args).map(|x| (x.to_string(), Type::Any)).collect(),
+                            returns: Type::Any,
                         },
                     );
                 }
