@@ -89,6 +89,17 @@ impl Node for Expr {
                                 .collect::<Option<Vec<_>>>()?
                         )
                     )
+                } else if ctx.js_function.contains(name) {
+                    format!("(call ${name} {})", {
+                        let mut result = String::new();
+                        for arg in args {
+                            result.push_str(&join!([
+                                arg.compile(ctx)?,
+                                type_to_json(&arg.type_infer(ctx)?)
+                            ]));
+                        }
+                        result
+                    })
                 } else if let Some((params, expr)) = ctx.macro_code.get(name).cloned() {
                     for (params, arg) in params.iter().zip(args) {
                         let typ = arg.type_infer(ctx)?;
