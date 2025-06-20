@@ -6,11 +6,7 @@ pub enum Stmt {
     While(Expr, Expr),
     Let(Scope, Expr, Expr),
     Type(String, Type),
-    Import(
-        String,
-        Option<String>,
-        Vec<(String, Vec<Type>, Type, Option<String>)>,
-    ),
+    Import(String, Option<String>, Vec<(String, Option<String>)>),
     Macro(String, Vec<String>, Expr),
     Expr(Expr),
     Return(Option<Expr>),
@@ -94,28 +90,15 @@ impl Node for Stmt {
         } else if let Some(after) = source.strip_prefix("load") {
             /// Signature String: "fn1():ret1 as alias, fn2(arg:t):ret2, …" to
             /// Vec<(Function Name, List of input and type, return type, alias)>
-            pub fn parse_sigs(
-                sigs: &str,
-            ) -> Option<Vec<(String, Vec<Type>, Type, Option<String>)>> {
+            pub fn parse_sigs(sigs: &str) -> Option<Vec<(String, Option<String>)>> {
                 let mut result = Vec::new();
                 for part in tokenize(sigs, &[","], false, true, false)? {
                     let part = part.trim();
-                    let (sig, alias) = part
+                    let (name, alias) = part
                         .rsplit_once("as")
                         .map(|(sig, alias)| (sig, Some(alias.to_string())))
                         .unwrap_or((part, None));
-                    let Oper::Cast(Expr::Call(name, args), ret_typ) = Oper::parse(sig)? else {
-                        return None;
-                    };
-                    let mut args_typ = vec![];
-                    for arg in args {
-                        let Expr::Oper(arg) = arg else { return None };
-                        let Oper::Cast(_, arg_typ) = *arg.clone() else {
-                            return None;
-                        };
-                        args_typ.push(arg_typ);
-                    }
-                    result.push((name, args_typ, ret_typ, alias));
+                    result.push((name.to_string(), alias));
                 }
                 Some(result)
             }
@@ -257,12 +240,8 @@ impl Node for Stmt {
                     } else {
                         join!(
                             args.iter()
-                                .map(|t| {
-                                    t.type_infer(ctx)?
-                                        .compile(ctx)
-                                        .map(|s| format!("(param {})", s))
-                                })
-                                .collect::<Option<Vec<_>>>()?
+                                .map(|_| format!("(param f64) (param i32)"))
+                                .collect::<Vec<_>>()
                         )
                     };
                     let ret = compile_return!(ret_typ, ctx);
