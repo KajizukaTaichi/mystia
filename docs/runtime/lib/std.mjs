@@ -3,8 +3,12 @@ import { write, read } from "../ffi.mjs";
 export class MystiaStdLib {
     constructor() {
         this.functions = {
-            to_str: (value) => {
-                return write(this.instance, "str", value.toString());
+            to_str: (value, typ) => {
+                return write(
+                    this.instance,
+                    "str",
+                    read(this.instance, typ, value).toString(),
+                );
             },
             to_num: (value) => {
                 return parseFloat(read(this.instance, "str", value));
