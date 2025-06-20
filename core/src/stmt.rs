@@ -239,9 +239,8 @@ impl Node for Stmt {
                         format!("{import_as}.{fn_name}")
                     };
                     let sig = format!("(param f64) (param i32)").repeat(*args_len);
-                    let ret = compile_return!(ret_typ, ctx);
                     ctx.import_code.push(format!(
-                        "(import \"env\" \"{wasm_name}\" (func ${export_name} {sig} {ret}))"
+                        "(import \"env\" \"{wasm_name}\" (func ${export_name} {sig} (return f64)))"
                     ));
                 }
                 String::new()
