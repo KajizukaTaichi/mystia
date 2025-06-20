@@ -44,6 +44,8 @@ pub struct Compiler {
     pub import_code: Vec<String>,
     /// Static string data
     pub static_data: Vec<String>,
+    /// JavaScript function prototype
+    pub js_function: Vec<String>,
     /// Set of function declare code
     pub declare_code: Vec<String>,
     /// Macro code that's processing in compile time
@@ -71,6 +73,7 @@ impl Compiler {
             import_code: vec![],
             static_data: vec![],
             declare_code: vec![],
+            js_function: vec![],
             occurred_error: None,
             macro_code: IndexMap::new(),
             type_alias: IndexMap::new(),
