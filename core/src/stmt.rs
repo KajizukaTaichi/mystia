@@ -6,7 +6,11 @@ pub enum Stmt {
     While(Expr, Expr),
     Let(Scope, Expr, Expr),
     Type(String, Type),
-    Import(String, Option<String>, Vec<(String, usize, Option<String>)>),
+    Import(
+        String,
+        Option<String>,
+        Vec<(String, usize, Option<Type>, Option<String>)>,
+    ),
     Macro(String, Vec<String>, Expr),
     Expr(Expr),
     Return(Option<Expr>),
@@ -90,7 +94,9 @@ impl Node for Stmt {
         } else if let Some(after) = source.strip_prefix("load") {
             /// Signature String: "fn1():ret1 as alias, fn2(arg:t):ret2, …" to
             /// Vec<(Function Name, List of input and type, return type, alias)>
-            pub fn parse_sigs(sigs: &str) -> Option<Vec<(String, usize, Option<String>)>> {
+            pub fn parse_sigs(
+                sigs: &str,
+            ) -> Option<Vec<(String, usize, Option<Type>, Option<String>)>> {
                 let mut result = Vec::new();
                 for part in tokenize(sigs, &[","], false, true, false)? {
                     let part = part.trim();
@@ -98,10 +104,13 @@ impl Node for Stmt {
                         .rsplit_once("as")
                         .map(|(sig, alias)| (sig, Some(alias.to_string())))
                         .unwrap_or((part, None));
-                    let Expr::Call(name, args) = Expr::parse(sig)? else {
+                    if let Expr::Call(name, args) = Expr::parse(sig)? {
+                        result.push((name, args.len(), None, alias));
+                    } else if let Oper::Cast(Expr::Call(name, args), typ) = Oper::parse(sig)? {
+                        result.push((name, args.len(), Some(typ), alias));
+                    } else {
                         return None;
                     };
-                    result.push((name, args.len(), alias));
                 }
                 Some(result)
             }
@@ -230,7 +239,7 @@ impl Node for Stmt {
                 _ => return None,
             },
             Stmt::Import(module, alias, funcs) => {
-                for (fn_name, args_len, maybe_alias) in funcs {
+                for (fn_name, args_len, _, maybe_alias) in funcs {
                     let export_name = maybe_alias.as_ref().unwrap_or(fn_name);
                     let import_as = alias.as_ref().unwrap_or(module);
                     let wasm_name = if import_as.is_empty() {
@@ -336,9 +345,9 @@ impl Node for Stmt {
                 Type::Void
             }
             Stmt::Import(_module, _alias, funcs) => {
-                for (fn_name, _, alias) in funcs {
+                for (fn_name, _, ret_typ, alias) in funcs {
                     let import_name = alias.as_ref().unwrap_or(fn_name).clone();
-                    ctx.js_function.push(import_name);
+                    ctx.js_function.insert(import_name, ret_typ.clone());
                 }
                 Type::Void
             }
