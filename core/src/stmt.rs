@@ -238,9 +238,9 @@ impl Node for Stmt {
                     } else {
                         format!("{import_as}.{fn_name}")
                     };
-                    let sig = format!("(param f64) (param i32)").repeat(*args_len);
+                    let sig = format!("(param i32) (param i32)").repeat(*args_len);
                     ctx.import_code.push(format!(
-                        "(import \"env\" \"{wasm_name}\" (func ${export_name} {sig} (result f64)))"
+                        "(import \"env\" \"{wasm_name}\" (func ${export_name} {sig} (result i32)))"
                     ));
                 }
                 String::new()
