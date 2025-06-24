@@ -17,11 +17,25 @@ export class MystiaStdLib {
             to_num: (value) => {
                 return parseFloat(read(this.instance, "str", value));
             },
-            repeat: (value, count) => {
+            repeat: (value, value_typ, count, count_typ) => {
                 return write(
                     this.instance,
                     "str",
-                    read(this.instance, "str", value).repeat(count),
+                    read(
+                        this.instance,
+                        eval(
+                            `(${read(this.instance, "str", value_typ).toString()})`,
+                        ),
+                        value,
+                    ).repeat(
+                        read(
+                            this.instance,
+                            eval(
+                                `(${read(this.instance, "str", count_typ).toString()})`,
+                            ),
+                            count,
+                        ),
+                    ),
                 );
             },
             concat: (str1, str2) => {
