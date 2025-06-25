@@ -25,8 +25,16 @@ export const spec = {
 export class MystiaDatetimeLib {
     constructor() {
         this.functions = {
-            now: () => write(this.instance, "str", new Date().toString()),
-            utcnow: () => write(this.instance, "str", new Date().toUTCString()),
+            now: () => write(
+                this.instance,
+                "str",
+                new Date().toString(),
+            ),
+            utcnow: () => write(
+                this.instance,
+                "str",
+                new Date().toUTCString(),
+            ),
             today: () => {
                 let date = new Date()
                     .toISOString()
@@ -39,56 +47,184 @@ export class MystiaDatetimeLib {
                     date,
                 );
             },
-            date: (y, m, d) => {
-                const dt = new Date(
-                    read(this.instance, "num", y),
-                    read(this.instance, "num", m) - 1,
-                    read(this.instance, "num", d),
+            date: (y, y_typ, m, m_typ, d, d_typ) => {
+                const Y = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", y_typ).toString()})`,
+                    ),
+                    y,
                 );
+                const M = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", m_typ).toString()})`,
+                    ),
+                    m,
+                );
+                const D = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", d_typ).toString()})`,
+                    ),
+                    d,
+                );
+                const dt = new Date(Y, M - 1, D);
                 return write(
                     this.instance,
                     "str",
                     dt.toISOString().slice(0, 10),
                 );
             },
-            time: (hr, min, sec, μ) => {
+            time: (hr, hr_typ, min, min_typ, sec, sec_typ, μ, μ_typ) => {
                 const pad = (n) => String(n).padStart(2, "0");
+                const H = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", hr_typ).toString()})`,
+                    ),
+                    hr,
+                );
+                const MI = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", min_typ).toString()})`,
+                    ),
+                    min,
+                );
+                const S = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", sec_typ).toString()})`,
+                    ),
+                    sec,
+                );
+                const MS = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", μ_typ).toString()})`,
+                    ),
+                    μ,
+                );
                 return write(
                     this.instance,
                     "str",
-                    `${pad(read(this.instance, "num", hr))}:${pad(read(this.instance, "num", min))}:${pad(read(this.instance, "num", sec))}.${String(read(this.instance, "num", μ)).padStart(6, "0")}`,
+                    `${pad(H)}:${pad(MI)}:${pad(S)}.${String(MS).padStart(6, "0")}`,
                 );
             },
-            datetime: (y, m, d, hr, min, sec, μ) => {
-                const dt = new Date(
-                    read(this.instance, "num", y),
-                    read(this.instance, "num", m) - 1,
-                    read(this.instance, "num", d),
-                    read(this.instance, "num", hr),
-                    read(this.instance, "num", min),
-                    read(this.instance, "num", sec),
-                    Math.floor(read(this.instance, "num", μ) / 1000),
+            datetime: (y, y_typ, m, m_typ, d, d_typ, hr, hr_typ, min, min_typ, sec, sec_typ, μ, μ_typ) => {
+                const Y = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", y_typ).toString()})`,
+                    ),
+                    y,
                 );
-                return write(this.instance, "str", dt.toISOString());
+                const M = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", m_typ).toString()})`,
+                    ),
+                    m,
+                );
+                const D = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", d_typ).toString()})`,
+                    ),
+                    d,
+                );
+                const H = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", hr_typ).toString()})`,
+                    ),
+                    hr,
+                );
+                const MI = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", min_typ).toString()})`,
+                    ),
+                    min,
+                );
+                const S = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", sec_typ).toString()})`,
+                    ),
+                    sec,
+                );
+                const MS = Math.floor(
+                    read(
+                        this.instance,
+                        eval(
+                            `(${read(this.instance, "str", μ_typ).toString()})`,
+                        ),
+                        μ,
+                    ) / 1000,
+                );
+                const dt = new Date(Y, M - 1, D, H, MI, S, MS);
+                return write(
+                    this.instance,
+                    "str",
+                    dt.toISOString(),
+                );
             },
-            fromtimestamp: (sec) =>
-                write(
+            fromtimestamp: (sec, sec_typ) => {
+                const S = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", sec_typ).toString()})`,
+                    ),
+                    sec,
+                );
+                return write(
                     this.instance,
                     "str",
-                    new Date(read(this.instance, "num", sec) * 1000).toString(),
-                ),
-            utcfromtimestamp: (sec) =>
-                write(
+                    new Date(S * 1000).toString(),
+                );
+            },
+            utcfromtimestamp: (sec, sec_typ) => {
+                const S = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", sec_typ).toString()})`,
+                    ),
+                    sec,
+                );
+                return write(
                     this.instance,
                     "str",
-                    new Date(
-                        read(this.instance, "num", sec) * 1000,
-                    ).toUTCString(),
-                ),
-            timestamp: (iso) =>
-                Date.parse(read(this.instance, "str", iso)) / 1000,
-            strftime: (iso, fmt) => {
-                const dt = new Date(read(this.instance, "str", iso));
+                    new Date(S * 1000).toUTCString(),
+                );
+            },
+            timestamp: (iso, iso_typ) => {
+                const I = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", iso_typ).toString()})`,
+                    ),
+                    iso,
+                );
+                return Date.parse(I) / 1000;
+            },
+            strftime: (iso, iso_typ, fmt, fmt_typ) => {
+                const I = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", iso_typ).toString()})`,
+                    ),
+                    iso,
+                );
+                const F = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", fmt_typ).toString()})`,
+                    ),
+                    fmt,
+                );
+                const dt = new Date(I);
                 return write(
                     this.instance,
                     "str",
@@ -98,42 +234,103 @@ export class MystiaDatetimeLib {
                     }).format(dt),
                 );
             },
-            strptime: (text, fmt) => {
-                const dt = new Date(read(this.instance, "str", text));
-                return write(this.instance, "str", dt.toISOString());
+            strptime: (text, text_typ, fmt, fmt_typ) => {
+                const T = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", text_typ).toString()})`,
+                    ),
+                    text,
+                );
+                const dt = new Date(T);
+                return write(
+                    this.instance,
+                    "str",
+                    dt.toISOString(),
+                );
             },
-            isoformat: (iso) =>
-                write(
+            isoformat: (iso, iso_typ) => {
+                const I = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", iso_typ).toString()})`,
+                    ),
+                    iso,
+                );
+                return write(
                     this.instance,
                     "str",
-                    new Date(read(this.instance, "str", iso)).toISOString(),
-                ),
-            weekday: (iso) =>
-                new Date(read(this.instance, "str", iso)).getDay() === 0
-                    ? 6
-                    : new Date(read(this.instance, "str", iso)).getDay() - 1,
-            isoweekday: (iso) =>
-                new Date(read(this.instance, "str", iso)).getDay() === 0
-                    ? 7
-                    : new Date(read(this.instance, "str", iso)).getDay(),
-            add_seconds: (iso, sec) =>
-                write(
+                    new Date(I).toISOString(),
+                );
+            },
+            weekday: (iso, iso_typ) => {
+                const I = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", iso_typ).toString()})`,
+                    ),
+                    iso,
+                );
+                const d = new Date(I).getDay();
+                return d === 0 ? 6 : d - 1;
+            },
+            isoweekday: (iso, iso_typ) => {
+                const I = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", iso_typ).toString()})`,
+                    ),
+                    iso,
+                );
+                const d = new Date(I).getDay();
+                return d === 0 ? 7 : d;
+            },
+            add_seconds: (iso, iso_typ, sec, sec_typ) => {
+                const I = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", iso_typ).toString()})`,
+                    ),
+                    iso,
+                );
+                const S = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", sec_typ).toString()})`,
+                    ),
+                    sec,
+                );
+                return write(
                     this.instance,
                     "str",
                     new Date(
-                        Date.parse(read(this.instance, "str", iso)) +
-                            read(this.instance, "num", sec) * 1000,
+                        Date.parse(I) + S * 1000,
                     ).toISOString(),
-                ),
-            sub_seconds: (iso, sec) =>
-                write(
+                );
+            },
+            sub_seconds: (iso, iso_typ, sec, sec_typ) => {
+                const I = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", iso_typ).toString()})`,
+                    ),
+                    iso,
+                );
+                const S = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", sec_typ).toString()})`,
+                    ),
+                    sec,
+                );
+                return write(
                     this.instance,
                     "str",
                     new Date(
-                        Date.parse(read(this.instance, "str", iso)) -
-                            read(this.instance, "num", sec) * 1000,
+                        Date.parse(I) - S * 1000,
                     ).toISOString(),
-                ),
+                );
+            },
         };
     }
     set_wasm(instance) {
