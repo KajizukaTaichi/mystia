@@ -5,101 +5,258 @@ import path from "path";
 export class MystiaOSLib {
     constructor() {
         this.functions = {
-            getcwd: () => write(this.instance, "str", process.cwd()),
-            remove: (value) => fs.unlinkSync(read(this.instance, "str", value)),
-            mkdir: (value) => fs.mkdirSync(read(this.instance, "str", value)),
-            rename: (src, dest) =>
-                fs.renameSync(
-                    read(this.instance, "str", src),
-                    read(this.instance, "str", dest),
-                ),
-            chdir: (value) =>
-                write(
+            getcwd: () => {
+                return write(
                     this.instance,
                     "str",
-                    process.chdir(read(this.instance, "str", value)),
-                ),
-            listdir: (value) =>
-                write(
+                    process.cwd(),
+                );
+            },
+            remove: (value, value_typ) => {
+                const V = read(
                     this.instance,
-                    "str",
-                    fs.readdirSync(read(this.instance, "str", value)),
-                ),
-            path_join: (value, end) =>
-                write(
-                    this.instance,
-                    "str",
-                    path.join(
-                        read(this.instance, "str", value),
-                        read(this.instance, "str", end),
+                    eval(
+                        `(${read(this.instance, "str", value_typ).toString()})`,
                     ),
-                ),
-            path_basename: (value) =>
-                write(
+                    value,
+                );
+                return fs.unlinkSync(V);
+            },
+            mkdir: (value, value_typ) => {
+                const V = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", value_typ).toString()})`,
+                    ),
+                    value,
+                );
+                return fs.mkdirSync(V);
+            },
+            rename: (src, src_typ, dest, dest_typ) => {
+                const S = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", src_typ).toString()})`,
+                    ),
+                    src,
+                );
+                const D = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", dest_typ).toString()})`,
+                    ),
+                    dest,
+                );
+                return fs.renameSync(S, D);
+            },
+            chdir: (value, value_typ) => {
+                const V = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", value_typ).toString()})`,
+                    ),
+                    value,
+                );
+                return write(
                     this.instance,
                     "str",
-                    path.basename(read(this.instance, "str", value)),
-                ),
-            path_parent: (value) =>
-                write(
+                    process.chdir(V),
+                );
+            },
+            listdir: (value, value_typ) => {
+                const V = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", value_typ).toString()})`,
+                    ),
+                    value,
+                );
+                const L = fs.readdirSync(V);
+                return write(
                     this.instance,
                     "str",
-                    path.dirname(read(this.instance, "str", value)),
-                ),
-            path_abs: (value) =>
-                write(
+                    L,
+                );
+            },
+            path_join: (value, value_typ, end, end_typ) => {
+                const V = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", value_typ).toString()})`,
+                    ),
+                    value,
+                );
+                const E = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", end_typ).toString()})`,
+                    ),
+                    end,
+                );
+                return write(
                     this.instance,
                     "str",
-                    path.resolve(read(this.instance, "str", value)),
-                ),
-            path_exist: (value) =>
-                fs.existsSync(read(this.instance, "str", value)),
-            path_isfile: (value) => {
+                    path.join(V, E),
+                );
+            },
+            path_basename: (value, value_typ) => {
+                const V = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", value_typ).toString()})`,
+                    ),
+                    value,
+                );
+                return write(
+                    this.instance,
+                    "str",
+                    path.basename(V),
+                );
+            },
+            path_parent: (value, value_typ) => {
+                const V = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", value_typ).toString()})`,
+                    ),
+                    value,
+                );
+                return write(
+                    this.instance,
+                    "str",
+                    path.dirname(V),
+                );
+            },
+            path_abs: (value, value_typ) => {
+                const V = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", value_typ).toString()})`,
+                    ),
+                    value,
+                );
+                return write(
+                    this.instance,
+                    "str",
+                    path.resolve(V),
+                );
+            },
+            path_exist: (value, value_typ) => {
+                const V = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", value_typ).toString()})`,
+                    ),
+                    value,
+                );
+                return fs.existsSync(V);
+            },
+            path_isfile: (value, value_typ) => {
+                const V = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", value_typ).toString()})`,
+                    ),
+                    value,
+                );
                 let isFile = false;
                 try {
                     isFile = fs
-                        .statSync(read(this.instance, "str", value))
+                        .statSync(V)
                         .isFile();
                 } catch {
                     isFile = false;
                 }
                 return isFile;
             },
-            path_isdir: (value) => {
+            path_isdir: (value, value_typ) => {
+                const V = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", value_typ).toString()})`,
+                    ),
+                    value,
+                );
                 let isDir = false;
                 try {
                     isDir = fs
-                        .statSync(read(this.instance, "str", value))
+                        .statSync(V)
                         .isDirectory();
                 } catch {
                     isDir = false;
                 }
                 return isDir;
             },
-            path_isabs: (value) =>
-                path.isAbsolute(read(this.instance, "str", value)),
-            path_root: (value) =>
-                write(
+            path_isabs: (value, value_typ) => {
+                const V = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", value_typ).toString()})`,
+                    ),
+                    value,
+                );
+                return path.isAbsolute(V);
+            },
+            path_root: (value, value_typ) => {
+                const V = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", value_typ).toString()})`,
+                    ),
+                    value,
+                );
+                return write(
                     this.instance,
                     "str",
-                    path.parse(read(this.instance, "str", value)).root,
-                ),
-            path_ext: (value) =>
-                write(
+                    path.parse(V).root,
+                );
+            },
+            path_ext: (value, value_typ) => {
+                const V = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", value_typ).toString()})`,
+                    ),
+                    value,
+                );
+                return write(
                     this.instance,
                     "str",
-                    path.extname(read(this.instance, "str", value)),
-                ),
-            read_file: (value) =>
-                write(
+                    path.extname(V),
+                );
+            },
+            read_file: (value, value_typ) => {
+                const V = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", value_typ).toString()})`,
+                    ),
+                    value,
+                );
+                return write(
                     this.instance,
                     "str",
-                    fs.readFileSync(read(this.instance, "str", value), "utf8"),
-                ),
-            write_file: (path, content) => {
+                    fs.readFileSync(V, "utf8"),
+                );
+            },
+            write_file: (file, file_typ, content, content_typ) => {
+                const F = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", file_typ).toString()})`,
+                    ),
+                    file,
+                );
+                const C = read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", content_typ).toString()})`,
+                    ),
+                    content,
+                );
                 fs.writeFileSync(
-                    read(this.instance, "str", path),
-                    read(this.instance, "str", content),
+                    F,
+                    C,
                     "utf8",
                 );
             },

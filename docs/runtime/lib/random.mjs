@@ -65,67 +65,209 @@ class Random {
         this._mt = new MersenneTwister(seed);
         this._gaussNext = null;
     }
-    seed(s) {
-        this._mt.init_genrand(s);
+    seed(s, s_typ) {
+        this._mt.init_genrand(
+            read(
+                this.instance,
+                eval(
+                    `(${read(this.instance, "str", s_typ).toString()})`,
+                ),
+                s,
+            ),
+        );
     }
     getstate() {
-        return { state: this._mt.mt.slice(), index: this._mt.mti };
+        const st = { state: this._mt.mt.slice(), index: this._mt.mti };
+        return write(this.instance, "str", JSON.stringify(st));
     }
-    setstate(st) {
-        this._mt.mt = st.state.slice();
-        this._mt.mti = st.index;
+    setstate(st, st_typ) {
+        const obj = JSON.parse(
+            read(
+                this.instance,
+                eval(
+                    `(${read(this.instance, "str", st_typ).toString()})`,
+                ),
+                st,
+            ),
+        );
+        this._mt.mt = obj.state.slice();
+        this._mt.mti = obj.index;
     }
     random() {
-        return this._mt.genrand_real2();
+        return write(this.instance, "num", this._mt.genrand_real2());
     }
-    getrandbits(k) {
+    getrandbits(k, k_typ) {
         let result = 0n,
             bits = 0;
-        while (bits < k) {
+        const need = read(
+            this.instance,
+            eval(
+                `(${read(this.instance, "str", k_typ).toString()})`,
+            ),
+            k,
+        );
+        while (bits < need) {
             const r = BigInt(this._mt.genrand_int32());
-            const take = BigInt(Math.min(k - bits, 32));
+            const take = BigInt(Math.min(need - bits, 32));
             result |= (r & ((1n << take) - 1n)) << BigInt(bits);
             bits += Number(take);
         }
-        return result;
+        return write(this.instance, "num", result);
     }
-    randbytes(n) {
-        // Uint8Array を使ってバイト列を生成し、ArrayBuffer を返す
-        const ua = new Uint8Array(n);
-        for (let i = 0; i < n; i++) {
+    randbytes(n, n_typ) {
+        const count = read(
+            this.instance,
+            eval(
+                `(${read(this.instance, "str", n_typ).toString()})`,
+            ),
+            n,
+        );
+        const ua = new Uint8Array(count);
+        for (let i = 0; i < count; i++) {
             ua[i] = this._mt.genrand_int32() & 0xff;
         }
-        return ua.buffer;
+        const payload = Buffer.from(ua).toString("base64");
+        return write(this.instance, "str", payload);
     }
-    randrange(start, stop = null, step = 1) {
+    randrange(start, start_typ, stop = null, stop_typ, step = 1, step_typ) {
+        let s = read(
+            this.instance,
+            eval(
+                `(${read(this.instance, "str", start_typ).toString()})`,
+            ),
+            start,
+        );
+        let e;
         if (stop === null) {
-            stop = start;
-            start = 0;
+            e = s;
+            s = 0;
+        } else {
+            e = read(
+                this.instance,
+                eval(
+                    `(${read(this.instance, "str", stop_typ).toString()})`,
+                ),
+                stop,
+            );
         }
-        const width = stop - start;
-        if (step === 1) return start + Math.floor(this.random() * width);
-        const n = Math.floor((width + step - 1) / step);
-        return start + step * Math.floor(this.random() * n);
+        const stp = read(
+            this.instance,
+            eval(
+                `(${read(this.instance, "str", step_typ).toString()})`,
+            ),
+            step,
+        );
+        const width = e - s;
+        if (stp === 1) {
+            return write(
+                this.instance,
+                "num",
+                s + Math.floor(this.random() * width),
+            );
+        }
+        const nOptions = Math.floor((width + stp - 1) / stp);
+        return write(
+            this.instance,
+            "num",
+            s + stp * Math.floor(this.random() * nOptions),
+        );
     }
-    randint(a, b) {
-        return this.randrange(a, b + 1);
+    randint(a, a_typ, b, b_typ) {
+        const start = read(
+            this.instance,
+            eval(
+                `(${read(this.instance, "str", a_typ).toString()})`,
+            ),
+            a,
+        );
+        const end = read(
+            this.instance,
+            eval(
+                `(${read(this.instance, "str", b_typ).toString()})`,
+            ),
+            b,
+        );
+        return this.randrange(start, null, end + 1, null, 1, null);
     }
-    uniform(a, b) {
-        return a + (b - a) * this.random();
+    uniform(a, a_typ, b, b_typ) {
+        const low = read(
+            this.instance,
+            eval(
+                `(${read(this.instance, "str", a_typ).toString()})`,
+            ),
+            a,
+        );
+        const high = read(
+            this.instance,
+            eval(
+                `(${read(this.instance, "str", b_typ).toString()})`,
+            ),
+            b,
+        );
+        return write(
+            this.instance,
+            "num",
+            low + (high - low) * this.random(),
+        );
     }
-    triangular(low = 0, high = 1, mode = null) {
-        if (mode === null) mode = (low + high) / 2;
-        const u = this.random(),
-            c = (mode - low) / (high - low);
-        return u < c
-            ? low + Math.sqrt(u * (high - low) * (mode - low))
-            : high - Math.sqrt((1 - u) * (high - low) * (high - mode));
+    triangular(low, low_typ, high, high_typ, mode = null, mode_typ) {
+        const lo = read(
+            this.instance,
+            eval(
+                `(${read(this.instance, "str", low_typ).toString()})`,
+            ),
+            low,
+        );
+        const hi = read(
+            this.instance,
+            eval(
+                `(${read(this.instance, "str", high_typ).toString()})`,
+            ),
+            high,
+        );
+        let md;
+        if (mode === null) {
+            md = (lo + hi) / 2;
+        } else {
+            md = read(
+                this.instance,
+                eval(
+                    `(${read(this.instance, "str", mode_typ).toString()})`,
+                ),
+                mode,
+            );
+        }
+        const u = this.random();
+        const c = (md - lo) / (hi - lo);
+        const result =
+            u < c
+                ? lo + Math.sqrt(u * (hi - lo) * (md - lo))
+                : hi - Math.sqrt((1 - u) * (hi - lo) * (hi - md));
+        return write(this.instance, "num", result);
     }
-    gauss(mu = 0, sigma = 1) {
+    gauss(mu, mu_typ, sigma, sigma_typ) {
         if (this._gaussNext !== null) {
             const v = this._gaussNext;
             this._gaussNext = null;
-            return v * sigma + mu;
+            return write(
+                this.instance,
+                "num",
+                v *
+                    read(
+                        this.instance,
+                        eval(
+                            `(${read(this.instance, "str", sigma_typ).toString()})`,
+                        ),
+                        sigma,
+                    ) +
+                    read(
+                        this.instance,
+                        eval(
+                            `(${read(this.instance, "str", mu_typ).toString()})`,
+                        ),
+                        mu,
+                    ),
+            );
         }
         let u1, u2;
         do {
@@ -133,122 +275,281 @@ class Random {
             u2 = this.random();
         } while (u1 <= Number.EPSILON);
         const mag = Math.sqrt(-2 * Math.log(u1));
-        const z0 = mag * Math.cos(2 * Math.PI * u2),
-            z1 = mag * Math.sin(2 * Math.PI * u2);
+        const z0 = mag * Math.cos(2 * Math.PI * u2);
+        const z1 = mag * Math.sin(2 * Math.PI * u2);
         this._gaussNext = z1;
-        return z0 * sigma + mu;
+        return write(
+            this.instance,
+            "num",
+            z0 *
+                read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", sigma_typ).toString()})`,
+                    ),
+                    sigma,
+                ) +
+                read(
+                    this.instance,
+                    eval(
+                        `(${read(this.instance, "str", mu_typ).toString()})`,
+                    ),
+                    mu,
+                ),
+        );
     }
-    normalvariate(mu, sigma) {
-        return this.gauss(mu, sigma);
+    normalvariate(mu, mu_typ, sigma, sigma_typ) {
+        const m = read(
+            this.instance,
+            eval(
+                `(${read(this.instance, "str", mu_typ).toString()})`,
+            ),
+            mu,
+        );
+        const s = read(
+            this.instance,
+            eval(
+                `(${read(this.instance, "str", sigma_typ).toString()})`,
+            ),
+            sigma,
+        );
+        return this.gauss(m, null, s, null);
     }
-    lognormvariate(mu, sigma) {
-        return Math.exp(this.normalvariate(mu, sigma));
+    lognormvariate(mu, mu_typ, sigma, sigma_typ) {
+        const val = this.normalvariate(mu, mu_typ, sigma, sigma_typ);
+        return write(
+            this.instance,
+            "num",
+            Math.exp(val),
+        );
     }
-    expovariate(lambd) {
-        if (lambd <= 0) throw Error("lambda>0");
-        return -Math.log(1 - this.random()) / lambd;
+    expovariate(lambd, lambd_typ) {
+        const l = read(
+            this.instance,
+            eval(
+                `(${read(this.instance, "str", lambd_typ).toString()})`,
+            ),
+            lambd,
+        );
+        if (l <= 0) throw Error("lambda>0");
+        return write(
+            this.instance,
+            "num",
+            -Math.log(1 - this.random()) / l,
+        );
     }
-    gammavariate(alpha, beta) {
-        if (alpha > 1) {
-            const d = alpha - 1 / 3,
-                c = 1 / Math.sqrt(9 * d);
+    gammavariate(alpha, alpha_typ, beta, beta_typ) {
+        const a = read(
+            this.instance,
+            eval(
+                `(${read(this.instance, "str", alpha_typ).toString()})`,
+            ),
+            alpha,
+        );
+        const b = read(
+            this.instance,
+            eval(
+                `(${read(this.instance, "str", beta_typ).toString()})`,
+            ),
+            beta,
+        );
+        if (a > 1) {
+            const d = a - 1 / 3,
+                cVal = 1 / Math.sqrt(9 * d);
             while (true) {
                 let x, v;
                 do {
-                    x = this.gauss();
-                    v = 1 + c * x;
+                    x = this.gauss(0, null, 1, null);
+                    v = 1 + cVal * x;
                 } while (v <= 0);
                 v = v * v * v;
                 const u = this.random();
-                if (u < 1 - 0.0331 * x * x * x * x) return d * v * beta;
-                if (Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v)))
-                    return d * v * beta;
+                if (u < 1 - 0.0331 * x * x * x * x) return write(this.instance, "num", d * v * b);
+                if (Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))) return write(this.instance, "num", d * v * b);
             }
         }
-        if (alpha === 1) return -Math.log(1 - this.random()) * beta;
-        return (
-            this.gammavariate(alpha + 1, 1) *
-            Math.pow(this.random(), 1 / alpha) *
-            beta
+        if (a === 1) {
+            const res = -Math.log(1 - this.random()) * b;
+            return write(this.instance, "num", res);
+        }
+        const val = this.gammavariate(a + 1, null, 1, null) * Math.pow(this.random(), 1 / a) * b;
+        return write(this.instance, "num", val);
+    }
+    betavariate(a, a_typ, b, b_typ) {
+        const y1 = this.gammavariate(a, a_typ, 1, null);
+        const y2 = this.gammavariate(b, b_typ, 1, null);
+        return write(this.instance, "num", y1 / (y1 + y2));
+    }
+    paretovariate(a, a_typ) {
+        const x = read(
+            this.instance,
+            eval(
+                `(${read(this.instance, "str", a_typ).toString()})`,
+            ),
+            a,
         );
+        if (x <= 0) throw Error("alpha>0");
+        return write(this.instance, "num", Math.pow(this.random(), -1 / x));
     }
-    betavariate(a, b) {
-        const y1 = this.gammavariate(a, 1),
-            y2 = this.gammavariate(b, 1);
-        return y1 / (y1 + y2);
+    weibullvariate(a, a_typ, b, b_typ) {
+        const av = read(
+            this.instance,
+            eval(
+                `(${read(this.instance, "str", a_typ).toString()})`,
+            ),
+            a,
+        );
+        const bv = read(
+            this.instance,
+            eval(
+                `(${read(this.instance, "str", b_typ).toString()})`,
+            ),
+            b,
+        );
+        if (av <= 0 || bv <= 0) throw Error("alpha/beta>0");
+        return write(this.instance, "num", bv * Math.pow(-Math.log(1 - this.random()), 1 / av));
     }
-    paretovariate(a) {
-        if (a <= 0) throw Error("alpha>0");
-        return Math.pow(this.random(), -1 / a);
-    }
-    weibullvariate(a, b) {
-        if (a <= 0 || b <= 0) throw Error("alpha/beta>0");
-        return b * Math.pow(-Math.log(1 - this.random()), 1 / a);
-    }
-    vonmisesvariate(mu, kappa) {
+    vonmisesvariate(mu, mu_typ, kappa, kappa_typ) {
+        const mVal = read(
+            this.instance,
+            eval(
+                `(${read(this.instance, "str", mu_typ).toString()})`,
+            ),
+            mu,
+        );
+        const kVal = read(
+            this.instance,
+            eval(
+                `(${read(this.instance, "str", kappa_typ).toString()})`,
+            ),
+            kappa,
+        );
         const TWO_PI = 2 * Math.PI;
-        if (kappa <= 1e-6) return mu + TWO_PI * this.random();
-        const a = 1 + Math.sqrt(1 + 4 * kappa * kappa),
-            b = (a - Math.sqrt(2 * a)) / (2 * kappa),
-            r = (1 + b * b) / (2 * b);
+        if (kVal <= 1e-6) return write(this.instance, "num", mVal + TWO_PI * this.random());
+        const a = 1 + Math.sqrt(1 + 4 * kVal * kVal);
+        const bVal = (a - Math.sqrt(2 * a)) / (2 * kVal);
+        const r = (1 + bVal * bVal) / (2 * bVal);
         while (true) {
-            const u1 = this.random(),
-                z = Math.cos(Math.PI * u1),
-                f = (1 + r * z) / (r + z),
-                c = kappa * (r - f),
-                u2 = this.random();
+            const u1 = this.random();
+            const z = Math.cos(Math.PI * u1);
+            const f = (1 + r * z) / (r + z);
+            const c = kVal * (r - f);
+            const u2 = this.random();
             if (u2 < c * (2 - c) || u2 <= c * Math.exp(1 - c)) {
-                const u3 = this.random(),
-                    theta = u3 > 0.5 ? Math.acos(f) : -Math.acos(f);
-                return (mu + theta + TWO_PI) % TWO_PI;
+                const u3 = this.random();
+                const theta = u3 > 0.5 ? Math.acos(f) : -Math.acos(f);
+                return write(this.instance, "num", (mVal + theta + TWO_PI) % TWO_PI);
             }
         }
     }
-    choice(seq) {
-        if (seq.length === 0) throw Error("empty");
-        return seq[Math.floor(this.random() * seq.length)];
+    choice(seq, seq_typ) {
+        const arr = read(
+            this.instance,
+            eval(
+                `(${read(this.instance, "str", seq_typ).toString()})`,
+            ),
+            seq,
+        );
+        if (arr.length === 0) throw Error("empty");
+        const idx = Math.floor(this.random() * arr.length);
+        return write(this.instance, "str", arr[idx]);
     }
-    choices(pop, weights = null, cum_weights = null, k = 1) {
-        const n = pop.length;
-        if (n === 0 || k < 0) throw Error("invalid");
+    choices(pop, pop_typ, weights = null, weights_typ, cum_weights = null, cum_typ, k = 1, k_typ) {
+        const p = read(
+            this.instance,
+            eval(
+                `(${read(this.instance, "str", pop_typ).toString()})`,
+            ),
+            pop,
+        );
+        let wArr = null;
+        let cArr = null;
+        if (weights !== null) {
+            wArr = read(
+                this.instance,
+                eval(
+                    `(${read(this.instance, "str", weights_typ).toString()})`,
+                ),
+                weights,
+            );
+        }
+        if (cum_weights !== null) {
+            cArr = read(
+                this.instance,
+                eval(
+                    `(${read(this.instance, "str", cum_typ).toString()})`,
+                ),
+                cum_weights,
+            );
+        }
+        const count = read(
+            this.instance,
+            eval(
+                `(${read(this.instance, "str", k_typ).toString()})`,
+            ),
+            k,
+        );
+        const n = p.length;
+        if (n === 0 || count < 0) throw Error("invalid");
         let cum = [];
-        if (cum_weights) cum = cum_weights.slice();
-        else if (weights) {
+        if (cArr) cum = cArr.slice();
+        else if (wArr) {
             let t = 0;
-            for (let w of weights) {
+            for (let w of wArr) {
                 t += w;
                 cum.push(t);
             }
         } else {
             for (let i = 0; i < n; i++) cum.push(i + 1);
         }
-        const total = cum[cum.length - 1],
-            res = [];
-        for (let i = 0; i < k; i++) {
-            const r = this.random() * total,
-                idx = cum.findIndex((c) => r < c);
-            res.push(pop[idx]);
+        const total = cum[cum.length - 1];
+        const res = [];
+        for (let i = 0; i < count; i++) {
+            const r = this.random() * total;
+            const idx = cum.findIndex((c) => r < c);
+            res.push(p[idx]);
         }
-        return res;
+        return write(this.instance, "str", JSON.stringify(res));
     }
-    shuffle(arr) {
-        for (let i = arr.length - 1; i > 0; i--) {
+    shuffle(arr, arr_typ) {
+        const a = read(
+            this.instance,
+            eval(
+                `(${read(this.instance, "str", arr_typ).toString()})`,
+            ),
+            arr,
+        );
+        for (let i = a.length - 1; i > 0; i--) {
             const j = Math.floor(this.random() * (i + 1));
-            [arr[i], arr[j]] = [arr[j], arr[i]];
+            [a[i], a[j]] = [a[j], a[i]];
         }
-        return arr;
+        return write(this.instance, "str", JSON.stringify(a));
     }
-    sample(pop, k) {
-        const n = pop.length;
-        if (k < 0 || k > n) throw Error("invalid");
-        const pool = pop.slice(),
-            res = [];
-        for (let i = 0; i < k; i++) {
+    sample(pop, pop_typ, k, k_typ) {
+        const p = read(
+            this.instance,
+            eval(
+                `(${read(this.instance, "str", pop_typ).toString()})`,
+            ),
+            pop,
+        );
+        const count = read(
+            this.instance,
+            eval(
+                `(${read(this.instance, "str", k_typ).toString()})`,
+            ),
+            k,
+        );
+        const n = p.length;
+        if (count < 0 || count > n) throw Error("invalid");
+        const pool = p.slice();
+        const res = [];
+        for (let i = 0; i < count; i++) {
             const idx = Math.floor(this.random() * pool.length);
             res.push(pool[idx]);
             pool.splice(idx, 1);
         }
-        return res;
+        return write(this.instance, "str", JSON.stringify(res));
     }
 }
 
@@ -259,23 +560,23 @@ export const __spec__ = {
     random: { args: [], ret: "num" },
     getrandbits: { args: ["num"], ret: "num" },
     randbytes: { args: ["num"], ret: "str" },
-    randrange: { args: ["num", "num", "num"], ret: "num" },
-    randint: { args: ["num", "num"], ret: "num" },
-    uniform: { args: ["num", "num"], ret: "num" },
-    triangular: { args: ["num", "num", "num"], ret: "num" },
-    gauss: { args: ["num", "num"], ret: "num" },
-    normalvariate: { args: ["num", "num"], ret: "num" },
-    lognormvariate: { args: ["num", "num"], ret: "num" },
-    expovariate: { args: ["num"], ret: "num" },
-    gammavariate: { args: ["num", "num"], ret: "num" },
-    betavariate: { args: ["num", "num"], ret: "num" },
-    paretovariate: { args: ["num"], ret: "num" },
-    weibullvariate: { args: ["num", "num"], ret: "num" },
-    vonmisesvariate: { args: ["num", "num"], ret: "num" },
-    choice: { args: ["str"], ret: "str" },
-    choices: { args: ["str", "str", "str", "num"], ret: "str" },
-    shuffle: { args: ["str"], ret: "str" },
-    sample: { args: ["str", "num"], ret: "str" },
+    randrange: { args: ["num", "num", "num", "num", "num", "num"], ret: "num" },
+    randint: { args: ["num", "num", "num", "num", "num", "num"], ret: "num" },
+    uniform: { args: ["num", "num", "num", "num"], ret: "num" },
+    triangular: { args: ["num", "num", "num", "num", "num", "num", "num", "num", "num", "num", "num", "num"], ret: "num" },
+    gauss: { args: ["num", "num", "num", "num"], ret: "num" },
+    normalvariate: { args: ["num", "num", "num", "num"], ret: "num" },
+    lognormvariate: { args: ["num", "num", "num", "num"], ret: "num" },
+    expovariate: { args: ["num", "num"], ret: "num" },
+    gammavariate: { args: ["num", "num", "num", "num"], ret: "num" },
+    betavariate: { args: ["num", "num", "num", "num"], ret: "num" },
+    paretovariate: { args: ["num", "num"], ret: "num" },
+    weibullvariate: { args: ["num", "num", "num", "num"], ret: "num" },
+    vonmisesvariate: { args: ["num", "num", "num", "num"], ret: "num" },
+    choice: { args: ["str", "str"], ret: "str" },
+    choices: { args: ["str", "str", "str", "str", "str", "str", "num", "num"], ret: "str" },
+    shuffle: { args: ["str", "str"], ret: "str" },
+    sample: { args: ["str", "str", "num", "num"], ret: "str" },
 };
 
 export class MystiaRandomLib {
@@ -284,42 +585,60 @@ export class MystiaRandomLib {
         this.functions = Object.create(null);
         for (const key of Object.keys(__spec__)) {
             this.functions[key] = (...ptrs) => {
-                const args = ptrs.map((p, i) => {
-                    const type = __spec__[key].args[i];
-                    return read(this.instance, type, p);
-                });
+                const args = [];
+                for (let i = 0; i < ptrs.length; i += 2) {
+                    const ptr = ptrs[i];
+                    const typPtr = ptrs[i + 1];
+                    args.push(
+                        read(
+                            this.instance,
+                            eval(
+                                `(${read(
+                                    this.instance,
+                                    "str",
+                                    typPtr,
+                                ).toString()})`,
+                            ),
+                            ptr,
+                        ),
+                    );
+                }
                 const val = this.rng[key](...args);
                 const retType = __spec__[key].ret;
                 if (retType === "void") return;
-
-                // ArrayBuffer / Uint8Array の判定を追加
                 let payload;
                 if (
                     val instanceof ArrayBuffer ||
                     ArrayBuffer.isView(val)
                 ) {
-                    // val が ArrayBuffer や TypedArray の場合、Uint8Array 化してから Base64 文字列に変換
-                    const ua = val instanceof ArrayBuffer ? new Uint8Array(val) : new Uint8Array(val.buffer, val.byteOffset, val.byteLength);
+                    const ua =
+                        val instanceof ArrayBuffer
+                            ? new Uint8Array(val)
+                            : new Uint8Array(
+                                  val.buffer,
+                                  val.byteOffset,
+                                  val.byteLength,
+                              );
                     payload = Buffer.from(ua).toString("base64");
-                } else if (typeof val === "string" || typeof val === "number") {
-                    payload = val;
                 } else {
-                    // その他の型はそのまま
                     payload = val;
                 }
-
-                // 返り値が文字列 or 数値なら write を呼び出す
                 if (retType === "str" || retType === "num") {
-                    return write(this.instance, retType, payload);
-                } else {
-                    return payload;
+                    return write(
+                        this.instance,
+                        retType,
+                        payload,
+                    );
                 }
+                return payload;
             };
         }
     }
+
     set_wasm(instance) {
         this.instance = instance;
     }
+
     bridge() {
         const b = {};
         for (const k of Object.keys(this.functions)) {
