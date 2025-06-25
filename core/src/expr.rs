@@ -91,15 +91,26 @@ impl Node for Expr {
                     )
                 } else if ctx.js_function.contains_key(name) {
                     format!("(call ${name} {})", {
-                        let mut result = String::new();
+                        let mut result = Vec::new();
                         for arg in args {
-                            result.push_str(&join!([
-                                arg.compile(ctx)?,
+                            result.push(join!([
+                                if let Type::Number = arg.type_infer(ctx)? {
+                                    arg.clone()
+                                } else {
+                                    Expr::Oper(Box::new(Oper::Cast(
+                                        Expr::Oper(Box::new(Oper::Transmute(
+                                            arg.clone(),
+                                            Type::Integer,
+                                        ))),
+                                        Type::Number,
+                                    )))
+                                }
+                                .compile(ctx)?,
                                 Expr::Literal(Value::String(type_to_json(&arg.type_infer(ctx)?)))
                                     .compile(ctx)?
                             ]));
                         }
-                        result
+                        join!(result)
                     })
                 } else if let Some((params, expr)) = ctx.macro_code.get(name).cloned() {
                     for (params, arg) in params.iter().zip(args) {
