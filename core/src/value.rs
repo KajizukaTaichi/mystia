@@ -73,11 +73,17 @@ impl Node for Value {
                     // if inner type is pointer (not primitive)
                     {
                         let mut inner_codes = vec![];
-                        for elm in array {
+                        for elm in array.clone() {
                             type_check!(inner_type, elm.type_infer(ctx)?, ctx)?;
                             inner_codes.push(elm.compile(ctx)?)
                         }
                         pointer = ctx.allocator;
+                        result.push(format!(
+                            "(i32.store {address} {length})",
+                            address = Value::Integer(ctx.allocator).compile(ctx)?,
+                            length = Value::Integer(array.len() as i32).compile(ctx)?
+                        ));
+                        ctx.allocator += 4;
                         for code in inner_codes {
                             result.push(format!(
                                 "({type}.store {address} {code})",
@@ -88,6 +94,12 @@ impl Node for Value {
                         }
                     } else {
                         pointer = ctx.allocator;
+                        result.push(format!(
+                            "(i32.store {address} {length})",
+                            address = Value::Integer(ctx.allocator).compile(ctx)?,
+                            length = Value::Integer(array.len() as i32).compile(ctx)?
+                        ));
+                        ctx.allocator += 4;
                         for elm in array {
                             type_check!(inner_type, elm.type_infer(ctx)?, ctx)?;
                             result.push(format!(
@@ -160,7 +172,7 @@ impl Node for Value {
             Value::Integer(_) => Type::Integer,
             Value::Bool(_) => Type::Bool,
             Value::String(_) => Type::String,
-            Value::Array(e) => Type::Array(Box::new(e.first()?.type_infer(ctx)?), e.len()),
+            Value::Array(e) => Type::Array(Box::new(e.first()?.type_infer(ctx)?)),
             Value::Dict(dict) => {
                 let mut result = IndexMap::new();
                 let mut index: i32 = 0;
