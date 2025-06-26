@@ -241,9 +241,12 @@ impl Expr {
                 }
                 Some(result)
             }
-            Type::Array(typ) => Some(Expr::Oper(Box::new(Oper::Mul(
-                Expr::Literal(Value::Integer(typ.pointer_length())),
-                Expr::MemLoad(Box::new(self.clone()), Type::Integer),
+            Type::Array(typ) => Some(Expr::Oper(Box::new(Oper::Add(
+                Expr::Oper(Box::new(Oper::Mul(
+                    Expr::Literal(Value::Integer(typ.pointer_length())),
+                    Expr::MemLoad(Box::new(self.clone()), Type::Integer),
+                ))),
+                Expr::Literal(Value::Integer(4)),
             )))),
             _ => None,
         }
