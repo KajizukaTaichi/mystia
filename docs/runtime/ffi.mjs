@@ -71,7 +71,9 @@ export function write(instance, type, value) {
         }
         const elemSize = type.element === "num" ? 8 : 4;
         const ptr = instance.exports.allocator + 0;
-        const view = new DataView(buffer, ptr, elemSize * type.length);
+        const view = new DataView(buffer, ptr, elemSize * value.length + 4);
+        const topAddr = instance.exports.malloc(4);
+        view.setInt32(topAddr, value.length, true);
         for (let elm of array) {
             const addr = instance.exports.allocator - ptr;
             const method = elemSize === 8 ? "setFloat64" : "setInt32";
