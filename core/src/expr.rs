@@ -52,6 +52,7 @@ impl Node for Expr {
                     Some(Expr::MemCpy(Box::new(args.first()?.clone())))
                 }
                 Expr::Variable(name) => Some(Expr::Call(name, args)),
+                Expr::Field(obj, name) if name == "memcpy" => Some(Expr::MemCpy(obj)),
                 Expr::Field(obj, name) => Some(Expr::Call(name, [vec![*obj], args].concat())),
                 _ => None,
             }
