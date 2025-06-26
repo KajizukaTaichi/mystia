@@ -155,8 +155,10 @@ impl Node for Oper {
 
     fn type_infer(&self, ctx: &mut Compiler) -> Option<Type> {
         match self {
-            Oper::Add(lhs, rhs)
-            | Oper::Sub(lhs, rhs)
+            Oper::Add(lhs, rhs) => {
+                correct!(lhs, rhs, ctx, Type::Number | Type::Integer | Type::String)
+            }
+            Oper::Sub(lhs, rhs)
             | Oper::Mul(lhs, rhs)
             | Oper::Div(lhs, rhs)
             | Oper::Mod(lhs, rhs)
@@ -164,16 +166,14 @@ impl Node for Oper {
             | Oper::Shl(lhs, rhs)
             | Oper::BAnd(lhs, rhs)
             | Oper::BOr(lhs, rhs)
-            | Oper::XOr(lhs, rhs) => {
-                type_check!(lhs, rhs, ctx)
-            }
+            | Oper::XOr(lhs, rhs) => correct!(lhs, rhs, ctx, Type::Number | Type::Integer),
             Oper::Eql(lhs, rhs)
             | Oper::Neq(lhs, rhs)
             | Oper::Lt(lhs, rhs)
             | Oper::Gt(lhs, rhs)
             | Oper::LtEq(lhs, rhs)
             | Oper::GtEq(lhs, rhs) => {
-                type_check!(lhs, rhs, ctx)?;
+                correct!(lhs, rhs, ctx, Type::Number | Type::Integer);
                 Some(Type::Bool)
             }
             Oper::LAnd(lhs, rhs) | Oper::LOr(lhs, rhs) => {
