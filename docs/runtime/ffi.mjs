@@ -19,8 +19,8 @@ export function read(instance, type, value) {
         const innerType = type.element;
         const memoryView = new Uint8Array(instance.exports.mem.buffer);
         const byte = innerType == "num" ? 8 : 4;
-        const length = concatBytes(memoryView.slice(addr, addr + 4), false);
         let [result, addr] = [[], value];
+        const length = concatBytes(memoryView.slice(addr, addr + 4), false);
         for (let index = 0; index < length; index++) {
             const sliced = memoryView.slice(addr + 4, addr + 4 + byte);
             const elem = concatBytes(sliced, byte == 8);
