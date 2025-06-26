@@ -9,7 +9,7 @@ pub enum Stmt {
     Import(
         String,
         Option<String>,
-        Vec<(String, usize, Option<Type>, Option<String>)>,
+        Vec<(String, Vec<Type>, Type, Option<String>)>,
     ),
     Macro(String, Vec<String>, Expr),
     Expr(Expr),
@@ -96,7 +96,7 @@ impl Node for Stmt {
             /// Vec<(Function Name, List of input and type, return type, alias)>
             pub fn parse_sigs(
                 sigs: &str,
-            ) -> Option<Vec<(String, usize, Option<Type>, Option<String>)>> {
+            ) -> Option<Vec<(String, Vec<Type>, Type, Option<String>)>> {
                 let mut result = Vec::new();
                 for part in tokenize(sigs, &[","], false, true, false)? {
                     let part = part.trim();
@@ -104,13 +104,18 @@ impl Node for Stmt {
                         .rsplit_once("as")
                         .map(|(sig, alias)| (sig, Some(alias.to_string())))
                         .unwrap_or((part, None));
-                    if let Expr::Call(name, args) = Expr::parse(sig)? {
-                        result.push((name, args.len(), None, alias));
-                    } else if let Oper::Cast(Expr::Call(name, args), typ) = Oper::parse(sig)? {
-                        result.push((name, args.len(), Some(typ), alias));
-                    } else {
+                    let Oper::Cast(Expr::Call(name, args), ret_typ) = Oper::parse(sig)? else {
                         return None;
                     };
+                    let mut args_typ = vec![];
+                    for arg in args {
+                        let Expr::Oper(arg) = arg else { return None };
+                        let Oper::Cast(_, arg_typ) = *arg.clone() else {
+                            return None;
+                        };
+                        args_typ.push(arg_typ);
+                    }
+                    result.push((name, args_typ, ret_typ, alias));
                 }
                 Some(result)
             }
@@ -218,11 +223,11 @@ impl Node for Stmt {
                     Stmt::Let(*scope, func, value.clone()).compile(ctx)?
                 }
                 Expr::Index(array, index) => {
-                    let Type::Array(typ, len) = array.type_infer(ctx)? else {
+                    let Type::Array(typ) = array.type_infer(ctx)? else {
                         return None;
                     };
                     type_check!(typ, value.type_infer(ctx)?, ctx)?;
-                    let addr = address_calc!(array, index, len, typ);
+                    let addr = address_calc!(array, index, typ);
                     let [typ, addr] = [typ.compile(ctx)?, addr.compile(ctx)?];
                     format!("({typ}.store {addr} {})", value.compile(ctx)?)
                 }
@@ -239,7 +244,7 @@ impl Node for Stmt {
                 _ => return None,
             },
             Stmt::Import(module, alias, funcs) => {
-                for (fn_name, args_len, _, maybe_alias) in funcs {
+                for (fn_name, args, ret_typ, maybe_alias) in funcs {
                     let export_name = maybe_alias.as_ref().unwrap_or(fn_name);
                     let import_as = alias.as_ref().unwrap_or(module);
                     let wasm_name = if import_as.is_empty() {
@@ -247,9 +252,22 @@ impl Node for Stmt {
                     } else {
                         format!("{import_as}.{fn_name}")
                     };
-                    let sig = format!("(param f64) (param i32)").repeat(*args_len);
+                    let sig = if args.is_empty() {
+                        String::new()
+                    } else {
+                        join!(
+                            args.iter()
+                                .map(|t| {
+                                    t.type_infer(ctx)?
+                                        .compile(ctx)
+                                        .map(|s| format!("(param {})", s))
+                                })
+                                .collect::<Option<Vec<_>>>()?
+                        )
+                    };
+                    let ret = compile_return!(ret_typ, ctx);
                     ctx.import_code.push(format!(
-                        "(import \"env\" \"{wasm_name}\" (func ${export_name} {sig} (result f32)))"
+                        "(import \"env\" \"{wasm_name}\" (func ${export_name} {sig} {ret}))"
                     ));
                 }
                 String::new()
@@ -345,9 +363,20 @@ impl Node for Stmt {
                 Type::Void
             }
             Stmt::Import(_module, _alias, funcs) => {
-                for (fn_name, _, ret_typ, alias) in funcs {
+                for (fn_name, args, ret_ty, alias) in funcs {
                     let import_name = alias.as_ref().unwrap_or(fn_name).clone();
-                    ctx.js_function.insert(import_name, ret_typ.clone());
+                    let mut arg_map = IndexMap::new();
+                    for (i, ty) in args.iter().enumerate() {
+                        arg_map.insert(i.to_string(), ty.clone());
+                    }
+                    ctx.function_type.insert(
+                        import_name,
+                        Function {
+                            variables: IndexMap::new(),
+                            arguments: arg_map,
+                            returns: ret_ty.clone(),
+                        },
+                    );
                 }
                 Type::Void
             }
