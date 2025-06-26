@@ -175,6 +175,24 @@ macro_rules! compile_arithmetic {
 }
 
 #[macro_export]
+macro_rules! correct {
+    ($lhs: expr, $rhs: expr , $ctx: expr, $pat: pat) => {{
+        let ret = type_check!($lhs, $rhs, $ctx)?;
+        if let $pat = ret {
+            Some(ret)
+        } else {
+            let msg = format!(
+                "can't mathematical operation between {} and {}",
+                $lhs.type_infer($ctx)?.format(),
+                $rhs.type_infer($ctx)?.format()
+            );
+            $ctx.occurred_error = Some(msg);
+            None
+        }
+    }};
+}
+
+#[macro_export]
 macro_rules! ok {
     ($result:expr) => {
         if let Ok(val) = $result {
