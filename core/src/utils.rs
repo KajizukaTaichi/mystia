@@ -59,12 +59,12 @@ macro_rules! compile_args_type {
 #[macro_export]
 macro_rules! if_ptr {
     ($typ: expr => $block: block) => {
-        if let Type::String | Type::Array(_, _) | Type::Dict(_) = $typ {
+        if let Type::String | Type::Array(_) | Type::Dict(_) = $typ {
             $block;
         }
     };
     ($typ: expr => $block: block else $els: block) => {
-        if let Type::String | Type::Array(_, _) | Type::Dict(_) = $typ {
+        if let Type::String | Type::Array(_) | Type::Dict(_) = $typ {
             $block;
         } else {
             $els;
@@ -110,13 +110,16 @@ macro_rules! compile_compare {
 
 #[macro_export]
 macro_rules! address_calc {
-    ($array: expr, $index: expr, $len: expr, $typ: expr) => {
+    ($array: expr, $index: expr, $typ: expr) => {
         Oper::Add(
-            Expr::Oper(Box::new(Oper::Transmute(*$array.clone(), Type::Integer))),
+            Expr::Oper(Box::new(Oper::Add(
+                Expr::Literal(Value::Integer(4)),
+                Expr::Oper(Box::new(Oper::Transmute(*$array.clone(), Type::Integer))),
+            ))),
             Expr::Oper(Box::new(Oper::Mul(
                 Expr::Oper(Box::new(Oper::Mod(
                     *$index.clone(),
-                    Expr::Literal(Value::Integer($len as i32)),
+                    Expr::Load($array.clone(), Type::Integer),
                 ))),
                 Expr::Literal(Value::Integer($typ.pointer_length())),
             ))),
@@ -150,10 +153,10 @@ macro_rules! compile_args {
 #[macro_export]
 macro_rules! offset_calc {
     ($dict: expr, $offset: expr) => {
-        Oper::Add(
+        Expr::Oper(Box::new(Oper::Add(
             Expr::Oper(Box::new(Oper::Transmute(*$dict.clone(), Type::Integer))),
             Expr::Literal(Value::Integer($offset.clone())),
-        )
+        )))
     };
 }
 
