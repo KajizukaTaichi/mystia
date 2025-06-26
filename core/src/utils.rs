@@ -119,7 +119,7 @@ macro_rules! address_calc {
             Expr::Oper(Box::new(Oper::Mul(
                 Expr::Oper(Box::new(Oper::Mod(
                     *$index.clone(),
-                    Expr::Load($array.clone(), Type::Integer),
+                    Expr::MemLoad($array.clone(), Type::Integer),
                 ))),
                 Expr::Literal(Value::Integer($typ.pointer_length())),
             ))),
