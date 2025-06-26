@@ -1,2 +1,2 @@
-load to_str(a);
-1.to_str() as int
+let top(array: [int]) = array[0];
+top([5]) + top([4, 5, 6])
