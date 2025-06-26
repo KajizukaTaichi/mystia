@@ -8,7 +8,7 @@ pub enum Type {
     Number,
     Bool,
     String,
-    Array(Box<Type>, usize),
+    Array(Box<Type>),
     Dict(Dict),
     Enum(Enum),
     Alias(String, Option<Box<Type>>),
@@ -28,11 +28,7 @@ impl Node for Type {
                 let source = source.trim().to_string();
                 if source.starts_with("[") && source.ends_with("]") {
                     let source = source.get(1..source.len() - 1)?.trim();
-                    let (typ, len) = source.rsplit_once(";")?;
-                    Some(Type::Array(
-                        Box::new(Type::parse(typ)?),
-                        ok!(len.trim().parse())?,
-                    ))
+                    Some(Type::Array(Box::new(Type::parse(source)?)))
                 } else if source.starts_with("@{") && source.ends_with("}") {
                     let source = source.get(2..source.len() - 1)?.trim();
                     let mut result = IndexMap::new();
@@ -69,7 +65,7 @@ impl Node for Type {
                 Type::Integer
                 | Type::Bool
                 | Type::String
-                | Type::Array(_, _)
+                | Type::Array(_)
                 | Type::Dict(_)
                 | Type::Enum(_) => "i32",
                 _ => return None,
@@ -92,7 +88,7 @@ impl Node for Type {
                 }
                 typ.type_infer(&mut new_ctx)
             }
-            Type::Array(typ, len) => Some(Type::Array(Box::new(typ.type_infer(ctx)?), *len)),
+            Type::Array(typ) => Some(Type::Array(Box::new(typ.type_infer(ctx)?))),
             Type::Dict(dict) => {
                 let mut a = IndexMap::new();
                 for (name, (offset, typ)) in dict {
@@ -108,7 +104,7 @@ impl Node for Type {
 impl Type {
     pub fn pointer_length(&self) -> i32 {
         match self {
-            Type::Array(_, _)
+            Type::Array(_)
             | Type::String
             | Type::Bool
             | Type::Dict(_)
@@ -119,28 +115,13 @@ impl Type {
         }
     }
 
-    pub fn bytes_length(&self) -> Option<usize> {
-        match self {
-            Type::Integer | Type::Bool | Type::String | Type::Enum(_) => Some(4),
-            Type::Number => Some(8),
-            Type::Void => Some(0),
-            Type::Dict(dict) => Some(
-                dict.iter()
-                    .map(|x| x.1.1.pointer_length() as usize)
-                    .sum::<usize>(),
-            ),
-            Type::Array(typ, len) => Some(typ.pointer_length() as usize * len),
-            _ => None,
-        }
-    }
-
     pub fn decompress_alias(&self, ctx: &Compiler) -> Type {
         let mut aliases = ctx.type_alias.iter();
         if let Some(i) = aliases.find(|(_, v)| v.format() == self.format()) {
             Type::Alias(i.0.clone(), None)
         } else {
             match self {
-                Type::Array(typ, len) => Type::Array(Box::new(typ.decompress_alias(ctx)), *len),
+                Type::Array(typ) => Type::Array(Box::new(typ.decompress_alias(ctx))),
                 Type::Dict(dict) => Type::Dict(
                     dict.iter()
                         .map(|(k, (o, t))| (k.clone(), (o.clone(), t.decompress_alias(ctx))))
@@ -166,42 +147,9 @@ impl Type {
                     .join(", ")
             ),
             Type::Enum(e) => format!("( {} )", e.join(" | ")),
-            Type::Array(typ, len) => format!("[{}; {len}]", typ.format()),
+            Type::Array(typ) => format!("[{}]", typ.format()),
             Type::Alias(name, _) => name.to_string(),
             Type::Any => "any".to_string(),
         }
-    }
-}
-
-pub fn type_to_json(typ: &Type) -> String {
-    match typ {
-        Type::Integer => "'int'".to_string(),
-        Type::Number => "'num'".to_string(),
-        Type::Bool => "'bool'".to_string(),
-        Type::String => "'str'".to_string(),
-        Type::Void => "null".to_string(),
-        Type::Dict(dict) => format!(
-            "{{ type: 'dict', fields: {{ {} }} }}",
-            dict.iter()
-                .map(|(k, (offset, typ))| format!(
-                    "{k}: {{ type: {}, offset: {offset} }}",
-                    type_to_json(typ)
-                ))
-                .collect::<Vec<_>>()
-                .join(", ")
-        ),
-        Type::Array(typ, len) => format!(
-            "{{ type: 'array', element: {}, length: {len} }}",
-            type_to_json(typ)
-        ),
-        Type::Enum(e) => format!(
-            "{{ type: 'enum', enum: [{}] }}",
-            e.iter()
-                .map(|x| format!("'{x}'"))
-                .collect::<Vec<_>>()
-                .join(", ")
-        ),
-        Type::Alias(name, _) => format!("{{ type: 'alias', name: {name} }}"),
-        Type::Any => format!("'any'"),
     }
 }
