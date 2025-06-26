@@ -3,7 +3,7 @@ type Elm = int;
 load new_elm(tag: str, parent: Elm): Elm;
 load upd_elm(id: Elm, prop: str, content: str): void;
 load evt_elm(id: Elm, name: str, func: str): void;
-load random::{ randint(a: int, b: int): int };
+load random::randint(a: int, b: int): int;
 load to_str(n: num): str;
 load concat(a: str, b: str): str;
 load alert(msg: str): void;
