@@ -43,6 +43,13 @@ export class MystiaStdLib {
                 const typ = { type: "array", element: "str" };
                 return write(this.instance, typ, splitted);
             },
+            array: (init, len) => {
+                return write(
+                    this.instance,
+                    { type: "array", element: "int" },
+                    Array(len).fill(init),
+                );
+            },
         };
     }
     set_wasm(instance) {
