@@ -10,7 +10,7 @@ pub enum Expr {
     Field(Box<Expr>, String),
     Block(Block),
     MemCpy(Box<Expr>),
-    Load(Box<Expr>, Type),
+    MemLoad(Box<Expr>, Type),
 }
 
 impl Node for Expr {
@@ -122,7 +122,7 @@ impl Node for Expr {
                 };
                 let (offset, typ) = dict.get(key)?.clone();
                 let addr = offset_calc!(expr, offset);
-                Expr::Load(Box::new(addr), typ).compile(ctx)?
+                Expr::MemLoad(Box::new(addr), typ).compile(ctx)?
             }
             Expr::Block(block) => block.compile(ctx)?,
             Expr::MemCpy(from) => {
@@ -139,7 +139,9 @@ impl Node for Expr {
                     return None
                 });
             }
-            Expr::Load(expr, typ) => format!("({}.load {})", typ.compile(ctx)?, expr.compile(ctx)?),
+            Expr::MemLoad(expr, typ) => {
+                format!("({}.load {})", typ.compile(ctx)?, expr.compile(ctx)?)
+            }
         })
     }
 
@@ -216,7 +218,7 @@ impl Node for Expr {
             }
             Expr::Block(block) => block.type_infer(ctx)?,
             Expr::MemCpy(from) => from.type_infer(ctx)?,
-            Expr::Load(_, typ) => typ.clone(),
+            Expr::MemLoad(_, typ) => typ.clone(),
         })
     }
 }
@@ -241,7 +243,7 @@ impl Expr {
             }
             Type::Array(typ) => Some(Expr::Oper(Box::new(Oper::Mul(
                 Expr::Literal(Value::Integer(typ.pointer_length())),
-                Expr::Load(Box::new(self.clone()), Type::Integer),
+                Expr::MemLoad(Box::new(self.clone()), Type::Integer),
             )))),
             _ => None,
         }
