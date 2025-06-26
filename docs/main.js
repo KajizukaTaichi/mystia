@@ -23,14 +23,14 @@ runBtn.addEventListener("click", async () => {
     timer = setInterval(() => {
         timerLabel.textContent = `Time: ${Date.now() - startTime}ms`;
     }, 1);
-    // try {
-    const result = await mystia(codeEditor.value);
-    if (result !== undefined) {
-        resultArea.innerHTML = JSON.stringify(result, null, 2);
+    try {
+        const result = await mystia(codeEditor.value);
+        if (result !== undefined) {
+            resultArea.innerHTML = JSON.stringify(result, null, 2);
+        }
+    } catch (error) {
+        resultArea.innerHTML = error;
     }
-    // } catch (error) {
-    // resultArea.innerHTML = error;
-    // }
     clearInterval(timer);
 });
 
