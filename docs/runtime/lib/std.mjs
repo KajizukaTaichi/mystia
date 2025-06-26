@@ -1,4 +1,4 @@
-import { write, read } from "../ffi.mjs";
+import { write, read, concatBytes } from "../ffi.mjs";
 
 export class MystiaStdLib {
     constructor() {
@@ -29,6 +29,12 @@ export class MystiaStdLib {
             strlen: (str) => {
                 str = read(this.instance, "str", str);
                 return str.length;
+            },
+            arrlen: (addr) => {
+                const memoryView = new Uint8Array(
+                    this.instance.exports.mem.buffer,
+                );
+                return concatBytes(memoryView.slice(addr, addr + 4), false);
             },
             split: (str, delimiter) => {
                 str = read(this.instance, "str", str);
