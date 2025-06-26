@@ -10,6 +10,7 @@ pub enum Expr {
     Field(Box<Expr>, String),
     Block(Block),
     MemCpy(Box<Expr>),
+    Load(Box<Expr>, Type),
 }
 
 impl Node for Expr {
@@ -89,29 +90,6 @@ impl Node for Expr {
                                 .collect::<Option<Vec<_>>>()?
                         )
                     )
-                } else if ctx.js_function.contains_key(name) {
-                    format!("(call ${name} {})", {
-                        let mut result = Vec::new();
-                        for arg in args {
-                            result.push(join!([
-                                if let Type::Number = arg.type_infer(ctx)? {
-                                    arg.clone()
-                                } else {
-                                    Expr::Oper(Box::new(Oper::Cast(
-                                        Expr::Oper(Box::new(Oper::Transmute(
-                                            arg.clone(),
-                                            Type::Integer,
-                                        ))),
-                                        Type::Number,
-                                    )))
-                                }
-                                .compile(ctx)?,
-                                Expr::Literal(Value::String(type_to_json(&arg.type_infer(ctx)?)))
-                                    .compile(ctx)?
-                            ]));
-                        }
-                        join!(result)
-                    })
                 } else if let Some((params, expr)) = ctx.macro_code.get(name).cloned() {
                     for (params, arg) in params.iter().zip(args) {
                         let typ = arg.type_infer(ctx)?;
@@ -131,10 +109,10 @@ impl Node for Expr {
                 }
             }
             Expr::Index(array, index) => {
-                let Type::Array(typ, len) = array.type_infer(ctx)? else {
+                let Type::Array(typ) = array.type_infer(ctx)? else {
                     return None;
                 };
-                let addr = address_calc!(array, index, len, typ);
+                let addr = address_calc!(array, index, typ);
                 format!("({}.load {})", typ.compile(ctx)?, addr.compile(ctx)?)
             }
             Expr::Field(expr, key) => {
@@ -144,13 +122,12 @@ impl Node for Expr {
                 };
                 let (offset, typ) = dict.get(key)?.clone();
                 let addr = offset_calc!(expr, offset);
-                format!("({}.load {})", typ.compile(ctx)?, addr.compile(ctx)?)
+                Expr::Load(Box::new(addr), typ).compile(ctx)?
             }
             Expr::Block(block) => block.compile(ctx)?,
             Expr::MemCpy(from) => {
                 let typ = from.type_infer(ctx)?;
-                let size = typ.bytes_length()?;
-                let size = Value::Integer(size as i32).compile(ctx)?;
+                let size = from.bytes_length(ctx)?.compile(ctx)?;
                 if_ptr!(typ => {
                     return Some(format!(
                         "(global.get $allocator) (memory.copy (global.get $allocator) {object} {size}) {}",
@@ -162,6 +139,7 @@ impl Node for Expr {
                     return None
                 });
             }
+            Expr::Load(expr, typ) => format!("({}.load {})", typ.compile(ctx)?, expr.compile(ctx)?),
         })
     }
 
@@ -196,11 +174,6 @@ impl Node for Expr {
                     let ziped = args.iter().zip(function.arguments.values());
                     ziped.map(func).collect::<Option<Vec<_>>>()?;
                     function.returns.type_infer(ctx)?
-                } else if let Some(ret_typ) = ctx.js_function.get(name).cloned() {
-                    args.iter()
-                        .map(|x| x.type_infer(ctx))
-                        .collect::<Option<Vec<_>>>()?;
-                    ret_typ.unwrap_or(Type::Any)
                 } else if let Some((params, expr)) = ctx.macro_code.get(name).cloned() {
                     for (params, arg) in params.iter().zip(args) {
                         let typ = arg.type_infer(ctx)?;
@@ -219,7 +192,7 @@ impl Node for Expr {
             }
             Expr::Index(arr, _) => {
                 let infered = arr.type_infer(ctx)?;
-                let Some(Type::Array(typ, _)) = infered.type_infer(ctx) else {
+                let Some(Type::Array(typ)) = infered.type_infer(ctx) else {
                     let error_message = format!("can't index access to {}", infered.format());
                     ctx.occurred_error = Some(error_message);
                     return None;
@@ -243,6 +216,34 @@ impl Node for Expr {
             }
             Expr::Block(block) => block.type_infer(ctx)?,
             Expr::MemCpy(from) => from.type_infer(ctx)?,
+            Expr::Load(_, typ) => typ.clone(),
         })
+    }
+}
+
+impl Expr {
+    pub fn bytes_length(&self, ctx: &mut Compiler) -> Option<Expr> {
+        match self.type_infer(ctx)? {
+            Type::Integer | Type::Bool | Type::String | Type::Enum(_) => {
+                Some(Expr::Literal(Value::Integer(4)))
+            }
+            Type::Number => Some(Expr::Literal(Value::Integer(8))),
+            Type::Void => Some(Expr::Literal(Value::Integer(0))),
+            Type::Dict(dict) => {
+                let mut result = Expr::Literal(Value::Integer(dict.first()?.1.1.pointer_length()));
+                for i in dict.iter().skip(1).map(|x| x.1.1.pointer_length()) {
+                    result = Expr::Oper(Box::new(Oper::Add(
+                        result,
+                        Expr::Literal(Value::Integer(i)),
+                    )));
+                }
+                Some(result)
+            }
+            Type::Array(typ) => Some(Expr::Oper(Box::new(Oper::Mul(
+                Expr::Literal(Value::Integer(typ.pointer_length())),
+                Expr::Load(Box::new(self.clone()), Type::Integer),
+            )))),
+            _ => None,
+        }
     }
 }
