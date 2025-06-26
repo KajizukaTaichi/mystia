@@ -97,7 +97,7 @@ export function write(instance, type, value) {
     }
 }
 
-function concatBytes(bytes, is_64bit = false) {
+export function concatBytes(bytes, is_64bit = false) {
     const buffer = new ArrayBuffer(8);
     const view = new DataView(buffer);
     let index = 0;
