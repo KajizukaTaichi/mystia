@@ -3,119 +3,40 @@ import { write, read } from "../ffi.mjs";
 export class MystiaStdLib {
     constructor() {
         this.functions = {
-            to_str: (value, typ) => {
+            to_str: (value) => {
+                return write(this.instance, "str", value.toString());
+            },
+            to_num: (value) => {
+                return parseFloat(read(this.instance, "str", value));
+            },
+            repeat: (value, count) => {
                 return write(
                     this.instance,
                     "str",
-                    read(
-                        this.instance,
-                        eval(
-                            `(${read(this.instance, "str", typ).toString()})`,
-                        ),
-                        value,
-                    ).toString(),
+                    read(this.instance, "str", value).repeat(count),
                 );
             },
-            to_num: (value, typ) => {
-                return parseFloat(
-                    read(
-                        this.instance,
-                        eval(
-                            `(${read(this.instance, "str", typ).toString()})`,
-                        ),
-                        value,
-                    ),
-                );
+            concat: (str1, str2) => {
+                str1 = read(this.instance, "str", str1);
+                str2 = read(this.instance, "str", str2);
+                return write(this.instance, "str", str1 + str2);
             },
-            repeat: (value, value_typ, count, count_typ) => {
-                return write(
-                    this.instance,
-                    "str",
-                    read(
-                        this.instance,
-                        eval(
-                            `(${read(this.instance, "str", value_typ).toString()})`,
-                        ),
-                        value,
-                    ).repeat(
-                        read(
-                            this.instance,
-                            eval(
-                                `(${read(this.instance, "str", count_typ).toString()})`,
-                            ),
-                            count,
-                        ),
-                    ),
-                );
+            strcmp: (str1, str2) => {
+                str1 = read(this.instance, "str", str1);
+                str2 = read(this.instance, "str", str2);
+                return str1 === str2;
             },
-            concat: (str1, str1_typ, str2, str2_typ) => {
-                return write(
-                    this.instance,
-                    "str",
-                    read(
-                        this.instance,
-                        eval(
-                            `(${read(this.instance, "str", str1_typ).toString()})`,
-                        ),
-                        str1,
-                    ) +
-                    read(
-                        this.instance,
-                        eval(
-                            `(${read(this.instance, "str", str2_typ).toString()})`,
-                        ),
-                        str2,
-                    ),
-                );
+            strlen: (str) => {
+                str = read(this.instance, "str", str);
+                return str.length;
             },
-            strcmp: (str1, str1_typ, str2, str2_typ) => {
-                return (
-                    read(
-                        this.instance,
-                        eval(
-                            `(${read(this.instance, "str", str1_typ).toString()})`,
-                        ),
-                        str1,
-                    ) ===
-                    read(
-                        this.instance,
-                        eval(
-                            `(${read(this.instance, "str", str2_typ).toString()})`,
-                        ),
-                        str2,
-                    )
-                );
-            },
-            strlen: (str, typ) => {
-                return (
-                    read(
-                        this.instance,
-                        eval(
-                            `(${read(this.instance, "str", typ).toString()})`,
-                        ),
-                        str,
-                    )
-                ).length;
-            },
-            split: (str, str_typ, delimiter, delimiter_typ) => {
-                const s = read(
-                    this.instance,
-                    eval(
-                        `(${read(this.instance, "str", str_typ).toString()})`,
-                    ),
-                    str,
-                );
-                const d = read(
-                    this.instance,
-                    eval(
-                        `(${read(this.instance, "str", delimiter_typ).toString()})`,
-                    ),
-                    delimiter,
-                );
-                const index = s.indexOf(d);
+            split: (str, delimiter) => {
+                str = read(this.instance, "str", str);
+                delimiter = read(this.instance, "str", delimiter);
+                const index = str.indexOf(delimiter);
                 const splitted = [
-                    s.substring(0, index),
-                    s.substring(index + d.length),
+                    str.substring(0, index),
+                    str.substring(index + delimiter.length),
                 ];
                 const typ = { type: "array", element: "str", length: 2 };
                 return write(this.instance, typ, splitted);
@@ -137,16 +58,8 @@ export class MystiaStdLib {
 export class MystiaNodeLib extends MystiaStdLib {
     constructor() {
         super();
-        this.functions.print = (message, message_typ) => {
-            console.log(
-                read(
-                    this.instance,
-                    eval(
-                        `(${read(this.instance, "str", message_typ).toString()})`,
-                    ),
-                    message,
-                ),
-            );
+        this.functions.print = (message) => {
+            console.log(read(this.instance, "str", message));
         };
     }
 }
@@ -157,38 +70,14 @@ let getMystiaDom = (id) => `mystia-dom-${id}`;
 export class MystiaWebLib extends MystiaStdLib {
     constructor() {
         super();
-        this.functions.alert = (message, message_typ) => {
-            window.alert(
-                read(
-                    this.instance,
-                    eval(
-                        `(${read(this.instance, "str", message_typ).toString()})`,
-                    ),
-                    message,
-                ),
-            );
+        this.functions.alert = (message) => {
+            window.alert(read(this.instance, "str", message));
         };
-        this.functions.confirm = (message, message_typ) => {
-            return window.confirm(
-                read(
-                    this.instance,
-                    eval(
-                        `(${read(this.instance, "str", message_typ).toString()})`,
-                    ),
-                    message,
-                ),
-            );
+        this.functions.confirm = (message) => {
+            window.confirm(read(this.instance, "str", message));
         };
-        this.functions.prompt = (message, message_typ) => {
-            const answer = window.prompt(
-                read(
-                    this.instance,
-                    eval(
-                        `(${read(this.instance, "str", message_typ).toString()})`,
-                    ),
-                    message,
-                ),
-            );
+        this.functions.prompt = (message) => {
+            const answer = window.prompt(read(this.instance, "str", message));
             return write(this.instance, "str", answer);
         };
         this.functions.init_canvas = () => {
@@ -206,115 +95,44 @@ export class MystiaWebLib extends MystiaStdLib {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
             }
         };
-        this.functions.draw = (x, x_typ, y, y_typ, color, color_typ) => {
-            const X = read(
-                this.instance,
-                eval(
-                    `(${read(this.instance, "str", x_typ).toString()})`,
-                ),
-                x,
-            );
-            const Y = read(
-                this.instance,
-                eval(
-                    `(${read(this.instance, "str", y_typ).toString()})`,
-                ),
-                y,
-            );
-            const C = read(
-                this.instance,
-                eval(
-                    `(${read(this.instance, "str", color_typ).toString()})`,
-                ),
-                color,
-            );
+        this.functions.draw = (x, y, color) => {
             const ctx = document
                 .getElementById("mystia-canvas")
                 .getContext("2d");
-            ctx.fillStyle = C;
-            ctx.fillRect(X, Y, 1, 1);
+            const pallet = "white|black|grey|blue|violet|green|red|pink|yellow";
+            const type = { type: "enum", enum: pallet.split("|") };
+            ctx.fillStyle = read(this.instance, type, color);
+            ctx.fillRect(x, y, 1, 1);
         };
-        this.functions.new_elm = (tag, tag_typ, parent, parent_typ) => {
-            const T = read(
-                this.instance,
-                eval(
-                    `(${read(this.instance, "str", tag_typ).toString()})`,
-                ),
-                tag,
-            );
-            const elm = document.createElement(T);
+        this.functions.new_elm = (tag, parent) => {
+            const elm = document.createElement(read(this.instance, "str", tag));
             elm.setAttribute("id", getMystiaDom(mystiaDomIndex++));
-            let P = read(
-                this.instance,
-                eval(
-                    `(${read(this.instance, "str", parent_typ).toString()})`,
-                ),
-                parent,
-            );
-            let parentElem = document.getElementById(getMystiaDom(P));
-            if (parentElem === null) parentElem = document.body;
-            parentElem.appendChild(elm);
+            parent = document.getElementById(getMystiaDom(parent));
+            if (parent === null) parent = document.body;
+            parent.appendChild(elm);
             return mystiaDomIndex - 1;
         };
-        this.functions.upd_elm = (id, id_typ, property, property_typ, content, content_typ) => {
-            const I = read(
-                this.instance,
-                eval(
-                    `(${read(this.instance, "str", id_typ).toString()})`,
-                ),
-                id,
-            );
-            const prop = read(
-                this.instance,
-                eval(
-                    `(${read(this.instance, "str", property_typ).toString()})`,
-                ),
-                property,
-            );
-            const cont = read(
-                this.instance,
-                eval(
-                    `(${read(this.instance, "str", content_typ).toString()})`,
-                ),
-                content,
-            );
-            let elm = document.getElementById(getMystiaDom(I));
+        this.functions.upd_elm = (id, property, content) => {
+            property = read(this.instance, "str", property);
+            content = read(this.instance, "str", content);
+            let elm = document.getElementById(getMystiaDom(id));
             if (elm === null) elm = document.querySelector(id);
-            if (prop == "style") {
-                elm.style.cssText += cont;
+            if (property == "style") {
+                elm.style.cssText += content;
             } else {
-                elm[prop] = cont;
+                elm[property] = content;
             }
         };
-        this.functions.evt_elm = (id, id_typ, name, name_typ, func, func_typ) => {
-            const I = read(
-                this.instance,
-                eval(
-                    `(${read(this.instance, "str", id_typ).toString()})`,
-                ),
-                id,
-            );
-            const N = read(
-                this.instance,
-                eval(
-                    `(${read(this.instance, "str", name_typ).toString()})`,
-                ),
-                name,
-            );
-            const F = read(
-                this.instance,
-                eval(
-                    `(${read(this.instance, "str", func_typ).toString()})`,
-                ),
-                func,
-            );
-            const elm = document.getElementById(getMystiaDom(I));
-            if (N.includes("key")) {
-                document.body.addEventListener(N, (event) =>
-                    this.instance.exports[F](event.keyCode),
+        this.functions.evt_elm = (id, name, func) => {
+            const elm = document.getElementById(getMystiaDom(id));
+            func = read(this.instance, "str", func);
+            name = read(this.instance, "str", name);
+            if (name.includes("key")) {
+                document.body.addEventListener(name, (event) =>
+                    this.instance.exports[func](event.keyCode),
                 );
             } else {
-                elm.addEventListener(N, () => this.instance.exports[F]());
+                elm.addEventListener(name, () => this.instance.exports[func]());
             }
         };
     }
