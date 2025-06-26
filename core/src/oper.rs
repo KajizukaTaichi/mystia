@@ -91,8 +91,16 @@ impl Node for Oper {
                 if let Type::String = typ {
                     Expr::Call(String::from("concat"), vec![lhs.clone(), rhs.clone()])
                         .compile(ctx)?
-                } else {
+                } else if let Type::Number | Type::Integer = typ {
                     compile_arithmetic!("add", self, ctx, lhs, rhs)
+                } else {
+                    let msg = format!(
+                        "can't addition between {} and {}",
+                        lhs.type_infer(ctx)?.format(),
+                        rhs.type_infer(ctx)?.format()
+                    );
+                    ctx.occurred_error = Some(msg);
+                    return None;
                 }
             }
             Oper::Eql(lhs, rhs) => {
