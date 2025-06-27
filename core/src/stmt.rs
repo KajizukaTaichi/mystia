@@ -6,11 +6,7 @@ pub enum Stmt {
     While(Expr, Expr),
     Let(Scope, Expr, Expr),
     Type(String, Type),
-    Import(
-        String,
-        Option<String>,
-        Vec<(String, Vec<Type>, Type, Option<String>)>,
-    ),
+    Import(String, Vec<(String, Vec<Type>, Type, Option<String>)>),
     Macro(String, Vec<String>, Expr),
     Expr(Expr),
     Return(Option<Expr>),
@@ -127,9 +123,9 @@ impl Node for Stmt {
                     .unwrap_or(sigs);
                 let sigs = parse_sigs(sigs.trim())?;
                 let module = module.trim().to_string();
-                Some(Stmt::Import(module, None, sigs))
+                Some(Stmt::Import(module, sigs))
             } else {
-                Some(Stmt::Import(String::new(), None, parse_sigs(&rest.trim())?))
+                Some(Stmt::Import(String::new(), parse_sigs(&rest.trim())?))
             }
         } else if let Some(source) = source.strip_prefix("return ") {
             Some(Stmt::Return(Some(Expr::parse(source)?)))
@@ -243,14 +239,11 @@ impl Node for Stmt {
                 }
                 _ => return None,
             },
-            Stmt::Import(module, alias, funcs) => {
-                for (fn_name, args, ret_typ, maybe_alias) in funcs {
-                    let export_name = maybe_alias.as_ref().unwrap_or(fn_name);
-                    let import_as = alias.as_ref().unwrap_or(module);
-                    let wasm_name = if import_as.is_empty() {
-                        fn_name.clone()
-                    } else {
-                        format!("{import_as}.{fn_name}")
+            Stmt::Import(module, funcs) => {
+                for (mut fn_name, args, ret_typ, maybe_alias) in funcs.clone() {
+                    fn_name = maybe_alias.unwrap_or(fn_name.clone());
+                    if !module.is_empty() {
+                        fn_name = format!("{module}.{fn_name}")
                     };
                     let sig = join!(
                         args.iter()
@@ -262,7 +255,7 @@ impl Node for Stmt {
                     );
                     let ret = compile_return!(ret_typ, ctx);
                     ctx.import_code.push(format!(
-                        "(import \"env\" \"{wasm_name}\" (func ${export_name} {sig} {ret}))"
+                        "(import \"env\" \"{fn_name}\" (func ${fn_name} {sig} {ret}))"
                     ));
                 }
                 String::new()
@@ -359,7 +352,7 @@ impl Node for Stmt {
                 ctx.type_alias.insert(name.to_string(), value.clone());
                 Type::Void
             }
-            Stmt::Import(_module, _alias, funcs) => {
+            Stmt::Import(_module, funcs) => {
                 for (fn_name, args, ret_ty, alias) in funcs {
                     let import_name = alias.as_ref().unwrap_or(fn_name).clone();
                     let mut arg_map = IndexMap::new();
