@@ -13,7 +13,7 @@ console.log("Mystia REPL");
 rl.prompt();
 
 rl.on("line", (input) => {
-    if (input.trim() !== "") {
+    if (input.trim() !== "")
         mystia(`${code};${input}`)
             .then((result) => {
                 if (result === undefined) code += `;${input}`;
@@ -21,9 +21,7 @@ rl.on("line", (input) => {
             })
             .catch((e) => console.log("\u0007Error!", e))
             .then(() => rl.prompt());
-    } else {
-        rl.prompt();
-    }
+    else rl.prompt();
 });
 
 rl.on("close", () => {
