@@ -252,18 +252,14 @@ impl Node for Stmt {
                     } else {
                         format!("{import_as}.{fn_name}")
                     };
-                    let sig = if args.is_empty() {
-                        String::new()
-                    } else {
-                        join!(
-                            args.iter()
-                                .map(|t| t
-                                    .type_infer(ctx)?
-                                    .compile(ctx)
-                                    .map(|s| format!("(param {})", s)))
-                                .collect::<Option<Vec<_>>>()?
-                        )
-                    };
+                    let sig = join!(
+                        args.iter()
+                            .map(|t| t
+                                .type_infer(ctx)?
+                                .compile(ctx)
+                                .map(|s| format!("(param {})", s)))
+                            .collect::<Option<Vec<_>>>()?
+                    );
                     let ret = compile_return!(ret_typ, ctx);
                     ctx.import_code.push(format!(
                         "(import \"env\" \"{wasm_name}\" (func ${export_name} {sig} {ret}))"
