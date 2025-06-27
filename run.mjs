@@ -10,7 +10,8 @@ if (args.length === 0) {
 const filePath = args[0];
 const source = readFileSync(filePath, "utf8");
 try {
-    await mystia(source.toString());
+    const result = await mystia(source.toString());
+    if (result !== undefined) console.log(result);
 } catch (e) {
     console.log("Error!", e);
 }
