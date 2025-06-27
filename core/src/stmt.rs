@@ -257,11 +257,10 @@ impl Node for Stmt {
                     } else {
                         join!(
                             args.iter()
-                                .map(|t| {
-                                    t.type_infer(ctx)?
-                                        .compile(ctx)
-                                        .map(|s| format!("(param {})", s))
-                                })
+                                .map(|t| t
+                                    .type_infer(ctx)?
+                                    .compile(ctx)
+                                    .map(|s| format!("(param {})", s)))
                                 .collect::<Option<Vec<_>>>()?
                         )
                     };
@@ -321,6 +320,8 @@ impl Node for Stmt {
                     Expr::Call(name, args) => {
                         let var_typ = ctx.variable_type.clone();
                         let arg_typ = ctx.argument_type.clone();
+                        ctx.variable_type.clear();
+                        ctx.argument_type.clear();
                         compile_args!(args, ctx);
                         let frame = Function {
                             variables: ctx.variable_type.clone(),
