@@ -16,11 +16,8 @@ rl.on("line", (input) => {
     if (input.trim() !== "") {
         mystia(`${code};${input}`)
             .then((result) => {
-                if (result === undefined) {
-                    code += `;${input}`;
-                } else {
-                    console.log(result);
-                }
+                if (result === undefined) code += `;${input}`;
+                else console.log(result);
             })
             .catch((e) => console.log("\u0007Error!", e))
             .then(() => rl.prompt());
