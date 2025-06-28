@@ -92,17 +92,17 @@ impl Node for Expr {
                         )
                     )
                 } else if let Some((params, expr)) = ctx.macro_code.get(name).cloned() {
-                    for (params, arg) in params.iter().zip(args) {
+                    for (param, arg) in params.iter().zip(args) {
                         let typ = arg.type_infer(ctx)?;
-                        ctx.variable_type.insert(params.to_owned(), typ);
+                        ctx.variable_type.insert(param.to_owned(), typ);
                     }
                     let mut body = expr.compile(ctx)?;
-                    for (params, arg) in params.iter().zip(args) {
-                        let var = Expr::Variable(params.to_owned()).compile(ctx)?;
+                    for (param, arg) in params.iter().zip(args) {
+                        let var = Expr::Variable(param.to_owned()).compile(ctx)?;
                         body = body.replace(&var, &arg.compile(ctx)?);
                     }
-                    for params in params {
-                        ctx.variable_type.shift_remove(&params);
+                    for param in params {
+                        ctx.variable_type.shift_remove(&param);
                     }
                     body
                 } else {
