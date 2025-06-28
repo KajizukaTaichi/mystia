@@ -163,21 +163,27 @@ impl Node for Expr {
             }
             Expr::Literal(literal) => literal.type_infer(ctx)?,
             Expr::Call(name, args) => {
+                macro_rules! arglen_check {
+                    ($params: expr) => {
+                        if args.len() != $params.len() {
+                            let errmsg = format!(
+                                "arguments of function `{name}` length should be {}, but passed {} values",
+                                $params.len(),
+                                args.len()
+                            );
+                            ctx.occurred_error = Some(errmsg);
+                            return None;
+                        }
+                    };
+                }
                 if let Some(function) = ctx.function_type.get(name).cloned() {
-                    if args.len() != function.arguments.len() {
-                        let errmsg = format!(
-                            "arguments of function `{name}` length should be {}, but passed {} values",
-                            function.arguments.len(),
-                            args.len()
-                        );
-                        ctx.occurred_error = Some(errmsg);
-                        return None;
-                    }
+                    arglen_check!(function.arguments);
                     let func = |(arg, typ): (&Expr, &Type)| type_check!(arg, typ, ctx);
                     let ziped = args.iter().zip(function.arguments.values());
                     ziped.map(func).collect::<Option<Vec<_>>>()?;
                     function.returns.type_infer(ctx)?
                 } else if let Some((params, expr)) = ctx.macro_code.get(name).cloned() {
+                    arglen_check!(params);
                     for (params, arg) in params.iter().zip(args) {
                         let typ = arg.type_infer(ctx)?;
                         ctx.variable_type.insert(params.to_owned(), typ);
