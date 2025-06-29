@@ -55,11 +55,10 @@ impl Node for Value {
             Value::Integer(n) => format!("(i32.const {n})"),
             Value::Bool(n) => Value::Integer(if *n { 1 } else { 0 }).compile(ctx)?,
             Value::String(str) => {
-                let len = str.len() + 1;
                 let result = Value::Integer(ctx.allocator).compile(ctx)?;
                 ctx.static_data
                     .push(format!(r#"(data {} "{str}\00")"#, result));
-                ctx.allocator += len as i32;
+                ctx.allocator += str.len() as i32 + 1;
                 result
             }
             Value::Array(array) => {
