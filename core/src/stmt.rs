@@ -72,7 +72,10 @@ impl Node for Stmt {
             Some(Stmt::Let(Scope::Global, name, value))
         } else if let Some(source) = source.strip_prefix("type ") {
             let (name, value) = source.split_once("=")?;
-            Some(Stmt::Type(name.trim().to_string(), Type::parse(value)?))
+            let Some(Expr::Variable(name)) = Expr::parse(name) else {
+                return None;
+            };
+            Some(Stmt::Type(name, Type::parse(value)?))
         } else if let Some(source) = source.strip_prefix("macro ") {
             let (head, value) = source.split_once("=")?;
             let Expr::Call(name, args) = Expr::parse(head)? else {
