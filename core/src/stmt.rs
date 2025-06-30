@@ -84,11 +84,8 @@ impl Node for Stmt {
             let args = args
                 .iter()
                 .map(|x| {
-                    if let Expr::Variable(x) = x {
-                        Some(x.clone())
-                    } else {
-                        None
-                    }
+                    let Expr::Variable(x) = x else { return None };
+                    Some(x.clone())
                 })
                 .collect::<Option<Vec<_>>>()?;
             Some(Stmt::Macro(name, args, Expr::parse(value)?))
