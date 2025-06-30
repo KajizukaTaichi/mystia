@@ -183,7 +183,7 @@ impl Node for Stmt {
                     let var_typ = ctx.variable_type.clone();
                     let arg_typ = ctx.argument_type.clone();
                     let fun_typ = ctx.function_type.clone();
-                    let function = ctx.function_type.get(name)?.clone();
+                    let function = fun_typ.get(name)?.clone();
                     ctx.variable_type = function.variables.clone();
                     ctx.argument_type = function.arguments.clone();
                     let code = format!(
