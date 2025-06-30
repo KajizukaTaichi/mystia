@@ -11,7 +11,7 @@ pub enum Type {
     Array(Box<Type>),
     Dict(Dict),
     Enum(Enum),
-    Alias(String, Option<Box<Type>>),
+    Alias(String),
     Void,
     Any,
 }
@@ -26,6 +26,9 @@ impl Node for Type {
             "void" => Some(Type::Void),
             _ => {
                 let source = source.trim().to_string();
+                if !source.is_ascii() {
+                    return None;
+                }
                 if source.starts_with("[") && source.ends_with("]") {
                     let source = source.get(1..source.len() - 1)?.trim();
                     Some(Type::Array(Box::new(Type::parse(source)?)))
@@ -45,14 +48,8 @@ impl Node for Type {
                     let result = tokenize(source, &["|"], false, true, false)?;
                     let result = result.iter().map(|x| x.trim().to_string()).collect();
                     Some(Type::Enum(result))
-                } else if source.contains("@") {
-                    let (name, args) = source.split_once("@")?;
-                    Some(Type::Alias(
-                        name.to_string(),
-                        Some(Box::new(Type::parse(args)?)),
-                    ))
                 } else {
-                    Some(Type::Alias(source, None))
+                    Some(Type::Alias(source))
                 }
             }
         }
@@ -76,17 +73,13 @@ impl Node for Type {
 
     fn type_infer(&self, ctx: &mut Compiler) -> Option<Type> {
         match self {
-            Type::Alias(name, args) => {
+            Type::Alias(name) => {
                 let Some(typ) = ctx.type_alias.get(name).cloned() else {
                     let msg = format!("undefined type alias `{name}`");
                     ctx.occurred_error = Some(msg);
                     return None;
                 };
-                let mut new_ctx = ctx.clone();
-                if let Some(arg) = args {
-                    new_ctx.type_alias.insert("T".to_string(), *arg.clone());
-                }
-                typ.type_infer(&mut new_ctx)
+                typ.type_infer(ctx)
             }
             Type::Array(typ) => Some(Type::Array(Box::new(typ.type_infer(ctx)?))),
             Type::Dict(dict) => {
@@ -118,7 +111,7 @@ impl Type {
     pub fn decompress_alias(&self, ctx: &Compiler) -> Type {
         let mut aliases = ctx.type_alias.iter();
         if let Some(i) = aliases.find(|(_, v)| v.format() == self.format()) {
-            Type::Alias(i.0.clone(), None)
+            Type::Alias(i.0.clone())
         } else {
             match self {
                 Type::Array(typ) => Type::Array(Box::new(typ.decompress_alias(ctx))),
@@ -148,7 +141,7 @@ impl Type {
             ),
             Type::Enum(e) => format!("( {} )", e.join(" | ")),
             Type::Array(typ) => format!("[{}]", typ.format()),
-            Type::Alias(name, _) => name.to_string(),
+            Type::Alias(name) => name.to_string(),
             Type::Any => "any".to_string(),
         }
     }
