@@ -182,8 +182,7 @@ impl Node for Stmt {
                 Expr::Call(name, _) => {
                     let var_typ = ctx.variable_type.clone();
                     let arg_typ = ctx.argument_type.clone();
-                    let fun_typ = ctx.function_type.clone();
-                    let function = fun_typ.get(name)?.clone();
+                    let function = ctx.function_type.get(name)?.clone();
                     ctx.variable_type = function.variables.clone();
                     ctx.argument_type = function.arguments.clone();
                     let code = format!(
@@ -205,7 +204,6 @@ impl Node for Stmt {
                     if !ctx.declare_code.contains(&code) {
                         ctx.declare_code.push(code);
                     }
-                    ctx.function_type = fun_typ;
                     ctx.variable_type = var_typ;
                     ctx.argument_type = arg_typ;
                     String::new()
@@ -308,16 +306,14 @@ impl Node for Stmt {
                     Expr::Call(name, args) => {
                         let var_typ = ctx.variable_type.clone();
                         let arg_typ = ctx.argument_type.clone();
-                        let fun_typ = ctx.function_type.clone();
                         ctx.variable_type.clear();
                         ctx.argument_type.clear();
                         compile_args!(args, ctx);
                         let frame = Function {
+                            returns: value.type_infer(ctx)?,
                             variables: ctx.variable_type.clone(),
                             arguments: ctx.argument_type.clone(),
-                            returns: value.type_infer(ctx)?,
                         };
-                        ctx.function_type = fun_typ;
                         ctx.function_type.insert(name.to_owned(), frame);
                         ctx.variable_type = var_typ;
                         ctx.argument_type = arg_typ;
