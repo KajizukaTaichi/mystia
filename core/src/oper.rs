@@ -94,12 +94,6 @@ impl Node for Oper {
                 } else if let Type::Number | Type::Integer = typ {
                     compile_arithmetic!("add", self, ctx, lhs, rhs)
                 } else {
-                    let msg = format!(
-                        "can't addition between {} and {}",
-                        lhs.type_infer(ctx)?.format(),
-                        rhs.type_infer(ctx)?.format()
-                    );
-                    ctx.occurred_error = Some(msg);
                     return None;
                 }
             }
