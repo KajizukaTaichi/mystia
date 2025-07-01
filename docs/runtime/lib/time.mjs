@@ -1,28 +1,5 @@
 import { write, read } from "../ffi.mjs";
 
-export const spec = {
-    time: { args: [], ret: "num" },
-    time_ns: { args: [], ret: "num" },
-    perf_counter: { args: [], ret: "num" },
-    perf_counter_ns: { args: [], ret: "num" },
-    monotonic: { args: [], ret: "num" },
-    monotonic_ns: { args: [], ret: "num" },
-    process_time: { args: [], ret: "num" },
-    process_time_ns: { args: [], ret: "num" },
-    sleep: { args: ["num"], ret: "void" },
-    ctime: { args: ["num"], ret: "str" },
-    asctime: { args: ["tuple"], ret: "str" },
-    localtime: { args: ["num"], ret: "tuple" },
-    gmtime: { args: ["num"], ret: "tuple" },
-    mktime: { args: ["tuple"], ret: "num" },
-    strftime: { args: ["str", "tuple"], ret: "str" },
-    strptime: { args: ["str", "str"], ret: "tuple" },
-    tzset: { args: ["str"], ret: "void" },
-    timezone: { args: [], ret: "num" },
-    daylight: { args: [], ret: "bool" },
-    tzname: { args: [], ret: "str" },
-};
-
 export class MystiaTimeLib {
     constructor() {
         this.functions = {
