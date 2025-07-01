@@ -22,7 +22,8 @@ export class MystiaOSLib {
             listdir: (value) =>
                 write(
                     this.instance,
-                    "str",
+                    { type: "array", element: "int" },
+
                     fs.readdirSync(read(this.instance, "str", value)),
                 ),
             path_join: (value, end) =>
