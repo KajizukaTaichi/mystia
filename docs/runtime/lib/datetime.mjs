@@ -1,27 +1,5 @@
 import { write, read } from "../ffi.mjs";
 
-export const spec = {
-    now: { args: [], ret: "str" }, // current local datetime
-    utcnow: { args: [], ret: "str" }, // current UTC datetime
-    today: { args: [], ret: "str" }, // current local date
-    date: { args: ["num", "num", "num"], ret: "str" }, // year, month, day
-    time: { args: ["num", "num", "num", "num"], ret: "str" }, // hr, min, sec, μsec
-    datetime: {
-        args: ["num", "num", "num", "num", "num", "num", "num"],
-        ret: "str",
-    }, // y,m,d,hr,min,sec,μsec
-    fromtimestamp: { args: ["num"], ret: "str" }, // seconds since epoch local
-    utcfromtimestamp: { args: ["num"], ret: "str" }, // seconds since epoch UTC
-    timestamp: { args: ["str"], ret: "num" }, // ISO string -> seconds since epoch
-    strftime: { args: ["str", "str"], ret: "str" }, // dt_str, format
-    strptime: { args: ["str", "str"], ret: "str" }, // text, format -> ISO
-    isoformat: { args: ["str"], ret: "str" }, // ensure ISO formatting
-    weekday: { args: ["str"], ret: "num" }, // 0=Mon..6=Sun
-    isoweekday: { args: ["str"], ret: "num" }, // 1=Mon..7=Sun
-    add_seconds: { args: ["str", "num"], ret: "str" }, // dt_str, seconds
-    sub_seconds: { args: ["str", "num"], ret: "str" }, // dt_str, seconds
-};
-
 export class MystiaDatetimeLib {
     constructor() {
         this.functions = {
