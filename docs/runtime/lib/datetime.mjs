@@ -13,7 +13,7 @@ export class MystiaDatetimeLib {
                     .map((x) => parseInt(x));
                 return write(
                     this.instance,
-                    { type: "array", element: "int", length: 3 },
+                    { type: "array", element: "int" },
                     date,
                 );
             },
