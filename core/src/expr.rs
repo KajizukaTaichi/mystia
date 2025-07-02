@@ -66,7 +66,7 @@ impl Node for Expr {
             let enum_ = Value::Enum(Type::parse(typ)?, enum_.to_owned());
             Some(Expr::Literal(enum_))
         // Variable reference
-        } else if !RESERVED.contains(&token) && !OPERATOR.contains(&token) && token.is_ascii() {
+        } else if is_identifier(token) {
             Some(Expr::Variable(token.to_string()))
         } else {
             None
