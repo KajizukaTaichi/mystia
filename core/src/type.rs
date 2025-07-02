@@ -48,8 +48,10 @@ impl Node for Type {
                     let result = tokenize(source, &["|"], false, true, false)?;
                     let result = result.iter().map(|x| x.trim().to_string()).collect();
                     Some(Type::Enum(result))
-                } else {
+                } else if is_identifier(&source) {
                     Some(Type::Alias(source))
+                } else {
+                    None
                 }
             }
         }
