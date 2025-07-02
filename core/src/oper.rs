@@ -67,8 +67,8 @@ impl Node for Oper {
                     _ => return None,
                 })
             };
-            for i in token_list.len().checked_sub(2)?..1 {
-                if let Some(a) = opergen(i) {
+            for i in 2..token_list.len() {
+                if let Some(a) = opergen(token_list.len().checked_sub(i)?) {
                     return Some(a);
                 }
             }
