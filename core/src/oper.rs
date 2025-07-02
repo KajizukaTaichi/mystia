@@ -63,7 +63,13 @@ impl Node for Oper {
             Some(match oper {
                 "~" => Oper::BNot(Expr::parse(token)?),
                 "!" => Oper::LNot(Expr::parse(token)?),
-                "-" => Oper::Sub(Expr::Literal(Value::Integer(0)), Expr::parse(token)?),
+                "-" => Oper::Sub(
+                    Expr::Oper(Box::new(Oper::Sub(
+                        Expr::parse(token)?,
+                        Expr::parse(token)?,
+                    ))),
+                    Expr::parse(token)?,
+                ),
                 _ => return None,
             })
         };
@@ -177,7 +183,7 @@ impl Node for Oper {
             | Oper::Gt(lhs, rhs)
             | Oper::LtEq(lhs, rhs)
             | Oper::GtEq(lhs, rhs) => {
-                correct!(lhs, rhs, ctx, Type::Number | Type::Integer);
+                correct!(lhs, rhs, ctx, Type::Number | Type::Integer)?;
                 Some(Type::Bool)
             }
             Oper::LAnd(lhs, rhs) | Oper::LOr(lhs, rhs) => {
