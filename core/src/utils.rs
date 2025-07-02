@@ -10,6 +10,13 @@ pub const RESERVED: [&str; 13] = [
     "as",
 ];
 
+pub fn is_identifier(name: &str) -> bool {
+    !SPACE.contains(&name)
+        && !RESERVED.contains(&name)
+        && !OPERATOR.contains(&name)
+        && name.is_ascii()
+}
+
 pub fn include_letter(query: &str, chars: &Vec<String>, idx: usize) -> bool {
     chars
         .clone()
