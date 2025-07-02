@@ -11,7 +11,7 @@ pub const RESERVED: [&str; 13] = [
 ];
 
 pub fn is_identifier(name: &str) -> bool {
-    !SPACE.contains(&name)
+    !name.split_whitespace().count() == 1
         && !RESERVED.contains(&name)
         && !OPERATOR.contains(&name)
         && name.is_ascii()
