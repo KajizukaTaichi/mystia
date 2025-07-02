@@ -241,7 +241,7 @@ impl Expr {
             Type::Void => Some(Expr::Literal(Value::Integer(0))),
             Type::Dict(dict) => {
                 let mut result = Expr::Literal(Value::Integer(dict.first()?.1.1.pointer_length()));
-                for i in dict.iter().skip(1).map(|x| x.1.1.pointer_length()) {
+                for i in dict.iter().skip(1).map(|(_, (_, x))| x.pointer_length()) {
                     result = Expr::Oper(Box::new(Oper::Add(
                         result,
                         Expr::Literal(Value::Integer(i)),
