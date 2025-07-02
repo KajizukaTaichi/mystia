@@ -41,9 +41,9 @@ impl Node for Oper {
         } else {
             // Parsing is from right to left because operator is left-associative
             let opergen = |n: usize| {
-                let operator = token_list.get(token_list.len().checked_sub(n)?)?;
-                let lhs = &join!(token_list.get(..token_list.len() - n)?);
-                let rhs = &join!(token_list.get(token_list.len() - n - 1..)?);
+                let operator = token_list.get(n)?;
+                let lhs = &join!(token_list.get(..n)?);
+                let rhs = &join!(token_list.get(n + 1..)?);
                 Some(match operator.as_str() {
                     "+" => Oper::Add(Expr::parse(lhs)?, Expr::parse(rhs)?),
                     "-" => Oper::Sub(Expr::parse(lhs)?, Expr::parse(rhs)?),
@@ -67,7 +67,7 @@ impl Node for Oper {
                     _ => return None,
                 })
             };
-            for i in 2..token_list.len() - 1 {
+            for i in token_list.len().checked_sub(2)?..1 {
                 if let Some(a) = opergen(i) {
                     return Some(a);
                 }
