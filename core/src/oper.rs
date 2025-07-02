@@ -29,51 +29,53 @@ pub enum Oper {
 impl Node for Oper {
     fn parse(source: &str) -> Option<Self> {
         let token_list: Vec<String> = tokenize(source, SPACE.as_ref(), true, true, false)?;
-        if token_list.len() == 2 {
+        // Parsing is from right to left because operator is left-associative
+        let binopergen = |n: usize| {
+            let operator = token_list.get(n)?;
+            let lhs = &join!(token_list.get(..n)?);
+            let rhs = &join!(token_list.get(n + 1..)?);
+            Some(match operator.as_str() {
+                "+" => Oper::Add(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                "-" => Oper::Sub(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                "*" => Oper::Mul(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                "/" => Oper::Div(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                "%" => Oper::Mod(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                ">>" => Oper::Shr(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                "<<" => Oper::Shl(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                "==" => Oper::Eql(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                "!=" => Oper::Neq(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                "<" => Oper::Lt(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                ">" => Oper::Gt(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                ">=" => Oper::GtEq(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                "<=" => Oper::LtEq(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                "&" => Oper::BAnd(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                "|" => Oper::BOr(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                "^" => Oper::XOr(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                "&&" => Oper::LAnd(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                "||" => Oper::LOr(Expr::parse(lhs)?, Expr::parse(rhs)?),
+                ":" | "as" => Oper::Cast(Expr::parse(lhs)?, Type::parse(rhs)?),
+                _ => return None,
+            })
+        };
+        let unaryopergen = || {
             let oper = token_list.first()?.trim();
-            let token = token_list.last()?.trim();
+            let token = &join!(token_list.get(1..)?);
             Some(match oper {
                 "~" => Oper::BNot(Expr::parse(token)?),
                 "!" => Oper::LNot(Expr::parse(token)?),
                 "-" => Oper::Sub(Expr::Literal(Value::Integer(0)), Expr::parse(token)?),
                 _ => return None,
             })
-        } else {
-            // Parsing is from right to left because operator is left-associative
-            let opergen = |n: usize| {
-                let operator = token_list.get(n)?;
-                let lhs = &join!(token_list.get(..n)?);
-                let rhs = &join!(token_list.get(n + 1..)?);
-                Some(match operator.as_str() {
-                    "+" => Oper::Add(Expr::parse(lhs)?, Expr::parse(rhs)?),
-                    "-" => Oper::Sub(Expr::parse(lhs)?, Expr::parse(rhs)?),
-                    "*" => Oper::Mul(Expr::parse(lhs)?, Expr::parse(rhs)?),
-                    "/" => Oper::Div(Expr::parse(lhs)?, Expr::parse(rhs)?),
-                    "%" => Oper::Mod(Expr::parse(lhs)?, Expr::parse(rhs)?),
-                    ">>" => Oper::Shr(Expr::parse(lhs)?, Expr::parse(rhs)?),
-                    "<<" => Oper::Shl(Expr::parse(lhs)?, Expr::parse(rhs)?),
-                    "==" => Oper::Eql(Expr::parse(lhs)?, Expr::parse(rhs)?),
-                    "!=" => Oper::Neq(Expr::parse(lhs)?, Expr::parse(rhs)?),
-                    "<" => Oper::Lt(Expr::parse(lhs)?, Expr::parse(rhs)?),
-                    ">" => Oper::Gt(Expr::parse(lhs)?, Expr::parse(rhs)?),
-                    ">=" => Oper::GtEq(Expr::parse(lhs)?, Expr::parse(rhs)?),
-                    "<=" => Oper::LtEq(Expr::parse(lhs)?, Expr::parse(rhs)?),
-                    "&" => Oper::BAnd(Expr::parse(lhs)?, Expr::parse(rhs)?),
-                    "|" => Oper::BOr(Expr::parse(lhs)?, Expr::parse(rhs)?),
-                    "^" => Oper::XOr(Expr::parse(lhs)?, Expr::parse(rhs)?),
-                    "&&" => Oper::LAnd(Expr::parse(lhs)?, Expr::parse(rhs)?),
-                    "||" => Oper::LOr(Expr::parse(lhs)?, Expr::parse(rhs)?),
-                    ":" | "as" => Oper::Cast(Expr::parse(lhs)?, Type::parse(rhs)?),
-                    _ => return None,
-                })
-            };
-            for i in 2..token_list.len() {
-                if let Some(a) = opergen(token_list.len().checked_sub(i)?) {
-                    return Some(a);
-                }
-            }
-            None
+        };
+        if let Some(op) = unaryopergen() {
+            return Some(op);
         }
+        for i in 2..token_list.len() {
+            if let Some(op) = binopergen(token_list.len().checked_sub(i)?) {
+                return Some(op);
+            }
+        }
+        None
     }
 
     fn compile(&self, ctx: &mut Compiler) -> Option<String> {
