@@ -6,7 +6,7 @@ let alice = @{
         english: 49,
         science: 87
     },
-    total: 0,
+    total: null: int,
     result: false
 };
 
@@ -19,4 +19,4 @@ if alice.total >= 80 then {
     let alice.result = true
 };
 
-alice.score.math: num * alice.age
+alice
