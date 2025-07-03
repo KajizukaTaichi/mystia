@@ -180,6 +180,7 @@ impl Node for Stmt {
                     }
                 },
                 Expr::Call(name, _) => {
+                    self.type_infer(ctx)?;
                     let var_typ = ctx.variable_type.clone();
                     let arg_typ = ctx.argument_type.clone();
                     let function = ctx.function_type.get(name)?.clone();
