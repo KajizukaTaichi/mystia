@@ -30,18 +30,18 @@ impl Node for Block {
 
     fn type_infer(&self, ctx: &mut Compiler) -> Option<Type> {
         let var_ctx = ctx.variable_type.clone();
-        let fun_ctx = ctx.function_type.clone();
         let typ_ctx = ctx.type_alias.clone();
+        let fun_ctx = ctx.function_type.clone();
 
         let Block(block) = self.clone();
-        let result = block
-            .iter()
-            .map(|x| x.type_infer(ctx))
-            .collect::<Option<Vec<_>>>()?;
+        let mut result = Type::Void;
+        for line in block {
+            result = line.type_infer(ctx)?;
+        }
 
         ctx.variable_type = var_ctx;
-        ctx.function_type = fun_ctx;
         ctx.type_alias = typ_ctx;
-        result.last().cloned()
+        ctx.function_type = fun_ctx;
+        Some(result)
     }
 }
