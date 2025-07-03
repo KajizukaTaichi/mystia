@@ -38,8 +38,8 @@ let init_position() = {
     let model.target.position.y = 500
 };
 
-let x_position(n: Character) = "left: " + (n.position.x as str) + "px;";
-let y_position(n: Character) = "bottom: " + (n.position.y as str) + "px;";
+let x_position(n: Character) = "left: " + (n.position.x: str) + "px;";
+let y_position(n: Character) = "bottom: " + (n.position.y: str) + "px;";
 let draw_player() = {
     model.player.dom.upd_elm("style", x_position(model.player));
     model.player.dom.upd_elm("style", y_position(model.player))
