@@ -102,10 +102,10 @@ impl Node for Stmt {
                     let mut args_typ = vec![];
                     for arg in args {
                         let Expr::Oper(arg) = arg else { return None };
-                        let Oper::Cast(Expr::Variable(arg_name), arg_typ) = *arg.clone() else {
+                        let Oper::Cast(Expr::Variable(arg_name), arg_ctx) = *arg.clone() else {
                             return None;
                         };
-                        args_typ.push((arg_name, arg_typ));
+                        args_typ.push((arg_name, arg_ctx));
                     }
                     result.push((name, args_typ, ret_typ, alias));
                 }
@@ -181,8 +181,8 @@ impl Node for Stmt {
                 },
                 Expr::Call(name, _) => {
                     self.type_infer(ctx);
-                    let var_typ = ctx.variable_type.clone();
-                    let arg_typ = ctx.argument_type.clone();
+                    let var_ctx = ctx.variable_type.clone();
+                    let arg_ctx = ctx.argument_type.clone();
                     let function = ctx.function_type.get(name)?.clone();
                     ctx.variable_type = function.variables.clone();
                     ctx.argument_type = function.arguments.clone();
@@ -203,8 +203,8 @@ impl Node for Stmt {
                         body = value.compile(ctx)?, locals = expand_local(ctx)?
                     );
                     ctx.declare_code.push(code);
-                    ctx.variable_type = var_typ;
-                    ctx.argument_type = arg_typ;
+                    ctx.variable_type = var_ctx;
+                    ctx.argument_type = arg_ctx;
                     String::new()
                 }
                 Expr::Oper(oper) => {
@@ -304,8 +304,8 @@ impl Node for Stmt {
                         }
                     },
                     Expr::Call(name, args) => {
-                        let var_typ = ctx.variable_type.clone();
-                        let arg_typ = ctx.argument_type.clone();
+                        let var_ctx = ctx.variable_type.clone();
+                        let arg_ctx = ctx.argument_type.clone();
                         ctx.variable_type.clear();
                         ctx.argument_type.clear();
                         compile_args!(args, ctx);
@@ -315,13 +315,13 @@ impl Node for Stmt {
                             arguments: ctx.argument_type.clone(),
                         };
                         ctx.function_type.insert(name.to_owned(), frame);
-                        ctx.variable_type = var_typ;
-                        ctx.argument_type = arg_typ;
+                        ctx.variable_type = var_ctx;
+                        ctx.argument_type = arg_ctx;
                     }
                     Expr::Oper(oper) => match *oper.clone() {
                         Oper::Cast(Expr::Call(name, args), ret) => {
-                            let var_typ = ctx.variable_type.clone();
-                            let arg_typ = ctx.argument_type.clone();
+                            let var_ctx = ctx.variable_type.clone();
+                            let arg_ctx = ctx.argument_type.clone();
                             ctx.variable_type.clear();
                             ctx.argument_type.clear();
                             compile_args!(args.clone(), ctx);
@@ -334,8 +334,8 @@ impl Node for Stmt {
                                 },
                             );
                             type_check!(value.type_infer(ctx)?, ret, ctx);
-                            ctx.variable_type = var_typ;
-                            ctx.argument_type = arg_typ;
+                            ctx.variable_type = var_ctx;
+                            ctx.argument_type = arg_ctx;
                         }
                         _ => return None,
                     },
