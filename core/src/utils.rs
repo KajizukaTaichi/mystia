@@ -1,12 +1,12 @@
 use crate::*;
 
 pub const SPACE: [&str; 5] = [" ", "　", "\n", "\t", "\r"];
-pub const OPERATOR: [&str; 21] = [
-    "+", "-", "*", "/", "%", "==", "!=", "<<", ">>", "<=", ">=", "<", ">", "&&", "||", "&", "|",
-    "^", ":", "!", "~",
+pub const OPERATOR: [&str; 22] = [
+    "+", "-", "*", "/", "%", "==", "=", "!=", "<<", ">>", "<=", ">=", "<", ">", "&&", "||", "&",
+    "|", "^", ":", "!", "~",
 ];
 pub const RESERVED: [&str; 13] = [
-    "let", "type", "if", "then", "else", "while", "loop", "break", "next", "return", "load", "pub",
+    "pub", "let", "type", "if", "then", "else", "while", "loop", "break", "next", "return", "load",
     "as",
 ];
 
