@@ -92,6 +92,7 @@ impl Node for Expr {
                         )
                     )
                 } else if let Some((params, expr)) = ctx.macro_code.get(name).cloned() {
+                    let var_ctx = ctx.variable_type.clone();
                     for (param, arg) in params.iter().zip(args) {
                         let typ = arg.type_infer(ctx)?;
                         ctx.variable_type.insert(param.to_owned(), typ);
@@ -101,9 +102,7 @@ impl Node for Expr {
                         let var = Expr::Variable(param.to_owned()).compile(ctx)?;
                         body = body.replace(&var, &arg.compile(ctx)?);
                     }
-                    for param in params {
-                        ctx.variable_type.shift_remove(&param);
-                    }
+                    ctx.variable_type = var_ctx;
                     body
                 } else {
                     return None;
@@ -185,18 +184,18 @@ impl Node for Expr {
                     function.returns.type_infer(ctx)?
                 } else if let Some((params, expr)) = ctx.macro_code.get(name).cloned() {
                     arglen_check!(params, "macro");
+                    let var_ctx = ctx.variable_type.clone();
                     for (params, arg) in params.iter().zip(args) {
                         let typ = arg.type_infer(ctx)?;
                         ctx.variable_type.insert(params.to_owned(), typ);
                     }
                     let typ = expr.type_infer(ctx)?;
-                    for params in params {
-                        ctx.variable_type.shift_remove(&params);
-                    }
+                    ctx.variable_type = var_ctx;
                     typ
                 } else {
-                    let errmsg = format!("function `{name}` you want to call is not defined");
-                    ctx.occurred_error = Some(errmsg);
+                    ctx.occurred_error = Some(format!(
+                        "function or macro `{name}` you want to call is not defined"
+                    ));
                     return None;
                 }
             }
