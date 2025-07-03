@@ -11,6 +11,7 @@ pub fn tokenize(
     let mut current_token = String::new();
     let mut in_parentheses: usize = 0;
     let mut in_quote = false;
+    let mut is_escape = false;
     let mut is_comment = false;
 
     let chars: Vec<String> = input.chars().map(String::from).collect();
@@ -27,8 +28,11 @@ pub fn tokenize(
             index += 1;
             continue;
         }
-
-        if ["(", "[", "{"].contains(&c.as_str()) {
+        if is_escape {
+            current_token.push_str(&c);
+            is_escape = false;
+            index += 1;
+        } else if ["(", "[", "{"].contains(&c.as_str()) {
             if is_split && in_parentheses == 0 {
                 tokens.push(current_token.clone());
                 current_token.clear();
@@ -47,6 +51,10 @@ pub fn tokenize(
         } else if c == "\"" {
             in_quote = !in_quote;
             current_token.push_str(c.as_str());
+            index += 1;
+        } else if c == "\\" {
+            current_token.push_str(&c);
+            is_escape = true;
             index += 1;
         } else {
             let mut is_opr = false;
@@ -91,7 +99,7 @@ pub fn tokenize(
     }
 
     // Syntax error check
-    if in_quote || in_parentheses != 0 {
+    if is_escape || in_quote || in_parentheses != 0 {
         return None;
     }
     if !is_trim || (is_trim && !current_token.is_empty()) {
