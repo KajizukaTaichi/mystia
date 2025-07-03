@@ -26,7 +26,7 @@ impl Node for Value {
         // String literal
         } else if source.starts_with("\"") && source.ends_with("\"") {
             let source = source.get(1..source.len() - 1)?;
-            Some(Value::String(str_escape(source)))
+            Some(Value::String(source.to_string()))
         // Array `[expr, ...]`
         } else if source.starts_with("[") && source.ends_with("]") {
             let source = source.get(1..source.len() - 1)?.trim();
