@@ -18,8 +18,7 @@ impl Node for Block {
         for (n, line) in self.0.iter().enumerate() {
             let mut output = line.compile(ctx)?;
             if n != self.0.len() - 1 {
-                if let Type::Void = line.type_infer(ctx)? {
-                } else {
+                if !matches!(line.type_infer(ctx)?, Type::Void) {
                     output.push_str("(drop)");
                 }
             }
