@@ -11,7 +11,7 @@ use indexmap::IndexMap;
 pub use {
     block::Block,
     expr::Expr,
-    lexer::{str_escape, tokenize},
+    lexer::tokenize,
     oper::Oper,
     stmt::Stmt,
     r#type::{Dict, Enum, Type},
