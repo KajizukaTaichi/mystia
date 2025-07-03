@@ -10,5 +10,5 @@ let sum = a * b;
 
 let question = (b: str) + " x " + (a: str) + " = ?";
 
-let result = prompt(question) as int == sum;
+let result = prompt(question): int == sum;
 if result then "Perfect!" else "Currect answer: " + (sum: str)
