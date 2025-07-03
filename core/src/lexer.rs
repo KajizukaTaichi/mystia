@@ -12,7 +12,6 @@ pub fn tokenize(
     let mut in_parentheses: usize = 0;
     let mut in_quote = false;
     let mut is_comment = false;
-    let mut is_escape = false;
 
     let chars: Vec<String> = input.chars().map(String::from).collect();
     let mut index = 0;
@@ -28,16 +27,8 @@ pub fn tokenize(
             index += 1;
             continue;
         }
-        if is_escape {
-            current_token.push_str(match c.as_str() {
-                "n" => "\n",
-                "t" => "\t",
-                "r" => "\r",
-                _ => &c,
-            });
-            is_escape = false;
-            index += 1;
-        } else if ["(", "[", "{"].contains(&c.as_str()) {
+
+        if ["(", "[", "{"].contains(&c.as_str()) {
             if is_split && in_parentheses == 0 {
                 tokens.push(current_token.clone());
                 current_token.clear();
@@ -53,13 +44,9 @@ pub fn tokenize(
                 return None;
             }
             index += 1;
-        } else if ["\"", "'", "`"].contains(&c.as_str()) {
+        } else if c == "\"" {
             in_quote = !in_quote;
             current_token.push_str(c.as_str());
-            index += 1;
-        } else if c == "\\" {
-            current_token.push_str(&c);
-            is_escape = true;
             index += 1;
         } else {
             let mut is_opr = false;
@@ -104,30 +91,11 @@ pub fn tokenize(
     }
 
     // Syntax error check
-    if is_escape || in_quote || in_parentheses != 0 {
+    if in_quote || in_parentheses != 0 {
         return None;
     }
     if !is_trim || (is_trim && !current_token.is_empty()) {
         tokens.push(current_token.clone());
     }
     Some(tokens)
-}
-
-pub fn str_escape(str: &str) -> String {
-    let mut result = String::new();
-    let mut is_escape = false;
-    for c in str.chars() {
-        if is_escape {
-            result.push(c);
-            is_escape = false;
-        } else {
-            match c {
-                '\\' => {
-                    is_escape = true;
-                }
-                _ => result.push(c),
-            }
-        }
-    }
-    result
 }
