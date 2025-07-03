@@ -5,7 +5,7 @@ let fizzbuzz(n: int) = {
     if n % 15 == 0 then "FizzBuzz"
     else if n % 3 == 0 then "Fizz"
     else if n % 5 == 0 then "Buzz"
-    else n as str
+    else n: str
 };
 
 let i = 1;
