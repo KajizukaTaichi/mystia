@@ -15,7 +15,7 @@ pub let model = @{
 };
 
 let view() = {
-    let formatted = "Number: " + (model.count as str);
+    let formatted = "Number: " + (model.count: str);
     upd_elm(model.layout.panel, "innerHTML", formatted)
 };
 
