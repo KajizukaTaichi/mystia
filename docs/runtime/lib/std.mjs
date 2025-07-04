@@ -83,7 +83,7 @@ export class MystiaWebLib extends MystiaStdLib {
             window.alert(read(this.instance, "str", message));
         };
         this.functions.confirm = (message) => {
-            window.confirm(read(this.instance, "str", message));
+            return window.confirm(read(this.instance, "str", message));
         };
         this.functions.prompt = (message) => {
             const answer = window.prompt(read(this.instance, "str", message));
