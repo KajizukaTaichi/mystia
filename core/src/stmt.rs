@@ -102,10 +102,10 @@ impl Node for Stmt {
                     let mut args_typ = vec![];
                     for arg in args {
                         let Expr::Oper(arg) = arg else { return None };
-                        let Oper::Cast(Expr::Variable(arg_name), arg_ctx) = *arg.clone() else {
+                        let Oper::Cast(Expr::Variable(arg_name), arg_typ) = *arg.clone() else {
                             return None;
                         };
-                        args_typ.push((arg_name, arg_ctx));
+                        args_typ.push((arg_name, arg_typ));
                     }
                     result.push((name, args_typ, ret_typ, alias));
                 }
