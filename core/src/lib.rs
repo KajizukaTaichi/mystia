@@ -60,8 +60,6 @@ pub struct Compiler {
     pub argument_type: IndexMap<String, Type>,
     /// Type environment for function
     pub function_type: IndexMap<String, Function>,
-    /// Expected type of type inference
-    pub expected_type: Option<String>,
     /// Type of main program returns
     pub program_return: Type,
 }
@@ -80,7 +78,6 @@ impl Compiler {
             global_type: IndexMap::new(),
             argument_type: IndexMap::new(),
             function_type: IndexMap::new(),
-            expected_type: None,
             program_return: Type::Void,
         }
     }
