@@ -74,35 +74,7 @@ impl Node for Type {
     }
 
     fn type_infer(&self, ctx: &mut Compiler) -> Option<Type> {
-        match self {
-            Type::Alias(name) => {
-                let Some(typ) = ctx.type_alias.get(name).cloned() else {
-                    let msg = format!("undefined type alias `{name}`");
-                    ctx.occurred_error = Some(msg);
-                    return None;
-                };
-                if ctx
-                    .expected_type
-                    .clone()
-                    .map(|xpct| &xpct == name)
-                    .unwrap_or(false)
-                {
-                    Some(self.clone())
-                } else {
-                    ctx.expected_type = Some(name.to_owned());
-                    typ.type_infer(ctx)
-                }
-            }
-            Type::Array(typ) => Some(Type::Array(Box::new(typ.type_infer(ctx)?))),
-            Type::Dict(dict) => {
-                let mut a = IndexMap::new();
-                for (name, (offset, typ)) in dict {
-                    a.insert(name.clone(), (offset.clone(), typ.type_infer(ctx)?));
-                }
-                Some(Type::Dict(a))
-            }
-            _ => Some(self.clone()),
-        }
+        self.compress_alias(ctx, &None)
     }
 }
 
@@ -117,6 +89,35 @@ impl Type {
             | Type::Enum(_) => 4,
             Type::Number => 8,
             _ => 0,
+        }
+    }
+
+    pub fn compress_alias(&self, ctx: &mut Compiler, xpct: &Option<String>) -> Option<Type> {
+        match self {
+            Type::Alias(name) => {
+                let Some(typ) = ctx.type_alias.get(name).cloned() else {
+                    let msg = format!("undefined type alias `{name}`");
+                    ctx.occurred_error = Some(msg);
+                    return None;
+                };
+                if xpct.clone().map(|xpct| &xpct == name).unwrap_or(false) {
+                    Some(self.clone())
+                } else {
+                    typ.compress_alias(ctx, &Some(name.to_owned()))
+                }
+            }
+            Type::Array(typ) => Some(Type::Array(Box::new(typ.compress_alias(ctx, xpct)?))),
+            Type::Dict(dict) => {
+                let mut a = IndexMap::new();
+                for (name, (offset, typ)) in dict {
+                    a.insert(
+                        name.clone(),
+                        (offset.clone(), typ.compress_alias(ctx, xpct)?),
+                    );
+                }
+                Some(Type::Dict(a))
+            }
+            _ => Some(self.clone()),
         }
     }
 
