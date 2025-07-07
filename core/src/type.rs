@@ -123,18 +123,19 @@ impl Type {
 
     pub fn decompress_alias(&self, ctx: &Compiler) -> Type {
         let mut aliases = ctx.type_alias.iter();
-        if let Some(i) = aliases.find(|(_, v)| v.format() == self.format()) {
+        let typ = match self {
+            Type::Array(typ) => Type::Array(Box::new(typ.decompress_alias(ctx))),
+            Type::Dict(dict) => Type::Dict(
+                dict.iter()
+                    .map(|(k, (o, t))| (k.clone(), (o.clone(), t.decompress_alias(ctx))))
+                    .collect(),
+            ),
+            _ => self.clone(),
+        };
+        if let Some(i) = aliases.find(|(_, v)| v.format() == typ.format()) {
             Type::Alias(i.0.clone())
         } else {
-            match self {
-                Type::Array(typ) => Type::Array(Box::new(typ.decompress_alias(ctx))),
-                Type::Dict(dict) => Type::Dict(
-                    dict.iter()
-                        .map(|(k, (o, t))| (k.clone(), (o.clone(), t.decompress_alias(ctx))))
-                        .collect(),
-                ),
-                _ => self.clone(),
-            }
+            typ
         }
     }
 
