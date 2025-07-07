@@ -81,7 +81,17 @@ impl Node for Type {
                     ctx.occurred_error = Some(msg);
                     return None;
                 };
-                typ.type_infer(ctx)
+                if ctx
+                    .expected_type
+                    .clone()
+                    .map(|xpct| &xpct == name)
+                    .unwrap_or(false)
+                {
+                    Some(self.clone())
+                } else {
+                    ctx.expected_type = Some(name.to_owned());
+                    typ.type_infer(ctx)
+                }
             }
             Type::Array(typ) => Some(Type::Array(Box::new(typ.type_infer(ctx)?))),
             Type::Dict(dict) => {
