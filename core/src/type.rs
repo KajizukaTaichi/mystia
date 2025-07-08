@@ -106,13 +106,18 @@ impl Type {
                     typ.compress_alias(ctx, &Some(name.to_owned()))
                 }
             }
-            Type::Array(typ) => Some(Type::Array(Box::new(typ.compress_alias(ctx, xpct)?))),
+            Type::Array(typ) => Some(Type::Array(Box::new(
+                typ.compress_alias(ctx, xpct)?.decompress_alias(ctx),
+            ))),
             Type::Dict(dict) => {
                 let mut a = IndexMap::new();
                 for (name, (offset, typ)) in dict {
                     a.insert(
                         name.clone(),
-                        (offset.clone(), typ.compress_alias(ctx, xpct)?),
+                        (
+                            offset.clone(),
+                            typ.compress_alias(ctx, xpct)?.decompress_alias(ctx),
+                        ),
                     );
                 }
                 Some(Type::Dict(a))
