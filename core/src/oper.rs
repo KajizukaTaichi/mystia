@@ -24,6 +24,7 @@ pub enum Oper {
     LNot(Expr),
     Cast(Expr, Type),
     NullCheck(Expr),
+    Nullable(Type),
     Transmute(Expr, Type),
 }
 
@@ -79,6 +80,7 @@ impl Node for Oper {
             let token = &join!(token_list.get(..token_list.len() - 1)?);
             Some(match oper {
                 "?" => Oper::NullCheck(Expr::parse(token)?),
+                "!" => Oper::Nullable(Type::parse(token)?),
                 _ => return None,
             })
         };
@@ -177,6 +179,7 @@ impl Node for Oper {
                 Expr::Literal(Value::Integer(-1)),
             )
             .compile(ctx)?,
+            Oper::Nullable(_) => Value::Null.compile(ctx)?,
         })
     }
 
@@ -228,6 +231,7 @@ impl Node for Oper {
                 expr.type_infer(ctx)?;
                 Some(Type::Bool)
             }
+            Oper::Nullable(typ) => Some(typ.clone()),
         }
     }
 }
