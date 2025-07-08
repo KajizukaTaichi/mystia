@@ -1,8 +1,6 @@
-type Elm = int;
-
-load new_elm(tag: str, parent: Elm): Elm;
-load upd_elm(id: Elm, prop: str, content: str): void;
-load evt_elm(id: Elm, name: str, func: str): void;
+load new_elm(tag: str, parent: int): int;
+load upd_elm(id: int, prop: str, content: str): void;
+load evt_elm(id: int, name: str, func: str): void;
 load random::randint(a: int, b: int): int;
 load to_str(n: num): str;
 load concat(a: str, b: str): str;
@@ -17,12 +15,12 @@ pub let model = @{
     count: 0,
     speed: 50,
     player: @{
-        dom: null:Elm,
+        dom: null:int,
         src: "https://pixiv.navirank.com/jpg/153/15371090.jpg",
         position: @{ x: null:int, y: null:int }
     },
     target: @{
-        dom: null:Elm,
+        dom: null:int,
         src: "https://pixiv.navirank.com/jpg/1263/126387033.jpg",
         position: @{ x: null:int, y: null:int }
     },
@@ -80,12 +78,12 @@ pub let user_operation(key_code: int) = {
     else if key_code == 40 then move_player(0, -model.speed)
 };
 
-let model.player.dom = new_elm("img", null:Elm);
+let model.player.dom = new_elm("img", null:int);
 model.player.dom.upd_elm("src", model.player.src);
 model.player.dom.upd_elm("style", model.style.char);
 model.player.dom.evt_elm("keydown", "user_operation");
 
-let model.target.dom = new_elm("img", null:Elm);
+let model.target.dom = new_elm("img", null:int);
 model.target.dom.upd_elm("src", model.target.src);
 model.target.dom.upd_elm("style", model.style.char);
 
