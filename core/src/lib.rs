@@ -85,6 +85,7 @@ impl Compiler {
     pub fn build(&mut self, source: &str) -> Option<String> {
         let ast = Block::parse(source)?;
         self.program_return = ast.type_infer(self)?;
+        dbg!(&self.program_return);
         Some(format!(
             "(module {import} {memory} {memcpy} {strings} {declare} {global} (func (export \"_start\") {ret} {locals} {code}))",
             code = ast.compile(self)?,
