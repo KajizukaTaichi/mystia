@@ -11,4 +11,4 @@ let list = @{
     }
 };
 
-list
+list.car() + list.cdr().car()
