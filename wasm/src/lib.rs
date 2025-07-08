@@ -60,7 +60,7 @@ pub fn type_to_json(typ: &Type) -> String {
                 .collect::<Vec<_>>()
                 .join(", ")
         ),
-        Type::Alias(name) => format!("{{ type: \"alias\", name: {name} }}"),
+        Type::Alias(name) => format!("{{ type: \"alias\", name: \"{name}\" }}"),
         Type::Any => format!("\"any\""),
     }
 }
