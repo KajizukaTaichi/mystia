@@ -43,12 +43,14 @@ export function read(instance, type, value) {
                     return concatBytes(sliced);
                 }
             })();
-            const fieldType = field.type.type === "alias" ? type : field.type;
+            const fieldType = field.type.type == "alias" ? type : field.type;
             result[name] = read(instance, fieldType, value);
         }
         return result;
     } else if (type.type == "enum") {
         return type.enum[value];
+    } else if (type.type == "alias") {
+        return null;
     } else {
         return type;
     }
