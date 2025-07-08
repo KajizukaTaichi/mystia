@@ -5,7 +5,12 @@ let append(self: LinkList, other: LinkList) = {
     while self.next? loop {
         let self = self.next
     };
-    let self.next = other
+    let self.next = other;
+    self
 };
 
-let list = @{ value: 2, next: @{ value: 5, next: @{ value: 8, next: LinkList! } } }
+let a = node(1);
+let b = node(2).append(node(3));
+a.append(b);
+
+a.value + a.next.value + a.next.next.value
