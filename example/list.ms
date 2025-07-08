@@ -1,5 +1,7 @@
 type LinkList = @{ value: int, next: LinkList };
 
+let car(self: LinkList) = self.value;
+let cdr(self: LinkList) = self.next;
 let node(value: int) = memcpy(@{ value: value, next: LinkList! });
 let append(self: LinkList, other: LinkList) = {
     while self.next? loop {
@@ -11,6 +13,4 @@ let append(self: LinkList, other: LinkList) = {
 
 let a = node(1);
 let b = node(2).append(node(3));
-a.append(b);
-
-a.value + a.next.value + a.next.next.value
+a.car() + b.car() + b.cdr().car()
