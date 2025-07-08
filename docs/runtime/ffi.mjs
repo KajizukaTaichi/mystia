@@ -48,6 +48,8 @@ export function read(instance, type, value) {
         return result;
     } else if (type.type == "enum") {
         return type.enum[value];
+    } else if (type.type == "alias") {
+        return null;
     } else {
         return type;
     }
