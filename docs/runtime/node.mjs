@@ -18,6 +18,7 @@ const moduleClasses = {
 
 export async function mystia(code, customModules = {}) {
     const result = compile(code);
+    console.log(result.get_return_type());
     const returnType = eval(`(${result.get_return_type()})`);
     const bytecodes = result.get_bytecode().buffer;
     const moduleObj = await WebAssembly.compile(bytecodes);
