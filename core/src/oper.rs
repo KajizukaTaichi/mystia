@@ -23,6 +23,7 @@ pub enum Oper {
     LOr(Expr, Expr),
     LNot(Expr),
     Cast(Expr, Type),
+    NullCheck(Expr),
     Transmute(Expr, Type),
 }
 
@@ -73,7 +74,18 @@ impl Node for Oper {
                 _ => return None,
             })
         };
+        let suffixopergen = || {
+            let oper = token_list.last()?.trim();
+            let token = &join!(token_list.get(..token_list.len() - 1)?);
+            Some(match oper {
+                "?" => Oper::NullCheck(Expr::parse(token)?),
+                _ => return None,
+            })
+        };
         if let Some(op) = unaryopergen() {
+            return Some(op);
+        }
+        if let Some(op) = suffixopergen() {
             return Some(op);
         }
         for i in 2..token_list.len() {
@@ -160,6 +172,11 @@ impl Node for Oper {
                 }
             }
             Oper::Transmute(lhs, _) => lhs.compile(ctx)?,
+            Oper::NullCheck(expr) => Oper::Neq(
+                Expr::Oper(Box::new(Oper::Transmute(expr.clone(), Type::Integer))),
+                Expr::Literal(Value::Integer(-1)),
+            )
+            .compile(ctx)?,
         })
     }
 
@@ -197,7 +214,7 @@ impl Node for Oper {
             }
             Oper::Cast(lhs, rhs) => {
                 lhs.type_infer(ctx)?;
-                Some(rhs.type_infer(ctx)?)
+                rhs.type_infer(ctx)
             }
             Oper::BNot(lhs) => {
                 type_check!(lhs, Type::Integer, ctx)?;
@@ -206,6 +223,10 @@ impl Node for Oper {
             Oper::Transmute(lhs, rhs) => {
                 lhs.type_infer(ctx)?;
                 rhs.type_infer(ctx)
+            }
+            Oper::NullCheck(expr) => {
+                expr.type_infer(ctx)?;
+                Some(Type::Bool)
             }
         }
     }
