@@ -94,8 +94,7 @@ impl Type {
 
     pub fn compress_alias(&self, ctx: &mut Compiler, xpct: Vec<Type>) -> Option<Type> {
         for x in &xpct {
-            dbg!((self.format(), x.format()));
-            if x.format() == self.format() {
+            if x.decompress_alias(ctx).format() == self.decompress_alias(ctx).format() {
                 return Some(self.decompress_alias(ctx));
             }
         }
@@ -106,7 +105,6 @@ impl Type {
                     ctx.occurred_error = Some(msg);
                     return None;
                 };
-                dbg!(&typ.clone());
                 typ.compress_alias(ctx, xpct.clone())
             }
             Type::Array(typ) => Some(Type::Array(Box::new(
@@ -114,7 +112,6 @@ impl Type {
             ))),
             Type::Dict(dict) => {
                 let mut a = IndexMap::new();
-                dbg!(self);
                 for (name, (offset, typ)) in dict {
                     a.insert(
                         name.clone(),
@@ -128,12 +125,6 @@ impl Type {
             }
             _ => Some(self.clone()),
         };
-        for x in &xpct {
-            dbg!((self.format(), x.format()));
-            if x.format() == self.format() {
-                return Some(self.decompress_alias(ctx));
-            }
-        }
         result
     }
 
