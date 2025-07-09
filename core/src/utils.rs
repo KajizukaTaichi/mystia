@@ -117,7 +117,7 @@ macro_rules! compile_compare {
 
 #[macro_export]
 macro_rules! address_calc {
-    ($array: expr, $index: expr, $typ: expr, $ctx: expr) => {
+    ($array: expr, $index: expr, $typ: expr) => {
         Oper::Add(
             Expr::Oper(Box::new(Oper::Add(
                 Expr::Literal(Value::Integer(4)),
@@ -128,7 +128,7 @@ macro_rules! address_calc {
                     *$index.clone(),
                     Expr::MemLoad($array.clone(), Type::Integer),
                 ))),
-                Expr::Literal(Value::Integer($typ.pointer_length($ctx)?)),
+                Expr::Literal(Value::Integer($typ.pointer_length()?)),
             ))),
         )
     };
