@@ -35,12 +35,10 @@ impl Node for Type {
                 } else if source.starts_with("@{") && source.ends_with("}") {
                     let source = source.get(2..source.len() - 1)?.trim();
                     let mut result = IndexMap::new();
-                    let mut index = 0;
                     for line in tokenize(source, &[","], false, true, false)? {
                         let (name, value) = line.split_once(":")?;
                         let typ = Type::parse(value)?;
-                        result.insert(name.trim().to_string(), (index, typ.clone()));
-                        index += typ.pointer_length();
+                        result.insert(name.trim().to_string(), (0, typ.clone()));
                     }
                     Some(Type::Dict(result))
                 } else if source.starts_with("(") && source.ends_with(")") {
@@ -79,16 +77,16 @@ impl Node for Type {
 }
 
 impl Type {
-    pub fn pointer_length(&self) -> i32 {
-        match self {
+    pub fn pointer_length(&self, ctx: &mut Compiler) -> Option<i32> {
+        match self.type_infer(ctx)? {
             Type::Array(_)
             | Type::String
             | Type::Bool
             | Type::Dict(_)
             | Type::Integer
-            | Type::Enum(_) => 4,
-            Type::Number => 8,
-            _ => 0,
+            | Type::Enum(_) => Some(4),
+            Type::Number => Some(8),
+            _ => None,
         }
     }
 
