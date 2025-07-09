@@ -32,4 +32,4 @@ let ast = node_binop_add(
     node_literal_int(100),
     node_literal_int(200)
 );
-ast.lhs.lhs
+ast.compile()
