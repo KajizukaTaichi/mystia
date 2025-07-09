@@ -1,6 +1,4 @@
 type LinkList = @{ value: int, next: LinkList };
-load print(_: str): void;
-load to_str(_: int): str;
 
 let car(self: LinkList) = self.value;
 let cdr(self: LinkList) = self.next;
