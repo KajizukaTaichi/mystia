@@ -112,14 +112,14 @@ impl Type {
                 let mut a = IndexMap::new();
                 let mut offset = 0;
                 for (name, (_, typ)) in dict {
-                    a.insert(
-                        name.clone(),
-                        (
-                            offset.clone(),
-                            typ.compress_alias(ctx, [xpct.clone(), vec![self.clone()]].concat())?,
-                        ),
-                    );
-                    offset += typ.pointer_length()?;
+                    let typ =
+                        typ.compress_alias(ctx, [xpct.clone(), vec![self.clone()]].concat())?;
+                    a.insert(name.clone(), (offset.clone(), typ.clone()));
+                    offset += if let Type::Alias(_) = typ {
+                        self.pointer_length()?
+                    } else {
+                        typ.pointer_length()?
+                    };
                 }
                 Some(Type::Dict(a))
             }
