@@ -74,7 +74,7 @@ impl Node for Type {
     }
 
     fn type_infer(&self, ctx: &mut Compiler) -> Option<Type> {
-        self.compress_alias(ctx, &None)
+        self.compress_alias(ctx, vec![])
     }
 }
 
@@ -92,50 +92,49 @@ impl Type {
         }
     }
 
-    pub fn compress_alias(&self, ctx: &mut Compiler, xpct: &Option<String>) -> Option<Type> {
-        macro_rules! ctx {
-            () => {{
-                let mut ctx = ctx.clone();
-                if let Some(name) = xpct {
-                    let typ = ctx.type_alias.get(name)?;
-                    ctx.type_alias = IndexMap::from([(name.to_owned(), typ.clone())]);
-                } else {
-                    ctx.type_alias.clear();
-                }
-                ctx
-            }};
+    pub fn compress_alias(&self, ctx: &mut Compiler, xpct: Vec<Type>) -> Option<Type> {
+        for x in &xpct {
+            dbg!((self.format(), x.format()));
+            if x.format() == self.format() {
+                return Some(self.decompress_alias(ctx));
+            }
         }
-        match self {
+        let result = match self {
             Type::Alias(name) => {
                 let Some(typ) = ctx.type_alias.get(name).cloned() else {
                     let msg = format!("undefined type alias `{name}`");
                     ctx.occurred_error = Some(msg);
                     return None;
                 };
-                if xpct.clone().map(|xpct| &xpct == name).unwrap_or(false) {
-                    Some(self.clone())
-                } else {
-                    typ.compress_alias(ctx, &Some(name.to_owned()))
-                }
+                dbg!(&typ.clone());
+                typ.compress_alias(ctx, xpct.clone())
             }
             Type::Array(typ) => Some(Type::Array(Box::new(
-                typ.compress_alias(ctx, xpct)?.decompress_alias(&ctx!()),
+                typ.compress_alias(ctx, [xpct.clone(), vec![self.clone()]].concat())?,
             ))),
             Type::Dict(dict) => {
                 let mut a = IndexMap::new();
+                dbg!(self);
                 for (name, (offset, typ)) in dict {
                     a.insert(
                         name.clone(),
                         (
                             offset.clone(),
-                            typ.compress_alias(ctx, xpct)?.decompress_alias(&ctx!()),
+                            typ.compress_alias(ctx, [xpct.clone(), vec![self.clone()]].concat())?,
                         ),
                     );
                 }
                 Some(Type::Dict(a))
             }
             _ => Some(self.clone()),
+        };
+        for x in &xpct {
+            dbg!((self.format(), x.format()));
+            if x.format() == self.format() {
+                return Some(self.decompress_alias(ctx));
+            }
         }
+        result
     }
 
     pub fn decompress_alias(&self, ctx: &Compiler) -> Type {
