@@ -233,14 +233,14 @@ impl Node for Expr {
 impl Expr {
     pub fn bytes_length(&self, ctx: &mut Compiler) -> Option<Expr> {
         match self.type_infer(ctx)? {
-            Type::Integer | Type::Bool | Type::String | Type::Enum(_) => {
-                Some(Expr::Literal(Value::Integer(4)))
-            }
-            Type::Number => Some(Expr::Literal(Value::Integer(8))),
-            Type::Void => Some(Expr::Literal(Value::Integer(0))),
             Type::Dict(dict) => {
                 let mut result = Expr::Literal(Value::Integer(dict.first()?.1.1.pointer_length()));
-                for i in dict.iter().skip(1).map(|(_, (_, x))| x.pointer_length()) {
+                for i in dict
+                    .iter()
+                    .skip(1)
+                    .map(|(_, (_, x))| x.type_infer(ctx).map(|typ| typ.pointer_length()))
+                    .collect::<Option<Vec<i32>>>()?
+                {
                     result = Expr::Oper(Box::new(Oper::Add(
                         result,
                         Expr::Literal(Value::Integer(i)),
@@ -250,7 +250,7 @@ impl Expr {
             }
             Type::Array(typ) => Some(Expr::Oper(Box::new(Oper::Add(
                 Expr::Oper(Box::new(Oper::Mul(
-                    Expr::Literal(Value::Integer(typ.pointer_length())),
+                    Expr::Literal(Value::Integer(typ.type_infer(ctx)?.pointer_length())),
                     Expr::MemLoad(Box::new(self.clone()), Type::Integer),
                 ))),
                 Expr::Literal(Value::Integer(4)),
