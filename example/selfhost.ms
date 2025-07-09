@@ -22,4 +22,8 @@ let node_binop_add(a: Expr, b: Expr) = memcpy(@{
     lhs: a, rhs: b
 });
 
-node_literal_int(200)
+let ast = node_binop_add(
+    node_literal_int(200),
+    node_literal_int(200)
+);
+ast
