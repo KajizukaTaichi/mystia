@@ -97,8 +97,8 @@ node repl.mjs
         import { mystia } from './docs/runtime/web.mjs';
         
         const code = `
-            load print(_: str): void;
-            print("Hello, WebAssembly!")
+            load alert(_: str): void;
+            alert("Hello, WebAssembly!")
         `;
         
         mystia(code);
@@ -111,21 +111,18 @@ node repl.mjs
 
 ### 変数と関数
 ```mystia
-// 変数宣言
-let x = 42;
+~~ 変数宣言 ~~
+pub let x = 42; ~~ グローバル ~~
 let message = "Hello, world!";
 
-// 関数定義
-let add(a: int, b: int) -> int = a + b;
-
-// 型推論付き関数
-let multiply(a, b) = a * b;
+~~ 関数定義 ~~
+let add(a: int, b: int) = a + b;
 ```
 
 ### 制御フロー
 ```mystia
 // 条件式
-let result = if x > 0 then "positive" else "non-positive";
+let result = { if x > 0 then "positive" else if x == 0 then "zero" else ""negative" };
 
 // ループ
 let i = 0;
@@ -137,23 +134,23 @@ while i < 10 loop {
 
 ### データ型
 ```mystia
-// 基本型
-let number: int = 42;
-let decimal: num = 3.14;
-let text: str = "Hello";
-let flag: bool = true;
+~~ 基本型 ~~
+let number = 42: int;
+let decimal = 3.14: num;
+let text = "Hello": str;
+let flag = true: bool;
 
-// コレクション
+~~ コレクション ~~ 
 let numbers = [1, 2, 3, 4, 5];
 let person = @{ name: "Alice", age: 30 };
 
-// カスタム型
-type Status = Success | Error | Pending;
+~~ カスタム型 ~~
+type Status = ( Success | Error | Pending );
 ```
 
 ### マクロ
 ```mystia
-// マクロ定義
+~~ マクロ定義 ~~
 macro times(n, block) = {
     let i = 0;
     while i < n loop {
@@ -162,7 +159,7 @@ macro times(n, block) = {
     }
 };
 
-// 使用例
+~~ 使用例 ~~
 5.times({
     print("繰り返しメッセージ")
 });
@@ -170,11 +167,11 @@ macro times(n, block) = {
 
 ### モジュールシステム
 ```mystia
-// 外部関数のインポート
+~~ 外部関数のインポート ~~
 load print(_: str): void;
 load to_str(n: num): str;
 
-// パブリック関数
+~~ パブリック関数 ~~
 pub let main() = {
     print("Hello from Mystia!")
 };
@@ -201,31 +198,23 @@ while i <= 100 loop {
 }
 ```
 
-### カウンターアプリ
+### リンクリスト
 ```mystia
-type Elm = int;
+type LinkList = @{ value: int, next: LinkList };
 
-load new_elm(tag: str, parent: Elm): Elm;
-load upd_elm(id: Elm, prop: str, content: str): void;
-load evt_elm(id: Elm, name: str, func: str): void;
-
-pub let model = @{
-    title: "Counter App",
-    count: 0,
-    layout: @{
-        panel: null:Elm
-    }
+let car(self: LinkList) = self.value;
+let cdr(self: LinkList) = self.next;
+let node(value: int) = memcpy(@{ value: value, next: LinkList! });
+let append(self: LinkList, other: LinkList) = {
+    let original_object = self;
+    while self.next? loop { let self = self.next };
+    let self.next = other;
+    original_object
 };
 
-let view() = {
-    let formatted = "Number: " + (model.count: str);
-    upd_elm(model.layout.panel, "innerHTML", formatted)
-};
-
-pub let inc_btn() = {
-    let model.count + 1;
-    view()
-};
+let a = node(1);
+let b = node(2).append(node(3));
+a.append(b)
 ```
 
 その他のサンプルは `example/` ディレクトリにあります。
