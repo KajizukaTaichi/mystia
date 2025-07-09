@@ -206,7 +206,7 @@ impl Node for Expr {
                     ctx.occurred_error = Some(error_message);
                     return None;
                 };
-                *typ
+                typ.type_infer(ctx)?
             }
             Expr::Field(dict, key) => {
                 let infered = dict.type_infer(ctx)?.type_infer(ctx)?;
@@ -216,7 +216,7 @@ impl Node for Expr {
                         ctx.occurred_error = Some(error_message);
                         return None;
                     };
-                    typ.clone()
+                    typ.type_infer(ctx)?
                 } else {
                     let error_message = format!("can't field access to {}", infered.format());
                     ctx.occurred_error = Some(error_message);
