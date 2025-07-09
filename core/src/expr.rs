@@ -112,7 +112,7 @@ impl Node for Expr {
                 let Type::Array(typ) = array.type_infer(ctx)?.type_infer(ctx)? else {
                     return None;
                 };
-                let addr = address_calc!(array, index, typ, ctx);
+                let addr = address_calc!(array, index, typ);
                 format!("({}.load {})", typ.compile(ctx)?, addr.compile(ctx)?)
             }
             Expr::Field(expr, key) => {
@@ -120,8 +120,10 @@ impl Node for Expr {
                 let Type::Dict(dict) = typ else {
                     return None;
                 };
+                dbg!(&expr, &dict);
                 let (offset, typ) = dict.get(key)?.clone();
                 let addr = offset_calc!(expr, offset);
+                dbg!(&addr);
                 Expr::MemLoad(Box::new(addr), typ).compile(ctx)?
             }
             Expr::Block(block) => block.compile(ctx)?,
@@ -234,12 +236,16 @@ impl Expr {
     pub fn bytes_length(&self, ctx: &mut Compiler) -> Option<Expr> {
         match self.type_infer(ctx)? {
             Type::Dict(dict) => {
-                let mut result =
-                    Expr::Literal(Value::Integer(dict.first()?.1.1.pointer_length(ctx)?));
+                let mut result = Expr::Literal(Value::Integer(
+                    dict.first()?.1.1.type_infer(ctx)?.pointer_length()?,
+                ));
                 for i in dict
                     .iter()
                     .skip(1)
-                    .map(|(_, (_, x))| x.type_infer(ctx).and_then(|typ| typ.pointer_length(ctx)))
+                    .map(|(_, (_, x))| {
+                        x.type_infer(ctx)
+                            .and_then(|typ| typ.type_infer(ctx)?.pointer_length())
+                    })
                     .collect::<Option<Vec<i32>>>()?
                 {
                     result = Expr::Oper(Box::new(Oper::Add(
@@ -251,7 +257,7 @@ impl Expr {
             }
             Type::Array(typ) => Some(Expr::Oper(Box::new(Oper::Add(
                 Expr::Oper(Box::new(Oper::Mul(
-                    Expr::Literal(Value::Integer(typ.type_infer(ctx)?.pointer_length(ctx)?)),
+                    Expr::Literal(Value::Integer(typ.type_infer(ctx)?.pointer_length()?)),
                     Expr::MemLoad(Box::new(self.clone()), Type::Integer),
                 ))),
                 Expr::Literal(Value::Integer(4)),
