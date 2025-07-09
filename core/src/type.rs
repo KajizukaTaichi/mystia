@@ -93,6 +93,18 @@ impl Type {
     }
 
     pub fn compress_alias(&self, ctx: &mut Compiler, xpct: &Option<String>) -> Option<Type> {
+        macro_rules! ctx {
+            () => {
+                if let Some(name) = xpct {
+                    let mut ctx = ctx.clone();
+                    let typ = ctx.type_alias.get(name)?;
+                    ctx.type_alias = IndexMap::from([(name.to_owned(), typ.clone())]);
+                    ctx
+                } else {
+                    ctx.clone()
+                }
+            };
+        }
         match self {
             Type::Alias(name) => {
                 let Some(typ) = ctx.type_alias.get(name).cloned() else {
@@ -107,7 +119,7 @@ impl Type {
                 }
             }
             Type::Array(typ) => Some(Type::Array(Box::new(
-                typ.compress_alias(ctx, xpct)?.decompress_alias(ctx),
+                typ.compress_alias(ctx, xpct)?.decompress_alias(&ctx!()),
             ))),
             Type::Dict(dict) => {
                 let mut a = IndexMap::new();
@@ -116,7 +128,7 @@ impl Type {
                         name.clone(),
                         (
                             offset.clone(),
-                            typ.compress_alias(ctx, xpct)?.decompress_alias(ctx),
+                            typ.compress_alias(ctx, xpct)?.decompress_alias(&ctx!()),
                         ),
                     );
                 }
