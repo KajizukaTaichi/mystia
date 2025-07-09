@@ -120,10 +120,8 @@ impl Node for Expr {
                 let Type::Dict(dict) = typ else {
                     return None;
                 };
-                dbg!(&expr, &dict);
                 let (offset, typ) = dict.get(key)?.clone();
                 let addr = offset_calc!(expr, offset);
-                dbg!(&addr);
                 Expr::MemLoad(Box::new(addr), typ).compile(ctx)?
             }
             Expr::Block(block) => block.compile(ctx)?,
