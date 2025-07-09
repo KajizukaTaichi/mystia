@@ -197,9 +197,16 @@ impl Node for Oper {
             | Oper::BAnd(lhs, rhs)
             | Oper::BOr(lhs, rhs)
             | Oper::XOr(lhs, rhs) => correct!(lhs, rhs, ctx, Type::Number | Type::Integer),
-            Oper::Eql(lhs, rhs)
-            | Oper::Neq(lhs, rhs)
-            | Oper::Lt(lhs, rhs)
+            Oper::Eql(lhs, rhs) | Oper::Neq(lhs, rhs) => {
+                correct!(
+                    lhs,
+                    rhs,
+                    ctx,
+                    Type::Number | Type::Integer | Type::String | Type::Enum(_)
+                )?;
+                Some(Type::Bool)
+            }
+            Oper::Lt(lhs, rhs)
             | Oper::Gt(lhs, rhs)
             | Oper::LtEq(lhs, rhs)
             | Oper::GtEq(lhs, rhs) => {
