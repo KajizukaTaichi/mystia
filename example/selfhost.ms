@@ -1,7 +1,6 @@
 load concat(a: str, b: str): str;
 load to_str(a: int): str;
 load to_num(a: str): int;
-load print(a: str): void;
 
 type Kind = ( Add | Literal );
 type Expr = @{ kind: Kind, literal_int: int, lhs: Expr, rhs: Expr };
