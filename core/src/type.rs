@@ -77,8 +77,8 @@ impl Node for Type {
 }
 
 impl Type {
-    pub fn pointer_length(&self, ctx: &mut Compiler) -> Option<i32> {
-        match self.type_infer(ctx)? {
+    pub fn pointer_length(&self) -> Option<i32> {
+        match self {
             Type::Array(_)
             | Type::String
             | Type::Bool
@@ -110,7 +110,8 @@ impl Type {
             ))),
             Type::Dict(dict) => {
                 let mut a = IndexMap::new();
-                for (name, (offset, typ)) in dict {
+                let mut offset = 0;
+                for (name, (_, typ)) in dict {
                     a.insert(
                         name.clone(),
                         (
@@ -118,6 +119,7 @@ impl Type {
                             typ.compress_alias(ctx, [xpct.clone(), vec![self.clone()]].concat())?,
                         ),
                     );
+                    offset += typ.pointer_length()?;
                 }
                 Some(Type::Dict(a))
             }
