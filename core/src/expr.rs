@@ -109,14 +109,14 @@ impl Node for Expr {
                 }
             }
             Expr::Index(array, index) => {
-                let Type::Array(typ) = array.type_infer(ctx)? else {
+                let Type::Array(typ) = array.type_infer(ctx)?.type_infer(ctx)? else {
                     return None;
                 };
                 let addr = address_calc!(array, index, typ);
                 format!("({}.load {})", typ.compile(ctx)?, addr.compile(ctx)?)
             }
             Expr::Field(expr, key) => {
-                let typ = expr.type_infer(ctx)?;
+                let typ = expr.type_infer(ctx)?.type_infer(ctx)?;
                 let Type::Dict(dict) = typ else {
                     return None;
                 };
@@ -209,7 +209,7 @@ impl Node for Expr {
                 *typ
             }
             Expr::Field(dict, key) => {
-                let infered = dict.type_infer(ctx)?;
+                let infered = dict.type_infer(ctx)?.type_infer(ctx)?;
                 if let Type::Dict(dict) = infered.clone() {
                     let Some((_offset, typ)) = dict.get(key) else {
                         let error_message = format!("{} haven't field `{key}`", infered.format());
