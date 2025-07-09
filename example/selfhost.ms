@@ -3,23 +3,23 @@ load to_str(a: int): str;
 load to_num(a: str): int;
 
 type Kind = ( Add | Literal );
-type Expr = @{ kind: Kind, literal_int: int, term: [Expr] };
+type Expr = @{ kind: Kind, literal_int: int, lhs: Expr, rhs: Expr };
 
 let compile(expr: Expr): str = {
     if expr.kind == Kind#Literal then "(i32.const " + to_str(expr.literal_int) + ")"
-    else "(i32.add " + compile(expr.term[0]) + " " + compile(expr.term[1]) + ")"
+    else "(i32.add " + compile(expr.lhs) + " " + compile(expr.rhs) + ")"
 };
 
 let node_literal_int(value: int) = memcpy(@{
     kind: Kind#Literal,
     literal_int: value,
-    term: [Expr]!
+    lhs: Expr!, rhs: Expr!
 });
 
 let node_binop_add(a: Expr, b: Expr) = memcpy(@{
     kind: Kind#Add,
     literal_int: int!,
-    term: [a, b]
+    lhs: a, rhs: b
 });
 
-let ast = node_literal_int(42)
+node_literal_int(200)
