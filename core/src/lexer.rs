@@ -32,7 +32,7 @@ pub fn tokenize(
             current_token.push_str(&c);
             is_escape = false;
             index += 1;
-        } else if ["(", "[", "{"].contains(&c.as_str()) {
+        } else if ["(", "[", "{"].contains(&c.as_str()) && !in_quote {
             if is_split && in_parentheses == 0 {
                 tokens.push(current_token.clone());
                 current_token.clear();
@@ -40,7 +40,7 @@ pub fn tokenize(
             current_token.push_str(c.as_str());
             in_parentheses += 1;
             index += 1;
-        } else if [")", "]", "}"].contains(&c.as_str()) {
+        } else if [")", "]", "}"].contains(&c.as_str()) && !in_quote {
             current_token.push_str(c.as_str());
             if let Some(i) = in_parentheses.checked_sub(1) {
                 in_parentheses = i;
