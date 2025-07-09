@@ -14,5 +14,4 @@ let append(self: LinkList, other: LinkList) = {
 
 let a = node(1);
 let b = node(2).append(node(3));
-let c = b.append(a);
-c
+a.append(b)
