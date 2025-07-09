@@ -94,16 +94,16 @@ impl Type {
 
     pub fn compress_alias(&self, ctx: &mut Compiler, xpct: &Option<String>) -> Option<Type> {
         macro_rules! ctx {
-            () => {
+            () => {{
+                let mut ctx = ctx.clone();
                 if let Some(name) = xpct {
-                    let mut ctx = ctx.clone();
                     let typ = ctx.type_alias.get(name)?;
                     ctx.type_alias = IndexMap::from([(name.to_owned(), typ.clone())]);
-                    ctx
                 } else {
-                    ctx.clone()
+                    ctx.type_alias.clear();
                 }
-            };
+                ctx
+            }};
         }
         match self {
             Type::Alias(name) => {
