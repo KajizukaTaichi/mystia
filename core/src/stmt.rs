@@ -219,7 +219,7 @@ impl Node for Stmt {
                         return None;
                     };
                     type_check!(typ, value.type_infer(ctx)?, ctx)?;
-                    let addr = address_calc!(array, index, typ);
+                    let addr = address_calc!(array, index, typ, ctx);
                     let [typ, addr] = [typ.compile(ctx)?, addr.compile(ctx)?];
                     format!("({typ}.store {addr} {})", value.compile(ctx)?)
                 }
