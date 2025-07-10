@@ -33,8 +33,30 @@ let node_binop_add(a: Expr, b: Expr) = memcpy(@{
     lhs: a, rhs: b
 });
 
+let lexer(source: str) = {
+    let chars = source.split("");
+    let length = arrlen(chars);
+
+    let current = "";
+    let nest_level = 0;
+    let index = 0;
+
+    while index < length loop {
+        let char = chars[index];
+        if char == "(" then {
+            let nest_level + 1;
+            let current + char
+        } else if char == ")" then {
+            let nest_level - 1;
+            let current + char
+        };
+        index += 1;
+    }
+    tokens
+};
+
 let parse(source: str): Expr = {
-    let tokens = source.split(" ");
+    let tokens = lexer(source);
     if arrlen(tokens) == 1 then node_literal_int(tokens[0]: int)
     else if tokens[-2] == "+" then {
         let lhs = tokens.slice(0, -2).join(" ").parse();
