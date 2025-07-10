@@ -18,7 +18,7 @@ type Expr = @{ kind: Kind, literal_int: int, lhs: Expr, rhs: Expr };
 let compile(expr: Expr): str = {
     if expr.kind == Kind#Literal then
         "(i32.const " + (expr.literal_int: str) + ")"
-    else if (expr.kind == Kind#Add) && (expr.lhs?) && (expr.rhs?) then {
+    else if expr.kind == Kind#Add then {
         let lhs = expr.lhs.compile();
         let rhs = expr.rhs.compile();
         "(i32.add " + lhs + " " + rhs + ")"
