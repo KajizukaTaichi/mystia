@@ -59,7 +59,7 @@ let lexer(source: str) = {
             if tokens? then {
                 tokens.append(new)
             } else {
-                tokens = new
+                let tokens = new
             };
             let current = ""
         } else {
