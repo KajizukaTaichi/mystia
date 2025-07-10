@@ -30,7 +30,7 @@ while (xsiz >= 2) || (ysiz >= 2) loop {
         };
         let y_index + 1
     };
-    let color_index = color_index + 1;
+    let color_index + 1;
 
     if state == 0 then {
         let xidx + xsiz;
