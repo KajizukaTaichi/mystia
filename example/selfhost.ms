@@ -40,18 +40,17 @@ let lexer(source: str) = {
     let length = arrlen(chars);
 
     let current = "";
+    let tokens = [str]!;
     let nest_level = 0;
     let index = 0;
 
-    let tokens = [str]!;
-    let new = [str]!;
-
     macro add_token() = {
-        let new = [current].memcpy();
-        if tokens? then {
-            let tokens = tokens.append(new)
-        } else {
-            let tokens = new
+        let tokens = {
+            if tokens? then {
+                tokens.append([current].memcpy())
+            } else {
+                [current].memcpy()
+            }
         }
     };
 
