@@ -66,7 +66,7 @@ let lexer(source: str) = {
             let current + char
         };
         index += 1;
-    }
+    };
     tokens
 };
 
