@@ -292,6 +292,10 @@ impl Node for Stmt {
                                 } else {
                                     ctx.variable_type.insert(name.to_string(), value_type);
                                 }
+                            } else {
+                                let msg = format!("can't reassign value to argument");
+                                ctx.occurred_error = Some(msg);
+                                return None;
                             }
                         }
                         Scope::Global => {
