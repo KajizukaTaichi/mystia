@@ -1,5 +1,8 @@
 load concat(a: str, b: str): str;
+load slice(a: [str], start: int, end: int): [str];
+load strcmp(a: str, b: str):bool;
 load split(a: str, b: str): [str];
+load join(a: [str], delimiter: str): str;
 load arrlen(a: [str]): int;
 load to_str(a: int): str;
 load to_num(a: str): int;
@@ -33,17 +36,12 @@ let node_binop_add(a: Expr, b: Expr) = memcpy(@{
 let parse(source: str): Expr = {
     let tokens = source.split(" ");
     if arrlen(tokens) == 1 then node_literal_int(tokens[0]: int)
-    else if token[-2] == "+" then {
-        node_binop_add(parse(tokens.slice(0, -2)), parse(tokens[-2]))
+    else if tokens[-2] == "+" then {
+        let lhs = tokens.slice(0, -2).join(" ").parse();
+        node_binop_add(lhs, parse(tokens[-2]))
     }
     else Expr!
 };
 
-let ast = node_binop_add(
-    node_binop_add(
-        node_literal_int(1),
-        node_literal_int(2)
-    ),
-    node_literal_int(3)
-);
+let ast = parse("1 + 2");
 ast.compile()
