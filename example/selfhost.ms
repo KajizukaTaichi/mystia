@@ -9,7 +9,7 @@ type Expr = @{ kind: Kind, literal_int: int, lhs: Expr, rhs: Expr };
 
 let compile(expr: Expr): str = {
     if expr.kind == Kind#Literal then
-        "(i32.const " + to_str(expr.literal_int) + ")"
+        "(i32.const " + (expr.literal_int: str) + ")"
     else if (expr.kind == Kind#Add) && (expr.lhs?) && (expr.rhs?) then {
         let lhs = expr.lhs.compile();
         let rhs = expr.rhs.compile();
@@ -32,17 +32,11 @@ let node_binop_add(a: Expr, b: Expr) = memcpy(@{
 
 let parse(source: str): Expr = {
     let tokens = source.split(" ");
-    let mut stack = [];
-    for token in tokens {
-        if token == "+" {
-            let rhs = stack.pop();
-            let lhs = stack.pop();
-            stack.push(node_binop_add(lhs, rhs));
-        } else {
-            stack.push(node_literal_int(to_num(token)));
-        }
+    if arrlen(tokens) == 1 then node_literal_int(tokens[0]: int)
+    else if token[-2] == "+" then {
+        node_binop_add(parse(tokens.slice(0, -2)), parse(tokens[-2]))
     }
-    stack.pop()
+    else Expr!
 };
 
 let ast = node_binop_add(
