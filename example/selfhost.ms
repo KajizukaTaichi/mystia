@@ -38,10 +38,10 @@ let parse(source: str): Expr = {
     if arrlen(tokens) == 1 then node_literal_int(tokens[0]: int)
     else if tokens[-2] == "+" then {
         let lhs = tokens.slice(0, -2).join(" ").parse();
-        node_binop_add(lhs, parse(tokens[-2]))
+        node_binop_add(lhs, parse(tokens[-1]))
     }
     else Expr!
 };
 
-let ast = parse("1 + 2");
+let ast = parse("100 + 200");
 ast.compile()
