@@ -1,14 +1,11 @@
-~~ Function around string ~~
 load concat(a: str, b: str): str;
 load split(a: str, b: str): [str];
 load strcmp(a: str, b: str): bool;
 load strlen(a: str): int;
-~~ Function around array ~~
 load slice(a: [str], b: int, c: int): [str];
 load append(a: [str], b: [str]): [str];
 load join(a: [str], b: str): str;
 load arrlen(a: [str]): int;
-~~ Function around type cast ~~
 load to_str(a: num): str;
 load to_num(a: str): int;
 
