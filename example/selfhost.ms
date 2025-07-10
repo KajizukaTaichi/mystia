@@ -79,7 +79,7 @@ let parse(source: str): Expr = {
     if arrlen(tokens) == 1 then {
         let chars = tokens[0].split("");
         if (chars[0] == "(") && (chars[-1] == ")") then {
-           parse(chars.slice(1, -1).join(""))
+            parse(chars.slice(1, -1).join(""))
         } else {
             node_literal_int(tokens[0]: int)
         }
