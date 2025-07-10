@@ -80,13 +80,19 @@ let lexer(source: str) = {
 
 let parse(source: str): Expr = {
     let tokens = lexer(source);
-    if arrlen(tokens) == 1 then node_literal_int(tokens[0]: int)
-    else if tokens[-2] == "+" then {
-        let lhs = tokens.slice(0, -2).join(" ").parse();
+    if arrlen(tokens) == 1 then {
+        let chars = token[0].split("");
+        if (chars[0] == "(") && (chars[-1] == ")") {
+           parse(chars.slice(1, -1).join(""))
+        } else {
+            node_literal_int(tokens[0]: int)
+        }
+    } else if tokens[-2] == "+" then {
+        let lhs = parse(tokens.slice(0, -2).join(" "));
         node_binop_add(lhs, parse(tokens[-1]))
     }
     else Expr!
 };
 
-let ast = parse("100 + 200 + 3");
+let ast = lexer("100 + 200 + 3");
 ast.compile()
