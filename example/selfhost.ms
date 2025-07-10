@@ -55,17 +55,17 @@ let lexer(source: str) = {
             let nest_level - 1;
             let current + char
         } else if (char == " ") && (nest_level == 0) then {
-            let current = "";
             let new = [current].memcpy();
             if tokens? then {
                 tokens.append(new)
             } else {
                 tokens = [new]
-            }
+            };
+            let current = ""
         } else {
             let current + char
         };
-        index += 1;
+        let index + 1
     };
     tokens
 };
