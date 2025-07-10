@@ -93,7 +93,7 @@ impl Node for Stmt {
                 for part in tokenize(sigs, &[","], false, true, false)? {
                     let part = part.trim();
                     let (sig, alias) = part
-                        .rsplit_once("as")
+                        .rsplit_once(" as ")
                         .map(|(sig, alias)| (sig, Some(alias.to_string())))
                         .unwrap_or((part, None));
                     let Oper::Cast(Expr::Call(name, args), ret_typ) = Oper::parse(sig)? else {
@@ -242,14 +242,13 @@ impl Node for Stmt {
                     if let Some(module) = module {
                         export = format!("{module}.{name}")
                     };
-                    let sig = join!(
-                        args.iter()
-                            .map(|(_, t)| t
-                                .type_infer(ctx)?
-                                .compile(ctx)
-                                .map(|s| format!("(param {})", s)))
-                            .collect::<Option<Vec<_>>>()?
-                    );
+                    let sig = join!(args
+                        .iter()
+                        .map(|(_, t)| t
+                            .type_infer(ctx)?
+                            .compile(ctx)
+                            .map(|s| format!("(param {})", s)))
+                        .collect::<Option<Vec<_>>>()?);
                     let ret = compile_return!(ret_typ, ctx);
                     ctx.import_code.push(format!(
                         "(import \"env\" \"{export}\" (func ${name} {sig} {ret}))"
