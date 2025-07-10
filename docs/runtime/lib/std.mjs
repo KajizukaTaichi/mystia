@@ -50,6 +50,12 @@ export class MystiaStdLib {
                     Array(len).fill(init),
                 );
             },
+            slice: (ptr, start, end) => {
+                const typ = { type: "array", element: "int" };
+                const array = read(this.instance, typ, ptr);
+                const slice = array.slice(start, end);
+                return write(this.instance, typ, slice);
+            },
         };
     }
     set_wasm(instance) {
