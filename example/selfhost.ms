@@ -1,8 +1,8 @@
 load concat(a: str, b: str): str;
-load slice(a: [str], start: int, end: int): [str];
+load slice(a: [str], b: int, c: int): [str];
 load strcmp(a: str, b: str):bool;
 load split(a: str, b: str): [str];
-load join(a: [str], delimiter: str): str;
+load join(a: [str], b: str): str;
 load arrlen(a: [str]): int;
 load to_str(a: num): str;
 load to_num(a: str): int;
