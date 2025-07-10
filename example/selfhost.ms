@@ -9,7 +9,7 @@ load arrlen(a: [str]): int;
 load to_str(a: num): str;
 load to_num(a: str): int;
 
-type Kind = ( Add | Literal );
+type Kind = ( Add | Sub | Literal );
 type Expr = @{ kind: Kind, literal_int: int, lhs: Expr, rhs: Expr };
 
 let compile(expr: Expr): str = {
@@ -19,6 +19,10 @@ let compile(expr: Expr): str = {
         let lhs = expr.lhs.compile();
         let rhs = expr.rhs.compile();
         "(i32.add " + lhs + " " + rhs + ")"
+    } else if expr.kind == Kind#Sub then {
+        let lhs = expr.lhs.compile();
+        let rhs = expr.rhs.compile();
+        "(i32.sub " + lhs + " " + rhs + ")"
     }
     else str!
 };
@@ -29,8 +33,8 @@ let node_literal_int(value: int) = memcpy(@{
     lhs: Expr!, rhs: Expr!
 });
 
-let node_binop_add(a: Expr, b: Expr) = memcpy(@{
-    kind: Kind#Add,
+let node_binop(k: Kind, a: Expr, b: Expr) = memcpy(@{
+    kind: k,
     literal_int: int!,
     lhs: a, rhs: b
 });
@@ -85,10 +89,13 @@ let parse(source: str): Expr = {
         }
     } else if tokens[-2] == "+" then {
         let lhs = parse(tokens.slice(0, -2).join(" "));
-        node_binop_add(lhs, parse(tokens[-1]))
+        node_binop(Kind#Add, lhs, parse(tokens[-1]))
+    } else if tokens[-2] == "-" then {
+        let lhs = parse(tokens.slice(0, -2).join(" "));
+        node_binop(Kind#Sub, lhs, parse(tokens[-1]))
     }
     else Expr!
 };
 
-let ast = parse("1 + (2 + 3)");
+let ast = parse("1 + (2 - 3)");
 ast.compile()
