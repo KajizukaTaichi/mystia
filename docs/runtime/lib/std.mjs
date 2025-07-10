@@ -63,6 +63,12 @@ export class MystiaStdLib {
                 delimiter = read(this.instance, "str", delimiter);
                 return write(this.instance, "str", array.join(delimiter));
             },
+            append: (a, b) => {
+                const typ = { type: "array", element: "int" };
+                const array1 = read(this.instance, typ, a);
+                const array2 = read(this.instance, typ, b);
+                return write(this.instance, typ, [...array1, ...array2]);
+            },
         };
     }
     set_wasm(instance) {
