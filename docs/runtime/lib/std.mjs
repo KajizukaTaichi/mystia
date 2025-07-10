@@ -57,6 +57,12 @@ export class MystiaStdLib {
                 const slice = array.slice(index(start), index(end));
                 return write(this.instance, typ, slice);
             },
+            join: (ptr, delimiter) => {
+                const typ = { type: "array", element: "str" };
+                const array = read(this.instance, typ, ptr);
+                delimiter = read(this.instance, "str", delimiter);
+                return write(this.instance, "str", array.join());
+            },
         };
     }
     set_wasm(instance) {
