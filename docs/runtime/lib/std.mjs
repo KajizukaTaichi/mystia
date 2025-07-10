@@ -61,7 +61,7 @@ export class MystiaStdLib {
                 const typ = { type: "array", element: "str" };
                 const array = read(this.instance, typ, ptr);
                 delimiter = read(this.instance, "str", delimiter);
-                return write(this.instance, "str", array.join());
+                return write(this.instance, "str", array.join(delimiter));
             },
         };
     }
