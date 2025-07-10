@@ -242,13 +242,14 @@ impl Node for Stmt {
                     if let Some(module) = module {
                         export = format!("{module}.{name}")
                     };
-                    let sig = join!(args
-                        .iter()
-                        .map(|(_, t)| t
-                            .type_infer(ctx)?
-                            .compile(ctx)
-                            .map(|s| format!("(param {})", s)))
-                        .collect::<Option<Vec<_>>>()?);
+                    let sig = join!(
+                        args.iter()
+                            .map(|(_, t)| t
+                                .type_infer(ctx)?
+                                .compile(ctx)
+                                .map(|s| format!("(param {})", s)))
+                            .collect::<Option<Vec<_>>>()?
+                    );
                     let ret = compile_return!(ret_typ, ctx);
                     ctx.import_code.push(format!(
                         "(import \"env\" \"{export}\" (func ${name} {sig} {ret}))"
