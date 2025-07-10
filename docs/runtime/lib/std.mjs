@@ -53,7 +53,8 @@ export class MystiaStdLib {
             slice: (ptr, start, end) => {
                 const typ = { type: "array", element: "int" };
                 const array = read(this.instance, typ, ptr);
-                const slice = array.slice(start, end);
+                const index = (i) => (i < 0 ? array.length + i : i);
+                const slice = array.slice(index(start), index(end));
                 return write(this.instance, typ, slice);
             },
         };
