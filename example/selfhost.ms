@@ -1,7 +1,8 @@
 ~~ Function around string ~~
 load concat(a: str, b: str): str;
 load split(a: str, b: str): [str];
-load strcmp(a: str, b: str):bool;
+load strcmp(a: str, b: str): bool;
+load strlen(a: str): int;
 ~~ Function around array ~~
 load slice(a: [str], b: int, c: int): [str];
 load append(a: [str], b: [str]): [str];
@@ -42,9 +43,20 @@ let lexer(source: str) = {
     let length = arrlen(chars);
 
     let current = "";
-    let tokens = [str]!;
     let nest_level = 0;
     let index = 0;
+
+    let tokens = [str]!;
+    let new = [str]!;
+
+    macro add_token() = {
+        let new = [current].memcpy();
+        if tokens? then {
+            let tokens = tokens.append(new)
+        } else {
+            let tokens = new
+        }
+    };
 
     while index < length loop {
         let char = chars[index];
@@ -55,18 +67,14 @@ let lexer(source: str) = {
             let nest_level - 1;
             let current + char
         } else if (char == " ") && (nest_level == 0) then {
-            let new = [current].memcpy();
-            if tokens? then {
-                let tokens = tokens.append(new)
-            } else {
-                let tokens = new
-            };
+            add_token();
             let current = ""
         } else {
             let current + char
         };
         let index + 1
     };
+    if strlen(current) != 0 then add_token();
     tokens
 };
 
