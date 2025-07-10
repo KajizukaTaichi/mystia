@@ -81,8 +81,8 @@ let lexer(source: str) = {
 let parse(source: str): Expr = {
     let tokens = lexer(source);
     if arrlen(tokens) == 1 then {
-        let chars = token[0].split("");
-        if (chars[0] == "(") && (chars[-1] == ")") {
+        let chars = tokens[0].split("");
+        if (chars[0] == "(") && (chars[-1] == ")") then {
            parse(chars.slice(1, -1).join(""))
         } else {
             node_literal_int(tokens[0]: int)
@@ -94,5 +94,5 @@ let parse(source: str): Expr = {
     else Expr!
 };
 
-let ast = lexer("100 + 200 + 3");
+let ast = parse("1 + (2 + 3)");
 ast.compile()
