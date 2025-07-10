@@ -6,6 +6,7 @@ load join(a: [str], b: str): str;
 load arrlen(a: [str]): int;
 load to_str(a: num): str;
 load to_num(a: str): int;
+load print(a: str): void;
 
 type Kind = ( Add | Literal );
 type Expr = @{ kind: Kind, literal_int: int, lhs: Expr, rhs: Expr };
@@ -37,11 +38,11 @@ let parse(source: str): Expr = {
     let tokens = source.split(" ");
     if arrlen(tokens) == 1 then node_literal_int(tokens[0]: int)
     else if tokens[-2] == "+" then {
-        let lhs = tokens.slice(0, -2).join(" ").parse();
-        node_binop_add(lhs, parse(tokens[-1]))
+        let lhs = tokens.slice(0, -2).join(" ");
+        node_binop_add(lhs.parse(), parse(tokens[-1]))
     }
     else Expr!
 };
 
-let ast = parse("100 + 200");
+let ast = parse("100 + 200 + 3");
 ast.compile()
