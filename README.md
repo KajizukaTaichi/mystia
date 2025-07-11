@@ -1,5 +1,5 @@
 # Mystia
-WebAssemblyに直接コンパイルするプログラミング言語
+WebAssemblyに直接コンパイルする静的型付けプログラミング言語 
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/KajizukaTaichi/mystia)
 
@@ -17,7 +17,7 @@ WebAssemblyに直接コンパイルするプログラミング言語
 
 ## 概要
 
-MystiaはWebAssembly (WASM)にコンパイルされるよう設計されたモダンなプログラミング言語です。Rustの安全性とパフォーマンスを、OCamlのような関数型プログラミング言語の表現力と組み合わせています。静的型付けと型推論、メモリ安全性、JavaScript環境とのシームレスな統合を特徴としています。
+MystiaはWebAssembly (WASM)にコンパイルすることに特化して設計されたモダンなプログラミング言語です。Rustの安全性とパフォーマンスを、OCamlのような関数型プログラミング言語の表現力と組み合わせています。静的型付けと型推論、メモリ安全性、JavaScript環境とのシームレスな統合を特徴としています。
 
 ## 特徴
 
