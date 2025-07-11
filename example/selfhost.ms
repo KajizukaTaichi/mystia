@@ -14,9 +14,11 @@ type Expr = @{ kind: Kind, literal_int: int, lhs: Expr, rhs: Expr };
 
 let compile(expr: Expr): str = {
     macro const(typ, value) = "(" + typ + ".const " + (value: str) + ")";
-    macro binop(opname) = "(i32." + opname + " "
-        + expr.lhs.compile() + " "
-        + expr.rhs.compile() + ")";
+    macro binop(opname) = {
+        let lhs = expr.lhs.compile();
+        let rhs = expr.rhs.compile();
+        "(i32." + opname + " " + lhs + " " + rhs + ")"
+    };
 
     if expr.kind == Kind#LiteralInt then {
         return const("i32", expr.literal_int)
