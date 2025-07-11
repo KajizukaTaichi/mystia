@@ -92,7 +92,6 @@ impl Node for Expr {
                         )
                     )
                 } else if let Some((params, expr)) = ctx.macro_code.get(name).cloned() {
-                    let var_ctx = ctx.variable_type.clone();
                     for (param, arg) in params.iter().zip(args) {
                         let typ = arg.type_infer(ctx)?;
                         ctx.variable_type.insert(param.to_owned(), typ);
@@ -102,7 +101,6 @@ impl Node for Expr {
                         let var = Expr::Variable(param.to_owned()).compile(ctx)?;
                         body = body.replace(&var, &arg.compile(ctx)?);
                     }
-                    ctx.variable_type = var_ctx;
                     body
                 } else {
                     return None;
