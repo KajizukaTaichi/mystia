@@ -75,24 +75,25 @@ let lexer(source: str) = {
 };
 
 let parse(source: str): Expr = {
-    macro binop(opkind) = node_binop(
-        opkind,
-        parse(tokens.slice(0, -2).join(" ")),
-        parse(tokens[-1])
-    );
-    macro is_op(opname) = tokens[-2] == opname;
     let tokens = lexer(source);
     if arrlen(tokens) == 1 then {
         let chars = tokens[0].split("");
+        macro bracket_inner(chars) = chars.slice(1, -1).join("");
         if (chars[0] == "(") && (chars[-1] == ")") then {
-            parse(chars.slice(1, -1).join(""))
+            parse(bracket_inner(chars))
         } else {
             node_literal_int(tokens[0]: int)
         }
+    } else {
+        macro is_op(opname) = tokens[-2] == opname;
+        macro binop(opkind) = opkind.node_binop(
+            parse(tokens.slice(0, -2).join(" ")),
+            parse(tokens[-1])
+        );
+        if is_op("+") then binop(Kind#Add)
+        else if is_op("-") then binop(Kind#Sub)
+        else Expr!
     }
-    else if is_op("+") then binop(Kind#Add)
-    else if is_op("-") then binop(Kind#Sub)
-    else Expr!
 };
 
 let ast = parse("1 + (2 - 3)");
