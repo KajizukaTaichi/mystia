@@ -203,6 +203,7 @@ impl Node for Stmt {
                         body = value.compile(ctx)?, locals = expand_local(ctx)?
                     );
                     ctx.declare_code.push(code);
+                    ctx.function_type.get_mut(name)?.variables = ctx.variable_type.clone();
                     ctx.variable_type = var_ctx;
                     ctx.argument_type = arg_ctx;
                     String::new()
