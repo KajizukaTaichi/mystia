@@ -106,5 +106,5 @@ let parse(source: str): Expr = {
     }
 };
 
-let ast = parse("1 + (2 - 3) * 5");
+let ast = parse("3 * (1 + 2) - 4");
 ast.compile()
