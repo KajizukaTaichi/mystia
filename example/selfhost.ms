@@ -54,11 +54,10 @@ let lexer(source: str) = {
 
     macro add_token() = {
         let tokens = {
-            if tokens? then {
+            if tokens? then
                 tokens.append([current].memcpy())
-            } else {
+            else
                 [current].memcpy()
-            }
         }
     };
 
