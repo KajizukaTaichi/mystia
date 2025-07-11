@@ -90,9 +90,9 @@ let parse(source: str): Expr = {
             parse(tokens.slice(0, -2).join(" ")),
             parse(tokens[-1])
         );
-        if is_op("+") then binop(Kind#Add)
-        else if is_op("-") then binop(Kind#Sub)
-        else Expr!
+        if is_op("+") then { return binop(Kind#Add) };
+        if is_op("-") then { return binop(Kind#Sub) };
+        Expr!
     }
 };
 
