@@ -55,12 +55,8 @@ let lexer(source: str) = {
     let index = 0;
 
     macro add_token() = {
-        let tokens = {
-            if tokens? then
-                tokens.append([current].memcpy())
-            else
-                [current].memcpy()
-        }
+        let new = [current].memcpy();
+        let tokens = { if tokens? then tokens.append(new) else new }
     };
 
     while index < length loop {
