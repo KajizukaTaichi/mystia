@@ -80,6 +80,7 @@ let parse(source: str): Expr = {
         parse(tokens.slice(0, -2).join(" ")),
         parse(tokens[-1])
     );
+    macro is_op(opname) = tokens[-2] == opname;
     let tokens = lexer(source);
     if arrlen(tokens) == 1 then {
         let chars = tokens[0].split("");
@@ -89,8 +90,8 @@ let parse(source: str): Expr = {
             node_literal_int(tokens[0]: int)
         }
     }
-    else if tokens[-2] == "+" then binop(Kind#Add)
-    else if tokens[-2] == "-" then binop(Kind#Sub)
+    else if is_op("+") then binop(Kind#Add)
+    else if is_op("-") then binop(Kind#Sub)
     else Expr!
 };
 
