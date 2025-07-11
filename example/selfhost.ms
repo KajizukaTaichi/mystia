@@ -13,17 +13,13 @@ type Kind = ( Add | Sub | Literal );
 type Expr = @{ kind: Kind, literal_int: int, lhs: Expr, rhs: Expr };
 
 let compile(expr: Expr): str = {
+    macro binop(opname) = "(i32." + opname + " "
+        + expr.lhs.compile() + " "
+        + expr.rhs.compile() + ")";
     if expr.kind == Kind#Literal then
         "(i32.const " + (expr.literal_int: str) + ")"
-    else if expr.kind == Kind#Add then {
-        let lhs = expr.lhs.compile();
-        let rhs = expr.rhs.compile();
-        "(i32.add " + lhs + " " + rhs + ")"
-    } else if expr.kind == Kind#Sub then {
-        let lhs = expr.lhs.compile();
-        let rhs = expr.rhs.compile();
-        "(i32.sub " + lhs + " " + rhs + ")"
-    }
+    else if expr.kind == Kind#Add then binop("add")
+    else if expr.kind == Kind#Sub then binop("sub")
     else str!
 };
 
@@ -79,6 +75,11 @@ let lexer(source: str) = {
 };
 
 let parse(source: str): Expr = {
+    macro binop(opkind) = node_binop(
+        opkind,
+        parse(tokens.slice(0, -2).join(" ")),
+        parse(tokens[-1])
+    );
     let tokens = lexer(source);
     if arrlen(tokens) == 1 then {
         let chars = tokens[0].split("");
@@ -87,13 +88,9 @@ let parse(source: str): Expr = {
         } else {
             node_literal_int(tokens[0]: int)
         }
-    } else if tokens[-2] == "+" then {
-        let lhs = parse(tokens.slice(0, -2).join(" "));
-        node_binop(Kind#Add, lhs, parse(tokens[-1]))
-    } else if tokens[-2] == "-" then {
-        let lhs = parse(tokens.slice(0, -2).join(" "));
-        node_binop(Kind#Sub, lhs, parse(tokens[-1]))
     }
+    else if tokens[-2] == "+" then binop(Kind#Add)
+    else if tokens[-2] == "-" then binop(Kind#Sub)
     else Expr!
 };
 
