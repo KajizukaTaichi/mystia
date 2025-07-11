@@ -9,22 +9,30 @@ load arrlen(a: [str]): int;
 load to_str(a: num): str;
 load to_num(a: str): int;
 
-type Kind = ( Add | Sub | Literal );
+type Kind = ( Add | Sub | Mul | Div | LiteralInt );
 type Expr = @{ kind: Kind, literal_int: int, lhs: Expr, rhs: Expr };
 
 let compile(expr: Expr): str = {
+    macro const(typ, value) = "(" + typ + ".const " + (value: str) + ")";
     macro binop(opname) = "(i32." + opname + " "
         + expr.lhs.compile() + " "
         + expr.rhs.compile() + ")";
-    if expr.kind == Kind#Literal then
-        "(i32.const " + (expr.literal_int: str) + ")"
-    else if expr.kind == Kind#Add then binop("add")
-    else if expr.kind == Kind#Sub then binop("sub")
-    else str!
+
+    if expr.kind == Kind#LiteralInt then {
+        return const("i32", expr.literal_int)
+    };
+
+    if (expr.lhs?) && (expr.rhs?) then {
+        if expr.kind == Kind#Add then { return binop("add") };
+        if expr.kind == Kind#Sub then { return binop("sub") };
+        if expr.kind == Kind#Mul then { return binop("mul") };
+        if expr.kind == Kind#Div then { return binop("div_s") }
+    };
+    str!
 };
 
 let node_literal_int(value: int) = memcpy(@{
-    kind: Kind#Literal,
+    kind: Kind#LiteralInt,
     literal_int: value,
     lhs: Expr!, rhs: Expr!
 });
@@ -92,9 +100,11 @@ let parse(source: str): Expr = {
         );
         if is_op("+") then { return binop(Kind#Add) };
         if is_op("-") then { return binop(Kind#Sub) };
+        if is_op("*") then { return binop(Kind#Mul) };
+        if is_op("/") then { return binop(Kind#Div) };
         Expr!
     }
 };
 
-let ast = parse("1 + (2 - 3)");
+let ast = parse("1 + (2 - 3) * 5");
 ast.compile()
