@@ -188,7 +188,11 @@ impl Node for Stmt {
                     self.type_infer(ctx);
                     let var_ctx = ctx.variable_type.clone();
                     let arg_ctx = ctx.argument_type.clone();
-                    let function = ctx.function_type.get(name)?.clone();
+                    let function = ctx
+                        .function_type
+                        .get(name)
+                        .or(ctx.export_type.get(name))?
+                        .clone();
                     ctx.variable_type = function.variables.clone();
                     ctx.argument_type = function.arguments.clone();
                     let code = format!(
@@ -323,7 +327,12 @@ impl Node for Stmt {
                             variables: ctx.variable_type.clone(),
                             arguments: ctx.argument_type.clone(),
                         };
-                        ctx.function_type.insert(name.to_owned(), frame);
+                        if let Scope::Global = scope {
+                            &mut ctx.export_type
+                        } else {
+                            &mut ctx.function_type
+                        }
+                        .insert(name.to_owned(), frame);
                         ctx.variable_type = var_ctx;
                         ctx.argument_type = arg_ctx;
                     }
