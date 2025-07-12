@@ -82,7 +82,7 @@ impl Node for Expr {
             Expr::Variable(name) => format!("(local.get ${name})"),
             Expr::Literal(literal) => literal.compile(ctx)?,
             Expr::Call(name, args) => {
-                if ctx.function_type.contains_key(name) {
+                if ctx.function_type.contains_key(name) && ctx.export_type.contains_key(name) {
                     format!(
                         "(call ${name} {})",
                         join!(
@@ -174,7 +174,12 @@ impl Node for Expr {
                         }
                     };
                 }
-                if let Some(function) = ctx.function_type.get(name).cloned() {
+                if let Some(function) = ctx
+                    .function_type
+                    .get(name)
+                    .or(ctx.export_type.get(name))
+                    .cloned()
+                {
                     arglen_check!(function.arguments, "function");
                     let func = |(arg, typ): (&Expr, &Type)| type_check!(arg, typ, ctx);
                     let ziped = args.iter().zip(function.arguments.values());
