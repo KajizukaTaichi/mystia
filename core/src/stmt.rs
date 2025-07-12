@@ -4,16 +4,17 @@ use crate::*;
 type FuncSig = (String, Vec<(String, Type)>, Type, Option<String>);
 #[derive(Clone, Debug)]
 pub enum Stmt {
+    Expr(Expr),
+    Let(Scope, Expr, Expr),
     If(Expr, Expr, Option<Box<Stmt>>),
     While(Expr, Expr),
-    Let(Scope, Expr, Expr),
     Type(String, Type),
-    Import(Option<String>, Vec<FuncSig>),
     Macro(String, Vec<String>, Expr),
-    Expr(Expr),
+    Import(Option<String>, Vec<FuncSig>),
+    Include(String),
     Return(Option<Expr>),
-    Next,
     Break,
+    Next,
 }
 
 #[derive(Clone, Copy, Debug)]
