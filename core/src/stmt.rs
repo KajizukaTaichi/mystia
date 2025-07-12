@@ -11,7 +11,6 @@ pub enum Stmt {
     Type(String, Type),
     Macro(String, Vec<String>, Expr),
     Import(Option<String>, Vec<FuncSig>),
-    Include(String),
     Return(Option<Expr>),
     Break,
     Next,
@@ -124,6 +123,13 @@ impl Node for Stmt {
             } else {
                 Some(Stmt::Import(None, parse_sigs(&rest.trim())?))
             }
+        } else if let Some(after) = source.strip_prefix("use ") {
+            let Ok(code) = read_to_string(path) else {
+                let errmsg = format!("can't read module file `{path}`");
+                ctx.occurred_error = Some(errmsg);
+                return None;
+            };
+            content
         } else if let Some(source) = source.strip_prefix("return ") {
             Some(Stmt::Return(Some(Expr::parse(source)?)))
         } else if source == "return" {
@@ -354,6 +360,11 @@ impl Node for Stmt {
                 ctx.type_alias.insert(name.to_string(), value.clone());
                 Type::Void
             }
+            Stmt::Macro(name, args, expr) => {
+                ctx.macro_code
+                    .insert(name.to_owned(), (args.clone(), expr.clone()));
+                Type::Void
+            }
             Stmt::Import(_module, funcs) => {
                 for (fn_name, args, ret_typ, alias) in funcs {
                     let import_name = alias.as_ref().unwrap_or(fn_name).clone();
@@ -370,11 +381,6 @@ impl Node for Stmt {
                         },
                     );
                 }
-                Type::Void
-            }
-            Stmt::Macro(name, args, expr) => {
-                ctx.macro_code
-                    .insert(name.to_owned(), (args.clone(), expr.clone()));
                 Type::Void
             }
             Stmt::Return(_) => Type::Void,
