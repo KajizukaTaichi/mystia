@@ -82,7 +82,7 @@ impl Node for Expr {
             Expr::Variable(name) => format!("(local.get ${name})"),
             Expr::Literal(literal) => literal.compile(ctx)?,
             Expr::Call(name, args) => {
-                if ctx.function_type.contains_key(name) && ctx.export_type.contains_key(name) {
+                if ctx.function_type.contains_key(name) || ctx.export_type.contains_key(name) {
                     format!(
                         "(call ${name} {})",
                         join!(
