@@ -42,7 +42,8 @@ fn main() {
     if cli.summary {
         println!("# Type Inference Summary");
         println!("Functions:");
-        for (name, func) in &compiler.function_type {
+        compiler.export_type.extend(compiler.function_type.clone());
+        for (name, func) in &compiler.export_type {
             println!(" - {}:", name.replace("__", "@"));
             println!("     Locals:");
             for (name, typ) in &func.variables {
