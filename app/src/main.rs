@@ -3,6 +3,7 @@ use clap::Parser;
 use mystia_core::Compiler;
 use sha2::{Digest, Sha256};
 use std::{
+    env::set_current_dir,
     fs::{File, read_to_string},
     io::Write,
     path::Path,
@@ -30,6 +31,7 @@ fn main() {
         eprintln!("Failed to read source file");
         return;
     };
+    set_current_dir(Path::new(filename).parent().unwrap()).unwrap();
     let Some(wat_code) = compiler.build(&source) else {
         let error_message = "failed to parse, compile or check type consistency";
         let err = compiler.occurred_error.unwrap_or(error_message.to_owned());
