@@ -1,9 +1,7 @@
 type LinkList = @{ value: int, next: LinkList };
 
-let car(self: LinkList) = self.value;
-let cdr(self: LinkList) = self.next;
 pub let node(value: int) = memcpy(@{ value: value, next: LinkList! });
-let append(self: LinkList, other: LinkList) = {
+pub let append(self: LinkList, other: LinkList) = {
     let current = self;
     while current.next? loop {
         let current = current.next
