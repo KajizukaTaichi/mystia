@@ -3,7 +3,7 @@ use clap::Parser;
 use mystia_core::Compiler;
 use sha2::{Digest, Sha256};
 use std::{
-    env::set_current_dir,
+    env::{current_dir, set_current_dir},
     fs::{File, read_to_string},
     io::Write,
     path::Path,
@@ -31,6 +31,7 @@ fn main() {
         eprintln!("Failed to read source file");
         return;
     };
+    let original_dir = current_dir().unwrap();
     set_current_dir(Path::new(filename).parent().unwrap()).unwrap();
     let Some(wat_code) = compiler.build(&source) else {
         let error_message = "failed to parse, compile or check type consistency";
@@ -82,6 +83,7 @@ fn main() {
         }
     );
 
+    set_current_dir(original_dir).unwrap();
     let Ok(mut output_file) = File::create(filename.with_extension("wat")) else {
         eprintln!("Failed to create output WAT file");
         return;
