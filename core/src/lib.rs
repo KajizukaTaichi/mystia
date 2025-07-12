@@ -60,6 +60,8 @@ pub struct Compiler {
     pub argument_type: IndexMap<String, Type>,
     /// Type environment for function
     pub function_type: IndexMap<String, Function>,
+    /// Type environment for exported function
+    pub export_type: IndexMap<String, Function>,
     /// Type of main program returns
     pub program_return: Type,
 }
@@ -78,6 +80,7 @@ impl Compiler {
             global_type: IndexMap::new(),
             argument_type: IndexMap::new(),
             function_type: IndexMap::new(),
+            export_type: IndexMap::new(),
             program_return: Type::Void,
         }
     }
