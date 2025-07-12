@@ -1,3 +1,5 @@
+use std::fs::read_to_string;
+
 use crate::*;
 
 /// Import function signature: name, arguments, return, alias
@@ -87,7 +89,7 @@ impl Node for Stmt {
             };
             let args = args.iter().map(func).collect::<Option<Vec<_>>>()?;
             Some(Stmt::Macro(name, args, Expr::parse(value)?))
-        } else if let Some(after) = source.strip_prefix("load") {
+        } else if let Some(after) = source.strip_prefix("load ") {
             let parse_sigs = |sigs: &str| {
                 let mut result = Vec::new();
                 for part in tokenize(sigs, &[","], false, true, false)? {
@@ -123,13 +125,9 @@ impl Node for Stmt {
             } else {
                 Some(Stmt::Import(None, parse_sigs(&rest.trim())?))
             }
-        } else if let Some(after) = source.strip_prefix("use ") {
-            let Ok(code) = read_to_string(path) else {
-                let errmsg = format!("can't read module file `{path}`");
-                ctx.occurred_error = Some(errmsg);
-                return None;
-            };
-            content
+        } else if let Some(path) = source.strip_prefix("use ") {
+            let code = ok!(read_to_string(path))?;
+            Some(Stmt::Expr(Expr::Block(Block::parse(&code)?)))
         } else if let Some(source) = source.strip_prefix("return ") {
             Some(Stmt::Return(Some(Expr::parse(source)?)))
         } else if source == "return" {
