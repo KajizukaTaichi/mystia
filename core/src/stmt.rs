@@ -55,7 +55,7 @@ impl Node for Stmt {
                 macro_rules! assign_with {
                     ($op: ident) => {
                         if let Oper::$op(name, value) = source {
-                            let value = Expr::Oper(Box::new(Oper::$op(name.clone(), value)));
+                            let value = Expr::Operator(Box::new(Oper::$op(name.clone(), value)));
                             return Some(Stmt::Let(Scope::Local, name, value));
                         }
                     };
@@ -103,7 +103,9 @@ impl Node for Stmt {
                     };
                     let mut args_typ = vec![];
                     for arg in args {
-                        let Expr::Oper(arg) = arg else { return None };
+                        let Expr::Operator(arg) = arg else {
+                            return None;
+                        };
                         let Oper::Cast(Expr::Variable(arg_name), arg_typ) = *arg.clone() else {
                             return None;
                         };
@@ -216,7 +218,7 @@ impl Node for Stmt {
                     ctx.argument_type = arg_ctx;
                     String::new()
                 }
-                Expr::Oper(oper) => {
+                Expr::Operator(oper) => {
                     self.type_infer(ctx)?;
                     let Oper::Cast(func, _) = *oper.clone() else {
                         return None;
@@ -336,7 +338,7 @@ impl Node for Stmt {
                         ctx.variable_type = var_ctx;
                         ctx.argument_type = arg_ctx;
                     }
-                    Expr::Oper(oper) => match *oper.clone() {
+                    Expr::Operator(oper) => match *oper.clone() {
                         Oper::Cast(Expr::Call(name, args), ret) => {
                             let var_ctx = ctx.variable_type.clone();
                             let arg_ctx = ctx.argument_type.clone();
