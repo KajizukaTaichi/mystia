@@ -15,8 +15,7 @@ pub enum Expr {
 
 impl Node for Expr {
     fn parse(source: &str) -> Option<Expr> {
-        let source = source.trim();
-
+        let token = source.trim();
         // Literal value
         if let Some(literal) = Value::parse(&token) {
             Some(Expr::Literal(literal))
