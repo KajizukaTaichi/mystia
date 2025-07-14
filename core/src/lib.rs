@@ -1,7 +1,7 @@
 mod block;
 mod expr;
 mod lexer;
-mod oper;
+mod op;
 mod stmt;
 mod r#type;
 mod utils;
@@ -12,7 +12,7 @@ pub use {
     block::Block,
     expr::Expr,
     lexer::tokenize,
-    oper::Oper,
+    op::Op,
     stmt::Stmt,
     r#type::{Dict, Enum, Type},
     utils::{OPERATOR, RESERVED, SPACE, expand_local, include_letter, is_identifier},
