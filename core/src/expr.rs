@@ -19,6 +19,7 @@ impl Node for Expr {
         // Literal value
         if let Some(literal) = Value::parse(&token) {
             Some(Expr::Literal(literal))
+        // Operator
         } else if let Some(literal) = Op::parse(&token) {
             Some(Expr::Operator(Box::new(literal)))
         // Prioritize higher than others
