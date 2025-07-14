@@ -119,12 +119,12 @@ macro_rules! compile_compare {
 macro_rules! address_calc {
     ($array: expr, $index: expr, $typ: expr) => {
         Oper::Add(
-            Expr::Oper(Box::new(Oper::Add(
+            Expr::Operator(Box::new(Oper::Add(
                 Expr::Literal(Value::Integer(4)),
-                Expr::Oper(Box::new(Oper::Transmute(*$array.clone(), Type::Integer))),
+                Expr::Operator(Box::new(Oper::Transmute(*$array.clone(), Type::Integer))),
             ))),
-            Expr::Oper(Box::new(Oper::Mul(
-                Expr::Oper(Box::new(Oper::Mod(
+            Expr::Operator(Box::new(Oper::Mul(
+                Expr::Operator(Box::new(Oper::Mod(
                     *$index.clone(),
                     Expr::MemLoad($array.clone(), Type::Integer),
                 ))),
@@ -138,7 +138,7 @@ macro_rules! address_calc {
 macro_rules! compile_args {
     ($args: expr, $ctx: expr) => {
         for arg in $args {
-            let Expr::Oper(oper) = arg else {
+            let Expr::Operator(oper) = arg else {
                 let msg = "function argument definition needs type annotation";
                 $ctx.occurred_error = Some(msg.to_string());
                 return None;
@@ -160,8 +160,8 @@ macro_rules! compile_args {
 #[macro_export]
 macro_rules! offset_calc {
     ($dict: expr, $offset: expr) => {
-        Expr::Oper(Box::new(Oper::Add(
-            Expr::Oper(Box::new(Oper::Transmute(*$dict.clone(), Type::Integer))),
+        Expr::Operator(Box::new(Oper::Add(
+            Expr::Operator(Box::new(Oper::Transmute(*$dict.clone(), Type::Integer))),
             Expr::Literal(Value::Integer($offset.clone())),
         )))
     };
