@@ -66,7 +66,7 @@ impl Node for Oper {
                 "~" => Oper::BNot(Expr::parse(token)?),
                 "!" => Oper::LNot(Expr::parse(token)?),
                 "-" => Oper::Sub(
-                    Expr::Oper(Box::new(Oper::Sub(
+                    Expr::Operator(Box::new(Oper::Sub(
                         Expr::parse(token)?,
                         Expr::parse(token)?,
                     ))),
@@ -151,7 +151,7 @@ impl Node for Oper {
             Oper::Cast(lhs, rhs) => {
                 let rhs = rhs.type_infer(ctx)?;
                 if let (Type::Number | Type::Integer, Type::String) = (lhs.type_infer(ctx)?, &rhs) {
-                    let numized = Expr::Oper(Box::new(Oper::Cast(lhs.clone(), Type::Number)));
+                    let numized = Expr::Operator(Box::new(Oper::Cast(lhs.clone(), Type::Number)));
                     Expr::Call(String::from("to_str"), vec![numized]).compile(ctx)?
                 } else if let (Type::String, Type::Number | Type::Integer) =
                     (lhs.type_infer(ctx)?, &rhs)
@@ -175,7 +175,7 @@ impl Node for Oper {
             }
             Oper::Transmute(lhs, _) => lhs.compile(ctx)?,
             Oper::NullCheck(expr) => Oper::Neq(
-                Expr::Oper(Box::new(Oper::Transmute(expr.clone(), Type::Integer))),
+                Expr::Operator(Box::new(Oper::Transmute(expr.clone(), Type::Integer))),
                 Expr::Literal(Value::Integer(-1)),
             )
             .compile(ctx)?,
