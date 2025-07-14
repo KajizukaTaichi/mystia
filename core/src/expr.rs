@@ -110,8 +110,8 @@ impl Node for Expr {
                 let Type::Array(typ) = array.type_infer(ctx)?.type_infer(ctx)? else {
                     return None;
                 };
-                let addr = address_calc!(array, index, typ);
-                format!("({}.load {})", typ.compile(ctx)?, addr.compile(ctx)?)
+                let addr = Box::new(address_calc!(array, index, typ));
+                Expr::MemLoad(Box::new(Expr::Oper(addr)), *typ).compile(ctx)?
             }
             Expr::Field(expr, key) => {
                 let typ = expr.type_infer(ctx)?.type_infer(ctx)?;
