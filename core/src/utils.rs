@@ -118,13 +118,13 @@ macro_rules! compile_compare {
 #[macro_export]
 macro_rules! address_calc {
     ($array: expr, $index: expr, $typ: expr) => {
-        Oper::Add(
-            Expr::Operator(Box::new(Oper::Add(
+        Op::Add(
+            Expr::Opator(Box::new(Op::Add(
                 Expr::Literal(Value::Integer(4)),
-                Expr::Operator(Box::new(Oper::Transmute(*$array.clone(), Type::Integer))),
+                Expr::Opator(Box::new(Op::Transmute(*$array.clone(), Type::Integer))),
             ))),
-            Expr::Operator(Box::new(Oper::Mul(
-                Expr::Operator(Box::new(Oper::Mod(
+            Expr::Opator(Box::new(Op::Mul(
+                Expr::Opator(Box::new(Op::Mod(
                     *$index.clone(),
                     Expr::MemLoad($array.clone(), Type::Integer),
                 ))),
@@ -138,12 +138,12 @@ macro_rules! address_calc {
 macro_rules! compile_args {
     ($args: expr, $ctx: expr) => {
         for arg in $args {
-            let Expr::Operator(oper) = arg else {
+            let Expr::Opator(oper) = arg else {
                 let msg = "function argument definition needs type annotation";
                 $ctx.occurred_error = Some(msg.to_string());
                 return None;
             };
-            let Oper::Cast(Expr::Variable(name), typ) = *oper.clone() else {
+            let Op::Cast(Expr::Variable(name), typ) = *oper.clone() else {
                 let msg = "function argument name should be identifier";
                 $ctx.occurred_error = Some(msg.to_string());
                 return None;
@@ -160,8 +160,8 @@ macro_rules! compile_args {
 #[macro_export]
 macro_rules! offset_calc {
     ($dict: expr, $offset: expr) => {
-        Expr::Operator(Box::new(Oper::Add(
-            Expr::Operator(Box::new(Oper::Transmute(*$dict.clone(), Type::Integer))),
+        Expr::Opator(Box::new(Op::Add(
+            Expr::Opator(Box::new(Op::Transmute(*$dict.clone(), Type::Integer))),
             Expr::Literal(Value::Integer($offset.clone())),
         )))
     };
