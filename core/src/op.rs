@@ -66,7 +66,7 @@ impl Node for Op {
                 "~" => Op::BNot(Expr::parse(token)?),
                 "!" => Op::LNot(Expr::parse(token)?),
                 "-" => Op::Sub(
-                    Expr::Opator(Box::new(Op::Sub(Expr::parse(token)?, Expr::parse(token)?))),
+                    Expr::Operator(Box::new(Op::Sub(Expr::parse(token)?, Expr::parse(token)?))),
                     Expr::parse(token)?,
                 ),
                 _ => return None,
@@ -148,7 +148,7 @@ impl Node for Op {
             Op::Cast(lhs, rhs) => {
                 let rhs = rhs.type_infer(ctx)?;
                 if let (Type::Number | Type::Integer, Type::String) = (lhs.type_infer(ctx)?, &rhs) {
-                    let numized = Expr::Opator(Box::new(Op::Cast(lhs.clone(), Type::Number)));
+                    let numized = Expr::Operator(Box::new(Op::Cast(lhs.clone(), Type::Number)));
                     Expr::Call(String::from("to_str"), vec![numized]).compile(ctx)?
                 } else if let (Type::String, Type::Number | Type::Integer) =
                     (lhs.type_infer(ctx)?, &rhs)
@@ -172,7 +172,7 @@ impl Node for Op {
             }
             Op::Transmute(lhs, _) => lhs.compile(ctx)?,
             Op::NullCheck(expr) => Op::Neq(
-                Expr::Opator(Box::new(Op::Transmute(expr.clone(), Type::Integer))),
+                Expr::Operator(Box::new(Op::Transmute(expr.clone(), Type::Integer))),
                 Expr::Literal(Value::Integer(-1)),
             )
             .compile(ctx)?,
