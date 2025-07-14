@@ -4,7 +4,7 @@ use crate::*;
 pub enum Expr {
     Literal(Value),
     Variable(String),
-    Oper(Box<Oper>),
+    Operator(Box<Oper>),
     Call(String, Vec<Expr>),
     Index(Box<Expr>, Box<Expr>),
     Field(Box<Expr>, String),
@@ -18,7 +18,7 @@ impl Node for Expr {
         let source = source.trim();
         let token_list: Vec<String> = tokenize(source, SPACE.as_ref(), true, true, false)?;
         if token_list.len() >= 2 {
-            return Some(Expr::Oper(Box::new(Oper::parse(source)?)));
+            return Some(Expr::Operator(Box::new(Oper::parse(source)?)));
         };
         let token = token_list.last()?.trim();
 
@@ -75,7 +75,7 @@ impl Node for Expr {
 
     fn compile(&self, ctx: &mut Compiler) -> Option<String> {
         Some(match self {
-            Expr::Oper(oper) => oper.compile(ctx)?,
+            Expr::Operator(oper) => oper.compile(ctx)?,
             Expr::Variable(name) if ctx.global_type.contains_key(name) => {
                 format!("(global.get ${name})")
             }
@@ -111,7 +111,7 @@ impl Node for Expr {
                     return None;
                 };
                 let addr = Box::new(address_calc!(array, index, typ));
-                Expr::MemLoad(Box::new(Expr::Oper(addr)), *typ).compile(ctx)?
+                Expr::MemLoad(Box::new(Expr::Operator(addr)), *typ).compile(ctx)?
             }
             Expr::Field(expr, key) => {
                 let typ = expr.type_infer(ctx)?.type_infer(ctx)?;
@@ -145,7 +145,7 @@ impl Node for Expr {
 
     fn type_infer(&self, ctx: &mut Compiler) -> Option<Type> {
         Some(match self {
-            Expr::Oper(oper) => oper.type_infer(ctx)?,
+            Expr::Operator(oper) => oper.type_infer(ctx)?,
             Expr::Variable(name) => {
                 if let Some(local) = ctx.variable_type.get(name) {
                     local.clone()
@@ -249,15 +249,15 @@ impl Expr {
                     })
                     .collect::<Option<Vec<i32>>>()?
                 {
-                    result = Expr::Oper(Box::new(Oper::Add(
+                    result = Expr::Operator(Box::new(Oper::Add(
                         result,
                         Expr::Literal(Value::Integer(i)),
                     )));
                 }
                 Some(result)
             }
-            Type::Array(typ) => Some(Expr::Oper(Box::new(Oper::Add(
-                Expr::Oper(Box::new(Oper::Mul(
+            Type::Array(typ) => Some(Expr::Operator(Box::new(Oper::Add(
+                Expr::Operator(Box::new(Oper::Mul(
                     Expr::Literal(Value::Integer(typ.type_infer(ctx)?.pointer_length()?)),
                     Expr::MemLoad(Box::new(self.clone()), Type::Integer),
                 ))),
