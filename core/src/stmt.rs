@@ -11,6 +11,7 @@ pub enum Stmt {
     If(Expr, Expr, Option<Box<Stmt>>),
     While(Expr, Expr),
     Type(String, Type),
+    Try(Expr, Box<Stmt>),
     Macro(String, Vec<String>, Expr),
     Import(Option<String>, Vec<FuncSig>),
     Return(Option<Expr>),
@@ -46,6 +47,12 @@ impl Node for Stmt {
             let cond = Expr::parse(&join!(tokens.get(0..r#loop)?))?;
             let body = Expr::parse(&join!(tokens.get(r#loop + 1..)?))?;
             Some(Stmt::While(cond, body))
+        } else if let Some(source) = source.strip_prefix("try ") {
+            let tokens = tokenize(source, SPACE.as_ref(), false, true, false)?;
+            let r#catch = tokens.iter().position(|i| i == "catch")?;
+            let expr = Expr::parse(&join!(tokens.get(0..r#catch)?))?;
+            let r#catch = Stmt::parse(&join!(tokens.get(r#catch + 1..)?))?;
+            Some(Stmt::Try(expr, Box::new(r#catch)))
         } else if let Some(token) = source.strip_prefix("let ") {
             if let Some((name, value)) = token.split_once("=") {
                 let (name, value) = (Expr::parse(name)?, Expr::parse(value)?);
@@ -246,6 +253,7 @@ impl Node for Stmt {
                 }
                 _ => return None,
             },
+            Stmt::Try(expr, catch) => expr.compile(ctx).or(catch.compile(ctx))?,
             Stmt::Import(module, funcs) => {
                 for (name, args, ret_typ, alias) in funcs.clone() {
                     let name = alias.unwrap_or(name.clone());
@@ -374,6 +382,7 @@ impl Node for Stmt {
                     .insert(name.to_owned(), (args.clone(), expr.clone()));
                 Type::Void
             }
+            Stmt::Try(expr, catch) => expr.type_infer(ctx).or(catch.type_infer(ctx))?,
             Stmt::Import(_module, funcs) => {
                 for (fn_name, args, ret_typ, alias) in funcs {
                     let import_name = alias.as_ref().unwrap_or(fn_name).clone();
