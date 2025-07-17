@@ -5,9 +5,9 @@ pub const OPERATOR: [&str; 23] = [
     "+", "-", "*", "/", "%", "==", "=", "!=", "<<", ">>", "<=", ">=", "<", ">", "&&", "||", "&",
     "|", "^", ":", "!", "?", "~",
 ];
-pub const RESERVED: [&str; 13] = [
+pub const RESERVED: [&str; 16] = [
     "pub", "let", "type", "if", "then", "else", "while", "loop", "break", "next", "return", "load",
-    "as",
+    "as", "try", "catch", "use",
 ];
 
 pub fn is_identifier(name: &str) -> bool {
