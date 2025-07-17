@@ -1,6 +1,5 @@
-use std::fs::read_to_string;
-
 use crate::*;
+use std::fs::read_to_string;
 
 /// Import function signature: name, arguments, return, alias
 type FuncSig = (String, Vec<(String, Type)>, Type, Option<String>);
