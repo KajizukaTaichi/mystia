@@ -1,2 +1,0 @@
-use list.ms;
-node(1).append(node(2)).next.value
