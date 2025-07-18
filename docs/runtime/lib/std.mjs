@@ -13,7 +13,7 @@ export class MystiaStdLib {
                 return write(
                     this.instance,
                     "str",
-                    read(this.instance, "str", value).repeat(count),
+                    read(this.instance, "str", value).repeat(Math.floor(count)),
                 );
             },
             concat: (str1, str2) => {
