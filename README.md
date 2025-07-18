@@ -30,6 +30,7 @@ MystiaはWebAssembly (WASM)にコンパイルすることに特化して設計�
 - **馴染みやすい構文**: 構文はRustとOCaml, TypeScriptなどに影響を受けています
 - **`let`文**: 変数や関数の定義や再代入には一貫して`let`キーワードを使用しています
 - **マクロ**: コンパイル時に型に縛られずスコープをキャプチャしたままコードを共通化できます
+- **静的例外処理**: 型エラーで分岐する`try-catch`で、マクロをもっと便利に汎用的に
 
 ### WebAssembly統合
 - **高速実行**: LLVMを介さず独自のバックエンドで効率的なバイトコードを生成します
@@ -148,18 +149,13 @@ type Status = ( Success | Error | Pending );
 ### マクロ
 ```mystia
 ~~ マクロ定義 ~~
-macro times(n, block) = {
-    let i = 0;
-    while i < n loop {
-        block;
-        let i + 1
-    }
+macro inc(n) = {
+    ~~ 静的例外処理 ~~
+    try n + 1 catch n + 1.0
 };
 
 ~~ 使用例 ~~
-5.times({
-    print("繰り返しメッセージ")
-});
+inc(5): num + inc(3.14)
 ```
 
 ### モジュールシステム
