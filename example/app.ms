@@ -10,7 +10,7 @@ pub let model = @{
     title: "Counter App",
     count: 0,
     layout: @{
-        panel: null:Elm
+        panel: Elm!
     }
 };
 
@@ -33,7 +33,7 @@ pub let inc_key(key_code: int) = {
     view()
 };
 
-let frame = new_elm("div", null: Elm);
+let frame = new_elm("div", Elm!);
 frame.upd_elm("style", "margin: 100px");
 frame.evt_elm("keydown", "inc_key");
 
