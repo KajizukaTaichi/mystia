@@ -16,12 +16,12 @@ pub enum Expr {
 impl Node for Expr {
     fn parse(source: &str) -> Option<Expr> {
         let token = source.trim();
-        // Literal value
-        if let Some(literal) = Value::parse(&token) {
-            Some(Expr::Literal(literal))
         // Operator
-        } else if let Some(literal) = Op::parse(&token) {
+        if let Some(literal) = Op::parse(&token) {
             Some(Expr::Operator(Box::new(literal)))
+            // Literal value
+        } else if let Some(literal) = Value::parse(&token) {
+            Some(Expr::Literal(literal))
         // Prioritize higher than others
         } else if token.starts_with("(") && token.ends_with(")") {
             let token = token.get(1..token.len() - 1)?.trim();
