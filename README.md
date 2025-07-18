@@ -107,8 +107,8 @@ node repl.mjs
 ### 変数と関数
 ```mystia
 ~~ 変数宣言 ~~
-pub let x = 42; ~~ グローバル ~~
 let message = "Hello, world!";
+pub let x = 42; ~~ グローバル変数 ~~
 
 ~~ 関数定義 ~~
 let add(a: int, b: int) = a + b;
@@ -120,7 +120,7 @@ let add(a: int, b: int) = a + b;
 let result = {
     if x > 0 then "positive"
     else if x == 0 then "zero"
-    else ""negative"
+    else "negative"
 };
 
 ~~ ループ ~~
