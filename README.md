@@ -48,9 +48,8 @@ MystiaはWebAssembly (WASM)にコンパイルすることに特化して設計�
 
 ### ソースからのビルド
 ```bash
-git clone <repository-url>
-cd mystia/main
-cargo build --release
+git clone https://github.com/KajizukaTaichi/mystia.git
+cargo install --path ./mystia/app
 ```
 
 ### WebAssemblyバインディングのビルド
@@ -69,10 +68,10 @@ wasm-pack build --target web
 ### コマンドラインインターフェース
 ```bash
 # Mystiaファイルをコンパイル
-./target/release/mystia example/fizzbuzz.ms
+mystia example/fizzbuzz.ms
 
 # 型推論サマリーを表示
-./target/release/mystia example/fizzbuzz.ms --summary
+mystia example/fizzbuzz.ms --summary
 
 # Node.jsランタイムでコンパイル・実行
 node run.mjs example/fizzbuzz.ms
