@@ -144,12 +144,12 @@ impl Node for Expr {
         Some(match self {
             Expr::Operator(oper) => oper.type_infer(ctx)?,
             Expr::Variable(name) => {
-                if let Some(local) = ctx.variable_type.get(name) {
+                if let Some(global) = ctx.global_type.get(name) {
+                    global.clone()
+                } else if let Some(local) = ctx.variable_type.get(name) {
                     local.clone()
                 } else if let Some(arg) = ctx.argument_type.get(name) {
                     arg.clone()
-                } else if let Some(glb) = ctx.global_type.get(name) {
-                    glb.clone()
                 } else {
                     ctx.occurred_error = Some(format!("undefined variable `{name}`"));
                     return None;
