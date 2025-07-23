@@ -158,7 +158,7 @@ impl Node for Expr {
             Expr::Literal(literal) => literal.type_infer(ctx)?,
             Expr::Call(name, args) => {
                 macro_rules! arglen_check {
-                    ($params: expr, $typ:literal) => {
+                    ($params: expr, $typ: literal) => {
                         if args.len() != $params.len() {
                             let errmsg = format!(
                                 "arguments of {} `{name}` length should be {}, but passed {} values",
