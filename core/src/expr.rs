@@ -80,14 +80,11 @@ impl Node for Expr {
             Expr::Literal(literal) => literal.compile(ctx)?,
             Expr::Call(name, args) => {
                 if ctx.function_type.contains_key(name) || ctx.export_type.contains_key(name) {
-                    format!(
-                        "(call ${name} {})",
-                        join!(
-                            args.iter()
-                                .map(|x| x.compile(ctx))
-                                .collect::<Option<Vec<_>>>()?
-                        )
-                    )
+                    let args = args
+                        .iter()
+                        .map(|x| x.compile(ctx))
+                        .collect::<Option<Vec<_>>>()?;
+                    format!("(call ${name} {})", join!(args))
                 } else if let Some((params, expr)) = ctx.macro_code.get(name).cloned() {
                     for (param, arg) in params.iter().zip(args) {
                         let typ = arg.type_infer(ctx)?;
