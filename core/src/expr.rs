@@ -160,12 +160,8 @@ impl Node for Expr {
                 macro_rules! arglen_check {
                     ($params: expr, $typ: literal) => {
                         if args.len() != $params.len() {
-                            let errmsg = format!(
-                                "arguments of {} `{name}` length should be {}, but passed {} values",
-                                $typ,
-                                $params.len(),
-                                args.len()
-                            );
+                            let (typ, paramlen, arglen) = ($typ, $params.len(), args.len());
+                            let errmsg = format!("arguments of {typ} `{name}` length should be {paramlen}, but passed {arglen} values");
                             ctx.occurred_error = Some(errmsg);
                             return None;
                         }
