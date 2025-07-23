@@ -164,8 +164,8 @@ impl Node for Op {
                 {
                     lhs.compile(ctx)?
                 } else {
-                    let lhs = lhs.type_infer(ctx)?.format();
-                    let msg = format!("type {lhs} can't convert to {}", rhs.format());
+                    let [lhs, rhs] = [lhs.type_infer(ctx)?.format(), rhs.format()];
+                    let msg = format!("type {lhs} can't convert to {rhs}");
                     ctx.occurred_error = Some(msg);
                     return None;
                 }
