@@ -19,14 +19,14 @@ impl Node for Expr {
         // Operator
         if let Some(literal) = Op::parse(&token) {
             Some(Expr::Operator(Box::new(literal)))
-            // Literal value
+        // Literal value
         } else if let Some(literal) = Value::parse(&token) {
             Some(Expr::Literal(literal))
-        // Prioritize higher than others
+        // Prioritize higher than other terms
         } else if token.starts_with("(") && token.ends_with(")") {
             let token = token.get(1..token.len() - 1)?.trim();
             Some(Expr::parse(token)?)
-            // Code block `{ stmt; ... }`
+        // Code block `{ stmt; ... }`
         } else if token.starts_with("{") && token.ends_with("}") {
             let token = token.get(1..token.len() - 1)?.trim();
             Some(Expr::Block(Block::parse(token)?))
