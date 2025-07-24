@@ -61,6 +61,5 @@ pub fn type_to_json(typ: &Type) -> String {
                 .join(", ")
         ),
         Type::Alias(name) => format!("{{ type: \"alias\", name: \"{name}\" }}"),
-        Type::Any => format!("\"any\""),
     }
 }
