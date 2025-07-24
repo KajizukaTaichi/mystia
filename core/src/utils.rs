@@ -65,18 +65,9 @@ macro_rules! compile_args_type {
 }
 
 #[macro_export]
-macro_rules! if_ptr {
-    ($typ: expr => $block: block) => {
-        if let Type::String | Type::Array(_) | Type::Dict(_) = $typ {
-            $block;
-        }
-    };
-    ($typ: expr => $block: block else $els: block) => {
-        if let Type::String | Type::Array(_) | Type::Dict(_) = $typ {
-            $block;
-        } else {
-            $els;
-        }
+macro_rules! is_ptr {
+    ($typ: expr ) => {
+        matches!($typ, Type::String | Type::Array(_) | Type::Dict(_))
     };
 }
 
