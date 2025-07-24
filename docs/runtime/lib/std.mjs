@@ -135,7 +135,7 @@ export class MystiaWebLib extends MystiaStdLib {
                     b: { type: "int", offset: 8 },
                 },
             };
-            const color = read(this.instance, type, color);
+            color = read(this.instance, type, color);
             ctx.fillStyle = `rgb(${color.r}, ${color.g}, ${color.b})`;
             ctx.fillRect(x, y, 1, 1);
         };
