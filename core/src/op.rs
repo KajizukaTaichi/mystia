@@ -30,12 +30,12 @@ pub enum Op {
 
 impl Node for Op {
     fn parse(source: &str) -> Option<Self> {
-        let token_list: Vec<String> = tokenize(source, SPACE.as_ref(), true, true, false)?;
+        let tokens: Vec<String> = tokenize(source, SPACE.as_ref(), true, true, false)?;
         // Parsing is from right to left because operator is left-associative
         let binopergen = |n: usize| {
-            let operator = token_list.get(n)?;
-            let lhs = &join!(token_list.get(..n)?);
-            let rhs = &join!(token_list.get(n + 1..)?);
+            let operator = tokens.get(n)?;
+            let lhs = &join!(tokens.get(..n)?);
+            let rhs = &join!(tokens.get(n + 1..)?);
             Some(match operator.as_str() {
                 "+" => Op::Add(Expr::parse(lhs)?, Expr::parse(rhs)?),
                 "-" => Op::Sub(Expr::parse(lhs)?, Expr::parse(rhs)?),
@@ -60,8 +60,8 @@ impl Node for Op {
             })
         };
         let unaryopergen = || {
-            let op = token_list.first()?.trim();
-            let token = &join!(token_list.get(1..)?);
+            let op = tokens.first()?.trim();
+            let token = &join!(tokens.get(1..)?);
             Some(match op {
                 "~" => Op::BNot(Expr::parse(token)?),
                 "!" => Op::LNot(Expr::parse(token)?),
@@ -73,8 +73,8 @@ impl Node for Op {
             })
         };
         let suffixopergen = || {
-            let op = token_list.last()?.trim();
-            let token = &join!(token_list.get(..token_list.len() - 1)?);
+            let op = tokens.last()?.trim();
+            let token = &join!(tokens.get(..tokens.len() - 1)?);
             Some(match op {
                 "?" => Op::NullCheck(Expr::parse(token)?),
                 "!" => Op::Nullable(Type::parse(token)?),
@@ -87,8 +87,8 @@ impl Node for Op {
         if let Some(op) = suffixopergen() {
             return Some(op);
         }
-        for i in 2..token_list.len() {
-            if let Some(op) = binopergen(token_list.len().checked_sub(i)?) {
+        for i in 2..tokens.len() {
+            if let Some(op) = binopergen(tokens.len().checked_sub(i)?) {
                 return Some(op);
             }
         }
