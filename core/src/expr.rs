@@ -120,16 +120,17 @@ impl Node for Expr {
             Expr::MemCpy(from) => {
                 let typ = from.type_infer(ctx)?;
                 let size = from.bytes_length(ctx)?.compile(ctx)?;
-                if_ptr!(typ => {
+                if is_ptr!(typ) {
                     return Some(format!(
                         "(global.get $allocator) (memory.copy (global.get $allocator) {object} {size}) {}",
                         format!("(global.set $allocator (i32.add (global.get $allocator) {size}))"),
                         object = from.compile(ctx)?,
-                    ))
+                    ));
                 } else {
-                    ctx.occurred_error = Some("can't memory copy primitive typed value".to_string());
-                    return None
-                });
+                    ctx.occurred_error =
+                        Some("can't memory copy primitive typed value".to_string());
+                    return None;
+                }
             }
             Expr::MemLoad(expr, typ) => {
                 format!("({}.load {})", typ.compile(ctx)?, expr.compile(ctx)?)
