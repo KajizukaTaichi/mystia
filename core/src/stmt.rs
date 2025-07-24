@@ -82,6 +82,7 @@ impl Node for Stmt {
             let Some(Expr::Variable(name)) = Expr::parse(name) else {
                 return None;
             };
+            dbg!(value);
             Some(Stmt::Type(name, Type::parse(value)?))
         } else if let Some(source) = source.strip_prefix("macro ") {
             let (head, value) = source.split_once("=")?;
