@@ -1,5 +1,4 @@
 use crate::*;
-use std::fs::read_to_string;
 
 /// Import function signature: name, arguments, return, alias
 type FuncSig = (String, Vec<(String, Type)>, Type);
@@ -103,9 +102,6 @@ impl Node for Stmt {
             } else {
                 Some(Stmt::Import(None, import_args!(after)))
             }
-        } else if let Some(path) = source.strip_prefix("use ") {
-            let code = ok!(read_to_string(path))?;
-            Some(Stmt::Expr(Expr::Block(Block::parse(&code)?)))
         } else if let Some(source) = source.strip_prefix("return ") {
             Some(Stmt::Return(Some(Expr::parse(source)?)))
         } else if source == "return" {
@@ -120,6 +116,7 @@ impl Node for Stmt {
     }
 
     fn compile(&self, ctx: &mut Compiler) -> Option<String> {
+        dbg!(&self);
         Some(match self {
             Stmt::Expr(expr) => expr.compile(ctx)?,
             Stmt::If(cond, then, r#else) => {
