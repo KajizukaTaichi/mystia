@@ -37,6 +37,9 @@ impl Node for Type {
                     let mut result = IndexMap::new();
                     for line in tokenize(source, &[","], false, true, false)? {
                         let (name, value) = line.split_once(":")?;
+                        if !is_identifier(name) {
+                            return None;
+                        };
                         let typ = Type::parse(value)?;
                         result.insert(name.trim().to_string(), (0, typ.clone()));
                     }
