@@ -1,8 +1,6 @@
-type Elm = int;
-
-load new_elm(tag: str, parent: Elm): Elm;
-load upd_elm(id: Elm, prop: str, content: str): void;
-load evt_elm(id: Elm, name: str, func: str): void;
+load new_elm(tag: str, parent: int): int;
+load upd_elm(id: int, prop: str, content: str): void;
+load evt_elm(id: int, name: str, func: str): void;
 load concat(a: str, b: str): str;
 load to_str(n: num): str;
 
@@ -10,7 +8,7 @@ pub let model = @{
     title: "Counter App",
     count: 0,
     layout: @{
-        panel: Elm!
+        panel: -1
     }
 };
 
@@ -33,7 +31,7 @@ pub let inc_key(key_code: int) = {
     view()
 };
 
-let frame = new_elm("div", Elm!);
+let frame = new_elm("div", -1);
 frame.upd_elm("style", "margin: 100px");
 frame.evt_elm("keydown", "inc_key");
 
