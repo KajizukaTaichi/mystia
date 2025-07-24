@@ -1,5 +1,6 @@
 use crate::*;
 
+pub const BYTES: i32 = 4;
 pub const SPACE: [&str; 5] = [" ", "　", "\n", "\t", "\r"];
 pub const OPERATOR: [&str; 23] = [
     "+", "-", "*", "/", "%", "==", "=", "!=", "<<", ">>", "<=", ">=", "<", ">", "&&", "||", "&",
@@ -120,7 +121,7 @@ macro_rules! address_calc {
     ($array: expr, $index: expr, $typ: expr) => {
         Op::Add(
             Expr::Operator(Box::new(Op::Add(
-                Expr::Literal(Value::Integer(4)),
+                Expr::Literal(Value::Integer(BYTES)),
                 Expr::Operator(Box::new(Op::Transmute(*$array.clone(), Type::Integer))),
             ))),
             Expr::Operator(Box::new(Op::Mul(
@@ -128,7 +129,7 @@ macro_rules! address_calc {
                     *$index.clone(),
                     Expr::MemLoad($array.clone(), Type::Integer),
                 ))),
-                Expr::Literal(Value::Integer($typ.pointer_length()?)),
+                Expr::Literal(Value::Integer(BYTES)),
             ))),
         )
     };
