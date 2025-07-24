@@ -85,7 +85,7 @@ impl Node for Type {
 impl Type {
     pub fn solve_alias(&self, ctx: &mut Compiler, xpct: Vec<Type>) -> Option<Type> {
         for x in &xpct {
-            if x.compress_alias(ctx).format() == self.compress_alias(ctx).format() {
+            if x.compress_alias(ctx) == self.compress_alias(ctx) {
                 return Some(self.compress_alias(ctx));
             }
         }
@@ -127,7 +127,7 @@ impl Type {
             ),
             _ => self.clone(),
         };
-        if let Some(i) = aliases.find(|(_, v)| v.format() == typ.format()) {
+        if let Some(i) = aliases.find(|(_, v)| **v == typ) {
             Type::Alias(i.0.clone())
         } else {
             typ
