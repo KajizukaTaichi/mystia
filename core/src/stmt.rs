@@ -1,7 +1,7 @@
 use crate::*;
 
 /// Import function signature: name, arguments, return, alias
-type FuncSig = (String, Vec<(String, Type)>, Type);
+type Signature = (String, Vec<(String, Type)>, Type);
 #[derive(Clone, Debug)]
 pub enum Stmt {
     Expr(Expr),
@@ -11,7 +11,7 @@ pub enum Stmt {
     Type(String, Type),
     Try(Expr, Box<Stmt>),
     Macro(String, Vec<String>, Expr),
-    Import(Option<String>, FuncSig),
+    Import(Option<String>, Signature),
     Return(Option<Expr>),
     Break,
     Next,
