@@ -262,7 +262,7 @@ impl Node for Stmt {
                     };
                     let sig = join!(
                         args.iter()
-                            .map(|(_, t)| t
+                            .map(|(_, typ)| typ
                                 .type_infer(ctx)?
                                 .compile(ctx)
                                 .map(|s| format!("(param {})", s)))
