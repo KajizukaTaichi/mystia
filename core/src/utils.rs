@@ -26,6 +26,9 @@ pub fn is_identifier(name: &str) -> bool {
     if RESERVED.contains(&name) {
         return false;
     }
+    if !name.is_ascii() {
+        return false;
+    }
     true
 }
 
