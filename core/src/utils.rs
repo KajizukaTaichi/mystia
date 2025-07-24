@@ -93,7 +93,7 @@ macro_rules! type_check {
     ($lhs: expr, $rhs: expr, $ctx: expr) => {{
         let lhs = $lhs.type_infer($ctx)?.type_infer($ctx)?;
         let rhs = $rhs.type_infer($ctx)?.type_infer($ctx)?;
-        if lhs.format() == rhs.format() {
+        if lhs == rhs {
             Some(lhs.clone())
         } else {
             $ctx.occurred_error = Some(format!(
