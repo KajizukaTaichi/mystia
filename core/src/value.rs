@@ -9,7 +9,6 @@ pub enum Value {
     Dict(IndexMap<String, Expr>),
     Enum(Type, String),
     String(String),
-    Null,
 }
 
 impl Node for Value {
@@ -42,8 +41,6 @@ impl Node for Value {
                 result.insert(name.trim().to_string(), Expr::parse(value)?);
             }
             Some(Value::Dict(result))
-        } else if source == "null" {
-            Some(Value::Null)
         } else {
             None
         }
@@ -159,7 +156,6 @@ impl Node for Value {
                 };
                 Value::Integer(value as i32).compile(ctx)?
             }
-            Value::Null => Value::Integer(-1).compile(ctx)?,
         })
     }
 
@@ -181,7 +177,6 @@ impl Node for Value {
                 Type::Dict(result)
             }
             Value::Enum(typ, _) => typ.type_infer(ctx)?,
-            Value::Null => Type::Any,
         })
     }
 }
