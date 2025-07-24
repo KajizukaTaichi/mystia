@@ -68,8 +68,8 @@ export function write(instance, type, value) {
             array.push(write(instance, type.element, elm));
         }
         const size = BYTES * value.length + BYTES;
-        const view = new DataView(buffer, ptr, size);
         const ptr = instance.exports.malloc(size);
+        const view = new DataView(buffer, ptr, size);
         let addr = ptr;
 
         view.setInt32(addr, value.length, true);
