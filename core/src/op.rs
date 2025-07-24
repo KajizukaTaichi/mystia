@@ -75,7 +75,6 @@ impl Node for Op {
         let suffixopergen = || {
             let op = token_list.last()?.trim();
             let token = &join!(token_list.get(..token_list.len() - 1)?);
-            dbg!(token, Expr::parse(token));
             Some(match op {
                 "?" => Op::NullCheck(Expr::parse(token)?),
                 "!" => Op::Nullable(Type::parse(token)?),
