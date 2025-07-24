@@ -1,12 +1,12 @@
-type LinkList = @{ value: int, next: LinkList };
+type LinkList = @{ value: int, relation: LinkList };
 
-pub let node(value: int) = memcpy(@{ value: value, next: LinkList! });
+pub let node(value: int) = memcpy(@{ value: value, relation: LinkList! });
 pub let append(self: LinkList, other: LinkList) = {
     let current = self;
-    while current.next? loop {
-        let current = current.next
+    while current.relation? loop {
+        let current = current.relation
     };
-    let current.next = other;
+    let current.relation = other;
     self
 };
 
