@@ -44,7 +44,10 @@ impl Node for Type {
                 } else if source.starts_with("(") && source.ends_with(")") {
                     let source = source.get(1..source.len() - 1)?.trim();
                     let result = tokenize(source, &["|"], false, true, false)?;
-                    let result = result.iter().map(|x| x.trim().to_string()).collect();
+                    let result: Vec<String> = result.iter().map(|x| x.trim().to_string()).collect();
+                    if !result.iter().all(|x| is_identifier(x)) {
+                        return None;
+                    };
                     Some(Type::Enum(result))
                 } else if is_identifier(&source) {
                     Some(Type::Alias(source))
