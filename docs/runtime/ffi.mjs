@@ -83,7 +83,7 @@ export function write(instance, type, value) {
         for (let [name, field] of Object.entries(type.fields)) {
             type.fields[name] = write(instance, field.type, value[name]);
         }
-        const ptr = instance.exports.malloc(bytes);
+        const ptr = instance.exports.malloc(field.length * BYTES);
         let addr = ptr;
 
         for (let [_name, field] of Object.entries(type.fields)) {
