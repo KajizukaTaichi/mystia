@@ -70,7 +70,7 @@ export function write(instance, type, value) {
         const size = BYTES * value.length + BYTES;
         const ptr = instance.exports.malloc(size);
         const view = new DataView(buffer, ptr, size);
-        let addr = ptr;
+        let addr = 0;
 
         view.setInt32(addr, value.length, true);
         addr += BYTES;
