@@ -22,7 +22,7 @@ impl Node for Expr {
         // Literal value
         } else if let Some(literal) = Value::parse(&token) {
             Some(Expr::Literal(literal))
-        // Prioritize higher than other terms
+        // Prioritize expression `(expr)`
         } else if token.starts_with("(") && token.ends_with(")") {
             let token = token.get(1..token.len() - 1)?.trim();
             Some(Expr::parse(token)?)
