@@ -107,7 +107,7 @@ impl Type {
                 for (name, (_, typ)) in dict {
                     let typ = typ.solve_alias(ctx, [xpct.clone(), vec![self.clone()]].concat())?;
                     a.insert(name.clone(), (offset.clone(), typ.clone()));
-                    offset += 4
+                    offset += BYTES
                 }
                 Some(Type::Dict(a))
             }
