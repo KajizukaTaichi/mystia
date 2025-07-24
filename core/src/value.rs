@@ -82,14 +82,14 @@ impl Node for Value {
                             address = Value::Integer(ctx.allocator).compile(ctx)?,
                             length = Value::Integer(array.len() as i32).compile(ctx)?
                         ));
-                        ctx.allocator += 4;
+                        ctx.allocator += BYTES;
                         for code in inner_codes {
                             result.push(format!(
                                 "({type}.store {address} {code})",
                                 r#type = &inner_type.compile(ctx)?,
                                 address = Value::Integer(ctx.allocator).compile(ctx)?,
                             ));
-                            ctx.allocator += inner_type.type_infer(ctx)?.pointer_length()?;
+                            ctx.allocator += BYTES;
                         }
                     } else {
                         pointer = ctx.allocator;
@@ -98,7 +98,7 @@ impl Node for Value {
                             address = Value::Integer(ctx.allocator).compile(ctx)?,
                             length = Value::Integer(array.len() as i32).compile(ctx)?
                         ));
-                        ctx.allocator += 4;
+                        ctx.allocator += BYTES;
                         for elm in array {
                             type_check!(inner_type, elm.type_infer(ctx)?, ctx)?;
                             result.push(format!(
@@ -107,7 +107,7 @@ impl Node for Value {
                                 address = Value::Integer(ctx.allocator).compile(ctx)?,
                                 value = elm.compile(ctx)?
                             ));
-                            ctx.allocator += inner_type.type_infer(ctx)?.pointer_length()?;
+                            ctx.allocator += BYTES
                         }
                     }
                 );
@@ -138,7 +138,7 @@ impl Node for Value {
                         address = Value::Integer(ctx.allocator).compile(ctx)?,
                         value = prestore.get(name).cloned().or_else(|| elm.compile(ctx))?
                     ));
-                    ctx.allocator += typ.type_infer(ctx)?.pointer_length()?;
+                    ctx.allocator += BYTES;
                 }
 
                 format!(
@@ -178,7 +178,7 @@ impl Node for Value {
                 for (name, elm) in dict {
                     let typ = elm.type_infer(ctx)?;
                     result.insert(name.to_string(), (index, typ.clone()));
-                    index += typ.type_infer(ctx)?.pointer_length()?;
+                    index += BYTES;
                 }
                 Type::Dict(result)
             }
