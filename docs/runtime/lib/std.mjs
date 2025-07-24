@@ -127,9 +127,16 @@ export class MystiaWebLib extends MystiaStdLib {
             const ctx = document
                 .getElementById("mystia-canvas")
                 .getContext("2d");
-            const pallet = "white|black|grey|blue|violet|green|red|pink|yellow";
-            const type = { type: "enum", enum: pallet.split("|") };
-            ctx.fillStyle = read(this.instance, type, color);
+            const type = {
+                type: "dict",
+                fields: {
+                    r: { type: "int", offset: 0 },
+                    g: { type: "int", offset: 4 },
+                    b: { type: "int", offset: 8 },
+                },
+            };
+            const color = read(this.instance, type, color);
+            ctx.fillStyle = `rgb(${color.r}, ${color.g}, ${color.b})`;
             ctx.fillRect(x, y, 1, 1);
         };
         this.functions.new_elm = (tag, parent) => {
