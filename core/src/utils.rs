@@ -12,10 +12,21 @@ pub const RESERVED: [&str; 16] = [
 ];
 
 pub fn is_identifier(name: &str) -> bool {
-    name.split_whitespace().count() == 1
-        && !RESERVED.contains(&name)
-        && !OPERATOR.contains(&name)
-        && name.is_ascii()
+    if name.is_empty() {
+        return false;
+    }
+    let mut chars = name.chars();
+    let first_char = chars.next().unwrap();
+    if !UnicodeXID::is_xid_start(first_char) {
+        return false;
+    }
+    if !chars.all(UnicodeXID::is_xid_continue) {
+        return false;
+    }
+    if RESERVED.contains(&name) {
+        return false;
+    }
+    true
 }
 
 pub fn include_letter(query: &str, chars: &Vec<String>, idx: usize) -> bool {
