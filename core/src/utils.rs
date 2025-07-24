@@ -161,6 +161,26 @@ macro_rules! compile_args {
 }
 
 #[macro_export]
+macro_rules! import_args {
+    ($sigs: expr) => {{
+        let Op::Cast(Expr::Call(name, args), ret_typ) = Op::parse($sigs)? else {
+            return None;
+        };
+        let mut args_typ = vec![];
+        for arg in args {
+            let Expr::Operator(arg) = arg else {
+                return None;
+            };
+            let Op::Cast(Expr::Variable(arg_name), arg_typ) = *arg.clone() else {
+                return None;
+            };
+            args_typ.push((arg_name, arg_typ));
+        }
+        (name, args_typ, ret_typ)
+    }};
+}
+
+#[macro_export]
 macro_rules! offset_calc {
     ($dict: expr, $offset: expr) => {
         Expr::Operator(Box::new(Op::Add(
