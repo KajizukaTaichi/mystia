@@ -8,6 +8,7 @@ mod utils;
 mod value;
 
 use indexmap::IndexMap;
+use unicode_xid::UnicodeXID;
 pub use {
     block::Block,
     expr::Expr,
