@@ -72,28 +72,15 @@ impl Node for Type {
     }
 
     fn type_infer(&self, ctx: &mut Compiler) -> Option<Type> {
-        self.compress_alias(ctx, vec![])
+        self.solve_alias(ctx, vec![])
     }
 }
 
 impl Type {
-    pub fn pointer_length(&self) -> Option<i32> {
-        match self {
-            Type::Array(_)
-            | Type::String
-            | Type::Bool
-            | Type::Dict(_)
-            | Type::Integer
-            | Type::Enum(_) => Some(4),
-            Type::Number => Some(8),
-            _ => None,
-        }
-    }
-
-    pub fn compress_alias(&self, ctx: &mut Compiler, xpct: Vec<Type>) -> Option<Type> {
+    pub fn solve_alias(&self, ctx: &mut Compiler, xpct: Vec<Type>) -> Option<Type> {
         for x in &xpct {
-            if x.decompress_alias(ctx).format() == self.decompress_alias(ctx).format() {
-                return Some(self.decompress_alias(ctx));
+            if x.compress_alias(ctx).format() == self.compress_alias(ctx).format() {
+                return Some(self.compress_alias(ctx));
             }
         }
         let result = match self {
@@ -103,23 +90,18 @@ impl Type {
                     ctx.occurred_error = Some(msg);
                     return None;
                 };
-                typ.compress_alias(ctx, xpct.clone())
+                typ.solve_alias(ctx, xpct.clone())
             }
             Type::Array(typ) => Some(Type::Array(Box::new(
-                typ.compress_alias(ctx, [xpct.clone(), vec![self.clone()]].concat())?,
+                typ.solve_alias(ctx, [xpct.clone(), vec![self.clone()]].concat())?,
             ))),
             Type::Dict(dict) => {
                 let mut a = IndexMap::new();
                 let mut offset = 0;
                 for (name, (_, typ)) in dict {
-                    let typ =
-                        typ.compress_alias(ctx, [xpct.clone(), vec![self.clone()]].concat())?;
+                    let typ = typ.solve_alias(ctx, [xpct.clone(), vec![self.clone()]].concat())?;
                     a.insert(name.clone(), (offset.clone(), typ.clone()));
-                    offset += if let Type::Alias(_) = typ {
-                        self.pointer_length()?
-                    } else {
-                        typ.pointer_length()?
-                    };
+                    offset += 4
                 }
                 Some(Type::Dict(a))
             }
@@ -128,13 +110,13 @@ impl Type {
         result
     }
 
-    pub fn decompress_alias(&self, ctx: &Compiler) -> Type {
+    pub fn compress_alias(&self, ctx: &Compiler) -> Type {
         let mut aliases = ctx.type_alias.iter();
         let typ = match self {
-            Type::Array(typ) => Type::Array(Box::new(typ.decompress_alias(ctx))),
+            Type::Array(typ) => Type::Array(Box::new(typ.compress_alias(ctx))),
             Type::Dict(dict) => Type::Dict(
                 dict.iter()
-                    .map(|(k, (o, t))| (k.clone(), (o.clone(), t.decompress_alias(ctx))))
+                    .map(|(k, (o, t))| (k.clone(), (o.clone(), t.compress_alias(ctx))))
                     .collect(),
             ),
             _ => self.clone(),
