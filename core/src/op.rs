@@ -159,9 +159,7 @@ impl Node for Op {
                     format!("(f32.convert_i32_s {})", lhs.compile(ctx)?,)
                 } else if let (Type::Number, Type::Integer) = (lhs.type_infer(ctx)?, &rhs) {
                     format!("(i32.trunc_f32_s {})", lhs.compile(ctx)?,)
-                } else if matches!(lhs.type_infer(ctx)?, Type::Any)
-                    || lhs.type_infer(ctx)?.type_infer(ctx)? == rhs
-                {
+                } else if lhs.type_infer(ctx)?.type_infer(ctx)? == rhs {
                     lhs.compile(ctx)?
                 } else {
                     let [lhs, rhs] = [lhs.type_infer(ctx)?.format(), rhs.format()];
@@ -176,7 +174,7 @@ impl Node for Op {
                 Expr::Literal(Value::Integer(-1)),
             )
             .compile(ctx)?,
-            Op::Nullable(_) => Value::Null.compile(ctx)?,
+            Op::Nullable(_) => Value::Integer(-1).compile(ctx)?,
         })
     }
 
