@@ -56,6 +56,9 @@ impl Node for Expr {
         // Dictionary access `dict.field`
         } else if token.contains(".") {
             let (dict, field) = token.rsplit_once(".")?;
+            if !is_identifier(field) {
+                return None;
+            };
             Some(Expr::Field(Box::new(Expr::parse(dict)?), field.to_owned()))
         // Enumerate access `( a | b )#a`
         } else if source.contains("#") {
