@@ -58,7 +58,7 @@ impl Node for Type {
     fn compile(&self, ctx: &mut Compiler) -> Option<String> {
         Some(
             match self.type_infer(ctx)? {
-                Type::Number => "f64",
+                Type::Number => "f32",
                 Type::Integer
                 | Type::Bool
                 | Type::String

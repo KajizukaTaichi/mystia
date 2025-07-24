@@ -3,7 +3,7 @@ use crate::*;
 #[derive(Debug, Clone)]
 pub enum Value {
     Integer(i32),
-    Number(f64),
+    Number(f32),
     Bool(bool),
     Array(Vec<Expr>),
     Dict(IndexMap<String, Expr>),
@@ -18,7 +18,7 @@ impl Node for Value {
         if let Ok(n) = source.parse::<i32>() {
             Some(Value::Integer(n))
         // Number literal
-        } else if let Ok(n) = source.parse::<f64>() {
+        } else if let Ok(n) = source.parse::<f32>() {
             Some(Value::Number(n))
         // Boolean literal
         } else if let Ok(n) = source.parse::<bool>() {
@@ -51,7 +51,7 @@ impl Node for Value {
 
     fn compile(&self, ctx: &mut Compiler) -> Option<String> {
         Some(match self {
-            Value::Number(n) => format!("(f64.const {n})"),
+            Value::Number(n) => format!("(f32.const {n})"),
             Value::Integer(n) => format!("(i32.const {n})"),
             Value::Bool(n) => Value::Integer(if *n { 1 } else { 0 }).compile(ctx)?,
             Value::String(str) => {

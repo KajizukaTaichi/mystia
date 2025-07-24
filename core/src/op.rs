@@ -138,7 +138,7 @@ impl Node for Op {
                 if typ == "i32" {
                     format!("(i32.rem_s (i32.add (i32.rem_s {lhs} {rhs}) {rhs}) {rhs})")
                 } else {
-                    format!("(f64.sub {lhs} (f64.mul (f64.floor (f64.div {lhs} {rhs})) {rhs}))")
+                    format!("(f32.sub {lhs} (f32.mul (f32.floor (f32.div {lhs} {rhs})) {rhs}))")
                 }
             }
             Op::BNot(lhs) => {
@@ -156,9 +156,9 @@ impl Node for Op {
                     Op::Cast(Expr::Call(String::from("to_num"), vec![lhs.clone()]), rhs)
                         .compile(ctx)?
                 } else if let (Type::Integer, Type::Number) = (lhs.type_infer(ctx)?, &rhs) {
-                    format!("(f64.convert_i32_s {})", lhs.compile(ctx)?,)
+                    format!("(f32.convert_i32_s {})", lhs.compile(ctx)?,)
                 } else if let (Type::Number, Type::Integer) = (lhs.type_infer(ctx)?, &rhs) {
-                    format!("(i32.trunc_f64_s {})", lhs.compile(ctx)?,)
+                    format!("(i32.trunc_f32_s {})", lhs.compile(ctx)?,)
                 } else if matches!(lhs.type_infer(ctx)?, Type::Any)
                     || lhs.type_infer(ctx)?.type_infer(ctx)?.format() == rhs.format()
                 {
