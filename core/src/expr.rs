@@ -122,7 +122,7 @@ impl Node for Expr {
             Expr::Block(block) => block.compile(ctx)?,
             Expr::MemCpy(from) => {
                 let typ = from.type_infer(ctx)?;
-                let size = from.bytes_length(ctx)?.compile(ctx)?;
+                let size = from.object_size(ctx)?.compile(ctx)?;
                 if is_ptr!(typ, ctx) {
                     return Some(format!(
                         "(global.get $allocator) (memory.copy (global.get $allocator) {object} {size}) {}",
@@ -228,7 +228,7 @@ impl Node for Expr {
 }
 
 impl Expr {
-    pub fn bytes_length(&self, ctx: &mut Compiler) -> Option<Expr> {
+    pub fn object_size(&self, ctx: &mut Compiler) -> Option<Expr> {
         match self.type_infer(ctx)? {
             Type::Dict(dict) => Some(Expr::Literal(Value::Integer(dict.len() as i32 * BYTES))),
             Type::Array(_) => Some(Expr::Operator(Box::new(Op::Add(
