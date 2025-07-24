@@ -41,7 +41,7 @@ let node_literal_int(value: int) = memcpy(@{
 
 let node_binop(k: Kind, a: Expr, b: Expr) = memcpy(@{
     kind: k,
-    literal_int: int!,
+    literal_int: 0,
     lhs: a, rhs: b
 });
 
