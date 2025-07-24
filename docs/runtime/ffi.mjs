@@ -17,15 +17,14 @@ export function read(instance, type, value) {
     } else if (type.type == "array") {
         if (value == -1) return null;
         const innerType = type.element;
+        let [result, addr] = [[], value + 4];
         const memoryView = new Uint8Array(instance.exports.mem.buffer);
-        const byte = innerType == "num" ? 8 : 4;
-        let [result, addr] = [[], value];
-        const length = concatBytes(memoryView.slice(addr, addr + 4), false);
+        const length = concatBytes(memoryView.slice(value, addr), false);
         for (let index = 0; index < length; index++) {
-            const sliced = memoryView.slice(addr + 4, addr + 4 + byte);
-            const elem = concatBytes(sliced, byte == 8);
+            const sliced = memoryView.slice(addr, addr + 4);
+            const elem = concatBytes(sliced, innerType == "num");
             result.push(read(instance, innerType, elem));
-            addr += byte;
+            addr += 4;
         }
         return result;
     } else if (type.type == "dict") {
@@ -34,15 +33,8 @@ export function read(instance, type, value) {
         const memoryView = new Uint8Array(instance.exports.mem.buffer);
         for (let [name, field] of Object.entries(type.fields)) {
             const address = pointer + field.offset;
-            const value = (() => {
-                if (field.type == "num") {
-                    const sliced = memoryView.slice(address, address + 8);
-                    return concatBytes(sliced, true);
-                } else {
-                    const sliced = memoryView.slice(address, address + 4);
-                    return concatBytes(sliced);
-                }
-            })();
+            const sliced = memoryView.slice(address, address + 4);
+            const value = concatBytes(sliced, field.type == "num");
             const fieldType = field.type.type == "alias" ? type : field.type;
             result[name] = read(instance, fieldType, value);
         }
@@ -63,44 +55,45 @@ export function write(instance, type, value) {
     else if (type === "num") return value;
     else if (type === "str") {
         const utf8 = new TextEncoder().encode(value + "\0");
-        const ptr = instance.exports.allocator + 0;
+        const ptr = instance.exports.malloc(utf8.length);
         new Uint8Array(buffer, ptr, utf8.length).set(utf8);
-        instance.exports.malloc(utf8.length);
         return ptr;
     } else if (type.type === "array") {
         let array = [];
         for (let elm of value) {
             array.push(write(instance, type.element, elm));
         }
-        const elemSize = type.element === "num" ? 8 : 4;
-        const ptr = instance.exports.allocator + 0;
-        const view = new DataView(buffer, ptr, elemSize * value.length + 4);
-        const topAddr = instance.exports.malloc(4);
-        view.setInt32(topAddr, value.length, true);
+        const size = 4 * value.length + 4;
+        const view = new DataView(buffer, ptr, size);
+        const ptr = instance.exports.malloc(size);
+        let addr = ptr;
+
+        view.setInt32(addr, value.length, true);
+        addr += 4;
+
         for (let elm of array) {
-            const addr = instance.exports.allocator - ptr;
-            const method = elemSize === 8 ? "setFloat64" : "setInt32";
-            instance.exports.malloc(elemSize);
+            const method = type.element === "num" ? "setFloat32" : "setInt32";
             view[method](addr, elm, true);
+            addr += 4;
         }
         return ptr;
     } else if (type.type == "dict") {
         for (let [name, field] of Object.entries(type.fields)) {
             type.fields[name] = write(instance, field.type, value[name]);
         }
-        const ptr = instance.exports.allocator + 0;
+        const ptr = instance.exports.malloc(bytes);
+        let addr = ptr;
+
         for (let [_name, field] of Object.entries(type.fields)) {
-            const bytes = field.type == "num" ? 8 : 4;
-            const addr = instance.exports.allocator - ptr;
-            const method = bytes === 8 ? "setFloat64" : "setInt32";
-            instance.exports.malloc(bytes);
+            const method = field.type == "num" ? "setFloat32" : "setInt32";
             view[method](addr, field, true);
+            addr += 4;
         }
         return ptr;
     }
 }
 
-export function concatBytes(bytes, is_64bit = false) {
+export function concatBytes(bytes, is_float = false) {
     const buffer = new ArrayBuffer(8);
     const view = new DataView(buffer);
     let index = 0;
@@ -108,5 +101,5 @@ export function concatBytes(bytes, is_64bit = false) {
         view.setUint8(index, byte);
         index += 1;
     }
-    return is_64bit ? view.getFloat64(0, true) : view.getInt32(0, true);
+    return is_float ? view.getFloat32(0, true) : view.getInt32(0, true);
 }
