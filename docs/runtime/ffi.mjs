@@ -2,8 +2,10 @@ const BYTES = 4;
 
 export function read(instance, type, value) {
     if (type == null) return undefined;
-    if (type == "int" || type == "num") {
+    if (type == "int") {
         return value;
+    } else if (type == "num") {
+        return Math.round(value * 1e6) / 1e6;
     } else if (type == "bool") {
         return value != 0;
     } else if (type == "str") {
