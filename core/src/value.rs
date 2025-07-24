@@ -67,50 +67,46 @@ impl Node for Value {
                 let mut result: Vec<_> = vec![];
                 let pointer;
 
-                if_ptr!(
-                    inner_type =>
-                    // if inner type is pointer (not primitive)
-                    {
-                        let mut inner_codes = vec![];
-                        for elm in array.clone() {
-                            type_check!(inner_type, elm.type_infer(ctx)?, ctx)?;
-                            inner_codes.push(elm.compile(ctx)?)
-                        }
-                        pointer = ctx.allocator;
-                        result.push(format!(
-                            "(i32.store {address} {length})",
-                            address = Value::Integer(ctx.allocator).compile(ctx)?,
-                            length = Value::Integer(array.len() as i32).compile(ctx)?
-                        ));
-                        ctx.allocator += BYTES;
-                        for code in inner_codes {
-                            result.push(format!(
-                                "({type}.store {address} {code})",
-                                r#type = &inner_type.compile(ctx)?,
-                                address = Value::Integer(ctx.allocator).compile(ctx)?,
-                            ));
-                            ctx.allocator += BYTES;
-                        }
-                    } else {
-                        pointer = ctx.allocator;
-                        result.push(format!(
-                            "(i32.store {address} {length})",
-                            address = Value::Integer(ctx.allocator).compile(ctx)?,
-                            length = Value::Integer(array.len() as i32).compile(ctx)?
-                        ));
-                        ctx.allocator += BYTES;
-                        for elm in array {
-                            type_check!(inner_type, elm.type_infer(ctx)?, ctx)?;
-                            result.push(format!(
-                                "({type}.store {address} {value})",
-                                r#type = &inner_type.compile(ctx)?,
-                                address = Value::Integer(ctx.allocator).compile(ctx)?,
-                                value = elm.compile(ctx)?
-                            ));
-                            ctx.allocator += BYTES
-                        }
+                if is_ptr!(inner_type) {
+                    let mut inner_codes = vec![];
+                    for elm in array.clone() {
+                        type_check!(inner_type, elm.type_infer(ctx)?, ctx)?;
+                        inner_codes.push(elm.compile(ctx)?)
                     }
-                );
+                    pointer = ctx.allocator;
+                    result.push(format!(
+                        "(i32.store {address} {length})",
+                        address = Value::Integer(ctx.allocator).compile(ctx)?,
+                        length = Value::Integer(array.len() as i32).compile(ctx)?
+                    ));
+                    ctx.allocator += BYTES;
+                    for code in inner_codes {
+                        result.push(format!(
+                            "({type}.store {address} {code})",
+                            r#type = &inner_type.compile(ctx)?,
+                            address = Value::Integer(ctx.allocator).compile(ctx)?,
+                        ));
+                        ctx.allocator += BYTES;
+                    }
+                } else {
+                    pointer = ctx.allocator;
+                    result.push(format!(
+                        "(i32.store {address} {length})",
+                        address = Value::Integer(ctx.allocator).compile(ctx)?,
+                        length = Value::Integer(array.len() as i32).compile(ctx)?
+                    ));
+                    ctx.allocator += BYTES;
+                    for elm in array {
+                        type_check!(inner_type, elm.type_infer(ctx)?, ctx)?;
+                        result.push(format!(
+                            "({type}.store {address} {value})",
+                            r#type = &inner_type.compile(ctx)?,
+                            address = Value::Integer(ctx.allocator).compile(ctx)?,
+                            value = elm.compile(ctx)?
+                        ));
+                        ctx.allocator += BYTES
+                    }
+                }
                 format!(
                     "{} {}",
                     Value::Integer(pointer,).compile(ctx)?,
@@ -126,7 +122,9 @@ impl Node for Value {
                 let mut prestore = IndexMap::new();
                 for (name, elm) in dict {
                     let typ = elm.type_infer(ctx)?;
-                    if_ptr!(typ => { prestore.insert(name, elm.compile(ctx)?) });
+                    if is_ptr!(typ) {
+                        prestore.insert(name, elm.compile(ctx)?);
+                    }
                 }
 
                 let pointer = ctx.allocator;
