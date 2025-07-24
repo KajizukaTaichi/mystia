@@ -226,19 +226,13 @@ impl Node for Expr {
 impl Expr {
     pub fn bytes_length(&self, ctx: &mut Compiler) -> Option<Expr> {
         match self.type_infer(ctx)? {
-            Type::Dict(dict) => {
-                let mut size = 0;
-                for (_, (_, field)) in dict {
-                    size += field.type_infer(ctx)?.type_infer(ctx)?.pointer_length()?;
-                }
-                Some(Expr::Literal(Value::Integer(size)))
-            }
-            Type::Array(typ) => Some(Expr::Operator(Box::new(Op::Add(
+            Type::Dict(dict) => Some(Expr::Literal(Value::Integer(dict.len() as i32 * BYTES))),
+            Type::Array(_) => Some(Expr::Operator(Box::new(Op::Add(
                 Expr::Operator(Box::new(Op::Mul(
-                    Expr::Literal(Value::Integer(typ.type_infer(ctx)?.pointer_length()?)),
+                    Expr::Literal(Value::Integer(BYTES)),
                     Expr::MemLoad(Box::new(self.clone()), Type::Integer),
                 ))),
-                Expr::Literal(Value::Integer(4)),
+                Expr::Literal(Value::Integer(BYTES)),
             )))),
             _ => None,
         }
