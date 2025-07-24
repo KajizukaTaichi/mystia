@@ -47,30 +47,30 @@ fn main() {
             println!(" - {}:", name.replace("__", "@"));
             println!("     Locals:");
             for (name, typ) in &func.variables {
-                let typ = typ.decompress_alias(&compiler).format();
+                let typ = typ.compress_alias(&compiler).format();
                 println!("      - {name}: {typ}");
             }
             println!("     Arguments:");
             for (name, typ) in &func.arguments {
-                let typ = typ.decompress_alias(&compiler).format();
+                let typ = typ.compress_alias(&compiler).format();
                 println!("      - {name}: {typ}");
             }
-            let ret = func.returns.decompress_alias(&compiler).format();
+            let ret = func.returns.compress_alias(&compiler).format();
             println!("     Returns: {ret}",);
         }
         println!("Variables:");
         for (name, typ) in &compiler.variable_type {
-            println!(" - {name}: {}", typ.decompress_alias(&compiler).format());
+            println!(" - {name}: {}", typ.compress_alias(&compiler).format());
         }
         println!("Globals:");
         for (name, typ) in &compiler.global_type {
-            println!(" - {name}: {}", typ.decompress_alias(&compiler).format());
+            println!(" - {name}: {}", typ.compress_alias(&compiler).format());
         }
         println!("Aliases:");
         for (name, typ) in &compiler.type_alias {
             println!(" - {name}: {}", typ.format());
         }
-        let returns = compiler.program_return.decompress_alias(&compiler).format();
+        let returns = compiler.program_return.compress_alias(&compiler).format();
         println!("Returns: {returns}");
     }
 
