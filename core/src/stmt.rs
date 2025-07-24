@@ -2,7 +2,7 @@ use crate::*;
 use std::fs::read_to_string;
 
 /// Import function signature: name, arguments, return, alias
-type FuncSig = (String, Vec<(String, Type)>, Type, Option<String>);
+type FuncSig = (String, Vec<(String, Type)>, Type);
 #[derive(Clone, Debug)]
 pub enum Stmt {
     Expr(Expr),
@@ -99,12 +99,7 @@ impl Node for Stmt {
             let parse_sigs = |sigs: &str| {
                 let mut result = Vec::new();
                 for part in tokenize(sigs, &[","], false, true, false)? {
-                    let part = part.trim();
-                    let (sig, alias) = part
-                        .rsplit_once(" as ")
-                        .map(|(sig, alias)| (sig, Some(alias.to_string())))
-                        .unwrap_or((part, None));
-                    let Op::Cast(Expr::Call(name, args), ret_typ) = Op::parse(sig)? else {
+                    let Op::Cast(Expr::Call(name, args), ret_typ) = Op::parse(part.trim())? else {
                         return None;
                     };
                     let mut args_typ = vec![];
@@ -117,7 +112,7 @@ impl Node for Stmt {
                         };
                         args_typ.push((arg_name, arg_typ));
                     }
-                    result.push((name, args_typ, ret_typ, alias));
+                    result.push((name, args_typ, ret_typ));
                 }
                 Some(result)
             };
@@ -254,8 +249,7 @@ impl Node for Stmt {
             },
             Stmt::Try(expr, catch) => expr.compile(ctx).or(catch.compile(ctx))?,
             Stmt::Import(module, funcs) => {
-                for (name, args, ret_typ, alias) in funcs.clone() {
-                    let name = alias.unwrap_or(name.clone());
+                for (name, args, ret_typ) in funcs.clone() {
                     let mut export = name.clone();
                     if let Some(module) = module {
                         export = format!("{module}.{name}")
@@ -383,14 +377,13 @@ impl Node for Stmt {
             }
             Stmt::Try(expr, catch) => expr.type_infer(ctx).or(catch.type_infer(ctx))?,
             Stmt::Import(_module, funcs) => {
-                for (fn_name, args, ret_typ, alias) in funcs {
-                    let import_name = alias.as_ref().unwrap_or(fn_name).clone();
+                for (fn_name, args, ret_typ) in funcs {
                     let mut arg_map = IndexMap::new();
                     for (name, typ) in args.iter() {
                         arg_map.insert(name.to_string(), typ.clone());
                     }
                     ctx.function_type.insert(
-                        import_name,
+                        fn_name.clone(),
                         Function {
                             variables: IndexMap::new(),
                             arguments: arg_map,
