@@ -155,3 +155,22 @@ impl Type {
         }
     }
 }
+
+impl PartialEq for Type {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Type::Integer, Type::Integer) => true,
+            (Type::Number, Type::Number) => true,
+            (Type::Bool, Type::Bool) => true,
+            (Type::String, Type::String) => true,
+            (Type::Void, Type::Void) => true,
+            (Type::Dict(a), Type::Dict(b)) => a == b,
+            (Type::Enum(a), Type::Enum(b)) => a == b,
+            (Type::Array(a), Type::Array(b)) => a == b,
+            (Type::Alias(a), Type::Alias(b)) => a == b,
+            (Type::Any, _) => true,
+            (_, Type::Any) => true,
+            _ => false,
+        }
+    }
+}
