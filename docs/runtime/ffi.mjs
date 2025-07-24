@@ -1,3 +1,5 @@
+const BYTES = 4;
+
 export function read(instance, type, value) {
     if (type == null) return undefined;
     if (type == "int" || type == "num") {
@@ -17,14 +19,14 @@ export function read(instance, type, value) {
     } else if (type.type == "array") {
         if (value == -1) return null;
         const innerType = type.element;
-        let [result, addr] = [[], value + 4];
+        let [result, addr] = [[], value + BYTES];
         const memoryView = new Uint8Array(instance.exports.mem.buffer);
         const length = concatBytes(memoryView.slice(value, addr), false);
         for (let index = 0; index < length; index++) {
-            const sliced = memoryView.slice(addr, addr + 4);
+            const sliced = memoryView.slice(addr, addr + BYTES);
             const elem = concatBytes(sliced, innerType == "num");
             result.push(read(instance, innerType, elem));
-            addr += 4;
+            addr += BYTES;
         }
         return result;
     } else if (type.type == "dict") {
@@ -33,7 +35,7 @@ export function read(instance, type, value) {
         const memoryView = new Uint8Array(instance.exports.mem.buffer);
         for (let [name, field] of Object.entries(type.fields)) {
             const address = pointer + field.offset;
-            const sliced = memoryView.slice(address, address + 4);
+            const sliced = memoryView.slice(address, address + BYTES);
             const value = concatBytes(sliced, field.type == "num");
             const fieldType = field.type.type == "alias" ? type : field.type;
             result[name] = read(instance, fieldType, value);
@@ -63,18 +65,18 @@ export function write(instance, type, value) {
         for (let elm of value) {
             array.push(write(instance, type.element, elm));
         }
-        const size = 4 * value.length + 4;
+        const size = BYTES * value.length + BYTES;
         const view = new DataView(buffer, ptr, size);
         const ptr = instance.exports.malloc(size);
         let addr = ptr;
 
         view.setInt32(addr, value.length, true);
-        addr += 4;
+        addr += BYTES;
 
         for (let elm of array) {
             const method = type.element === "num" ? "setFloat32" : "setInt32";
             view[method](addr, elm, true);
-            addr += 4;
+            addr += BYTES;
         }
         return ptr;
     } else if (type.type == "dict") {
@@ -87,7 +89,7 @@ export function write(instance, type, value) {
         for (let [_name, field] of Object.entries(type.fields)) {
             const method = field.type == "num" ? "setFloat32" : "setInt32";
             view[method](addr, field, true);
-            addr += 4;
+            addr += BYTES;
         }
         return ptr;
     }
