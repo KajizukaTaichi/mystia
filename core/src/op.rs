@@ -229,14 +229,14 @@ impl Node for Op {
                 rhs.type_infer(ctx)
             }
             Op::NullCheck(expr) => {
-                if is_ptr!(expr.type_infer(ctx)?) {
+                if is_ptr!(expr.type_infer(ctx)?, ctx) {
                     Some(Type::Bool)
                 } else {
                     return None;
                 }
             }
             Op::Nullable(typ) => {
-                if is_ptr!(typ) {
+                if is_ptr!(typ, ctx) {
                     Some(typ.clone())
                 } else {
                     return None;
