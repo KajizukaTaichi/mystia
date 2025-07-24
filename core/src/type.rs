@@ -24,11 +24,8 @@ impl Node for Type {
             "bool" => Some(Type::Bool),
             "str" => Some(Type::String),
             "void" => Some(Type::Void),
-            _ => {
-                let source = source.trim().to_string();
-                if !source.is_ascii() {
-                    return None;
-                }
+            source => {
+                let source = source.trim();
                 if source.starts_with("[") && source.ends_with("]") {
                     let source = source.get(1..source.len() - 1)?.trim();
                     Some(Type::Array(Box::new(Type::parse(source)?)))
@@ -37,11 +34,12 @@ impl Node for Type {
                     let mut result = IndexMap::new();
                     for line in tokenize(source, &[","], false, true, false)? {
                         let (name, value) = line.split_once(":")?;
-                        if !is_identifier(name) {
+                        let name = name.trim().to_string();
+                        if !is_identifier(&name) {
                             return None;
                         };
                         let typ = Type::parse(value)?;
-                        result.insert(name.trim().to_string(), (0, typ.clone()));
+                        result.insert(name, (0, typ.clone()));
                     }
                     Some(Type::Dict(result))
                 } else if source.starts_with("(") && source.ends_with(")") {
@@ -53,7 +51,7 @@ impl Node for Type {
                     };
                     Some(Type::Enum(result))
                 } else if is_identifier(&source) {
-                    Some(Type::Alias(source))
+                    Some(Type::Alias(source.to_string()))
                 } else {
                     None
                 }
