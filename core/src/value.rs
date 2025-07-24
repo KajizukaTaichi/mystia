@@ -67,7 +67,7 @@ impl Node for Value {
                 let mut result: Vec<_> = vec![];
                 let pointer;
 
-                if is_ptr!(inner_type) {
+                if is_ptr!(inner_type, ctx) {
                     let mut inner_codes = vec![];
                     for elm in array.clone() {
                         type_check!(inner_type, elm.type_infer(ctx)?, ctx)?;
@@ -122,7 +122,7 @@ impl Node for Value {
                 let mut prestore = IndexMap::new();
                 for (name, elm) in dict {
                     let typ = elm.type_infer(ctx)?;
-                    if is_ptr!(typ) {
+                    if is_ptr!(typ, ctx) {
                         prestore.insert(name, elm.compile(ctx)?);
                     }
                 }
