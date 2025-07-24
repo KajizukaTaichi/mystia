@@ -123,7 +123,7 @@ impl Node for Expr {
             Expr::MemCpy(from) => {
                 let typ = from.type_infer(ctx)?;
                 let size = from.bytes_length(ctx)?.compile(ctx)?;
-                if is_ptr!(typ) {
+                if is_ptr!(typ, ctx) {
                     return Some(format!(
                         "(global.get $allocator) (memory.copy (global.get $allocator) {object} {size}) {}",
                         format!("(global.set $allocator (i32.add (global.get $allocator) {size}))"),
