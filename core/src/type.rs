@@ -32,6 +32,7 @@ impl Node for Type {
                 } else if source.starts_with("@{") && source.ends_with("}") {
                     let source = source.get(2..source.len() - 1)?.trim();
                     let mut result = IndexMap::new();
+                    let mut offset = 0;
                     for line in tokenize(source, &[","], false, true, false)? {
                         let (name, value) = line.split_once(":")?;
                         let name = name.trim().to_string();
@@ -39,7 +40,8 @@ impl Node for Type {
                             return None;
                         };
                         let typ = Type::parse(value)?;
-                        result.insert(name, (0, typ.clone()));
+                        result.insert(name, (offset, typ.clone()));
+                        offset += BYTES;
                     }
                     Some(Type::Dict(result))
                 } else if source.starts_with("(") && source.ends_with(")") {
