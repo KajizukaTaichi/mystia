@@ -80,8 +80,11 @@ macro_rules! compile_args_type {
 
 #[macro_export]
 macro_rules! is_ptr {
-    ($typ: expr ) => {
-        matches!($typ, Type::String | Type::Array(_) | Type::Dict(_))
+    ($typ: expr, $ctx: expr) => {
+        matches!(
+            $typ.type_infer($ctx)?,
+            Type::String | Type::Array(_) | Type::Dict(_)
+        )
     };
 }
 
