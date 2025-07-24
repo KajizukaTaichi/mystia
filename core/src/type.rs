@@ -24,6 +24,7 @@ impl Node for Type {
             "bool" => Some(Type::Bool),
             "str" => Some(Type::String),
             "void" => Some(Type::Void),
+            "any" => Some(Type::Any),
             source => {
                 let source = source.trim();
                 if source.starts_with("[") && source.ends_with("]") {
