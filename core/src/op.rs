@@ -60,9 +60,9 @@ impl Node for Op {
             })
         };
         let unaryopergen = || {
-            let oper = token_list.first()?.trim();
+            let op = token_list.first()?.trim();
             let token = &join!(token_list.get(1..)?);
-            Some(match oper {
+            Some(match op {
                 "~" => Op::BNot(Expr::parse(token)?),
                 "!" => Op::LNot(Expr::parse(token)?),
                 "-" => Op::Sub(
@@ -73,9 +73,10 @@ impl Node for Op {
             })
         };
         let suffixopergen = || {
-            let oper = token_list.last()?.trim();
+            let op = token_list.last()?.trim();
             let token = &join!(token_list.get(..token_list.len() - 1)?);
-            Some(match oper {
+            dbg!(token, Expr::parse(token));
+            Some(match op {
                 "?" => Op::NullCheck(Expr::parse(token)?),
                 "!" => Op::Nullable(Type::parse(token)?),
                 _ => return None,
