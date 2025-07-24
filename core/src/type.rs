@@ -13,7 +13,6 @@ pub enum Type {
     Enum(Enum),
     Alias(String),
     Void,
-    Any,
 }
 
 impl Node for Type {
@@ -24,7 +23,6 @@ impl Node for Type {
             "bool" => Some(Type::Bool),
             "str" => Some(Type::String),
             "void" => Some(Type::Void),
-            "any" => Some(Type::Any),
             source => {
                 let source = source.trim();
                 if source.starts_with("[") && source.ends_with("]") {
@@ -152,7 +150,6 @@ impl Type {
             Type::Enum(e) => format!("( {} )", e.join(" | ")),
             Type::Array(typ) => format!("[{}]", typ.format()),
             Type::Alias(name) => name.to_string(),
-            Type::Any => "any".to_string(),
         }
     }
 }
@@ -169,8 +166,6 @@ impl PartialEq for Type {
             (Type::Enum(a), Type::Enum(b)) => a == b,
             (Type::Array(a), Type::Array(b)) => a == b,
             (Type::Alias(a), Type::Alias(b)) => a == b,
-            (Type::Any, _) => true,
-            (_, Type::Any) => true,
             _ => false,
         }
     }
