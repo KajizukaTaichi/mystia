@@ -160,7 +160,7 @@ impl Node for Op {
                 } else if let (Type::Number, Type::Integer) = (lhs.type_infer(ctx)?, &rhs) {
                     format!("(i32.trunc_f32_s {})", lhs.compile(ctx)?,)
                 } else if matches!(lhs.type_infer(ctx)?, Type::Any)
-                    || lhs.type_infer(ctx)?.type_infer(ctx)?.format() == rhs.format()
+                    || lhs.type_infer(ctx)?.type_infer(ctx)? == rhs
                 {
                     lhs.compile(ctx)?
                 } else {
