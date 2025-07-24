@@ -227,22 +227,11 @@ impl Expr {
     pub fn bytes_length(&self, ctx: &mut Compiler) -> Option<Expr> {
         match self.type_infer(ctx)? {
             Type::Dict(dict) => {
-                let mut result = Expr::Literal(Value::Integer(
-                    dict.first()?.1.1.type_infer(ctx)?.pointer_length()?,
-                ));
-                for i in dict
-                    .iter()
-                    .skip(1)
-                    .map(|(_, (_, x))| {
-                        x.type_infer(ctx)
-                            .and_then(|typ| typ.type_infer(ctx)?.pointer_length())
-                    })
-                    .collect::<Option<Vec<i32>>>()?
-                {
-                    result =
-                        Expr::Operator(Box::new(Op::Add(result, Expr::Literal(Value::Integer(i)))));
+                let mut size = 0;
+                for (_, (_, field)) in dict {
+                    size += field.type_infer(ctx)?.type_infer(ctx)?.pointer_length()?;
                 }
-                Some(result)
+                Some(Expr::Literal(Value::Integer(size)))
             }
             Type::Array(typ) => Some(Expr::Operator(Box::new(Op::Add(
                 Expr::Operator(Box::new(Op::Mul(
