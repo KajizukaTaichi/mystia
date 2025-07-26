@@ -77,8 +77,7 @@ export function write(instance, type, value) {
         addr += BYTES;
 
         for (let elm of array) {
-            const method = reader(type.element);
-            view[method](addr, elm, true);
+            view[reader(type.element)](addr, elm, true);
             addr += BYTES;
         }
         return ptr;
@@ -90,8 +89,7 @@ export function write(instance, type, value) {
         let addr = ptr;
 
         for (let [_name, field] of Object.entries(type.fields)) {
-            const method = reader(type.element);
-            view[method](addr, field, true);
+            view[reader(type.element)](addr, field, true);
             addr += BYTES;
         }
         return ptr;
