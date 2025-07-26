@@ -230,6 +230,8 @@ impl Node for Op {
                 if is_ptr!(expr.type_infer(ctx)?, ctx) {
                     Some(Type::Bool)
                 } else {
+                    let errmsg = format!("can't null-check primitive typed value");
+                    ctx.occurred_error = Some(errmsg);
                     return None;
                 }
             }
@@ -237,6 +239,8 @@ impl Node for Op {
                 if is_ptr!(typ, ctx) {
                     Some(typ.clone())
                 } else {
+                    let errmsg = format!("primitive types are not nullable");
+                    ctx.occurred_error = Some(errmsg);
                     return None;
                 }
             }
