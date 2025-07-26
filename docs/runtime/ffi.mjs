@@ -53,7 +53,7 @@ export function read(instance, type, value) {
 }
 
 export function write(instance, type, value) {
-    const method = (type) => (type === "num" ? "setFloat32" : "setInt32");
+    const reader = (type) => (type === "num" ? "setFloat32" : "setInt32");
     const buffer = instance.exports.mem.buffer;
     if (type == null) return null;
     else if (type === "int") return value;
@@ -77,7 +77,7 @@ export function write(instance, type, value) {
         addr += BYTES;
 
         for (let elm of array) {
-            const method = method(type.element);
+            const method = reader(type.element);
             view[method](addr, elm, true);
             addr += BYTES;
         }
@@ -90,7 +90,7 @@ export function write(instance, type, value) {
         let addr = ptr;
 
         for (let [_name, field] of Object.entries(type.fields)) {
-            const method = method(type.element);
+            const method = reader(type.element);
             view[method](addr, field, true);
             addr += BYTES;
         }
