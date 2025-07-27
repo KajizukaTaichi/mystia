@@ -9,7 +9,7 @@ pub enum Expr {
     Index(Box<Expr>, Box<Expr>),
     Field(Box<Expr>, String),
     Block(Block),
-    MemCpy(Box<Expr>),
+    Clone(Box<Expr>),
     Peek(Box<Expr>, Type),
 }
 
@@ -46,10 +46,10 @@ impl Node for Expr {
             let args = args.collect::<Option<Vec<_>>>()?;
             match Expr::parse(&name)? {
                 Expr::Variable(name) if name == "memcpy" => {
-                    Some(Expr::MemCpy(Box::new(args.first()?.clone())))
+                    Some(Expr::Clone(Box::new(args.first()?.clone())))
                 }
                 Expr::Variable(name) => Some(Expr::Call(name, args)),
-                Expr::Field(obj, name) if name == "memcpy" => Some(Expr::MemCpy(obj)),
+                Expr::Field(obj, name) if name == "memcpy" => Some(Expr::Clone(obj)),
                 Expr::Field(obj, name) => Some(Expr::Call(name, [vec![*obj], args].concat())),
                 _ => None,
             }
@@ -120,7 +120,7 @@ impl Node for Expr {
                 Expr::Peek(Box::new(addr), typ).compile(ctx)?
             }
             Expr::Block(block) => block.compile(ctx)?,
-            Expr::MemCpy(from) => {
+            Expr::Clone(from) => {
                 let size = from.object_size(ctx)?.compile(ctx)?;
                 format!(
                     "(memory.copy (global.get $allocator) {object} {size}) (call $malloc {size})",
@@ -213,7 +213,7 @@ impl Node for Expr {
                 }
             }
             Expr::Block(block) => block.type_infer(ctx)?,
-            Expr::MemCpy(from) => {
+            Expr::Clone(from) => {
                 let typ = from.type_infer(ctx)?;
                 if is_ptr!(typ, ctx) {
                     typ
