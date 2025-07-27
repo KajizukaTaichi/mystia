@@ -10,11 +10,9 @@ export function read(instance, type, value) {
         return value != 0;
     } else if (type == "str") {
         if (value == -1) return null;
-        const memoryView = new Uint8Array(instance.exports.mem.buffer);
         let stringLength = value;
-        while (memoryView[stringLength] != 0) {
-            stringLength++;
-        }
+        const memoryView = new Uint8Array(instance.exports.mem.buffer);
+        while (memoryView[stringLength] != 0) stringLength++;
         const stringBytes = memoryView.slice(value, stringLength);
         const textDecoder = new TextDecoder("utf-8");
         return textDecoder.decode(stringBytes);
