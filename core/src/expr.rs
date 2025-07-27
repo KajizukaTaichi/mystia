@@ -10,7 +10,7 @@ pub enum Expr {
     Field(Box<Expr>, String),
     Block(Block),
     MemCpy(Box<Expr>),
-    MemLoad(Box<Expr>, Type),
+    Peek(Box<Expr>, Type),
 }
 
 impl Node for Expr {
@@ -108,7 +108,7 @@ impl Node for Expr {
                     return None;
                 };
                 let addr = Box::new(address_calc!(array, index, typ));
-                Expr::MemLoad(Box::new(Expr::Operator(addr)), *typ).compile(ctx)?
+                Expr::Peek(Box::new(Expr::Operator(addr)), *typ).compile(ctx)?
             }
             Expr::Field(expr, key) => {
                 let typ = expr.type_infer(ctx)?.type_infer(ctx)?;
@@ -117,7 +117,7 @@ impl Node for Expr {
                 };
                 let (offset, typ) = dict.get(key)?.clone();
                 let addr = offset_calc!(expr, offset);
-                Expr::MemLoad(Box::new(addr), typ).compile(ctx)?
+                Expr::Peek(Box::new(addr), typ).compile(ctx)?
             }
             Expr::Block(block) => block.compile(ctx)?,
             Expr::MemCpy(from) => {
@@ -127,7 +127,7 @@ impl Node for Expr {
                     object = from.compile(ctx)?,
                 )
             }
-            Expr::MemLoad(expr, typ) => {
+            Expr::Peek(expr, typ) => {
                 format!("({}.load {})", typ.compile(ctx)?, expr.compile(ctx)?)
             }
         })
@@ -223,7 +223,7 @@ impl Node for Expr {
                     return None;
                 }
             }
-            Expr::MemLoad(_, typ) => typ.clone(),
+            Expr::Peek(_, typ) => typ.clone(),
         })
     }
 }
@@ -235,7 +235,7 @@ impl Expr {
             Type::Array(_) => Some(Expr::Operator(Box::new(Op::Add(
                 Expr::Operator(Box::new(Op::Mul(
                     Expr::Literal(Value::Integer(BYTES)),
-                    Expr::MemLoad(Box::new(self.clone()), Type::Integer),
+                    Expr::Peek(Box::new(self.clone()), Type::Integer),
                 ))),
                 Expr::Literal(Value::Integer(BYTES)),
             )))),
