@@ -121,19 +121,11 @@ impl Node for Expr {
             }
             Expr::Block(block) => block.compile(ctx)?,
             Expr::MemCpy(from) => {
-                let typ = from.type_infer(ctx)?;
                 let size = from.object_size(ctx)?.compile(ctx)?;
-                if is_ptr!(typ, ctx) {
-                    return Some(format!(
-                        "(global.get $allocator) (memory.copy (global.get $allocator) {object} {size}) {}",
-                        format!("(global.set $allocator (i32.add (global.get $allocator) {size}))"),
-                        object = from.compile(ctx)?,
-                    ));
-                } else {
-                    ctx.occurred_error =
-                        Some("can't memory copy primitive typed value".to_string());
-                    return None;
-                }
+                format!(
+                    "(memory.copy (global.get $allocator) {object} {size}) (call $malloc {size})",
+                    object = from.compile(ctx)?,
+                )
             }
             Expr::MemLoad(expr, typ) => {
                 format!("({}.load {})", typ.compile(ctx)?, expr.compile(ctx)?)
@@ -221,7 +213,16 @@ impl Node for Expr {
                 }
             }
             Expr::Block(block) => block.type_infer(ctx)?,
-            Expr::MemCpy(from) => from.type_infer(ctx)?,
+            Expr::MemCpy(from) => {
+                let typ = from.type_infer(ctx)?;
+                if is_ptr!(typ, ctx) {
+                    typ
+                } else {
+                    let errmsg = "can't memory copy primitive typed value";
+                    ctx.occurred_error = Some(errmsg.to_string());
+                    return None;
+                }
+            }
             Expr::MemLoad(_, typ) => typ.clone(),
         })
     }
