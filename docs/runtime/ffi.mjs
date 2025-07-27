@@ -63,29 +63,23 @@ export function write(instance, type, value) {
         return ptr;
     } else if (type.type == "array") {
         let array = [];
-        for (let elm of value) {
-            array.push(write(instance, type.element, elm));
-        }
+        for (let elm of value) array.push(write(instance, type.element, elm));
         const size = BYTES * value.length + BYTES;
         const ptr = instance.exports.malloc(size);
         const view = new DataView(buffer, ptr, size);
         let addr = 0;
-
         view.setInt32(addr, value.length, true);
         addr += BYTES;
-
         for (let elm of array) {
             view[reader(type.element)](addr, elm, true);
             addr += BYTES;
         }
         return ptr;
     } else if (type.type == "dict") {
-        for (let [name, field] of Object.entries(type.fields)) {
+        for (let [name, field] of Object.entries(type.fields))
             type.fields[name] = write(instance, field.type, value[name]);
-        }
         const ptr = instance.exports.malloc(field.length * BYTES);
         let addr = ptr;
-
         for (let [_name, field] of Object.entries(type.fields)) {
             view[reader(type.element)](addr, field, true);
             addr += BYTES;
