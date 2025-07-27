@@ -100,7 +100,7 @@ impl Compiler {
             memcpy = &format!(
                 "(global $allocator (export \"allocator\") (mut i32) (i32.const {allocator})) {}",
                 format!(
-                    "(func (export \"malloc\") (param $size i32) (result i32) (global.get $allocator) {}",
+                    "(func $malloc (export \"malloc\") (param $size i32) (result i32) (global.get $allocator) {}",
                     "(global.set $allocator (i32.add (global.get $allocator) (local.get $size))))"
                 ),
                 allocator = self.allocator
