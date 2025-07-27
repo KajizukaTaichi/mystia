@@ -38,5 +38,7 @@ export async function mystia(code, customModules = {}) {
     const { instance } = await WebAssembly.instantiate(wab, importObject);
     Object.values(instances).forEach((inst) => inst.set_wasm(instance));
     const raw = instance.exports._start();
-    return read(instance, returnType, raw);
+    if (returnType != null) {
+        return read(instance, returnType, raw);
+    }
 }
