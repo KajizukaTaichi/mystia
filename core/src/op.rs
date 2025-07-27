@@ -162,9 +162,6 @@ impl Node for Op {
                 } else if lhs.type_infer(ctx)?.type_infer(ctx)? == rhs {
                     lhs.compile(ctx)?
                 } else {
-                    let [lhs, rhs] = [lhs.type_infer(ctx)?.format(), rhs.format()];
-                    let msg = format!("type {lhs} can't convert to {rhs}");
-                    ctx.occurred_error = Some(msg);
                     return None;
                 }
             }
@@ -215,8 +212,21 @@ impl Node for Op {
                 Some(Type::Bool)
             }
             Op::Cast(lhs, rhs) => {
-                lhs.type_infer(ctx)?;
-                rhs.type_infer(ctx)
+                let lhs = lhs.type_infer(ctx)?;
+                let rhs = rhs.type_infer(ctx)?;
+                match (lhs.clone(), rhs.clone()) {
+                    (Type::Number, Type::Integer) => Some(Type::Integer),
+                    (Type::Integer, Type::Number) => Some(Type::Number),
+                    (Type::String, Type::Integer | Type::Number) => Some(rhs),
+                    (Type::Integer | Type::Number, Type::String) => Some(Type::String),
+                    (lhs, rhs) if lhs == rhs => Some(lhs),
+                    _ => {
+                        let [lhs, rhs] = [lhs.format(), rhs.format()];
+                        let msg = format!("type {lhs} can't convert to {rhs}");
+                        ctx.occurred_error = Some(msg);
+                        return None;
+                    }
+                }
             }
             Op::BNot(lhs) => {
                 type_check!(lhs, Type::Integer, ctx)?;
