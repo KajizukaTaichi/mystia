@@ -53,17 +53,17 @@ export function read(instance, type, value) {
 }
 
 export function write(instance, type, value) {
-    const reader = (type) => (type === "num" ? "setFloat32" : "setInt32");
+    const reader = (type) => (type == "num" ? "setFloat32" : "setInt32");
     const buffer = instance.exports.mem.buffer;
     if (type == null) return null;
-    else if (type === "int") return value;
-    else if (type === "num") return value;
-    else if (type === "str") {
+    else if (type == "int") return value;
+    else if (type == "num") return value;
+    else if (type == "str") {
         const utf8 = new TextEncoder().encode(value + "\0");
         const ptr = instance.exports.malloc(utf8.length);
         new Uint8Array(buffer, ptr, utf8.length).set(utf8);
         return ptr;
-    } else if (type.type === "array") {
+    } else if (type.type == "array") {
         let array = [];
         for (let elm of value) {
             array.push(write(instance, type.element, elm));
