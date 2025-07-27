@@ -45,7 +45,22 @@ pub fn expand_local(ctx: &mut Compiler) -> Option<String> {
         ctx.variable_type
             .clone()
             .iter()
-            .map(|(name, typ)| { Some(format!("(local ${name} {})", typ.compile(ctx)?)) })
+            .map(|(name, typ)| Some(format!("(local ${name} {})", typ.compile(ctx)?)))
+            .collect::<Option<Vec<String>>>()?
+    ))
+}
+
+pub fn expand_global(ctx: &mut Compiler) -> Option<String> {
+    Some(join!(
+        ctx.global_type
+            .clone()
+            .iter()
+            .map(|(name, typ)| {
+                Some(format!(
+                    "(global ${name} (mut {typ}) ({typ}.const 0))",
+                    typ = typ.compile(ctx)?
+                ))
+            })
             .collect::<Option<Vec<String>>>()?
     ))
 }

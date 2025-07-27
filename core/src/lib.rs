@@ -7,8 +7,10 @@ mod r#type;
 mod utils;
 mod value;
 
+use crate::utils::expand_global;
 use indexmap::IndexMap;
 use unicode_xid::UnicodeXID;
+
 pub use {
     block::Block,
     expr::Expr,
@@ -96,6 +98,8 @@ impl Compiler {
             import = join!(self.import_code),
             strings = join!(self.static_data),
             declare = join!(self.declare_code),
+            global = expand_global(self)?,
+            locals = expand_local(self)?,
             memory = "(memory $mem (export \"mem\") 64)",
             memcpy = &format!(
                 "(global $allocator (export \"allocator\") (mut i32) (i32.const {allocator})) {}",
@@ -105,18 +109,6 @@ impl Compiler {
                 ),
                 allocator = self.allocator
             ),
-            global = join!(
-                self.global_type
-                    .iter()
-                    .map(|(name, typ)| {
-                        Some(format!(
-                            "(global ${name} (mut {typ}) ({typ}.const 0))",
-                            typ = typ.compile(&mut self.clone())?
-                        ))
-                    })
-                    .collect::<Option<Vec<String>>>()?
-            ),
-            locals = expand_local(self)?,
         ))
     }
 }
