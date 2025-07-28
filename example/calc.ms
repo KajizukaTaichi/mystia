@@ -13,11 +13,11 @@ type Kind = ( Add | Sub | Mul | Div | LiteralInt );
 type Expr = @{ kind: Kind, literal_int: int, lhs: Expr, rhs: Expr };
 
 let compile(expr: Expr): str = {
-    macro const(typ, value) = "(" + typ + ".const " + (value: str) + ")";
+    macro const(typ, value) = f"({typ}.const {value})";
     macro binop(opname) = {
         let lhs = expr.lhs.compile();
         let rhs = expr.rhs.compile();
-        "(i32." + opname + " " + lhs + " " + rhs + ")"
+        f"(i32.{opname} {lhs} {rhs})"
     };
 
     if expr.kind == Kind#LiteralInt then {
