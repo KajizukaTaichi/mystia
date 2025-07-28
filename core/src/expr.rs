@@ -28,7 +28,7 @@ impl Node for Expr {
             let mut result = None;
             for elm in str {
                 if elm.starts_with("{") && elm.ends_with("}") {
-                    let elm = token.get(1..token.len() - 1)?.trim();
+                    let elm = elm.get(1..elm.len() - 1)?.trim();
                     let block = Expr::Operator(Box::new(Op::Cast(
                         Expr::Block(Block::parse(elm)?),
                         Type::String,
@@ -47,6 +47,7 @@ impl Node for Expr {
                     })
                 }
             }
+            dbg!(&result);
             result
         // Prioritize expression `(expr)`
         } else if token.starts_with("(") && token.ends_with(")") {
