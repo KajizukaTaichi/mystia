@@ -24,8 +24,7 @@ impl Node for Expr {
             Some(Expr::Literal(literal))
         // Formatted string (f-string)
         } else if token.starts_with("f\"") && token.ends_with('"') {
-            let str = token.get(2..token.len() - 1)?.trim();
-            let str = str_format(str)?;
+            let str = str_format(token.get(2..token.len() - 1)?)?;
             let mut result = None;
             for elm in str {
                 if elm.starts_with("{") && elm.ends_with("}") {
