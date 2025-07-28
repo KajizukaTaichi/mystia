@@ -8,7 +8,7 @@ let a = randint(1, 9);
 let b = randint(1, 9);
 let sum = a * b;
 
-let question = (b: str) + " x " + (a: str) + " = ?";
+let question = f"{b} x {a} = ?";
 
 let result = prompt(question): int == sum;
-if result then "Perfect!" else "Currect answer: " + (sum: str)
+if result then "Perfect!" else f"Currect answer: {sum}"
