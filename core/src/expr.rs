@@ -22,6 +22,32 @@ impl Node for Expr {
         // Literal value
         } else if let Some(literal) = Value::parse(&token) {
             Some(Expr::Literal(literal))
+        } else if token.starts_with("f\"") && token.ends_with('"') {
+            let str = token.get(2..token.len() - 1)?.trim();
+            let str = str_format(str)?;
+            let mut result = None;
+            for elm in str {
+                if elm.starts_with("{") && elm.ends_with("}") {
+                    let elm = token.get(1..token.len() - 1)?.trim();
+                    let block = Expr::Operator(Box::new(Op::Cast(
+                        Expr::Block(Block::parse(elm)?),
+                        Type::String,
+                    )));
+                    result = Some(if let Some(result) = result {
+                        Expr::Operator(Box::new(Op::Add(result, block)))
+                    } else {
+                        block
+                    });
+                } else {
+                    let str = Expr::Literal(Value::String(elm));
+                    result = Some(if let Some(result) = result {
+                        Expr::Operator(Box::new(Op::Add(result, str)))
+                    } else {
+                        str
+                    })
+                }
+            }
+            result
         // Prioritize expression `(expr)`
         } else if token.starts_with("(") && token.ends_with(")") {
             let token = token.get(1..token.len() - 1)?.trim();
