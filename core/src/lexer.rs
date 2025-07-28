@@ -141,12 +141,7 @@ pub fn str_format(input: &str) -> Option<Vec<String>> {
 
     for c in input.chars() {
         if is_escape {
-            current_token.push(match c {
-                'n' => '\n',
-                't' => '\t',
-                'r' => '\r',
-                _ => c,
-            });
+            current_token.push(c);
             is_escape = false;
         } else {
             match c {
