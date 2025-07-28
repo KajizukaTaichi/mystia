@@ -22,6 +22,7 @@ impl Node for Expr {
         // Literal value
         } else if let Some(literal) = Value::parse(&token) {
             Some(Expr::Literal(literal))
+        // Formatted string (f-string)
         } else if token.starts_with("f\"") && token.ends_with('"') {
             let str = token.get(2..token.len() - 1)?.trim();
             let str = str_format(str)?;
