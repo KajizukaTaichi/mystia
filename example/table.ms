@@ -6,7 +6,7 @@ let i = 1;
 while i < 10 loop {
     let j = 1;
     while j < 10 loop {
-        print((i: str) + " x " + (j: str) + " = " + (i * j: str));
+        print(i: str + " x " + (j: str) + " = " + (i * j: str));
         let j + 1
     };
     let i + 1
