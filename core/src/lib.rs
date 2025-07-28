@@ -14,11 +14,11 @@ use unicode_xid::UnicodeXID;
 pub use {
     block::Block,
     expr::Expr,
-    lexer::tokenize,
+    lexer::{is_identifier, str_format, tokenize},
     op::Op,
     stmt::Stmt,
     r#type::{Dict, Enum, Type},
-    utils::{BYTES, OPERATOR, RESERVED, SPACE, expand_local, include_letter, is_identifier},
+    utils::{BYTES, OPERATOR, RESERVED, SPACE, expand_local},
     value::Value,
 };
 
