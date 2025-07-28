@@ -11,35 +11,6 @@ pub const RESERVED: [&str; 15] = [
     "as", "try", "catch",
 ];
 
-pub fn is_identifier(name: &str) -> bool {
-    if name.is_empty() {
-        return false;
-    }
-    let mut chars = name.chars();
-    let first_char = chars.next().unwrap();
-    if !UnicodeXID::is_xid_start(first_char) {
-        return false;
-    }
-    if !chars.all(UnicodeXID::is_xid_continue) {
-        return false;
-    }
-    if RESERVED.contains(&name) {
-        return false;
-    }
-    if !name.is_ascii() {
-        return false;
-    }
-    true
-}
-
-pub fn include_letter(query: &str, chars: &Vec<String>, idx: usize) -> bool {
-    chars
-        .clone()
-        .get(idx..idx + query.chars().count())
-        .map(|i| query == i.concat())
-        .unwrap_or(false)
-}
-
 pub fn expand_local(ctx: &mut Compiler) -> Option<String> {
     Some(join!(
         ctx.variable_type
