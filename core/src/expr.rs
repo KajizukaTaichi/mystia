@@ -83,6 +83,7 @@ impl Node for Expr {
         // Dictionary access `dict.field`
         } else if token.contains(".") {
             let (dict, field) = token.rsplit_once(".")?;
+            let field = field.trim();
             if !is_identifier(field) {
                 return None;
             };
