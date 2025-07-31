@@ -55,7 +55,7 @@ impl Node for Value {
         Some(match self {
             Value::Number(n) => format!("(f32.const {n})"),
             Value::Integer(n) => format!("(i32.const {n})"),
-            Value::Bool(n) => Value::Integer(if *n { 1 } else { 0 }).compile(ctx)?,
+            Value::Bool(n) => value(if *n { 1 } else { 0 }).compile(ctx)?,
             Value::String(str) => {
                 let result = value(ctx.allocator).compile(ctx)?;
                 let code = format!(r#"(data {result} "{str}\00")"#);
@@ -121,7 +121,7 @@ impl Node for Value {
                     result.push(format!(
                         "({typ}.store {address} {value})",
                         typ = typ.clone().compile(ctx)?,
-                        address = Value::Integer(ctx.allocator).compile(ctx)?,
+                        address = value(ctx.allocator).compile(ctx)?,
                         value = prestore.get(name).cloned().or_else(|| elm.compile(ctx))?
                     ));
                     ctx.allocator += BYTES;
