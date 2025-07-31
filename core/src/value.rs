@@ -81,9 +81,9 @@ impl Node for Value {
                     ctx.allocator += BYTES;
                     for code in inner_codes {
                         result.push(format!(
-                            "({typ}.store {address} {code})",
+                            "({typ}.store {addr} {code})",
                             typ = inner_type.compile(ctx)?,
-                            address = value(ctx.allocator).compile(ctx)?,
+                            addr = value(ctx.allocator).compile(ctx)?,
                         ));
                         ctx.allocator += BYTES;
                     }
@@ -119,9 +119,9 @@ impl Node for Value {
                 for (name, elm) in dict {
                     let typ = elm.type_infer(ctx)?;
                     result.push(format!(
-                        "({typ}.store {address} {value})",
+                        "({typ}.store {addr} {value})",
                         typ = typ.clone().compile(ctx)?,
-                        address = value(ctx.allocator).compile(ctx)?,
+                        addr = value(ctx.allocator).compile(ctx)?,
                         value = prestore.get(name).cloned().or_else(|| elm.compile(ctx))?
                     ));
                     ctx.allocator += BYTES;
