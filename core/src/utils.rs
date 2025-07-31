@@ -113,7 +113,7 @@ macro_rules! compile_compare {
 #[macro_export]
 macro_rules! address_calc {
     ($array: expr, $index: expr, $typ: expr) => {
-        Op::Add(
+        Expr::Operator(Box::new(Op::Add(
             Expr::Operator(Box::new(Op::Add(
                 Expr::Literal(Value::Integer(BYTES)),
                 Expr::Operator(Box::new(Op::Transmute(*$array.clone(), Type::Integer))),
@@ -125,7 +125,7 @@ macro_rules! address_calc {
                 ))),
                 Expr::Literal(Value::Integer(BYTES)),
             ))),
-        )
+        )))
     };
 }
 
