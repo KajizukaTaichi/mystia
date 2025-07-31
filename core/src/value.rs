@@ -119,8 +119,8 @@ impl Node for Value {
                 for (name, elm) in dict {
                     let typ = elm.type_infer(ctx)?;
                     result.push(format!(
-                        "({type}.store {address} {value})",
-                        r#type = typ.clone().compile(ctx)?,
+                        "({typ}.store {address} {value})",
+                        typ = typ.clone().compile(ctx)?,
                         address = Value::Integer(ctx.allocator).compile(ctx)?,
                         value = prestore.get(name).cloned().or_else(|| elm.compile(ctx))?
                     ));
