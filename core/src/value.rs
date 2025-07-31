@@ -51,6 +51,7 @@ impl Node for Value {
     }
 
     fn compile(&self, ctx: &mut Compiler) -> Option<String> {
+        let value = |n| Box::new(Expr::Literal(Value::Integer(n)));
         Some(match self {
             Value::Number(n) => format!("(f32.const {n})"),
             Value::Integer(n) => format!("(i32.const {n})"),
@@ -91,28 +92,17 @@ impl Node for Value {
                     }
                 } else {
                     pointer = ctx.allocator;
-                    result.push(format!(
-                        "(i32.store {address} {length})",
-                        address = Value::Integer(ctx.allocator).compile(ctx)?,
-                        length = Value::Integer(array.len() as i32).compile(ctx)?
-                    ));
+                    let poke = Expr::Poke(value(ctx.allocator), value(array.len() as i32));
+                    result.push(poke.compile(ctx)?);
                     ctx.allocator += BYTES;
                     for elm in array {
                         type_check!(inner_type, elm.type_infer(ctx)?, ctx)?;
-                        result.push(format!(
-                            "({type}.store {address} {value})",
-                            r#type = &inner_type.compile(ctx)?,
-                            address = Value::Integer(ctx.allocator).compile(ctx)?,
-                            value = elm.compile(ctx)?
-                        ));
+                        let poke = Expr::Poke(value(ctx.allocator), Box::new(elm));
+                        result.push(poke.compile(ctx)?);
                         ctx.allocator += BYTES
                     }
                 }
-                format!(
-                    "{} {}",
-                    Value::Integer(pointer,).compile(ctx)?,
-                    join!(result)
-                )
+                format!("{} {}", value(pointer).compile(ctx)?, join!(result))
             }
             Value::Dict(dict) => {
                 let mut result: Vec<_> = vec![];
