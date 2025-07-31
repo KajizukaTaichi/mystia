@@ -76,17 +76,14 @@ impl Node for Value {
                         inner_codes.push(elm.compile(ctx)?)
                     }
                     pointer = ctx.allocator;
-                    result.push(format!(
-                        "(i32.store {address} {length})",
-                        address = Value::Integer(ctx.allocator).compile(ctx)?,
-                        length = Value::Integer(array.len() as i32).compile(ctx)?
-                    ));
+                    let poke = Expr::Poke(value(ctx.allocator), value(array.len() as i32));
+                    result.push(poke.compile(ctx)?);
                     ctx.allocator += BYTES;
                     for code in inner_codes {
                         result.push(format!(
-                            "({type}.store {address} {code})",
-                            r#type = &inner_type.compile(ctx)?,
-                            address = Value::Integer(ctx.allocator).compile(ctx)?,
+                            "({typ}.store {address} {code})",
+                            typ = inner_type.compile(ctx)?,
+                            address = value(ctx.allocator).compile(ctx)?,
                         ));
                         ctx.allocator += BYTES;
                     }
