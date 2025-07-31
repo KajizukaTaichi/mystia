@@ -11,6 +11,7 @@ pub enum Expr {
     Block(Block),
     Clone(Box<Expr>),
     Peek(Box<Expr>, Type),
+    Poke(Box<Expr>, Box<Expr>),
 }
 
 impl Node for Expr {
@@ -158,6 +159,14 @@ impl Node for Expr {
             Expr::Peek(expr, typ) => {
                 format!("({}.load {})", typ.compile(ctx)?, expr.compile(ctx)?)
             }
+            Expr::Poke(addr, expr) => {
+                format!(
+                    "({}.store {} {})",
+                    expr.type_infer(ctx)?.compile(ctx)?,
+                    addr.compile(ctx)?,
+                    expr.compile(ctx)?
+                )
+            }
         })
     }
 
@@ -251,7 +260,15 @@ impl Node for Expr {
                     return None;
                 }
             }
-            Expr::Peek(_, typ) => typ.clone(),
+            Expr::Peek(expr, typ) => {
+                expr.type_infer(ctx)?;
+                typ.clone()
+            }
+            Expr::Poke(addr, expr) => {
+                addr.type_infer(ctx)?;
+                expr.type_infer(ctx)?;
+                Type::Void
+            }
         })
     }
 }
