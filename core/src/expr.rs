@@ -137,7 +137,7 @@ impl Node for Expr {
                     return None;
                 };
                 let addr = Box::new(address_calc!(array, index, typ));
-                Expr::Peek(Box::new(Expr::Operator(addr)), *typ).compile(ctx)?
+                Expr::Peek(addr, *typ).compile(ctx)?
             }
             Expr::Field(expr, key) => {
                 let typ = expr.type_infer(ctx)?.type_infer(ctx)?;
