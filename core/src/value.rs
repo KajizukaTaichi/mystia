@@ -99,7 +99,7 @@ impl Node for Value {
                         ctx.allocator += BYTES
                     }
                 }
-                format!("{} {}", value(pointer).compile(ctx)?, join!(result))
+                join!([value(pointer).compile(ctx)?, join!(result)])
             }
             Value::Dict(dict) => {
                 let mut result: Vec<_> = vec![];
@@ -127,11 +127,7 @@ impl Node for Value {
                     ctx.allocator += BYTES;
                 }
 
-                format!(
-                    "{} {}",
-                    Value::Integer(pointer).compile(ctx)?,
-                    join!(result)
-                )
+                join!([value(pointer).compile(ctx)?, join!(result)])
             }
             Value::Enum(typ, key) => {
                 let typ = typ.type_infer(ctx)?;
@@ -140,12 +136,12 @@ impl Node for Value {
                     ctx.occurred_error = Some(error_message);
                     return None;
                 };
-                let Some(value) = enum_type.iter().position(|item| item == key) else {
+                let Some(variant) = enum_type.iter().position(|item| item == key) else {
                     let error_message = format!("`{key}` is invalid variant of {}", typ.format());
                     ctx.occurred_error = Some(error_message);
                     return None;
                 };
-                Value::Integer(value as i32).compile(ctx)?
+                value(variant as i32).compile(ctx)?
             }
         })
     }
