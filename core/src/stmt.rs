@@ -202,9 +202,8 @@ impl Node for Stmt {
                         return None;
                     };
                     type_check!(typ, value.type_infer(ctx)?, ctx)?;
-                    let addr = address_calc!(array, index, typ);
-                    let [typ, addr] = [typ.compile(ctx)?, addr.compile(ctx)?];
-                    format!("({typ}.store {addr} {})", value.compile(ctx)?)
+                    let addr = Box::new(address_calc!(array, index, typ));
+                    Expr::Poke(addr, Box::new(value.clone())).compile(ctx)?
                 }
                 Expr::Field(expr, key) => {
                     let Type::Dict(dict) = expr.type_infer(ctx)? else {
@@ -212,9 +211,8 @@ impl Node for Stmt {
                     };
                     let (offset, typ) = dict.get(key)?.clone();
                     type_check!(typ, value.type_infer(ctx)?, ctx)?;
-                    let addr = offset_calc!(expr, offset);
-                    let [typ, addr] = [typ.compile(ctx)?, addr.compile(ctx)?];
-                    format!("({typ}.store {addr} {})", value.compile(ctx)?)
+                    let addr = Box::new(offset_calc!(expr, offset));
+                    Expr::Poke(addr, Box::new(value.clone())).compile(ctx)?
                 }
                 _ => return None,
             },
