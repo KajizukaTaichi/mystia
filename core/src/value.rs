@@ -64,7 +64,9 @@ impl Node for Value {
                 result
             }
             Value::Array(array) => {
-                let inner_type = array.first()?.type_infer(ctx)?;
+                let Type::Array(inner_type) = self.type_infer(ctx)? else {
+                    return None;
+                };
                 let array = array.clone();
                 let mut result: Vec<_> = vec![];
                 let pointer;
@@ -72,7 +74,6 @@ impl Node for Value {
                 if is_ptr!(inner_type, ctx) {
                     let mut inner_codes = vec![];
                     for elm in array.clone() {
-                        type_check!(inner_type, elm.type_infer(ctx)?, ctx)?;
                         inner_codes.push(elm.compile(ctx)?)
                     }
                     pointer = ctx.allocator;
