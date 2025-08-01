@@ -152,7 +152,18 @@ impl Node for Value {
             Value::Integer(_) => Type::Integer,
             Value::Bool(_) => Type::Bool,
             Value::String(_) => Type::String,
-            Value::Array(e) => Type::Array(Box::new(e.first()?.type_infer(ctx)?)),
+            Value::Array(e) => {
+                let origin = e.first()?.type_infer(ctx)?;
+                for e in e.iter().skip(1) {
+                    let typ = e.type_infer(ctx)?;
+                    if typ != origin {
+                        let errmsg = "array elements must be of the same type";
+                        ctx.occurred_error = Some(errmsg.to_owned());
+                        return None;
+                    }
+                }
+                Type::Array(Box::new(origin))
+            }
             Value::Dict(dict) => {
                 let mut result = IndexMap::new();
                 let mut index: i32 = 0;
