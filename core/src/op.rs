@@ -257,3 +257,29 @@ impl Node for Op {
         }
     }
 }
+
+impl Op {
+    pub fn id(self) -> Option<usize> {
+        Some(match self {
+            Op::Add(_, _) => 1,
+            Op::Sub(_, _) => 2,
+            Op::Mul(_, _) => 3,
+            Op::Div(_, _) => 4,
+            Op::Mod(_, _) => 5,
+            Op::Shr(_, _) => 6,
+            Op::Shl(_, _) => 7,
+            Op::Eql(_, _) => 8,
+            Op::Neq(_, _) => 9,
+            Op::Lt(_, _) => 10,
+            Op::Gt(_, _) => 11,
+            Op::LtEq(_, _) => 12,
+            Op::GtEq(_, _) => 13,
+            Op::BAnd(_, _) => 14,
+            Op::BOr(_, _) => 15,
+            Op::XOr(_, _) => 17,
+            Op::LAnd(_, _) => 18,
+            Op::LOr(_, _) => 19,
+            _ => return None,
+        })
+    }
+}
