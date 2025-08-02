@@ -96,6 +96,22 @@ impl Node for Op {
     }
 
     fn compile(&self, ctx: &mut Compiler) -> Option<String> {
+        let mut overload = || {
+            let terms = self.binop_term()?;
+            let terms_typ = (
+                terms.0.type_infer(ctx)?.format(),
+                terms.1.type_infer(ctx)?.format(),
+            );
+            let key = (self.overload_id()?, terms_typ);
+            if let Some(func) = ctx.overload.get(&key) {
+                return Expr::Call(func.to_string(), vec![terms.0, terms.1]).compile(ctx);
+            } else {
+                None
+            }
+        };
+        if let Some(overloaded) = overload() {
+            return Some(overloaded);
+        }
         Some(match self {
             Op::Sub(lhs, rhs) => compile_arithmetic!("sub", self, ctx, lhs, rhs),
             Op::Mul(lhs, rhs) => compile_arithmetic!("mul", self, ctx, lhs, rhs),
