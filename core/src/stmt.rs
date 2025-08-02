@@ -96,20 +96,16 @@ impl Node for Stmt {
             let args = args.iter().map(func).collect::<Option<Vec<_>>>()?;
             Some(Stmt::Macro(name, args, Expr::parse(value)?))
         } else if let Some(source) = source.strip_prefix("overload ") {
-            let (head, value) = source.split_once("=")?;
-            let [lhs, op, rhs] = tokenize(head, SPACE.as_ref(), true, true, false)?.as_slice()
-            else {
+            let (name, value) = source.split_once("=")?;
+            let tokens = tokenize(value, SPACE.as_ref(), true, true, false)?;
+            let [lhs, op, rhs] = tokens.as_slice() else {
                 return None;
             };
-            let Expr::Call(name, args) = Expr::parse(head)? else {
-                return None;
-            };
-            let func = |x: &Expr| {
-                let Expr::Variable(x) = x else { return None };
-                Some(x.clone())
-            };
-            let args = args.iter().map(func).collect::<Option<Vec<_>>>()?;
-            Some(Stmt::Macro(name, args, Expr::parse(value)?))
+            Some(Stmt::Overload(
+                OPERATOR.iter().position(|x| x == op)?,
+                (Type::parse(lhs)?, Type::parse(rhs)?),
+                name.to_owned(),
+            ))
         } else if let Some(after) = source.strip_prefix("load ") {
             let rest = after.trim_start();
             if let Some((module, sigs)) = rest.split_once(".") {
