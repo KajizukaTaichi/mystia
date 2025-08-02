@@ -102,7 +102,7 @@ impl Node for Stmt {
                 return None;
             };
             Some(Stmt::Overload(
-                OPERATOR.iter().position(|x| x == op)?,
+                Op::parse(&format!("0 {op} 0"))?.overload_id()?,
                 (Type::parse(lhs)?, Type::parse(rhs)?),
                 name.to_owned(),
             ))
