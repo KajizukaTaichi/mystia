@@ -51,6 +51,8 @@ pub struct Compiler {
     pub declare_code: Vec<String>,
     /// Macro code that's processing in compile time
     pub macro_code: IndexMap<String, (Vec<String>, Expr)>,
+    /// Operator overload code that's processing in compile time
+    pub overload: IndexMap<(usize, (String, String)), String>,
     /// Type alias that's defined by user
     pub type_alias: IndexMap<String, Type>,
     /// Errors that occurred during compilation
@@ -78,6 +80,7 @@ impl Compiler {
             declare_code: vec![],
             occurred_error: None,
             macro_code: IndexMap::new(),
+            overload: IndexMap::new(),
             type_alias: IndexMap::new(),
             variable_type: IndexMap::new(),
             global_type: IndexMap::new(),

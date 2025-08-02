@@ -11,6 +11,7 @@ pub enum Stmt {
     Type(String, Type),
     Try(Expr, Box<Stmt>),
     Macro(String, Vec<String>, Expr),
+    Overload(usize, (Type, Type), String),
     Import(Option<String>, Signature),
     Return(Option<Expr>),
     Break,
@@ -235,9 +236,11 @@ impl Node for Stmt {
                 ));
                 String::new()
             }
-            Stmt::Return(Some(expr)) => format!("(return {})", expr.compile(ctx)?),
+            Stmt::Return(Some(expr)) => {
+                format!("(return {})", expr.compile(ctx)?)
+            }
             Stmt::Return(_) => "(return)".to_string(),
-            Stmt::Type(_, _) | Stmt::Macro(_, _, _) => String::new(),
+            Stmt::Type(_, _) | Stmt::Macro(_, _, _) | Stmt::Overload(_, (_, _), _) => String::new(),
         })
     }
 
@@ -356,6 +359,11 @@ impl Node for Stmt {
                         returns: ret_typ.clone(),
                     },
                 );
+                Type::Void
+            }
+            Stmt::Overload(id, (arg1, arg2), name) => {
+                let key = (*id, (arg1.format(), arg2.format()));
+                ctx.overload.insert(key, name.clone());
                 Type::Void
             }
             Stmt::Return(_) => Type::Void,
