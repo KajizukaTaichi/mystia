@@ -19,10 +19,10 @@ impl Node for Value {
         // Number literal
         } else if let Ok(n) = source.parse::<f32>() {
             Some(Value::Number(n))
-        // Boolean literal
+        // Boolean literal `true | false`
         } else if let Ok(n) = source.parse::<bool>() {
             Some(Value::Bool(n))
-        // String literal
+        // String literal `"..."`
         } else if source.starts_with("\"") && source.ends_with("\"") {
             let source = source.get(1..source.len() - 1)?;
             Some(Value::String(source.to_string()))
@@ -32,7 +32,7 @@ impl Node for Value {
             let elms = tokenize(source, &[","], false, true, false)?;
             let elms = elms.iter().map(|i| Expr::parse(&i));
             Some(Value::Array(elms.collect::<Option<Vec<_>>>()?))
-        // Dict `{ field expr, ... }`
+        // Dict `@{ field: expr, ... }`
         } else if source.starts_with("@{") && source.ends_with("}") {
             let token = source.get(2..source.len() - 1)?.trim();
             let mut result = IndexMap::new();
