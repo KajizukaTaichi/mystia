@@ -259,7 +259,7 @@ impl Node for Op {
 }
 
 impl Op {
-    pub fn id(self) -> Option<usize> {
+    pub fn overload_id(self) -> Option<usize> {
         Some(match self {
             Op::Add(_, _) => 1,
             Op::Sub(_, _) => 2,
