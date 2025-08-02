@@ -176,7 +176,22 @@ impl Node for Op {
     }
 
     fn type_infer(&self, ctx: &mut Compiler) -> Option<Type> {
-        self.overload_id();
+        let mut overload = || {
+            let terms = self.binop_term()?;
+            let terms_typ = (
+                terms.0.type_infer(ctx)?.format(),
+                terms.1.type_infer(ctx)?.format(),
+            );
+            let key = (self.overload_id()?, terms_typ);
+            if let Some(func) = ctx.overload.get(&key) {
+                return Expr::Call(func.to_string(), vec![terms.0, terms.1]).type_infer(ctx);
+            } else {
+                None
+            }
+        };
+        if let Some(overloaded) = overload() {
+            return Some(overloaded);
+        }
         match self {
             Op::Add(lhs, rhs) => {
                 correct!(lhs, rhs, ctx, Type::Number | Type::Integer | Type::String)
@@ -284,26 +299,26 @@ impl Op {
         })
     }
 
-    pub fn binop_term(&self, ctx: &mut Compiler) -> Option<(Type, Type)> {
-        Some(match self {
-            Op::Add(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
-            Op::Sub(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
-            Op::Mul(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
-            Op::Div(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
-            Op::Mod(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
-            Op::Shr(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
-            Op::Shl(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
-            Op::Eql(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
-            Op::Neq(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
-            Op::Lt(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
-            Op::Gt(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
-            Op::LtEq(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
-            Op::GtEq(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
-            Op::BAnd(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
-            Op::BOr(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
-            Op::XOr(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
-            Op::LAnd(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
-            Op::LOr(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
+    pub fn binop_term(&self) -> Option<(Expr, Expr)> {
+        Some(match self.clone() {
+            Op::Add(lhs, rhs) => (lhs, rhs),
+            Op::Sub(lhs, rhs) => (lhs, rhs),
+            Op::Mul(lhs, rhs) => (lhs, rhs),
+            Op::Div(lhs, rhs) => (lhs, rhs),
+            Op::Mod(lhs, rhs) => (lhs, rhs),
+            Op::Shr(lhs, rhs) => (lhs, rhs),
+            Op::Shl(lhs, rhs) => (lhs, rhs),
+            Op::Eql(lhs, rhs) => (lhs, rhs),
+            Op::Neq(lhs, rhs) => (lhs, rhs),
+            Op::Lt(lhs, rhs) => (lhs, rhs),
+            Op::Gt(lhs, rhs) => (lhs, rhs),
+            Op::LtEq(lhs, rhs) => (lhs, rhs),
+            Op::GtEq(lhs, rhs) => (lhs, rhs),
+            Op::BAnd(lhs, rhs) => (lhs, rhs),
+            Op::BOr(lhs, rhs) => (lhs, rhs),
+            Op::XOr(lhs, rhs) => (lhs, rhs),
+            Op::LAnd(lhs, rhs) => (lhs, rhs),
+            Op::LOr(lhs, rhs) => (lhs, rhs),
             _ => return None,
         })
     }
