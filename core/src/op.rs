@@ -176,6 +176,7 @@ impl Node for Op {
     }
 
     fn type_infer(&self, ctx: &mut Compiler) -> Option<Type> {
+        self.overload_id();
         match self {
             Op::Add(lhs, rhs) => {
                 correct!(lhs, rhs, ctx, Type::Number | Type::Integer | Type::String)
@@ -259,7 +260,7 @@ impl Node for Op {
 }
 
 impl Op {
-    pub fn overload_id(self) -> Option<usize> {
+    pub fn overload_id(&self) -> Option<usize> {
         Some(match self {
             Op::Add(_, _) => 1,
             Op::Sub(_, _) => 2,
@@ -279,6 +280,30 @@ impl Op {
             Op::XOr(_, _) => 17,
             Op::LAnd(_, _) => 18,
             Op::LOr(_, _) => 19,
+            _ => return None,
+        })
+    }
+
+    pub fn binop_term(&self, ctx: &mut Compiler) -> Option<(Type, Type)> {
+        Some(match self {
+            Op::Add(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
+            Op::Sub(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
+            Op::Mul(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
+            Op::Div(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
+            Op::Mod(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
+            Op::Shr(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
+            Op::Shl(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
+            Op::Eql(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
+            Op::Neq(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
+            Op::Lt(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
+            Op::Gt(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
+            Op::LtEq(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
+            Op::GtEq(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
+            Op::BAnd(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
+            Op::BOr(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
+            Op::XOr(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
+            Op::LAnd(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
+            Op::LOr(lhs, rhs) => (lhs.type_infer(ctx)?, rhs.type_infer(ctx)?),
             _ => return None,
         })
     }
