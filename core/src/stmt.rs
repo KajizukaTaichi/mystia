@@ -104,7 +104,7 @@ impl Node for Stmt {
             Some(Stmt::Overload(
                 Op::parse(&format!("0 {op} 0"))?.overload_id()?,
                 (Type::parse(lhs)?, Type::parse(rhs)?),
-                name.to_owned(),
+                name.trim().to_owned(),
             ))
         } else if let Some(after) = source.strip_prefix("load ") {
             let rest = after.trim_start();
